@@ -1,0 +1,72 @@
+---
+title: Effect size calculation for 'Group-based community interventions to support
+  the social reintegration of marginalised adults with mental illness'
+output: html_document
+date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+options(pillar.sigfig = 4) # ensure tibble include 4 digits
+options(tibble.width = Inf)
+options(dplyr.print_min = 310)
+options(scipen = 10)
+options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
+
+```
+
+### Introduction 
+
+### R package used for effect size calculation
+
+```{r}
+library(dplyr)
+```
+
+
+### ICC values used for cluster adjustment
+
+### Function building to conduct cluster design adjustment
+
+## **Studies in meta-analysis**
+
+### **Joergensen et al. (2013)**
+
+Indicate exactly from where the data is retrieved
+
+```{r}
+
+Jorgensen2013 <- tibble()
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
