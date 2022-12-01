@@ -33,17 +33,7 @@ library(dplyr)
 
 ## **Studies in meta-analysis**
 
-### **Joergensen et al. (2013)**
-
-Indicate exactly from where the data is retrieved
-
-```{r}
-
-Jorgensen2013 <- tibble()
-
-2 + 2
-
-```
+[INSERT STUDIES]
 
 
 
