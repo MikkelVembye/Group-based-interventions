@@ -22,7 +22,9 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 ### R package used for effect size calculation
 
+
 ```{r}
+install.packages("POMADE")
 library(dplyr)
 ```
 
