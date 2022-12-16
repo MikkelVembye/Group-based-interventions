@@ -1,8 +1,19 @@
 ---
 title: Effect size calculation for 'Group-based community interventions to support
   the social reintegration of marginalised adults with mental illness'
-output: html_document
 date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
+output: 
+  html_document:
+    toc: true
+    code_folding: show
+    code_download: true
+bibliography: Group-based interventions.bib
+biblio-style: apa
+link-citations: yes
+fontsize: 11pt
+spacing: single
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -24,16 +35,283 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 ```{r}
 library(dplyr)
-```
+library(readxl)
 
+
+```
 
 ### ICC values used for cluster adjustment
 
+```{r}
+ICC_01 <- 0.1
+```
+
+
 ### Function building to conduct cluster design adjustment
+
+We use Hedges & Citkowicz [-@Hedges2015_onetreatcluster] to cluster bias correct effect size variance estimates in study where clustering is not treated properly since we in many cases only will experience clustering in the treatment group. It might happen that clustering should be handled in the Cochrane and Hedges 2007. 
+
+```{r}
+
+# Equation (7) in Hedges & Citkowicz (2015)
+df_h <- function(total_sample_size, ICC, trt_sample_size, avg_grp_size){
+  
+  N <- total_sample_size
+  rho <- ICC
+  NT <- trt_sample_size
+  n <- avg_grp_size
+  
+  h <- ((N-2)*(1-rho) + (NT-n)*rho)^2 /
+       ((N-2)*(1-rho)^2 + (NT-n)*n*rho^2 + 2*(NT-2)*(1-rho)*rho)
+  
+  h
+}
+
+# Test
+#df_h(
+#  total_sample_size = 100,
+#  ICC = 0.2,
+#  trt_sample_size = 80,
+#  avg_grp_size = 5
+#)
+
+```
+
 
 ## **Studies in meta-analysis**
 
-[INSERT STUDIES]
+### **Gestel-Timmermans [-@VanGestel-Timmermans2012]**
+#### (Multi-level analysis to handle clustering)
+
+Data is retrieved from Tables 2 & 3 (p. 58) 
+
+```{r}
+# Testing missing 
+
+Timmermans_sample_size_dat <-
+  tibble(
+    
+    measure = rep(c("Empoverment", "Hope", "Quality", "Self-e", "Loneliness"), each = 4),
+    timing = rep(c("3 months", "6 months"), each = 2, 5),
+    group = rep(c("Treatment", "Control"), 10),
+    
+    N_start = rep(rep(c(168, 165), 10)),
+    
+    N_actual = c(
+      136, 117, 121, 99,
+      132, 118, 120, 97,
+      124, 114, 111, 97,
+      134, 116, 121, 100,
+      138, 122, 125, 102
+    ),
+    
+    #non_missing = N_actual/N_start,
+    #
+    #percent_missing = (1 - non_missing) * 100
+    
+); Timmermans_sample_size_dat
+```
+
+Missingness analysis
+
+```{r}
+Timmermans_missingness <- 
+  Timmermans_sample_size_dat |> 
+  group_by(measure, timing) |> 
+  summarise(
+    N_start_total = sum(N_start),
+    N_actual_total = sum(N_actual),
+    
+    #percent_missing_total = round(mean(percent_missing)),
+    
+    percent_missing_total = round((1 - (N_actual_total/N_start_total)) * 100),
+    
+    .groups = "drop"
+  )
+
+Timmermans_missingness 
+```
+
+Data entrance 
+```{r}
+
+Timmermans2012 <- 
+  Timmermans_sample_size_dat |> 
+  rename(N =  N_actual) |> 
+  mutate(
+    
+    #From Table 2 (p. 58)
+    m_post = c(
+      
+      3.55, 3.38, 3.59, 3.40,
+      2.91, 2.79, 2.97, 2.73,
+      4.49, 4.36, 4.63, 4.39,
+      4.65, 4.35, 4.71, 4.4,
+      5.89, 6.27, 3.87, 3.68
+      
+    ),
+    
+    sd_post = c(
+      
+      0.48, 0.53, 0.50, 0.56,
+      0.47, 0.53, 0.46, 0.48,
+      0.96, 1.07, 0.97, 1.05,
+      0.81, 0.97, 0.93, 0.88,
+      3.61, 3.55, 3.87, 3.68
+      
+    ),
+    
+    es_paper = rep(
+      c(
+        0.27, 0.36, 
+        0.25, 0.48,
+        0.03, 0.15,
+        0.27, 0.23, 
+        -0.04, 0.15
+      ),
+      each = 2
+    ),
+    
+    # From Table 3 (p. 58)
+    
+    b_adj = c(
+      .12, .021, .13, .046,   #Empowerment
+      .10, .038, .17, .004,   #Hope
+      .064, .11, .11, .15,    #Quality of life
+      .23, .064, .21, .14,    #Self-efficacy beliefs
+      .066, -.65, -.34, -.49  # Loneliness
+      
+    ),
+    
+    pval = c(
+      .016, .55, .012, .24,  #Empowerment
+      .039, .28, .001, .91,  #Hope
+      .471, .09, .24, .025,  #Quality of life
+      .010, .31, .026, .042, #Self-efficacy beliefs
+      .85, .008, .35, .07    #Loneliness
+      
+      ),
+    
+    ci_l = c(
+      .022, -.05, .026, -.025,
+      NA, -.030, .026, -.025,
+      -.11, -.016, -.071, 0.020,
+      .059, -.062, .027, .006,
+      -.60, -1.14, -1.05, -1.02
+    ),
+    
+    ci_u = c(
+      .22, .092, .23, .12,
+      NA, .11, .23, .12, 
+      .23, .24, .29, .28,
+      .40, .19, .39, .27,
+      .74, -.16, .37, .042
+    ),
+    
+    tval = qt(pval/2, df = N-2, lower.tail = FALSE),
+    se_b = b_adj/tval
+    
+  ); Timmermans2012 
+
+
+```
+
+Effect sizes calculation
+
+```{r}
+
+Timmermans2012_es_T <- 
+  Timmermans2012 |> 
+  group_by(measure, timing) |> 
+  summarise(
+    
+    Nt = N[1],
+    Nc = N[2],
+    
+    N_tot = Nt + Nc, 
+    
+    df_ind = N_tot-2,
+    
+    sd_pool = sqrt( sum((N-1)*sd_post^2)/df_ind ),
+    
+    diff_raw = m_post[1] - m_post[2],
+    
+    d_paper = es_paper[1],
+    d = diff_raw/sd_pool,
+    vd = sum(N)/prod(N) + d^2/(2*df_ind),
+    Wd = sum(N)/prod(N),
+    
+    DD = b_adj[1] - b_adj[2],
+    
+    d_adj = DD/sd_pool,
+    vd_adj = sum((se_b/sd_pool)^2) + d^2/(2*df_ind),
+    Wd_adj = sum((se_b/sd_pool)^2),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g = J * d,
+    vg = J^2 * vd,
+    Wg = J^2 * Wd,
+    
+    g_adj = J * d_adj,
+    vg_adj = J^2 * vd_adj,
+    Wg_adj = J^2 * Wd_adj, 
+    
+    .groups = "drop"
+    
+    
+  ) |> 
+  rowwise() |> 
+  # Cluster bias correction
+  mutate(
+  
+    
+    n_group = 7, 
+    icc = 0.7, # See page 57 - needs to be checked how this should be interpreted
+    
+    gamma = 1 - (Nc + n_group-2)*ICC_01 / (N_tot-2), # Change when discussed
+    df_h = df_h(total_sample_size = N_tot, ICC = ICC_01, avg_grp_size = n_group, trt_sample_size = Nt),
+    eta = 1 + ( (n_group*Nc/N_tot)-1 ) * ICC_01,
+    
+    gt = g * sqrt(gamma),
+    vgt = Wg * eta + gt^2/(2*df_h),
+    
+    gt_adj_alt = g_adj * sqrt(gamma),
+    vgt_adj_alt = Wg_adj * gamma + gt_adj_alt^2/(2*df_h),
+    
+    vary_id = paste0(measure, "/", timing)
+    
+    
+  ) |> 
+  ungroup(); Timmermans2012_es_T
+
+
+
+```
+
+
+
+## Amalgamation of data
+
+```{r}
+covariates <- read_xlsx(
+  "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx",
+  na = c(".", "")
+)
+
+group_based_dat <- 
+  bind_cols(
+    covariates,
+    Timmermans2012_es_T
+
+); glimpse(group_based_dat)
+
+```
+
+
+
+## **Reference**
+
 
 
 
