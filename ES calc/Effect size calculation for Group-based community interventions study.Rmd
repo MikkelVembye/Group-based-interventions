@@ -294,8 +294,10 @@ Timmermans2012_es_T <-
 ## Amalgamation of data
 
 ```{r}
+#Remember to see working directory to "Group-based-interventions/ES calc"
+
 covariates <- read_xlsx(
-  "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx",
+  "Descriptive coding scheme for group-based interventions (data).xlsx",
   na = c(".", "")
 )
 
