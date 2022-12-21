@@ -36,8 +36,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 ```{r}
 library(dplyr)
 library(readxl)
-
-
+library(purrr)
 ```
 
 ### ICC values used for cluster adjustment
@@ -80,7 +79,7 @@ df_h <- function(total_sample_size, ICC, trt_sample_size, avg_grp_size){
 
 ## **Studies in meta-analysis**
 
-### **Gestel-Timmermans [-@VanGestel-Timmermans2012]**
+### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012]**
 #### (Multi-level analysis to handle clustering)
 
 Data is retrieved from Tables 2 & 3 (p. 58) 
@@ -220,19 +219,25 @@ Effect sizes calculation
 
 ```{r}
 
-Timmermans2012_es_T <- 
+Timmermans2012_est <- 
   Timmermans2012 |> 
   group_by(measure, timing) |> 
   summarise(
+    
+    study = "Timmermans2012",
+    es_method = "Posttest only",
+    
+    ppcor = NA,  
+    ppcor_type = "Not relevant",
     
     Nt = N[1],
     Nc = N[2],
     
     N_tot = Nt + Nc, 
     
-    df_ind = N_tot-2,
+    df_ind = N_tot,
     
-    sd_pool = sqrt( sum((N-1)*sd_post^2)/df_ind ),
+    sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_tot-2) ),
     
     diff_raw = m_post[1] - m_post[2],
     
@@ -240,6 +245,8 @@ Timmermans2012_es_T <-
     d = diff_raw/sd_pool,
     vd = sum(N)/prod(N) + d^2/(2*df_ind),
     Wd = sum(N)/prod(N),
+    
+    cov_ds = "Not obtainable",
     
     DD = b_adj[1] - b_adj[2],
     
@@ -267,7 +274,8 @@ Timmermans2012_es_T <-
   
     
     n_group = 7, 
-    icc = 0.7, # See page 57 - needs to be checked how this should be interpreted
+    icc = ICC_01,
+    icc_type = "Imputed",
     
     gamma = 1 - (Nc + n_group-2)*ICC_01 / (N_tot-2), # Change when discussed
     df_h = df_h(total_sample_size = N_tot, ICC = ICC_01, avg_grp_size = n_group, trt_sample_size = Nt),
@@ -275,24 +283,144 @@ Timmermans2012_es_T <-
     
     gt = g * sqrt(gamma),
     vgt = Wg * eta + gt^2/(2*df_h),
+    Wgt = Wg * eta,
     
-    gt_adj_alt = g_adj * sqrt(gamma),
-    vgt_adj_alt = Wg_adj * gamma + gt_adj_alt^2/(2*df_h),
+    gt_alt = g_adj * sqrt(gamma),
+    vgt_alt = Wg_adj * gamma + gt_alt^2/(2*df_h),
+    Wgt_alt = Wg_adj * gamma,
     
     vary_id = paste0(measure, "/", timing)
     
     
   ) |> 
-  ungroup(); Timmermans2012_es_T
+  ungroup(); Timmermans2012_est
 
 
 
 ```
 
 
+### ** Bond et al. [-@Bond1991]**
+#### (No cluster treatment)
+
+Entering data from page 39
+
+```{r}
+
+Bond_1991 <- tibble(
+  trt = c("ACT", "RG", "Control"),
+  n = c(28, 23, 40), 
+  tval_paried = c(3, 2, 2.6)
+)
+
+Bond_1991 
+```
+
+Effect size calculation and cluster bias correction
+
+```{r}
+
+Bond_1991_est <- 
+  Bond_1991 |> 
+  mutate(
+    r = 0.5,
+    d_pair = tval_paried * sqrt( (2*(1-r))/n  )
+  ) |> 
+  summarise(
+    
+    study = "Bond1991",
+    es_method = "Pre-test adjusted",
+    
+    trt = c("ACT", "RG"),
+    
+    measure = "Hospital days",
+    timing = "6 months",
+    
+    ppcor = 0.5,
+    ppcor_type = "Imputed",
+    
+    Nt = c(28, 23),
+    Nc = 40,
+    N_tot = Nt + Nc,
+    df_ind = N_tot,
+    
+    d_pp_trt = c(d_pair[1], d_pair[2]),
+    d_pp_ctr = d_pair[3]
+    
+    
+  ) |> 
+  mutate(
+    
+    d = d_pp_trt - d_pp_ctr,
+    vd = (1/Nt + 1/Nc) * 2*(1-ppcor) + d^2/(2*(Nt+Nc)),
+    Wd = (1/Nt + 1/Nc) * 2*(1-ppcor),
+    
+    # Gleser & Olkin 2009 eq. 19.19
+    cov_ds = 1/Nc + (prod(d)/ 2*(N_tot - 2 - 1)),
+    
+    J = 1 - 3/(4*N_tot-1),
+    
+    g = J * d,
+    vg = J^2 * vd,
+    Wg = J^2 * Wd,
+    
+    n_group = 12.5, 
+    icc = ICC_01, # See page 57 - needs to be checked how this should be interpreted
+    icc_type = "Imputed",
+    
+    gamma = 1 - (Nc + n_group-2)*ICC_01 / (N_tot-2), # Change when discussed
+    df_h = df_h(total_sample_size = N_tot, ICC = ICC_01, avg_grp_size = n_group, trt_sample_size = Nt),
+    eta = 1 + ( (n_group*Nc/N_tot)-1 ) * ICC_01,
+    
+    gt = g * sqrt(gamma),
+    vgt = Wg * eta + gt^2/(2*df_h),
+    Wgt = Wg * eta,
+    
+    gt_alt = NA,
+    vgt_alt = NA,
+    Wgt_alt = NA,
+    
+    vary_id = trt
+     
+  ); Bond_1991_est
+
+```
+
 
 ## Amalgamation of data
 
+Amalgamating effect size data
+
+```{r}
+
+select_across_df <- function(dataframes = list(), list_labels){
+  
+  map_dfr(dataframes, ~ select(., !!!list_labels))
+  
+}
+
+# Extend variables
+var_label <- c(
+  "study", "es_method", "ppcor", "ppcor_type", "Nt", "Nc", "N_tot",
+  "df_ind", "d",  "vd", "Wd", "g", "vg", "Wg", # Continue here more variables are needed
+  "vary_id"
+)
+
+es_dat <- 
+  select_across_df(
+    list(
+      Timmermans2012_est,
+      Bond_1991_est
+    ),
+    
+    var_label
+
+); es_dat
+
+
+```
+
+Amalgating covariates and effect size data
 ```{r}
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
@@ -304,7 +432,7 @@ covariates <- read_xlsx(
 group_based_dat <- 
   bind_cols(
     covariates,
-    Timmermans2012_es_T
+    es_dat
 
 ); glimpse(group_based_dat)
 
