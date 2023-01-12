@@ -300,7 +300,7 @@ Timmermans2012_est <-
 ```
 
 
-### ** Bond et al. [-@Bond1991]**
+### **Bond et al. [-@Bond1991]**
 #### (No cluster treatment)
 
 Entering data from page 39
@@ -385,6 +385,9 @@ Bond_1991_est <-
   ); Bond_1991_est
 
 ```
+
+### **Fisher & Bentley [-@Fisher1996]**
+
 
 
 ## Amalgamation of data
