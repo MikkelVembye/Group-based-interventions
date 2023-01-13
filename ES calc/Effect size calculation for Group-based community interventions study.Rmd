@@ -325,7 +325,8 @@ Bond_1991_est <-
   mutate(
     r = 0.5,
     d_pair = tval_paried * sqrt( (2*(1-r))/n  ),
-    vd_pair = (1/n + (d_pair^2/(2*n))) * 2*(1-r) 
+    vd_pair = (1/n + (d_pair^2/(2*n))) * 2*(1-r), 
+    Wd_pair = 1/n * (2*(1-r))
   ) |> 
   summarise(
     
@@ -349,8 +350,10 @@ Bond_1991_est <-
     d_pp_ctr = d_pair[3],
     
     vd_pp_trt = c(vd_pair[1], vd_pair[2]),
-    vd_pp_ctr = c(vd_pair[3])
+    vd_pp_ctr = c(vd_pair[3]),
     
+    Wd_pp_trt = c(Wd_pair[1], Wd_pair[2]),
+    Wd_pp_ctr = c(Wd_pair[3])
     
   ) |> 
   mutate(
@@ -358,8 +361,10 @@ Bond_1991_est <-
     d = d_pp_trt - d_pp_ctr,
     vd = (1/Nt + 1/Nc) * 2*(1-ppcor) + d^2/(2*(Nt+Nc)),
     # Insert alternative vd calculation based on Table 11.2 (Borenstein & Hedges 2019, p. 216)
-    
     Wd = (1/Nt + 1/Nc) * 2*(1-ppcor),
+    
+    vd_alt = vd_pp_trt + vd_pp_ctr,
+    Wd_alt = Wd_pp_trt + Wd_pp_ctr,
     
     # Gleser & Olkin 2009 eq. 19.19
     cov_ds = 1/Nc + (prod(d)/ 2*(N_tot - 2 - 1)),
