@@ -387,6 +387,8 @@ Bond_1991_est <-
     vgt = Wg * eta + gt^2/(2*df_h),
     Wgt = Wg * eta,
     
+    
+    # Not alternative calculation due equivalent Wd and Wd_alt
     gt_alt = NA,
     vgt_alt = NA,
     Wgt_alt = NA,
