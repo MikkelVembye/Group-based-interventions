@@ -26,11 +26,8 @@ fisher_1996 <- tibble(
 # Now I will put in the different values of the mean and standard deviation
 # for each treatment-group before(pre) and after treatment (post) and the difference
 
-<<<<<<< HEAD
  N = 9, 
-=======
- N = 9,
->>>>>>> ca83b6e714d832ebb7a4c72fc6d9e2f822f64835
+
  m_pre = c(
   0.469, 0.441, 0.349, # alcohol_use - inpatient
   0.725, 0.598, 0.682, # alcohol_use - outpatient
