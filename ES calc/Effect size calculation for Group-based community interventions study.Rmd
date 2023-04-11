@@ -34,7 +34,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 ### R package used for effect size calculation
 
 ```{r}
-library(dplyr)
+library(tidyverse)
 library(readxl)
 library(purrr)
 ```
@@ -300,114 +300,114 @@ Timmermans2012_est <-
 ```
 
 
-### **Bond et al. [-@Bond1991]**
-#### (No cluster treatment)
+### **Smith et al. [-@Smith2021]**
 
-Entering data from page 39
+Entering data from Table 2 (p. 445). Sample size information is retrived from Table 1 (p. 442)
 
-```{r}
+```{r Smith2021dat}
 
-Bond_1991 <- tibble(
-  trt = c("ACT", "RG", "Control"),
-  n = c(28, 23, 40), 
-  tval_paried = c(3, 2, 2.6)
-)
+# Calculate paired t-test statistics to obtain pre-posttest score correlation estimates
 
-Bond_1991 
-```
+## _rep = reported
 
-Effect size calculation and cluster bias correction
+Smith2021 <- 
+  tibble(
+  
+  outcome = rep(c("Loneliness", "Anxiety", "Depressive"), each = 2),
+  
+  group = rep(c("CBT", "Waitlist"), 3),
+  
+  N = rep(c(27, 35), 3),
+   
+  m_pre = c(
+    
+    1.59, 1.36, # Loneliness
+    5.20, 4.58, # Anxiety
+    5.48, 4.98  # Depressive
+    
+  ),
+  
+  se_pre = c(
+    
+    0.209, 0.169,
+    0.246, 0.200,
+    0.272, 0.217
+    
+  ),
+  
+  sd_pre = se_pre * sqrt(N),
+  
+  m_post = c(
+    
+    0.593, 1.24,
+    2.68, 4.01,
+    2.02, 4.25
+    
+  ),
+  
+  se_post = c(
+    
+    0.169, 0.194,
+    0.307, 0.227,
+    0.319, 0.260
+  
+  ),
+  
+  sd_post = se_post * sqrt(N),
+  
+  d_rep = c(
+    
+    1.25, 0.11, 
+    2.33, 0.45, 
+    2.48, 0.52  
+    
+    ),
+  
+  ci_l_rep = c(
+    
+    0.62, -0.41,
+    1.55, -0.07,
+    1.70, -0.02
+    
+    ),
+  
+  ci_u_rep = c(
+    
+    1.88, 0.63,
+    3.11, 0.97, 
+    3.26, 1.06
+    
+    ),
+      
+  se_d_rep = (ci_u_rep - ci_l_rep) / 3.92,
+  
+  t_pair = d_rep/se_d_rep,
+  
+  # Using Eq. (31) from Wilson 2016
+  r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
+        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
+    
+  z = 0.5 * log( (1+r)/(1-r)),
+  v = 1/(N-3)
+  
+  
+  ); Smith2021
 
-```{r}
-
-Bond_1991_est <- 
-  Bond_1991 |> 
-  mutate(
-    r = 0.5,
-    d_pair = tval_paried * sqrt( (2*(1-r))/n  ),
-    vd_pair = (1/n + (d_pair^2/(2*n))) * 2*(1-r), 
-    Wd_pair = 1/n * (2*(1-r))
-  ) |> 
-  summarise(
-    
-    study = "Bond1991",
-    es_method = "Pre-test adjusted",
-    
-    trt = c("ACT", "RG"),
-    
-    measure = "Hospital days",
-    timing = "6 months",
-    
-    ppcor = 0.5,
-    ppcor_type = "Imputed",
-    
-    Nt = c(28, 23),
-    Nc = 40,
-    N_tot = Nt + Nc,
-    df_ind = N_tot,
-    
-    d_pp_trt = c(d_pair[1], d_pair[2]),
-    d_pp_ctr = d_pair[3],
-    
-    vd_pp_trt = c(vd_pair[1], vd_pair[2]),
-    vd_pp_ctr = c(vd_pair[3]),
-    
-    Wd_pp_trt = c(Wd_pair[1], Wd_pair[2]),
-    Wd_pp_ctr = c(Wd_pair[3])
-    
-  ) |> 
-  mutate(
-    
-    d = d_pp_trt - d_pp_ctr,
-    vd = (1/Nt + 1/Nc) * 2*(1-ppcor) + d^2/(2*(Nt+Nc)),
-    # Insert alternative vd calculation based on Table 11.2 (Borenstein & Hedges 2019, p. 216)
-    Wd = (1/Nt + 1/Nc) * 2*(1-ppcor),
-    
-    vd_alt = vd_pp_trt + vd_pp_ctr,
-    Wd_alt = Wd_pp_trt + Wd_pp_ctr,
-    
-    # Gleser & Olkin 2009 eq. 19.19
-    cov_ds = 1/Nc + (prod(d)/ 2*(N_tot - 2 - 1)),
-    
-    J = 1 - 3/(4*N_tot-1),
-    
-    g = J * d,
-    vg = J^2 * vd,
-    Wg = J^2 * Wd,
-    
-    n_group = 12.5, 
-    icc = ICC_01, # See page 57 - needs to be checked how this should be interpreted
-    icc_type = "Imputed",
-    
-    gamma = 1 - (Nc + n_group-2)*ICC_01 / (N_tot-2), # Change when discussed
-    df_h = df_h(total_sample_size = N_tot, ICC = ICC_01, avg_grp_size = n_group, trt_sample_size = Nt),
-    eta = 1 + ( (n_group*Nc/N_tot)-1 ) * ICC_01,
-    
-    gt = g * sqrt(gamma),
-    vgt = Wg * eta + gt^2/(2*df_h),
-    Wgt = Wg * eta,
-    
-    
-    # Not alternative calculation due equivalent Wd and Wd_alt
-    gt_alt = NA,
-    vgt_alt = NA,
-    Wgt_alt = NA,
-    
-    vary_id = trt
-     
-  ); Bond_1991_est
 
 ```
 
-### **Fisher & Bentley [-@Fisher1996]**
+Calculating effect sizes and correcting for cluster at the treatment level 
 
+```{r}
+
+```
 
 
 ## Amalgamation of data
 
 Amalgamating effect size data
 
-```{r}
+```{r, include=FALSE, eval=FALSE}
 
 select_across_df <- function(dataframes = list(), list_labels){
   
@@ -425,8 +425,7 @@ var_label <- c(
 es_dat <- 
   select_across_df(
     list(
-      Timmermans2012_est,
-      Bond_1991_est
+      Timmermans2012_est
     ),
     
     var_label
@@ -437,7 +436,7 @@ es_dat <-
 ```
 
 Amalgating covariates and effect size data
-```{r}
+```{r, include=FALSE, eval=FALSE}
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
@@ -453,7 +452,6 @@ group_based_dat <-
 ); glimpse(group_based_dat)
 
 ```
-
 
 
 ## **Reference**
