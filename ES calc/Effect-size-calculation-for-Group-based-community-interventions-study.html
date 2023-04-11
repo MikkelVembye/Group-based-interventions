@@ -505,7 +505,8 @@ meta-analysis</strong></a>
 <ul>
 <li><a href="#gestel-timmermans-et-al.--vangestel-timmermans2012" id="toc-gestel-timmermans-et-al.--vangestel-timmermans2012"><strong>Gestel-Timmermans
 et al. <span class="citation">(2012)</span></strong></a></li>
-<li><a href="#smith-et-al.--smith2021" id="toc-smith-et-al.--smith2021"><strong>Smith et al. <span class="citation">(2021)</span></strong></a></li>
+<li><a href="#wuthrich-rapee--wuthrich2013-and-smith-et-al.--smith2021" id="toc-wuthrich-rapee--wuthrich2013-and-smith-et-al.--smith2021"><strong>Wuthrich
+&amp; Rapee <span class="citation">(2013)</span> and Smith et al. <span class="citation">(2021)</span></strong></a></li>
 </ul></li>
 <li><a href="#amalgamation-of-data" id="toc-amalgamation-of-data">Amalgamation of data</a></li>
 <li><a href="#reference" id="toc-reference"><strong>Reference</strong></a></li>
@@ -517,9 +518,12 @@ et al. <span class="citation">(2012)</span></strong></a></li>
 </div>
 <div id="r-package-used-for-effect-size-calculation" class="section level3">
 <h3>R package used for effect size calculation</h3>
-<pre class="r"><code>library(dplyr)
+<pre class="r"><code>#devtools::install_github(&quot;MikkelVembye/VIVECampbell&quot;)
+
+library(tidyverse)
 library(readxl)
-library(purrr)</code></pre>
+library(purrr)
+library(VIVECampbell)</code></pre>
 </div>
 <div id="icc-values-used-for-cluster-adjustment" class="section level3">
 <h3>ICC values used for cluster adjustment</h3>
@@ -767,10 +771,10 @@ Timmermans_missingness </code></pre>
   summarise(
     
     study = &quot;Timmermans2012&quot;,
-    es_method = &quot;Posttest only&quot;,
+    es_calc_method = &quot;Posttest&quot;,
     
     ppcor = NA,  
-    ppcor_type = &quot;Not relevant&quot;,
+    ppcor_calc_method = &quot;Not relevant&quot;,
     
     Nt = N[1],
     Nc = N[2],
@@ -837,30 +841,30 @@ Timmermans_missingness </code></pre>
   ) |&gt; 
   ungroup(); Timmermans2012_est</code></pre>
 <pre><code>## # A tibble: 10 × 41
-##    measure     timing   study          es_method     ppcor ppcor_type      Nt
-##    &lt;chr&gt;       &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;         &lt;lgl&gt; &lt;chr&gt;        &lt;dbl&gt;
-##  1 Empoverment 3 months Timmermans2012 Posttest only NA    Not relevant   136
-##  2 Empoverment 6 months Timmermans2012 Posttest only NA    Not relevant   121
-##  3 Hope        3 months Timmermans2012 Posttest only NA    Not relevant   132
-##  4 Hope        6 months Timmermans2012 Posttest only NA    Not relevant   120
-##  5 Loneliness  3 months Timmermans2012 Posttest only NA    Not relevant   138
-##  6 Loneliness  6 months Timmermans2012 Posttest only NA    Not relevant   125
-##  7 Quality     3 months Timmermans2012 Posttest only NA    Not relevant   124
-##  8 Quality     6 months Timmermans2012 Posttest only NA    Not relevant   111
-##  9 Self-e      3 months Timmermans2012 Posttest only NA    Not relevant   134
-## 10 Self-e      6 months Timmermans2012 Posttest only NA    Not relevant   121
-##       Nc N_tot df_ind sd_pool diff_raw d_paper        d      vd      Wd
-##    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
-##  1   117   253    253  0.5037   0.17      0.27  0.3375  0.01613 0.01590
-##  2    99   220    220  0.5278   0.19      0.36  0.3600  0.01866 0.01837
-##  3   118   250    250  0.4992   0.1200    0.25  0.2404  0.01617 0.01605
-##  4    97   217    217  0.4690   0.2400    0.48  0.5117  0.01925 0.01864
-##  5   122   260    260  3.582   -0.38     -0.04 -0.1061  0.01546 0.01544
-##  6   102   227    227  3.786    0.19      0.15  0.05019 0.01781 0.01780
-##  7   114   238    238  1.014    0.1300    0.03  0.1282  0.01687 0.01684
-##  8    97   208    208  1.008    0.2400    0.15  0.2381  0.01945 0.01932
-##  9   116   250    250  0.8878   0.3000    0.27  0.3379  0.01631 0.01608
-## 10   100   221    221  0.9077   0.3100    0.23  0.3415  0.01853 0.01826
+##    measure     timing   study          es_calc_method ppcor ppcor_calc_method
+##    &lt;chr&gt;       &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;          &lt;lgl&gt; &lt;chr&gt;            
+##  1 Empoverment 3 months Timmermans2012 Posttest       NA    Not relevant     
+##  2 Empoverment 6 months Timmermans2012 Posttest       NA    Not relevant     
+##  3 Hope        3 months Timmermans2012 Posttest       NA    Not relevant     
+##  4 Hope        6 months Timmermans2012 Posttest       NA    Not relevant     
+##  5 Loneliness  3 months Timmermans2012 Posttest       NA    Not relevant     
+##  6 Loneliness  6 months Timmermans2012 Posttest       NA    Not relevant     
+##  7 Quality     3 months Timmermans2012 Posttest       NA    Not relevant     
+##  8 Quality     6 months Timmermans2012 Posttest       NA    Not relevant     
+##  9 Self-e      3 months Timmermans2012 Posttest       NA    Not relevant     
+## 10 Self-e      6 months Timmermans2012 Posttest       NA    Not relevant     
+##       Nt    Nc N_tot df_ind sd_pool diff_raw d_paper        d      vd      Wd
+##    &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+##  1   136   117   253    253  0.5037   0.17      0.27  0.3375  0.01613 0.01590
+##  2   121    99   220    220  0.5278   0.19      0.36  0.3600  0.01866 0.01837
+##  3   132   118   250    250  0.4992   0.1200    0.25  0.2404  0.01617 0.01605
+##  4   120    97   217    217  0.4690   0.2400    0.48  0.5117  0.01925 0.01864
+##  5   138   122   260    260  3.582   -0.38     -0.04 -0.1061  0.01546 0.01544
+##  6   125   102   227    227  3.786    0.19      0.15  0.05019 0.01781 0.01780
+##  7   124   114   238    238  1.014    0.1300    0.03  0.1282  0.01687 0.01684
+##  8   111    97   208    208  1.008    0.2400    0.15  0.2381  0.01945 0.01932
+##  9   134   116   250    250  0.8878   0.3000    0.27  0.3379  0.01631 0.01608
+## 10   121   100   221    221  0.9077   0.3100    0.23  0.3415  0.01853 0.01826
 ##    cov_ds             DD    d_adj  vd_adj  Wd_adj      J        g      vg
 ##    &lt;chr&gt;           &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
 ##  1 Not obtainable  0.099  0.1965  0.01459 0.01437 0.9970  0.3365  0.01603
@@ -899,9 +903,214 @@ Timmermans_missingness </code></pre>
 ## 10  0.3321  0.02233 0.02207  0.07499 0.01527 0.01526 Self-e/6 months</code></pre>
 </div>
 </div>
-<div id="smith-et-al.--smith2021" class="section level3">
-<h3><strong>Smith et al. <span class="citation">(<a href="#ref-Smith2021" role="doc-biblioref">2021</a>)</span></strong></h3>
-<p>Entering data from Table 2 (p. 445)</p>
+<div id="wuthrich-rapee--wuthrich2013-and-smith-et-al.--smith2021" class="section level3">
+<h3><strong>Wuthrich &amp; Rapee <span class="citation">(<a href="#ref-Wuthrich2013" role="doc-biblioref">2013</a>)</span> and Smith
+et al. <span class="citation">(<a href="#ref-Smith2021" role="doc-biblioref">2021</a>)</span></strong></h3>
+<p>Entering data from Table 2 (p. 445). Sample size information is
+retrived from Table 1 (p. 442)</p>
+<pre class="r"><code># Calculate paired t-test statistics to obtain pre-posttest score correlation estimates
+
+## _rep = reported
+
+Smith2021 &lt;- 
+  tibble(
+  
+  outcome = rep(c(&quot;Loneliness&quot;, &quot;Anxiety&quot;, &quot;Depressive&quot;), each = 2),
+  
+  group = rep(c(&quot;CBT&quot;, &quot;Waitlist&quot;), 3),
+  
+  N = rep(c(27, 35), 3),
+   
+  m_pre = c(
+    
+    1.59, 1.36, # Loneliness
+    5.20, 4.58, # Anxiety
+    5.48, 4.98  # Depressive
+    
+  ),
+  
+  se_pre = c(
+    
+    0.209, 0.169,
+    0.246, 0.200,
+    0.272, 0.217
+    
+  ),
+  
+  sd_pre = se_pre * sqrt(N),
+  
+  m_post = c(
+    
+    0.593, 1.24,
+    2.68, 4.01,
+    2.02, 4.25
+    
+  ),
+  
+  se_post = c(
+    
+    0.169, 0.194,
+    0.307, 0.227,
+    0.319, 0.260
+  
+  ),
+  
+  sd_post = se_post * sqrt(N),
+  
+  d_rep = c(
+    
+    1.25, 0.11, 
+    2.33, 0.45, 
+    2.48, 0.52  
+    
+    ),
+  
+  ci_l_rep = c(
+    
+    0.62, -0.41,
+    1.55, -0.07,
+    1.70, -0.02
+    
+    ),
+  
+  ci_u_rep = c(
+    
+    1.88, 0.63,
+    3.11, 0.97, 
+    3.26, 1.06
+    
+    ),
+      
+  se_d_rep = (ci_u_rep - ci_l_rep) / 3.92,
+  
+  t_pair = d_rep/se_d_rep,
+  
+  # Using Eq. (31) from Wilson 2016
+  r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
+        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
+    
+  z = 0.5 * log( (1+r)/(1-r)),
+  v = 1/(N-3)
+  
+  
+  ); Smith2021</code></pre>
+<pre><code>## # A tibble: 6 × 17
+##   outcome    group        N m_pre se_pre sd_pre m_post se_post sd_post d_rep
+##   &lt;chr&gt;      &lt;chr&gt;    &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;
+## 1 Loneliness CBT         27  1.59  0.209 1.086   0.593   0.169  0.8781  1.25
+## 2 Loneliness Waitlist    35  1.36  0.169 0.9998  1.24    0.194  1.148   0.11
+## 3 Anxiety    CBT         27  5.2   0.246 1.278   2.68    0.307  1.595   2.33
+## 4 Anxiety    Waitlist    35  4.58  0.2   1.183   4.01    0.227  1.343   0.45
+## 5 Depressive CBT         27  5.48  0.272 1.413   2.02    0.319  1.658   2.48
+## 6 Depressive Waitlist    35  4.98  0.217 1.284   4.25    0.26   1.538   0.52
+##   ci_l_rep ci_u_rep se_d_rep t_pair        r        z       v
+##      &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+## 1     0.62     1.88   0.3214 3.889   0.09224  0.09250 0.04167
+## 2    -0.41     0.63   0.2653 0.4146 -0.2679  -0.2746  0.03125
+## 3     1.55     3.11   0.3980 5.855  -0.2019  -0.2047  0.04167
+## 4    -0.07     0.97   0.2653 1.696  -0.2357  -0.2402  0.03125
+## 5     1.7      3.26   0.3980 6.232  -0.7637  -1.005   0.04167
+## 6    -0.02     1.06   0.2755 1.887  -0.3093  -0.3198  0.03125</code></pre>
+<pre class="r"><code>Smith2021_long &lt;- 
+  Smith2021 |&gt;
+  mutate(group = case_match(group, &quot;CBT&quot; ~ &quot;t&quot;, &quot;Waitlist&quot; ~ &quot;c&quot;)) |&gt; 
+  pivot_wider(
+    names_from = group,
+    values_from = N:v
+  )</code></pre>
+<p>Calculating effect sizes and correcting for cluster at the treatment
+level</p>
+<pre class="r"><code>## ppcor = pre-posttest correlation
+## _calc_method = calculation method 
+
+Smith2021_es &lt;- 
+  Smith2021 |&gt; 
+  summarise(
+    
+    study = &quot;Smith et al. 2021&quot;,
+    es_calc_method = &quot;DiD&quot;,
+    
+    N_t = N[1],
+    N_c = N[2],
+    
+    N_tot = sum(N),
+    
+    M = sum(v*z)/sum(v),
+    ppcor = (exp(2*M)-1)/(exp(2*M)+1) * -1,
+    ppcor_calc_method = &quot;From study&quot;,
+    
+    df_ind = sum(N-1),
+    
+    dif_t = (m_post[1] - m_pre[1]),
+    dif_c = (m_post[2] - m_pre[2]),
+    
+    DD = (dif_c - dif_t),
+    s_pool = sqrt(sum((N - 1) * sd_post^2) / df_ind),
+
+    d = DD/s_pool,
+    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
+    
+    Wd = 2*(1-ppcor) * sum(1/N),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    # Based on d calculated from the sd_post 
+    g = J * d,
+    vg = J^2 * vd,
+    Wg = J^2 * Wd,
+    
+    .by = outcome
+  
+); Smith2021_es</code></pre>
+<pre><code>## # A tibble: 3 × 21
+##   outcome    study             es_calc_method   N_t   N_c N_tot        M   ppcor
+##   &lt;chr&gt;      &lt;chr&gt;             &lt;chr&gt;          &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;
+## 1 Loneliness Smith et al. 2021 DiD               27    35    62 -0.06485 0.06476
+## 2 Anxiety    Smith et al. 2021 DiD               27    35    62 -0.2199  0.2164 
+## 3 Depressive Smith et al. 2021 DiD               27    35    62 -0.7113  0.6115 
+##   ppcor_calc_method df_ind  dif_t   dif_c    DD s_pool      d      vd      Wd
+##   &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 From study            60 -0.997 -0.1200 0.877  1.040 0.8437 0.1287  0.1227 
+## 2 From study            60 -2.52  -0.57   1.95   1.458 1.338  0.1177  0.1028 
+## 3 From study            60 -3.46  -0.730  2.73   1.591 1.716  0.07551 0.05098
+##        J      g      vg      Wg
+##    &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 0.9874 0.8331 0.1254  0.1197 
+## 2 0.9874 1.321  0.1148  0.1003 
+## 3 0.9874 1.694  0.07363 0.04971</code></pre>
+<pre class="r"><code>Smith2021_est &lt;- left_join(Smith2021_long, Smith2021_es)
+Smith2021_est</code></pre>
+<pre><code>## # A tibble: 3 × 49
+##   outcome      N_t   N_c m_pre_t m_pre_c se_pre_t se_pre_c sd_pre_t sd_pre_c
+##   &lt;chr&gt;      &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+## 1 Loneliness    27    35    1.59    1.36    0.209    0.169    1.086   0.9998
+## 2 Anxiety       27    35    5.2     4.58    0.246    0.2      1.278   1.183 
+## 3 Depressive    27    35    5.48    4.98    0.272    0.217    1.413   1.284 
+##   m_post_t m_post_c se_post_t se_post_c sd_post_t sd_post_c d_rep_t d_rep_c
+##      &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1    0.593     1.24     0.169     0.194    0.8781     1.148    1.25    0.11
+## 2    2.68      4.01     0.307     0.227    1.595      1.343    2.33    0.45
+## 3    2.02      4.25     0.319     0.26     1.658      1.538    2.48    0.52
+##   ci_l_rep_t ci_l_rep_c ci_u_rep_t ci_u_rep_c se_d_rep_t se_d_rep_c t_pair_t
+##        &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;
+## 1       0.62      -0.41       1.88       0.63     0.3214     0.2653    3.889
+## 2       1.55      -0.07       3.11       0.97     0.3980     0.2653    5.855
+## 3       1.7       -0.02       3.26       1.06     0.3980     0.2755    6.232
+##   t_pair_c      r_t     r_c      z_t     z_c     v_t     v_c study            
+##      &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;            
+## 1   0.4146  0.09224 -0.2679  0.09250 -0.2746 0.04167 0.03125 Smith et al. 2021
+## 2   1.696  -0.2019  -0.2357 -0.2047  -0.2402 0.04167 0.03125 Smith et al. 2021
+## 3   1.887  -0.7637  -0.3093 -1.005   -0.3198 0.04167 0.03125 Smith et al. 2021
+##   es_calc_method N_tot        M   ppcor ppcor_calc_method df_ind  dif_t   dif_c
+##   &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;              &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+## 1 DiD               62 -0.06485 0.06476 From study            60 -0.997 -0.1200
+## 2 DiD               62 -0.2199  0.2164  From study            60 -2.52  -0.57  
+## 3 DiD               62 -0.7113  0.6115  From study            60 -3.46  -0.730 
+##      DD s_pool      d      vd      Wd      J      g      vg      Wg
+##   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;
+## 1 0.877  1.040 0.8437 0.1287  0.1227  0.9874 0.8331 0.1254  0.1197 
+## 2 1.95   1.458 1.338  0.1177  0.1028  0.9874 1.321  0.1148  0.1003 
+## 3 2.73   1.591 1.716  0.07551 0.05098 0.9874 1.694  0.07363 0.04971</code></pre>
 </div>
 </div>
 <div id="amalgamation-of-data" class="section level2">
@@ -930,10 +1139,16 @@ therapy on loneliness in a community sample of older adults: A secondary
 analysis of a randomized controlled trial</span>.”</span> <em>Clinical
 Gerontologist</em> 44 (4): 439–49.
 </div>
+<div id="ref-Wuthrich2013" class="csl-entry">
+Wuthrich, Viviana M, and Ronald M Rapee. 2013. <span>“<span class="nocase">Randomised controlled trial of group cognitive
+behavioural therapy for comorbid anxiety and depression in older
+adults</span>.”</span> <em>Behaviour Research and Therapy</em> 51 (12):
+779–86. <a href="https://doi.org/10.1016/j.brat.2013.09.002">https://doi.org/10.1016/j.brat.2013.09.002</a>.
+</div>
 </div>
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogRWZmZWN0IHNpemUgY2FsY3VsYXRpb24gZm9yICdHcm91cC1iYXNlZCBjb21tdW5pdHkgaW50ZXJ2ZW50aW9ucyB0byBzdXBwb3J0DQogIHRoZSBzb2NpYWwgcmVpbnRlZ3JhdGlvbiBvZiBtYXJnaW5hbGlzZWQgYWR1bHRzIHdpdGggbWVudGFsIGlsbG5lc3MnDQpkYXRlOiAiTGFzdCB1cGRhdGVkIGByIGZvcm1hdChTeXMudGltZSgpLCAnJVkuJW0uJWQnKWAiDQpvdXRwdXQ6IA0KICBodG1sX2RvY3VtZW50Og0KICAgIHRvYzogdHJ1ZQ0KICAgIGNvZGVfZm9sZGluZzogc2hvdw0KICAgIGNvZGVfZG93bmxvYWQ6IHRydWUNCmJpYmxpb2dyYXBoeTogR3JvdXAtYmFzZWQgaW50ZXJ2ZW50aW9ucy5iaWINCmJpYmxpby1zdHlsZTogYXBhDQpsaW5rLWNpdGF0aW9uczogeWVzDQpmb250c2l6ZTogMTFwdA0Kc3BhY2luZzogc2luZ2xlDQplZGl0b3Jfb3B0aW9uczogDQogIGNodW5rX291dHB1dF90eXBlOiBjb25zb2xlDQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9DQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUpDQprbml0cjo6b3B0c19jaHVuayRzZXQobWVzc2FnZSA9IEZBTFNFKQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KHdhcm5pbmcgPSBGQUxTRSkNCg0Kb3B0aW9ucyhwaWxsYXIuc2lnZmlnID0gNCkgIyBlbnN1cmUgdGliYmxlIGluY2x1ZGUgNCBkaWdpdHMNCm9wdGlvbnModGliYmxlLndpZHRoID0gSW5mKQ0Kb3B0aW9ucyhkcGx5ci5wcmludF9taW4gPSAzMTApDQpvcHRpb25zKHNjaXBlbiA9IDEwKQ0Kb3B0aW9ucyhkcGx5ci5zdW1tYXJpc2UuaW5mb3JtID0gRkFMU0UpICMgQXZvaWRzIHN1bW1hcml6ZSBpbmZvIGZyb20gdGlkeXZlcnNlDQoNCmBgYA0KDQojIyMgSW50cm9kdWN0aW9uIA0KDQojIyMgUiBwYWNrYWdlIHVzZWQgZm9yIGVmZmVjdCBzaXplIGNhbGN1bGF0aW9uDQoNCmBgYHtyfQ0KbGlicmFyeShkcGx5cikNCmxpYnJhcnkocmVhZHhsKQ0KbGlicmFyeShwdXJycikNCmBgYA0KDQojIyMgSUNDIHZhbHVlcyB1c2VkIGZvciBjbHVzdGVyIGFkanVzdG1lbnQNCg0KYGBge3J9DQpJQ0NfMDEgPC0gMC4xDQpgYGANCg0KDQojIyMgRnVuY3Rpb24gYnVpbGRpbmcgdG8gY29uZHVjdCBjbHVzdGVyIGRlc2lnbiBhZGp1c3RtZW50DQoNCldlIHVzZSBIZWRnZXMgJiBDaXRrb3dpY3ogWy1ASGVkZ2VzMjAxNV9vbmV0cmVhdGNsdXN0ZXJdIHRvIGNsdXN0ZXIgYmlhcyBjb3JyZWN0IGVmZmVjdCBzaXplIHZhcmlhbmNlIGVzdGltYXRlcyBpbiBzdHVkeSB3aGVyZSBjbHVzdGVyaW5nIGlzIG5vdCB0cmVhdGVkIHByb3Blcmx5IHNpbmNlIHdlIGluIG1hbnkgY2FzZXMgb25seSB3aWxsIGV4cGVyaWVuY2UgY2x1c3RlcmluZyBpbiB0aGUgdHJlYXRtZW50IGdyb3VwLiBJdCBtaWdodCBoYXBwZW4gdGhhdCBjbHVzdGVyaW5nIHNob3VsZCBiZSBoYW5kbGVkIGluIHRoZSBDb2NocmFuZSBhbmQgSGVkZ2VzIDIwMDcuIA0KDQpgYGB7cn0NCg0KIyBFcXVhdGlvbiAoNykgaW4gSGVkZ2VzICYgQ2l0a293aWN6ICgyMDE1KQ0KZGZfaCA8LSBmdW5jdGlvbih0b3RhbF9zYW1wbGVfc2l6ZSwgSUNDLCB0cnRfc2FtcGxlX3NpemUsIGF2Z19ncnBfc2l6ZSl7DQogIA0KICBOIDwtIHRvdGFsX3NhbXBsZV9zaXplDQogIHJobyA8LSBJQ0MNCiAgTlQgPC0gdHJ0X3NhbXBsZV9zaXplDQogIG4gPC0gYXZnX2dycF9zaXplDQogIA0KICBoIDwtICgoTi0yKSooMS1yaG8pICsgKE5ULW4pKnJobyleMiAvDQogICAgICAgKChOLTIpKigxLXJobyleMiArIChOVC1uKSpuKnJob14yICsgMiooTlQtMikqKDEtcmhvKSpyaG8pDQogIA0KICBoDQp9DQoNCiMgVGVzdA0KI2RmX2goDQojICB0b3RhbF9zYW1wbGVfc2l6ZSA9IDEwMCwNCiMgIElDQyA9IDAuMiwNCiMgIHRydF9zYW1wbGVfc2l6ZSA9IDgwLA0KIyAgYXZnX2dycF9zaXplID0gNQ0KIykNCg0KYGBgDQoNCg0KIyMgKipTdHVkaWVzIGluIG1ldGEtYW5hbHlzaXMqKg0KDQojIyMgKipHZXN0ZWwtVGltbWVybWFucyBldCBhbC4gWy1AVmFuR2VzdGVsLVRpbW1lcm1hbnMyMDEyXSoqDQojIyMjIChNdWx0aS1sZXZlbCBhbmFseXNpcyB0byBoYW5kbGUgY2x1c3RlcmluZykNCg0KRGF0YSBpcyByZXRyaWV2ZWQgZnJvbSBUYWJsZXMgMiAmIDMgKHAuIDU4KSANCg0KYGBge3J9DQojIFRlc3RpbmcgbWlzc2luZyANCg0KVGltbWVybWFuc19zYW1wbGVfc2l6ZV9kYXQgPC0NCiAgdGliYmxlKA0KICAgIA0KICAgIG1lYXN1cmUgPSByZXAoYygiRW1wb3Zlcm1lbnQiLCAiSG9wZSIsICJRdWFsaXR5IiwgIlNlbGYtZSIsICJMb25lbGluZXNzIiksIGVhY2ggPSA0KSwNCiAgICB0aW1pbmcgPSByZXAoYygiMyBtb250aHMiLCAiNiBtb250aHMiKSwgZWFjaCA9IDIsIDUpLA0KICAgIGdyb3VwID0gcmVwKGMoIlRyZWF0bWVudCIsICJDb250cm9sIiksIDEwKSwNCiAgICANCiAgICBOX3N0YXJ0ID0gcmVwKHJlcChjKDE2OCwgMTY1KSwgMTApKSwNCiAgICANCiAgICBOX2FjdHVhbCA9IGMoDQogICAgICAxMzYsIDExNywgMTIxLCA5OSwNCiAgICAgIDEzMiwgMTE4LCAxMjAsIDk3LA0KICAgICAgMTI0LCAxMTQsIDExMSwgOTcsDQogICAgICAxMzQsIDExNiwgMTIxLCAxMDAsDQogICAgICAxMzgsIDEyMiwgMTI1LCAxMDINCiAgICApLA0KICAgIA0KICAgICNub25fbWlzc2luZyA9IE5fYWN0dWFsL05fc3RhcnQsDQogICAgIw0KICAgICNwZXJjZW50X21pc3NpbmcgPSAoMSAtIG5vbl9taXNzaW5nKSAqIDEwMA0KICAgIA0KKTsgVGltbWVybWFuc19zYW1wbGVfc2l6ZV9kYXQNCmBgYA0KDQpNaXNzaW5nbmVzcyBhbmFseXNpcw0KDQpgYGB7cn0NClRpbW1lcm1hbnNfbWlzc2luZ25lc3MgPC0gDQogIFRpbW1lcm1hbnNfc2FtcGxlX3NpemVfZGF0IHw+IA0KICBncm91cF9ieShtZWFzdXJlLCB0aW1pbmcpIHw+IA0KICBzdW1tYXJpc2UoDQogICAgTl9zdGFydF90b3RhbCA9IHN1bShOX3N0YXJ0KSwNCiAgICBOX2FjdHVhbF90b3RhbCA9IHN1bShOX2FjdHVhbCksDQogICAgDQogICAgI3BlcmNlbnRfbWlzc2luZ190b3RhbCA9IHJvdW5kKG1lYW4ocGVyY2VudF9taXNzaW5nKSksDQogICAgDQogICAgcGVyY2VudF9taXNzaW5nX3RvdGFsID0gcm91bmQoKDEgLSAoTl9hY3R1YWxfdG90YWwvTl9zdGFydF90b3RhbCkpICogMTAwKSwNCiAgICANCiAgICAuZ3JvdXBzID0gImRyb3AiDQogICkNCg0KVGltbWVybWFuc19taXNzaW5nbmVzcyANCmBgYA0KDQpEYXRhIGVudHJhbmNlIA0KYGBge3J9DQoNClRpbW1lcm1hbnMyMDEyIDwtIA0KICBUaW1tZXJtYW5zX3NhbXBsZV9zaXplX2RhdCB8PiANCiAgcmVuYW1lKE4gPSAgTl9hY3R1YWwpIHw+IA0KICBtdXRhdGUoDQogICAgDQogICAgI0Zyb20gVGFibGUgMiAocC4gNTgpDQogICAgbV9wb3N0ID0gYygNCiAgICAgIA0KICAgICAgMy41NSwgMy4zOCwgMy41OSwgMy40MCwNCiAgICAgIDIuOTEsIDIuNzksIDIuOTcsIDIuNzMsDQogICAgICA0LjQ5LCA0LjM2LCA0LjYzLCA0LjM5LA0KICAgICAgNC42NSwgNC4zNSwgNC43MSwgNC40LA0KICAgICAgNS44OSwgNi4yNywgMy44NywgMy42OA0KICAgICAgDQogICAgKSwNCiAgICANCiAgICBzZF9wb3N0ID0gYygNCiAgICAgIA0KICAgICAgMC40OCwgMC41MywgMC41MCwgMC41NiwNCiAgICAgIDAuNDcsIDAuNTMsIDAuNDYsIDAuNDgsDQogICAgICAwLjk2LCAxLjA3LCAwLjk3LCAxLjA1LA0KICAgICAgMC44MSwgMC45NywgMC45MywgMC44OCwNCiAgICAgIDMuNjEsIDMuNTUsIDMuODcsIDMuNjgNCiAgICAgIA0KICAgICksDQogICAgDQogICAgZXNfcGFwZXIgPSByZXAoDQogICAgICBjKA0KICAgICAgICAwLjI3LCAwLjM2LCANCiAgICAgICAgMC4yNSwgMC40OCwNCiAgICAgICAgMC4wMywgMC4xNSwNCiAgICAgICAgMC4yNywgMC4yMywgDQogICAgICAgIC0wLjA0LCAwLjE1DQogICAgICApLA0KICAgICAgZWFjaCA9IDINCiAgICApLA0KICAgIA0KICAgICMgRnJvbSBUYWJsZSAzIChwLiA1OCkNCiAgICANCiAgICBiX2FkaiA9IGMoDQogICAgICAuMTIsIC4wMjEsIC4xMywgLjA0NiwgICAjRW1wb3dlcm1lbnQNCiAgICAgIC4xMCwgLjAzOCwgLjE3LCAuMDA0LCAgICNIb3BlDQogICAgICAuMDY0LCAuMTEsIC4xMSwgLjE1LCAgICAjUXVhbGl0eSBvZiBsaWZlDQogICAgICAuMjMsIC4wNjQsIC4yMSwgLjE0LCAgICAjU2VsZi1lZmZpY2FjeSBiZWxpZWZzDQogICAgICAuMDY2LCAtLjY1LCAtLjM0LCAtLjQ5ICAjIExvbmVsaW5lc3MNCiAgICAgIA0KICAgICksDQogICAgDQogICAgcHZhbCA9IGMoDQogICAgICAuMDE2LCAuNTUsIC4wMTIsIC4yNCwgICNFbXBvd2VybWVudA0KICAgICAgLjAzOSwgLjI4LCAuMDAxLCAuOTEsICAjSG9wZQ0KICAgICAgLjQ3MSwgLjA5LCAuMjQsIC4wMjUsICAjUXVhbGl0eSBvZiBsaWZlDQogICAgICAuMDEwLCAuMzEsIC4wMjYsIC4wNDIsICNTZWxmLWVmZmljYWN5IGJlbGllZnMNCiAgICAgIC44NSwgLjAwOCwgLjM1LCAuMDcgICAgI0xvbmVsaW5lc3MNCiAgICAgIA0KICAgICAgKSwNCiAgICANCiAgICBjaV9sID0gYygNCiAgICAgIC4wMjIsIC0uMDUsIC4wMjYsIC0uMDI1LA0KICAgICAgTkEsIC0uMDMwLCAuMDI2LCAtLjAyNSwNCiAgICAgIC0uMTEsIC0uMDE2LCAtLjA3MSwgMC4wMjAsDQogICAgICAuMDU5LCAtLjA2MiwgLjAyNywgLjAwNiwNCiAgICAgIC0uNjAsIC0xLjE0LCAtMS4wNSwgLTEuMDINCiAgICApLA0KICAgIA0KICAgIGNpX3UgPSBjKA0KICAgICAgLjIyLCAuMDkyLCAuMjMsIC4xMiwNCiAgICAgIE5BLCAuMTEsIC4yMywgLjEyLCANCiAgICAgIC4yMywgLjI0LCAuMjksIC4yOCwNCiAgICAgIC40MCwgLjE5LCAuMzksIC4yNywNCiAgICAgIC43NCwgLS4xNiwgLjM3LCAuMDQyDQogICAgKSwNCiAgICANCiAgICB0dmFsID0gcXQocHZhbC8yLCBkZiA9IE4tMiwgbG93ZXIudGFpbCA9IEZBTFNFKSwNCiAgICBzZV9iID0gYl9hZGovdHZhbA0KICAgIA0KICApOyBUaW1tZXJtYW5zMjAxMiANCg0KDQpgYGANCg0KRWZmZWN0IHNpemVzIGNhbGN1bGF0aW9uDQoNCmBgYHtyfQ0KDQpUaW1tZXJtYW5zMjAxMl9lc3QgPC0gDQogIFRpbW1lcm1hbnMyMDEyIHw+IA0KICBncm91cF9ieShtZWFzdXJlLCB0aW1pbmcpIHw+IA0KICBzdW1tYXJpc2UoDQogICAgDQogICAgc3R1ZHkgPSAiVGltbWVybWFuczIwMTIiLA0KICAgIGVzX21ldGhvZCA9ICJQb3N0dGVzdCBvbmx5IiwNCiAgICANCiAgICBwcGNvciA9IE5BLCAgDQogICAgcHBjb3JfdHlwZSA9ICJOb3QgcmVsZXZhbnQiLA0KICAgIA0KICAgIE50ID0gTlsxXSwNCiAgICBOYyA9IE5bMl0sDQogICAgDQogICAgTl90b3QgPSBOdCArIE5jLCANCiAgICANCiAgICBkZl9pbmQgPSBOX3RvdCwNCiAgICANCiAgICBzZF9wb29sID0gc3FydCggc3VtKChOLTEpKnNkX3Bvc3ReMikvIChOX3RvdC0yKSApLA0KICAgIA0KICAgIGRpZmZfcmF3ID0gbV9wb3N0WzFdIC0gbV9wb3N0WzJdLA0KICAgIA0KICAgIGRfcGFwZXIgPSBlc19wYXBlclsxXSwNCiAgICBkID0gZGlmZl9yYXcvc2RfcG9vbCwNCiAgICB2ZCA9IHN1bShOKS9wcm9kKE4pICsgZF4yLygyKmRmX2luZCksDQogICAgV2QgPSBzdW0oTikvcHJvZChOKSwNCiAgICANCiAgICBjb3ZfZHMgPSAiTm90IG9idGFpbmFibGUiLA0KICAgIA0KICAgIEREID0gYl9hZGpbMV0gLSBiX2FkalsyXSwNCiAgICANCiAgICBkX2FkaiA9IEREL3NkX3Bvb2wsDQogICAgdmRfYWRqID0gc3VtKChzZV9iL3NkX3Bvb2wpXjIpICsgZF4yLygyKmRmX2luZCksDQogICAgV2RfYWRqID0gc3VtKChzZV9iL3NkX3Bvb2wpXjIpLA0KICAgIA0KICAgIEogPSAxIC0gMy8oNCpkZl9pbmQtMSksDQogICAgDQogICAgZyA9IEogKiBkLA0KICAgIHZnID0gSl4yICogdmQsDQogICAgV2cgPSBKXjIgKiBXZCwNCiAgICANCiAgICBnX2FkaiA9IEogKiBkX2FkaiwNCiAgICB2Z19hZGogPSBKXjIgKiB2ZF9hZGosDQogICAgV2dfYWRqID0gSl4yICogV2RfYWRqLCANCiAgICANCiAgICAuZ3JvdXBzID0gImRyb3AiDQogICAgDQogICAgDQogICkgfD4gDQogIHJvd3dpc2UoKSB8PiANCiAgIyBDbHVzdGVyIGJpYXMgY29ycmVjdGlvbg0KICBtdXRhdGUoDQogIA0KICAgIA0KICAgIG5fZ3JvdXAgPSA3LCANCiAgICBpY2MgPSBJQ0NfMDEsDQogICAgaWNjX3R5cGUgPSAiSW1wdXRlZCIsDQogICAgDQogICAgZ2FtbWEgPSAxIC0gKE5jICsgbl9ncm91cC0yKSpJQ0NfMDEgLyAoTl90b3QtMiksICMgQ2hhbmdlIHdoZW4gZGlzY3Vzc2VkDQogICAgZGZfaCA9IGRmX2godG90YWxfc2FtcGxlX3NpemUgPSBOX3RvdCwgSUNDID0gSUNDXzAxLCBhdmdfZ3JwX3NpemUgPSBuX2dyb3VwLCB0cnRfc2FtcGxlX3NpemUgPSBOdCksDQogICAgZXRhID0gMSArICggKG5fZ3JvdXAqTmMvTl90b3QpLTEgKSAqIElDQ18wMSwNCiAgICANCiAgICBndCA9IGcgKiBzcXJ0KGdhbW1hKSwNCiAgICB2Z3QgPSBXZyAqIGV0YSArIGd0XjIvKDIqZGZfaCksDQogICAgV2d0ID0gV2cgKiBldGEsDQogICAgDQogICAgZ3RfYWx0ID0gZ19hZGogKiBzcXJ0KGdhbW1hKSwNCiAgICB2Z3RfYWx0ID0gV2dfYWRqICogZ2FtbWEgKyBndF9hbHReMi8oMipkZl9oKSwNCiAgICBXZ3RfYWx0ID0gV2dfYWRqICogZ2FtbWEsDQogICAgDQogICAgdmFyeV9pZCA9IHBhc3RlMChtZWFzdXJlLCAiLyIsIHRpbWluZykNCiAgICANCiAgICANCiAgKSB8PiANCiAgdW5ncm91cCgpOyBUaW1tZXJtYW5zMjAxMl9lc3QNCg0KDQoNCmBgYA0KDQoNCiMjIyAqKlNtaXRoIGV0IGFsLiBbLUBTbWl0aDIwMjFdKioNCg0KRW50ZXJpbmcgZGF0YSBmcm9tIFRhYmxlIDIgKHAuIDQ0NSkNCg0KDQoNCiMjIEFtYWxnYW1hdGlvbiBvZiBkYXRhDQoNCkFtYWxnYW1hdGluZyBlZmZlY3Qgc2l6ZSBkYXRhDQoNCmBgYHtyLCBpbmNsdWRlPUZBTFNFLCBldmFsPUZBTFNFfQ0KDQpzZWxlY3RfYWNyb3NzX2RmIDwtIGZ1bmN0aW9uKGRhdGFmcmFtZXMgPSBsaXN0KCksIGxpc3RfbGFiZWxzKXsNCiAgDQogIG1hcF9kZnIoZGF0YWZyYW1lcywgfiBzZWxlY3QoLiwgISEhbGlzdF9sYWJlbHMpKQ0KICANCn0NCg0KIyBFeHRlbmQgdmFyaWFibGVzDQp2YXJfbGFiZWwgPC0gYygNCiAgInN0dWR5IiwgImVzX21ldGhvZCIsICJwcGNvciIsICJwcGNvcl90eXBlIiwgIk50IiwgIk5jIiwgIk5fdG90IiwNCiAgImRmX2luZCIsICJkIiwgICJ2ZCIsICJXZCIsICJnIiwgInZnIiwgIldnIiwgIyBDb250aW51ZSBoZXJlIG1vcmUgdmFyaWFibGVzIGFyZSBuZWVkZWQNCiAgInZhcnlfaWQiDQopDQoNCmVzX2RhdCA8LSANCiAgc2VsZWN0X2Fjcm9zc19kZigNCiAgICBsaXN0KA0KICAgICAgVGltbWVybWFuczIwMTJfZXN0DQogICAgKSwNCiAgICANCiAgICB2YXJfbGFiZWwNCg0KKTsgZXNfZGF0DQoNCg0KYGBgDQoNCkFtYWxnYXRpbmcgY292YXJpYXRlcyBhbmQgZWZmZWN0IHNpemUgZGF0YQ0KYGBge3IsIGluY2x1ZGU9RkFMU0UsIGV2YWw9RkFMU0V9DQojUmVtZW1iZXIgdG8gc2VlIHdvcmtpbmcgZGlyZWN0b3J5IHRvICJHcm91cC1iYXNlZC1pbnRlcnZlbnRpb25zL0VTIGNhbGMiDQoNCmNvdmFyaWF0ZXMgPC0gcmVhZF94bHN4KA0KICAiRGVzY3JpcHRpdmUgY29kaW5nIHNjaGVtZSBmb3IgZ3JvdXAtYmFzZWQgaW50ZXJ2ZW50aW9ucyAoZGF0YSkueGxzeCIsDQogIG5hID0gYygiLiIsICIiKQ0KKQ0KDQpncm91cF9iYXNlZF9kYXQgPC0gDQogIGJpbmRfY29scygNCiAgICBjb3ZhcmlhdGVzLA0KICAgIGVzX2RhdA0KDQopOyBnbGltcHNlKGdyb3VwX2Jhc2VkX2RhdCkNCg0KYGBgDQoNCg0KDQojIyAqKlJlZmVyZW5jZSoqDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg==</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogRWZmZWN0IHNpemUgY2FsY3VsYXRpb24gZm9yICdHcm91cC1iYXNlZCBjb21tdW5pdHkgaW50ZXJ2ZW50aW9ucyB0byBzdXBwb3J0DQogIHRoZSBzb2NpYWwgcmVpbnRlZ3JhdGlvbiBvZiBtYXJnaW5hbGlzZWQgYWR1bHRzIHdpdGggbWVudGFsIGlsbG5lc3MnDQpkYXRlOiAiTGFzdCB1cGRhdGVkIGByIGZvcm1hdChTeXMudGltZSgpLCAnJVkuJW0uJWQnKWAiDQpvdXRwdXQ6IA0KICBodG1sX2RvY3VtZW50Og0KICAgIHRvYzogdHJ1ZQ0KICAgIGNvZGVfZm9sZGluZzogc2hvdw0KICAgIGNvZGVfZG93bmxvYWQ6IHRydWUNCmJpYmxpb2dyYXBoeTogR3JvdXAtYmFzZWQgaW50ZXJ2ZW50aW9ucy5iaWINCmJpYmxpby1zdHlsZTogYXBhDQpsaW5rLWNpdGF0aW9uczogeWVzDQpmb250c2l6ZTogMTFwdA0Kc3BhY2luZzogc2luZ2xlDQplZGl0b3Jfb3B0aW9uczogDQogIGNodW5rX291dHB1dF90eXBlOiBjb25zb2xlDQotLS0NCg0KYGBge3Igc2V0dXAsIGluY2x1ZGU9RkFMU0V9DQprbml0cjo6b3B0c19jaHVuayRzZXQoZWNobyA9IFRSVUUpDQprbml0cjo6b3B0c19jaHVuayRzZXQobWVzc2FnZSA9IEZBTFNFKQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KHdhcm5pbmcgPSBGQUxTRSkNCg0Kb3B0aW9ucyhwaWxsYXIuc2lnZmlnID0gNCkgIyBlbnN1cmUgdGliYmxlIGluY2x1ZGUgNCBkaWdpdHMNCm9wdGlvbnModGliYmxlLndpZHRoID0gSW5mKQ0Kb3B0aW9ucyhkcGx5ci5wcmludF9taW4gPSAzMTApDQpvcHRpb25zKHNjaXBlbiA9IDEwKQ0Kb3B0aW9ucyhkcGx5ci5zdW1tYXJpc2UuaW5mb3JtID0gRkFMU0UpICMgQXZvaWRzIHN1bW1hcml6ZSBpbmZvIGZyb20gdGlkeXZlcnNlDQoNCmBgYA0KDQojIyMgSW50cm9kdWN0aW9uIA0KDQojIyMgUiBwYWNrYWdlIHVzZWQgZm9yIGVmZmVjdCBzaXplIGNhbGN1bGF0aW9uDQoNCmBgYHtyfQ0KI2RldnRvb2xzOjppbnN0YWxsX2dpdGh1YigiTWlra2VsVmVtYnllL1ZJVkVDYW1wYmVsbCIpDQoNCmxpYnJhcnkodGlkeXZlcnNlKQ0KbGlicmFyeShyZWFkeGwpDQpsaWJyYXJ5KHB1cnJyKQ0KbGlicmFyeShWSVZFQ2FtcGJlbGwpDQoNCmBgYA0KDQojIyMgSUNDIHZhbHVlcyB1c2VkIGZvciBjbHVzdGVyIGFkanVzdG1lbnQNCg0KYGBge3J9DQpJQ0NfMDEgPC0gMC4xDQpgYGANCg0KDQojIyMgRnVuY3Rpb24gYnVpbGRpbmcgdG8gY29uZHVjdCBjbHVzdGVyIGRlc2lnbiBhZGp1c3RtZW50DQoNCldlIHVzZSBIZWRnZXMgJiBDaXRrb3dpY3ogWy1ASGVkZ2VzMjAxNV9vbmV0cmVhdGNsdXN0ZXJdIHRvIGNsdXN0ZXIgYmlhcyBjb3JyZWN0IGVmZmVjdCBzaXplIHZhcmlhbmNlIGVzdGltYXRlcyBpbiBzdHVkeSB3aGVyZSBjbHVzdGVyaW5nIGlzIG5vdCB0cmVhdGVkIHByb3Blcmx5IHNpbmNlIHdlIGluIG1hbnkgY2FzZXMgb25seSB3aWxsIGV4cGVyaWVuY2UgY2x1c3RlcmluZyBpbiB0aGUgdHJlYXRtZW50IGdyb3VwLiBJdCBtaWdodCBoYXBwZW4gdGhhdCBjbHVzdGVyaW5nIHNob3VsZCBiZSBoYW5kbGVkIGluIHRoZSBDb2NocmFuZSBhbmQgSGVkZ2VzIDIwMDcuIA0KDQpgYGB7cn0NCg0KIyBFcXVhdGlvbiAoNykgaW4gSGVkZ2VzICYgQ2l0a293aWN6ICgyMDE1KQ0KZGZfaCA8LSBmdW5jdGlvbih0b3RhbF9zYW1wbGVfc2l6ZSwgSUNDLCB0cnRfc2FtcGxlX3NpemUsIGF2Z19ncnBfc2l6ZSl7DQogIA0KICBOIDwtIHRvdGFsX3NhbXBsZV9zaXplDQogIHJobyA8LSBJQ0MNCiAgTlQgPC0gdHJ0X3NhbXBsZV9zaXplDQogIG4gPC0gYXZnX2dycF9zaXplDQogIA0KICBoIDwtICgoTi0yKSooMS1yaG8pICsgKE5ULW4pKnJobyleMiAvDQogICAgICAgKChOLTIpKigxLXJobyleMiArIChOVC1uKSpuKnJob14yICsgMiooTlQtMikqKDEtcmhvKSpyaG8pDQogIA0KICBoDQp9DQoNCiMgVGVzdA0KI2RmX2goDQojICB0b3RhbF9zYW1wbGVfc2l6ZSA9IDEwMCwNCiMgIElDQyA9IDAuMiwNCiMgIHRydF9zYW1wbGVfc2l6ZSA9IDgwLA0KIyAgYXZnX2dycF9zaXplID0gNQ0KIykNCg0KYGBgDQoNCg0KIyMgKipTdHVkaWVzIGluIG1ldGEtYW5hbHlzaXMqKg0KDQojIyMgKipHZXN0ZWwtVGltbWVybWFucyBldCBhbC4gWy1AVmFuR2VzdGVsLVRpbW1lcm1hbnMyMDEyXSoqDQojIyMjIChNdWx0aS1sZXZlbCBhbmFseXNpcyB0byBoYW5kbGUgY2x1c3RlcmluZykNCg0KRGF0YSBpcyByZXRyaWV2ZWQgZnJvbSBUYWJsZXMgMiAmIDMgKHAuIDU4KSANCg0KYGBge3J9DQojIFRlc3RpbmcgbWlzc2luZyANCg0KVGltbWVybWFuc19zYW1wbGVfc2l6ZV9kYXQgPC0NCiAgdGliYmxlKA0KICAgIA0KICAgIG1lYXN1cmUgPSByZXAoYygiRW1wb3Zlcm1lbnQiLCAiSG9wZSIsICJRdWFsaXR5IiwgIlNlbGYtZSIsICJMb25lbGluZXNzIiksIGVhY2ggPSA0KSwNCiAgICB0aW1pbmcgPSByZXAoYygiMyBtb250aHMiLCAiNiBtb250aHMiKSwgZWFjaCA9IDIsIDUpLA0KICAgIGdyb3VwID0gcmVwKGMoIlRyZWF0bWVudCIsICJDb250cm9sIiksIDEwKSwNCiAgICANCiAgICBOX3N0YXJ0ID0gcmVwKHJlcChjKDE2OCwgMTY1KSwgMTApKSwNCiAgICANCiAgICBOX2FjdHVhbCA9IGMoDQogICAgICAxMzYsIDExNywgMTIxLCA5OSwNCiAgICAgIDEzMiwgMTE4LCAxMjAsIDk3LA0KICAgICAgMTI0LCAxMTQsIDExMSwgOTcsDQogICAgICAxMzQsIDExNiwgMTIxLCAxMDAsDQogICAgICAxMzgsIDEyMiwgMTI1LCAxMDINCiAgICApLA0KICAgIA0KICAgICNub25fbWlzc2luZyA9IE5fYWN0dWFsL05fc3RhcnQsDQogICAgIw0KICAgICNwZXJjZW50X21pc3NpbmcgPSAoMSAtIG5vbl9taXNzaW5nKSAqIDEwMA0KICAgIA0KKTsgVGltbWVybWFuc19zYW1wbGVfc2l6ZV9kYXQNCmBgYA0KDQpNaXNzaW5nbmVzcyBhbmFseXNpcw0KDQpgYGB7cn0NClRpbW1lcm1hbnNfbWlzc2luZ25lc3MgPC0gDQogIFRpbW1lcm1hbnNfc2FtcGxlX3NpemVfZGF0IHw+IA0KICBncm91cF9ieShtZWFzdXJlLCB0aW1pbmcpIHw+IA0KICBzdW1tYXJpc2UoDQogICAgTl9zdGFydF90b3RhbCA9IHN1bShOX3N0YXJ0KSwNCiAgICBOX2FjdHVhbF90b3RhbCA9IHN1bShOX2FjdHVhbCksDQogICAgDQogICAgI3BlcmNlbnRfbWlzc2luZ190b3RhbCA9IHJvdW5kKG1lYW4ocGVyY2VudF9taXNzaW5nKSksDQogICAgDQogICAgcGVyY2VudF9taXNzaW5nX3RvdGFsID0gcm91bmQoKDEgLSAoTl9hY3R1YWxfdG90YWwvTl9zdGFydF90b3RhbCkpICogMTAwKSwNCiAgICANCiAgICAuZ3JvdXBzID0gImRyb3AiDQogICkNCg0KVGltbWVybWFuc19taXNzaW5nbmVzcyANCmBgYA0KDQpEYXRhIGVudHJhbmNlIA0KYGBge3J9DQoNClRpbW1lcm1hbnMyMDEyIDwtIA0KICBUaW1tZXJtYW5zX3NhbXBsZV9zaXplX2RhdCB8PiANCiAgcmVuYW1lKE4gPSAgTl9hY3R1YWwpIHw+IA0KICBtdXRhdGUoDQogICAgDQogICAgI0Zyb20gVGFibGUgMiAocC4gNTgpDQogICAgbV9wb3N0ID0gYygNCiAgICAgIA0KICAgICAgMy41NSwgMy4zOCwgMy41OSwgMy40MCwNCiAgICAgIDIuOTEsIDIuNzksIDIuOTcsIDIuNzMsDQogICAgICA0LjQ5LCA0LjM2LCA0LjYzLCA0LjM5LA0KICAgICAgNC42NSwgNC4zNSwgNC43MSwgNC40LA0KICAgICAgNS44OSwgNi4yNywgMy44NywgMy42OA0KICAgICAgDQogICAgKSwNCiAgICANCiAgICBzZF9wb3N0ID0gYygNCiAgICAgIA0KICAgICAgMC40OCwgMC41MywgMC41MCwgMC41NiwNCiAgICAgIDAuNDcsIDAuNTMsIDAuNDYsIDAuNDgsDQogICAgICAwLjk2LCAxLjA3LCAwLjk3LCAxLjA1LA0KICAgICAgMC44MSwgMC45NywgMC45MywgMC44OCwNCiAgICAgIDMuNjEsIDMuNTUsIDMuODcsIDMuNjgNCiAgICAgIA0KICAgICksDQogICAgDQogICAgZXNfcGFwZXIgPSByZXAoDQogICAgICBjKA0KICAgICAgICAwLjI3LCAwLjM2LCANCiAgICAgICAgMC4yNSwgMC40OCwNCiAgICAgICAgMC4wMywgMC4xNSwNCiAgICAgICAgMC4yNywgMC4yMywgDQogICAgICAgIC0wLjA0LCAwLjE1DQogICAgICApLA0KICAgICAgZWFjaCA9IDINCiAgICApLA0KICAgIA0KICAgICMgRnJvbSBUYWJsZSAzIChwLiA1OCkNCiAgICANCiAgICBiX2FkaiA9IGMoDQogICAgICAuMTIsIC4wMjEsIC4xMywgLjA0NiwgICAjRW1wb3dlcm1lbnQNCiAgICAgIC4xMCwgLjAzOCwgLjE3LCAuMDA0LCAgICNIb3BlDQogICAgICAuMDY0LCAuMTEsIC4xMSwgLjE1LCAgICAjUXVhbGl0eSBvZiBsaWZlDQogICAgICAuMjMsIC4wNjQsIC4yMSwgLjE0LCAgICAjU2VsZi1lZmZpY2FjeSBiZWxpZWZzDQogICAgICAuMDY2LCAtLjY1LCAtLjM0LCAtLjQ5ICAjIExvbmVsaW5lc3MNCiAgICAgIA0KICAgICksDQogICAgDQogICAgcHZhbCA9IGMoDQogICAgICAuMDE2LCAuNTUsIC4wMTIsIC4yNCwgICNFbXBvd2VybWVudA0KICAgICAgLjAzOSwgLjI4LCAuMDAxLCAuOTEsICAjSG9wZQ0KICAgICAgLjQ3MSwgLjA5LCAuMjQsIC4wMjUsICAjUXVhbGl0eSBvZiBsaWZlDQogICAgICAuMDEwLCAuMzEsIC4wMjYsIC4wNDIsICNTZWxmLWVmZmljYWN5IGJlbGllZnMNCiAgICAgIC44NSwgLjAwOCwgLjM1LCAuMDcgICAgI0xvbmVsaW5lc3MNCiAgICAgIA0KICAgICAgKSwNCiAgICANCiAgICBjaV9sID0gYygNCiAgICAgIC4wMjIsIC0uMDUsIC4wMjYsIC0uMDI1LA0KICAgICAgTkEsIC0uMDMwLCAuMDI2LCAtLjAyNSwNCiAgICAgIC0uMTEsIC0uMDE2LCAtLjA3MSwgMC4wMjAsDQogICAgICAuMDU5LCAtLjA2MiwgLjAyNywgLjAwNiwNCiAgICAgIC0uNjAsIC0xLjE0LCAtMS4wNSwgLTEuMDINCiAgICApLA0KICAgIA0KICAgIGNpX3UgPSBjKA0KICAgICAgLjIyLCAuMDkyLCAuMjMsIC4xMiwNCiAgICAgIE5BLCAuMTEsIC4yMywgLjEyLCANCiAgICAgIC4yMywgLjI0LCAuMjksIC4yOCwNCiAgICAgIC40MCwgLjE5LCAuMzksIC4yNywNCiAgICAgIC43NCwgLS4xNiwgLjM3LCAuMDQyDQogICAgKSwNCiAgICANCiAgICB0dmFsID0gcXQocHZhbC8yLCBkZiA9IE4tMiwgbG93ZXIudGFpbCA9IEZBTFNFKSwNCiAgICBzZV9iID0gYl9hZGovdHZhbA0KICAgIA0KICApOyBUaW1tZXJtYW5zMjAxMiANCg0KDQpgYGANCg0KRWZmZWN0IHNpemVzIGNhbGN1bGF0aW9uDQoNCmBgYHtyfQ0KDQpUaW1tZXJtYW5zMjAxMl9lc3QgPC0gDQogIFRpbW1lcm1hbnMyMDEyIHw+IA0KICBncm91cF9ieShtZWFzdXJlLCB0aW1pbmcpIHw+IA0KICBzdW1tYXJpc2UoDQogICAgDQogICAgc3R1ZHkgPSAiVGltbWVybWFuczIwMTIiLA0KICAgIGVzX2NhbGNfbWV0aG9kID0gIlBvc3R0ZXN0IiwNCiAgICANCiAgICBwcGNvciA9IE5BLCAgDQogICAgcHBjb3JfY2FsY19tZXRob2QgPSAiTm90IHJlbGV2YW50IiwNCiAgICANCiAgICBOdCA9IE5bMV0sDQogICAgTmMgPSBOWzJdLA0KICAgIA0KICAgIE5fdG90ID0gTnQgKyBOYywgDQogICAgDQogICAgZGZfaW5kID0gTl90b3QsDQogICAgDQogICAgc2RfcG9vbCA9IHNxcnQoIHN1bSgoTi0xKSpzZF9wb3N0XjIpLyAoTl90b3QtMikgKSwNCiAgICANCiAgICBkaWZmX3JhdyA9IG1fcG9zdFsxXSAtIG1fcG9zdFsyXSwNCiAgICANCiAgICBkX3BhcGVyID0gZXNfcGFwZXJbMV0sDQogICAgZCA9IGRpZmZfcmF3L3NkX3Bvb2wsDQogICAgdmQgPSBzdW0oTikvcHJvZChOKSArIGReMi8oMipkZl9pbmQpLA0KICAgIFdkID0gc3VtKE4pL3Byb2QoTiksDQogICAgDQogICAgY292X2RzID0gIk5vdCBvYnRhaW5hYmxlIiwNCiAgICANCiAgICBERCA9IGJfYWRqWzFdIC0gYl9hZGpbMl0sDQogICAgDQogICAgZF9hZGogPSBERC9zZF9wb29sLA0KICAgIHZkX2FkaiA9IHN1bSgoc2VfYi9zZF9wb29sKV4yKSArIGReMi8oMipkZl9pbmQpLA0KICAgIFdkX2FkaiA9IHN1bSgoc2VfYi9zZF9wb29sKV4yKSwNCiAgICANCiAgICBKID0gMSAtIDMvKDQqZGZfaW5kLTEpLA0KICAgIA0KICAgIGcgPSBKICogZCwNCiAgICB2ZyA9IEpeMiAqIHZkLA0KICAgIFdnID0gSl4yICogV2QsDQogICAgDQogICAgZ19hZGogPSBKICogZF9hZGosDQogICAgdmdfYWRqID0gSl4yICogdmRfYWRqLA0KICAgIFdnX2FkaiA9IEpeMiAqIFdkX2FkaiwgDQogICAgDQogICAgLmdyb3VwcyA9ICJkcm9wIg0KICAgIA0KICAgIA0KICApIHw+IA0KICByb3d3aXNlKCkgfD4gDQogICMgQ2x1c3RlciBiaWFzIGNvcnJlY3Rpb24NCiAgbXV0YXRlKA0KICANCiAgICANCiAgICBuX2dyb3VwID0gNywgDQogICAgaWNjID0gSUNDXzAxLA0KICAgIGljY190eXBlID0gIkltcHV0ZWQiLA0KICAgIA0KICAgIGdhbW1hID0gMSAtIChOYyArIG5fZ3JvdXAtMikqSUNDXzAxIC8gKE5fdG90LTIpLCAjIENoYW5nZSB3aGVuIGRpc2N1c3NlZA0KICAgIGRmX2ggPSBkZl9oKHRvdGFsX3NhbXBsZV9zaXplID0gTl90b3QsIElDQyA9IElDQ18wMSwgYXZnX2dycF9zaXplID0gbl9ncm91cCwgdHJ0X3NhbXBsZV9zaXplID0gTnQpLA0KICAgIGV0YSA9IDEgKyAoIChuX2dyb3VwKk5jL05fdG90KS0xICkgKiBJQ0NfMDEsDQogICAgDQogICAgZ3QgPSBnICogc3FydChnYW1tYSksDQogICAgdmd0ID0gV2cgKiBldGEgKyBndF4yLygyKmRmX2gpLA0KICAgIFdndCA9IFdnICogZXRhLA0KICAgIA0KICAgIGd0X2FsdCA9IGdfYWRqICogc3FydChnYW1tYSksDQogICAgdmd0X2FsdCA9IFdnX2FkaiAqIGdhbW1hICsgZ3RfYWx0XjIvKDIqZGZfaCksDQogICAgV2d0X2FsdCA9IFdnX2FkaiAqIGdhbW1hLA0KICAgIA0KICAgIHZhcnlfaWQgPSBwYXN0ZTAobWVhc3VyZSwgIi8iLCB0aW1pbmcpDQogICAgDQogICAgDQogICkgfD4gDQogIHVuZ3JvdXAoKTsgVGltbWVybWFuczIwMTJfZXN0DQoNCg0KDQpgYGANCg0KDQojIyMgKipXdXRocmljaCAmIFJhcGVlIFstQFd1dGhyaWNoMjAxM10gYW5kIFNtaXRoIGV0IGFsLiBbLUBTbWl0aDIwMjFdKioNCg0KRW50ZXJpbmcgZGF0YSBmcm9tIFRhYmxlIDIgKHAuIDQ0NSkuIFNhbXBsZSBzaXplIGluZm9ybWF0aW9uIGlzIHJldHJpdmVkIGZyb20gVGFibGUgMSAocC4gNDQyKQ0KDQpgYGB7ciBTbWl0aDIwMjFkYXR9DQoNCiMgQ2FsY3VsYXRlIHBhaXJlZCB0LXRlc3Qgc3RhdGlzdGljcyB0byBvYnRhaW4gcHJlLXBvc3R0ZXN0IHNjb3JlIGNvcnJlbGF0aW9uIGVzdGltYXRlcw0KDQojIyBfcmVwID0gcmVwb3J0ZWQNCg0KU21pdGgyMDIxIDwtIA0KICB0aWJibGUoDQogIA0KICBvdXRjb21lID0gcmVwKGMoIkxvbmVsaW5lc3MiLCAiQW54aWV0eSIsICJEZXByZXNzaXZlIiksIGVhY2ggPSAyKSwNCiAgDQogIGdyb3VwID0gcmVwKGMoIkNCVCIsICJXYWl0bGlzdCIpLCAzKSwNCiAgDQogIE4gPSByZXAoYygyNywgMzUpLCAzKSwNCiAgIA0KICBtX3ByZSA9IGMoDQogICAgDQogICAgMS41OSwgMS4zNiwgIyBMb25lbGluZXNzDQogICAgNS4yMCwgNC41OCwgIyBBbnhpZXR5DQogICAgNS40OCwgNC45OCAgIyBEZXByZXNzaXZlDQogICAgDQogICksDQogIA0KICBzZV9wcmUgPSBjKA0KICAgIA0KICAgIDAuMjA5LCAwLjE2OSwNCiAgICAwLjI0NiwgMC4yMDAsDQogICAgMC4yNzIsIDAuMjE3DQogICAgDQogICksDQogIA0KICBzZF9wcmUgPSBzZV9wcmUgKiBzcXJ0KE4pLA0KICANCiAgbV9wb3N0ID0gYygNCiAgICANCiAgICAwLjU5MywgMS4yNCwNCiAgICAyLjY4LCA0LjAxLA0KICAgIDIuMDIsIDQuMjUNCiAgICANCiAgKSwNCiAgDQogIHNlX3Bvc3QgPSBjKA0KICAgIA0KICAgIDAuMTY5LCAwLjE5NCwNCiAgICAwLjMwNywgMC4yMjcsDQogICAgMC4zMTksIDAuMjYwDQogIA0KICApLA0KICANCiAgc2RfcG9zdCA9IHNlX3Bvc3QgKiBzcXJ0KE4pLA0KICANCiAgZF9yZXAgPSBjKA0KICAgIA0KICAgIDEuMjUsIDAuMTEsIA0KICAgIDIuMzMsIDAuNDUsIA0KICAgIDIuNDgsIDAuNTIgIA0KICAgIA0KICAgICksDQogIA0KICBjaV9sX3JlcCA9IGMoDQogICAgDQogICAgMC42MiwgLTAuNDEsDQogICAgMS41NSwgLTAuMDcsDQogICAgMS43MCwgLTAuMDINCiAgICANCiAgICApLA0KICANCiAgY2lfdV9yZXAgPSBjKA0KICAgIA0KICAgIDEuODgsIDAuNjMsDQogICAgMy4xMSwgMC45NywgDQogICAgMy4yNiwgMS4wNg0KICAgIA0KICAgICksDQogICAgICANCiAgc2VfZF9yZXAgPSAoY2lfdV9yZXAgLSBjaV9sX3JlcCkgLyAzLjkyLA0KICANCiAgdF9wYWlyID0gZF9yZXAvc2VfZF9yZXAsDQogIA0KICAjIFVzaW5nIEVxLiAoMzEpIGZyb20gV2lsc29uIDIwMTYNCiAgciA9ICgoc2RfcHJlXjIqdF9wYWlyXjIgKyBzZF9wb3N0XjIqdF9wYWlyXjIpIC0gDQogICAgICAgIChtX3Bvc3QtbV9wcmUpXjIgKiBOKS8gKDIgKiBzZF9wcmUqc2RfcG9zdCp0X3BhaXJeMiksDQogICAgDQogIHogPSAwLjUgKiBsb2coICgxK3IpLygxLXIpKSwNCiAgdiA9IDEvKE4tMykNCiAgDQogIA0KICApOyBTbWl0aDIwMjENCg0KU21pdGgyMDIxX2xvbmcgPC0gDQogIFNtaXRoMjAyMSB8Pg0KICBtdXRhdGUoZ3JvdXAgPSBjYXNlX21hdGNoKGdyb3VwLCAiQ0JUIiB+ICJ0IiwgIldhaXRsaXN0IiB+ICJjIikpIHw+IA0KICBwaXZvdF93aWRlcigNCiAgICBuYW1lc19mcm9tID0gZ3JvdXAsDQogICAgdmFsdWVzX2Zyb20gPSBOOnYNCiAgKQ0KDQpgYGANCg0KQ2FsY3VsYXRpbmcgZWZmZWN0IHNpemVzIGFuZCBjb3JyZWN0aW5nIGZvciBjbHVzdGVyIGF0IHRoZSB0cmVhdG1lbnQgbGV2ZWwgDQoNCmBgYHtyfQ0KDQojIyBwcGNvciA9IHByZS1wb3N0dGVzdCBjb3JyZWxhdGlvbg0KIyMgX2NhbGNfbWV0aG9kID0gY2FsY3VsYXRpb24gbWV0aG9kIA0KDQpTbWl0aDIwMjFfZXMgPC0gDQogIFNtaXRoMjAyMSB8PiANCiAgc3VtbWFyaXNlKA0KICAgIA0KICAgIHN0dWR5ID0gIlNtaXRoIGV0IGFsLiAyMDIxIiwNCiAgICBlc19jYWxjX21ldGhvZCA9ICJEaUQiLA0KICAgIA0KICAgIE5fdCA9IE5bMV0sDQogICAgTl9jID0gTlsyXSwNCiAgICANCiAgICBOX3RvdCA9IHN1bShOKSwNCiAgICANCiAgICBNID0gc3VtKHYqeikvc3VtKHYpLA0KICAgIHBwY29yID0gKGV4cCgyKk0pLTEpLyhleHAoMipNKSsxKSAqIC0xLA0KICAgIHBwY29yX2NhbGNfbWV0aG9kID0gIkZyb20gc3R1ZHkiLA0KICAgIA0KICAgIGRmX2luZCA9IHN1bShOLTEpLA0KICAgIA0KICAgIGRpZl90ID0gKG1fcG9zdFsxXSAtIG1fcHJlWzFdKSwNCiAgICBkaWZfYyA9IChtX3Bvc3RbMl0gLSBtX3ByZVsyXSksDQogICAgDQogICAgREQgPSAoZGlmX2MgLSBkaWZfdCksDQogICAgc19wb29sID0gc3FydChzdW0oKE4gLSAxKSAqIHNkX3Bvc3ReMikgLyBkZl9pbmQpLA0KDQogICAgZCA9IEREL3NfcG9vbCwNCiAgICB2ZCA9IDIqKDEtcHBjb3IpICogc3VtKDEvTikgKyBkXjIvKDIqZGZfaW5kKSwNCiAgICANCiAgICBXZCA9IDIqKDEtcHBjb3IpICogc3VtKDEvTiksDQogICAgDQogICAgSiA9IDEgLSAzLyg0KmRmX2luZC0xKSwNCiAgICANCiAgICAjIEJhc2VkIG9uIGQgY2FsY3VsYXRlZCBmcm9tIHRoZSBzZF9wb3N0IA0KICAgIGcgPSBKICogZCwNCiAgICB2ZyA9IEpeMiAqIHZkLA0KICAgIFdnID0gSl4yICogV2QsDQogICAgDQogICAgLmJ5ID0gb3V0Y29tZQ0KICANCik7IFNtaXRoMjAyMV9lcw0KDQoNClNtaXRoMjAyMV9lc3QgPC0gbGVmdF9qb2luKFNtaXRoMjAyMV9sb25nLCBTbWl0aDIwMjFfZXMpDQpTbWl0aDIwMjFfZXN0DQoNCg0KYGBgDQoNCg0KIyMgQW1hbGdhbWF0aW9uIG9mIGRhdGENCg0KQW1hbGdhbWF0aW5nIGVmZmVjdCBzaXplIGRhdGENCg0KYGBge3IsIGluY2x1ZGU9RkFMU0UsIGV2YWw9RkFMU0V9DQoNCnNlbGVjdF9hY3Jvc3NfZGYgPC0gZnVuY3Rpb24oZGF0YWZyYW1lcyA9IGxpc3QoKSwgbGlzdF9sYWJlbHMpew0KICANCiAgbWFwX2RmcihkYXRhZnJhbWVzLCB+IHNlbGVjdCguLCAhISFsaXN0X2xhYmVscykpDQogIA0KfQ0KDQojIEV4dGVuZCB2YXJpYWJsZXMNCnZhcl9sYWJlbCA8LSBjKA0KICAic3R1ZHkiLCAiZXNfbWV0aG9kIiwgInBwY29yIiwgInBwY29yX3R5cGUiLCAiTnQiLCAiTmMiLCAiTl90b3QiLA0KICAiZGZfaW5kIiwgImQiLCAgInZkIiwgIldkIiwgImciLCAidmciLCAiV2ciLCAjIENvbnRpbnVlIGhlcmUgbW9yZSB2YXJpYWJsZXMgYXJlIG5lZWRlZA0KICAidmFyeV9pZCINCikNCg0KZXNfZGF0IDwtIA0KICBzZWxlY3RfYWNyb3NzX2RmKA0KICAgIGxpc3QoDQogICAgICBUaW1tZXJtYW5zMjAxMl9lc3QNCiAgICApLA0KICAgIA0KICAgIHZhcl9sYWJlbA0KDQopOyBlc19kYXQNCg0KDQpgYGANCg0KQW1hbGdhdGluZyBjb3ZhcmlhdGVzIGFuZCBlZmZlY3Qgc2l6ZSBkYXRhDQpgYGB7ciwgaW5jbHVkZT1GQUxTRSwgZXZhbD1GQUxTRX0NCiNSZW1lbWJlciB0byBzZWUgd29ya2luZyBkaXJlY3RvcnkgdG8gIkdyb3VwLWJhc2VkLWludGVydmVudGlvbnMvRVMgY2FsYyINCg0KY292YXJpYXRlcyA8LSByZWFkX3hsc3goDQogICJEZXNjcmlwdGl2ZSBjb2Rpbmcgc2NoZW1lIGZvciBncm91cC1iYXNlZCBpbnRlcnZlbnRpb25zIChkYXRhKS54bHN4IiwNCiAgbmEgPSBjKCIuIiwgIiIpDQopDQoNCmdyb3VwX2Jhc2VkX2RhdCA8LSANCiAgYmluZF9jb2xzKA0KICAgIGNvdmFyaWF0ZXMsDQogICAgZXNfZGF0DQoNCik7IGdsaW1wc2UoZ3JvdXBfYmFzZWRfZGF0KQ0KDQpgYGANCg0KDQojIyAqKlJlZmVyZW5jZSoqDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg==</div>
 
 
 
