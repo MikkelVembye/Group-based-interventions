@@ -312,98 +312,349 @@ Entering data from Table 2 (p. 445). Sample size information is retrived from Ta
 
 # Calculate paired t-test statistics to obtain pre-posttest score correlation estimates
 
-## _rep = reported
+#-----------------------------------------------------------------
+# OUTCOME ANCRONYMS AND FULL NAMES
+#-----------------------------------------------------------------
+# GDS = Geriatric Depression Scale
+# CES-D = The Centre for Epidemiological Studies Depression Scale
+# GAI = Geriatric Anxiety Inventory
+# PSWQ = The Penn State Worry Questionnaire
+# SF12 = The Short Form 12 version 1 Mental Health Subscale
+#-----------------------------------------------------------------
 
-Smith2021 <- 
+# F-test stats
+F_stat_Wuthrich <- 
   tibble(
-  
-  outcome = rep(c("Loneliness", "Anxiety", "Depressive"), each = 2),
-  
-  group = rep(c("CBT", "Waitlist"), 3),
-  
-  N = rep(c(27, 35), 3),
-   
-  m_pre = c(
     
-    1.59, 1.36, # Loneliness
-    5.20, 4.58, # Anxiety
-    5.48, 4.98  # Depressive
+    year = c(13, 21, 21, 13, 21, 13, 13, 13),
     
-  ),
-  
-  se_pre = c(
-    
-    0.209, 0.169,
-    0.246, 0.200,
-    0.272, 0.217
-    
-  ),
-  
-  sd_pre = se_pre * sqrt(N),
-  
-  m_post = c(
-    
-    0.593, 1.24,
-    2.68, 4.01,
-    2.02, 4.25
-    
-  ),
-  
-  se_post = c(
-    
-    0.169, 0.194,
-    0.307, 0.227,
-    0.319, 0.260
-  
-  ),
-  
-  sd_post = se_post * sqrt(N),
-  
-  d_rep = c(
-    
-    1.25, 0.11, 
-    2.33, 0.45, 
-    2.48, 0.52  
-    
-    ),
-  
-  ci_l_rep = c(
-    
-    0.62, -0.41,
-    1.55, -0.07,
-    1.70, -0.02
-    
-    ),
-  
-  ci_u_rep = c(
-    
-    1.88, 0.63,
-    3.11, 0.97, 
-    3.26, 1.06
-    
-    ),
+    outcome = c("Primary problem", "Anxiety", "Mood", "GDS", "Loneliness", "GAI", "PSWQ", "SF12"),
+    df1 = c(1),
+    df2 = c(
       
-  se_d_rep = (ci_u_rep - ci_l_rep) / 3.92,
-  
-  t_pair = d_rep/se_d_rep,
-  
-  # Using Eq. (31) from Wilson 2016
-  r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
-        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
+      47.95,  # Primary problem severity (2013, p. 783)
+      49.603, # Anxiety disorder severity (2021, p. 444)
+      45.451, # Depressive disorder severity [Mood] (2021, p. 444)
+      50.88,  # GDS (2013, p. 783)
+      40.609, # Loneliness (2021, p. 444)
+      55.65,  # GAI (2013, p. 783)
+      54.95,  # PSWQ (2013, p. 783)
+      51.39   # SF15 (2013, p. 783)
+      
+      ),
+    F_val = c(
+      
+      17.36, 
+      17.858,
+      30.884,
+      8.86,
+      7.070,
+      7.4,
+      0.57,
+      qf(.988, df1 = 1, df2 = df2[8], lower.tail = FALSE)
+      
+    ),
     
-  z = 0.5 * log( (1+r)/(1-r)),
-  v = 1/(N-3)
-  
-  
-  ); Smith2021
+    pval_reported = c(
+      
+      pf(F_val[1], df1 = 1, df2 = df2[1], lower.tail = FALSE),
+      pf(F_val[2], df1 = 1, df2 = df2[2], lower.tail = FALSE),
+      pf(F_val[3], df1 = 1, df2 = df2[3], lower.tail = FALSE),
+      .004,
+      .011,
+      .009,
+      .452,
+      .988
+      
+    )
+    
+    
+); F_stat_Wuthrich
 
-Smith2021_long <- 
-  Smith2021 |>
-  mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
-  pivot_wider(
-    names_from = group,
-    values_from = N:v
-  )
+## emm = estimated marginal means
+
+Wuthrich2013_2021 <- 
+  tibble(
+    
+    outcome = rep(c("Primary problem"), each = 2),
+    group = rep(c("CBT", "Waitlist"), n_distinct(outcome)),
+    N = c(27, 35),
+    
+    emm_pre = c(
+      
+      6.33, 5.81 # ADIS primary disorder severity (from Table 3, 2013, p. 784)
+      
+    ),
+    
+    emm_post = c(
+      
+      3.46, 5.15 # ADIS primary disorder severity (from Table 3, 2013, p. 784)
+      
+    ),
+    
+    sd_pre = c(
+      
+      0.653, 1.16 # ADIS primary disorder severity (from Table 2, 2013, p. 783)
+      
+    ),
+    
+    # Number of controlled covariates
+    q = 1
+    
+  ); Wuthrich2013_2021
+
+
+Wuthrich2013_2021_es <- 
+  Wuthrich2013_2021 |> 
+  summarise(
+    
+    study = "Wuthrich studies",
+    es_calc_method = "DiD",
+    
+    N_t = N[1],
+    N_c = N[2],
+    N_tot = sum(N),
+    q = q[1],
+    
+    dif_t = emm_post[1] - emm_pre[1],
+    dif_c = emm_post[2] - emm_pre[2],
+    
+    DD = dif_t - dif_c,
+    s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
+    
+    d = DD/s_pool,
+    
+    .by = outcome
+    
+  ) |> 
+  left_join(select(F_stat_Wuthrich[1,], -year)) |> 
+  mutate(
+    
+    vd = 1/N_t + 1/N_c + d^2/(2*N_tot),
+    Wd = 1/N_t + 1/N_c,
+    vd_alt = d^2/F_val + d^2/(2*N_tot),
+    Wd_alt = d^2/F_val,
+    
+    J = 1 - 3/(4*N_tot-1),
+    
+    g = J * d,
+    vg = vd,
+    Wg = 1/N_t + 1/N_c,
+    
+    # Average cluster size in treatment group
+    n_cluster = 8, 
+    n_type = "From study (2013, p. 781)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = n_cluster, ICC = icc),
+    
+    gt = g * gamma_sqrt,
+    
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = n_cluster, 
+      ICC = icc, 
+      g = gt, 
+      model = "ANCOVA",
+      not_cluster_adj = FALSE,
+      R2 = 0,
+      q = q
+      
+      )
+    
+  ); Wuthrich2013_2021_es
+
+
+
+#Wuthrich2013 <- 
+#  tibble(
+#    
+#    outcome = rep(c("Primary problem", "Mood", "Anxiety", "GDS", "CES-D", "GAI", "PSWQ", "SF12"), each = 2),
+#    
+#    group = rep(c("CBT", "Waitlist"), n_distinct(outcome)),
+#    
+#    N = rep(c(27, 35), n_distinct(outcome)),
+#    
+#    m_pre = c(
+#      
+#      6.33, 5.81,   # Severity Primary Problem
+#      6.53, 5.61,   # Severity Primary Mood Problem
+#      6.25, 6.05,   # Severity Primary Anxiety Problem
+#      18.14, 16.35, # Geriatric Depression Scale (GDS)
+#      26.37, 22.61, # Centre for Epidemiological Studies-Depression (CES-D)
+#      11.59, 9.48,  # Geriatric Anxiety Inventory (GAI)
+#      53.62, 49.27, # Penn State Worry Questionnaire (PSWQ)
+#      37.09, 38.45  # Short Form-12 (Mental) (SF12)
+#      
+#    ),
+#    
+#    se_pre = c(
+#      
+#      0.25, 0.21,
+#      0.44, 0.29,
+#      0.29, 0.31,
+#      1.28, 1.10,
+#      1.94, 1.70, 
+#      1.10, 0.95,
+#      2.52, 2.29,
+#      2.01, 1.73
+#      
+#    ),
+#    
+#    sd_pre = se_pre * sqrt(N),
+#    
+#    m_post = c(
+#      
+#      3.46, 5.15, 
+#      3.00, 4.93, 
+#      3.71, 5.46,
+#      9.21, 14.38,
+#      13.34, 21.15,
+#      5.84, 8.33,
+#      46.54, 47.24,
+#      47.79, 43.56
+#      
+#    ),
+#    
+#    se_post = c(
+#      
+#      0.29, 0.24,
+#      0.52, 0.31,
+#      0.34, 0.38,
+#      1.44, 1.23,
+#      2.18, 1.90,
+#      1.20, 1.04,
+#      2.80, 2.41,
+#      2.26, 1.97
+#      
+#    ),
+#    
+#    sd_post = se_post *sqrt(N),
+#    
+#    d_paper = c(
+#      
+#      1.46, 0.49,
+#      2.13, 0.49,
+#      1.20, 0.42,
+#      0.98, 0.15, 
+#      1.41, 0.04, 
+#      0.95, 0.23, 
+#      0.50, 0.32,
+#      0.86, 0.41
+#      
+#    ),
+#    
+#    # Obtained from Eq. (7) in Lakens (2013, p. 4)
+#    #t_pair = d_paper * sqrt(N),
+#    
+#    # Using Eq. (31) from Wilson 2016
+#    r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
+#          (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
+#      
+#    z = 0.5 * log( (1+r)/(1-r)),
+#    v = 1/(N-3)
+#    
+#  ); Wuthrich2013
+#
+## There seem to be reporting error for the CES-D outcomes based on our calculation
+#
+#
+#Smith2021 <- 
+#  tibble(
+#  
+#  outcome = rep(c("Loneliness", "Anxiety", "Depressive"), each = 2),
+#  
+#  group = rep(c("CBT", "Waitlist"), 3),
+#  
+#  N = rep(c(27, 35), 3),
+#   
+#  m_pre = c(
+#    
+#    1.59, 1.36, # Loneliness
+#    5.20, 4.58, # Anxiety
+#    5.48, 4.98  # Depressive
+#    
+#  ),
+#  
+#  se_pre = c(
+#    
+#    0.209, 0.169,
+#    0.246, 0.200,
+#    0.272, 0.217
+#    
+#  ),
+#  
+#  sd_pre = se_pre * sqrt(N),
+#  
+#  m_post = c(
+#    
+#    0.593, 1.24,
+#    2.68, 4.01,
+#    2.02, 4.25
+#    
+#  ),
+#  
+#  se_post = c(
+#    
+#    0.169, 0.194,
+#    0.307, 0.227,
+#    0.319, 0.260
+#  
+#  ),
+#  
+#  sd_post = se_post * sqrt(N),
+#  
+#  d_rep = c(
+#    
+#    1.25, 0.11, 
+#    2.33, 0.45, 
+#    2.48, 0.52  
+#    
+#    ),
+#  
+#  ci_l_rep = c(
+#    
+#    0.62, -0.41,
+#    1.55, -0.07,
+#    1.70, -0.02
+#    
+#    ),
+#  
+#  ci_u_rep = c(
+#    
+#    1.88, 0.63,
+#    3.11, 0.97, 
+#    3.26, 1.06
+#    
+#    ),
+#      
+#  se_d_rep = (ci_u_rep - ci_l_rep) / 3.92,
+#  
+#  # Obtained from Eq. (7) in Lakens (2013, p. 4)
+#  t_pair = d_rep * sqrt(N),
+#  
+#  # Using Eq. (31) from Wilson 2016
+#  r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
+#        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
+#    
+#  z = 0.5 * log( (1+r)/(1-r)),
+#  v = 1/(N-3)
+#  
+#  
+#  ); Smith2021
+#
+#Smith2021_long <- 
+#  Smith2021 |>
+#  mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
+#  pivot_wider(
+#    names_from = group,
+#    values_from = N:v
+#  )
 
 ```
 
@@ -414,61 +665,74 @@ Calculating effect sizes and correcting for cluster at the treatment level
 ## ppcor = pre-posttest correlation
 ## _calc_method = calculation method 
 
-Smith2021_es <- 
-  Smith2021 |> 
-  summarise(
-    
-    study = "Smith et al. 2021",
-    es_calc_method = "DiD",
-    
-    N_t = N[1],
-    N_c = N[2],
-    
-    N_tot = sum(N),
-    
-    M = sum(v*z)/sum(v),
-    ppcor = (exp(2*M)-1)/(exp(2*M)+1) * -1,
-    ppcor_calc_method = "From study",
-    
-    df_ind = sum(N-1),
-    
-    dif_t = (m_post[1] - m_pre[1]),
-    dif_c = (m_post[2] - m_pre[2]),
-    
-    DD = (dif_c - dif_t),
-    s_pool = sqrt(sum((N - 1) * sd_post^2) / df_ind),
+#Smith2021_es <- 
+#  Smith2021 |> 
+#  summarise(
+#    
+#    study = "Smith et al. 2021",
+#    es_calc_method = "DiD",
+#    
+#    N_t = N[1],
+#    N_c = N[2],
+#    
+#    N_tot = sum(N),
+#    
+#    M = sum(v*z)/sum(v),
+#    ppcor = (exp(2*M)-1)/(exp(2*M)+1),
+#    ppcor_calc_method = "From study",
+#    
+#    df_ind = sum(N-1),
+#    
+#    dif_t = (m_post[1] - m_pre[1]),
+#    dif_c = (m_post[2] - m_pre[2]),
+#    
+#    DD = (dif_t - dif_c),
+#    s_pool = sqrt(sum((N - 1) * sd_post^2) / (N-2)),
+#
+#    d = DD/s_pool,
+#    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
+#    
+#    Wd = 2*(1-ppcor) * sum(1/N),
+#    
+#    J = 1 - 3/(4*df_ind-1),
+#    
+#    # Based on d calculated from the sd_post 
+#    g = J * d,
+#    vg = J^2 * vd,
+#    Wg = J^2 * Wd,
+#    
+#    # Cluster bias adjustment
+#    icc = ICC_01,
+#    icc_type = "Imputed",
+#    
+#    # Average cluster size
+#    # Obtained from "6-8 group members" (Wuthrich & Rapee, 2013, p. 781)
+#    n_cluster = 7, 
+#    n_type = "From study (2013, p. 781)",
+#    
+#    
+#    .by = outcome
+#  
+#); Smith2021_es
+#
+#
+#Smith2021_est <- left_join(Smith2021_long, Smith2021_es)
+#Smith2021_est
 
-    d = DD/s_pool,
-    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
-    
-    Wd = 2*(1-ppcor) * sum(1/N),
-    
-    J = 1 - 3/(4*df_ind-1),
-    
-    # Based on d calculated from the sd_post 
-    g = J * d,
-    vg = J^2 * vd,
-    Wg = J^2 * Wd,
-    
-    # Cluster bias adjustment
-    icc = ICC_01,
-    icc_type = "Imputed",
-    
-    # Average cluster size
-    # Obtained from "6-8 group members" (Wuthrich & Rapee, 2013, p. 781)
-    n_cluster = 7, 
-    n_type = "From study (2013, p. 781)",
-    
-    
-    .by = outcome
-  
-); Smith2021_es
+# Odd ratios from Wuthrich 2013
+#
+#p1 <- 0.42
+#p2 <- 0.074
+#n1 <- 27
+#n2 <- 35
+#
+#OR <- (p1*(1-p2))/(p2*(1-p1))
+#ln_OR <- log(OR)
+#vln_OR <- 1/(n1*p1) + 1/(n1*(1-p1)) + 1/(n2*p2) + 1/(n2*(1-p2))
+#
 
-
-Smith2021_est <- left_join(Smith2021_long, Smith2021_es)
-Smith2021_est
-
-
+#round(0.42*27)
+#round(0.074*35)
 ```
 
 
