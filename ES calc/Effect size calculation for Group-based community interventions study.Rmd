@@ -414,7 +414,7 @@ Wuthrich2013_2021_es <-
     N_t = N[1],
     N_c = N[2],
     N_tot = sum(N),
-    q = q[1],
+    n_covariates = q[1],
     
     dif_t = emm_post[1] - emm_pre[1],
     dif_c = emm_post[2] - emm_pre[2],
@@ -422,7 +422,10 @@ Wuthrich2013_2021_es <-
     DD = dif_t - dif_c,
     s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
     
-    d = DD/s_pool,
+    b = emm_post[1] - emm_post[2],
+    
+    d_post = b/s_pool,
+    d_DD = DD/s_pool,
     
     .by = outcome
     
@@ -430,14 +433,14 @@ Wuthrich2013_2021_es <-
   left_join(select(F_stat_Wuthrich[1,], -year)) |> 
   mutate(
     
-    vd = 1/N_t + 1/N_c + d^2/(2*N_tot),
+    vd = 1/N_t + 1/N_c + d_DD^2/(2*N_tot),
     Wd = 1/N_t + 1/N_c,
-    vd_alt = d^2/F_val + d^2/(2*N_tot),
-    Wd_alt = d^2/F_val,
+    vd_alt = d_DD^2/F_val + d_DD^2/(2*N_tot),
+    Wd_alt = d_DD^2/F_val,
     
     J = 1 - 3/(4*N_tot-1),
     
-    g = J * d,
+    g = J * d_DD,
     vg = vd,
     Wg = 1/N_t + 1/N_c,
     
@@ -447,6 +450,7 @@ Wuthrich2013_2021_es <-
     
     # Imputed icc value
     icc = ICC_01,
+    icc_alt = 0.2,
     icc_type = "Imputed",
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
@@ -463,9 +467,26 @@ Wuthrich2013_2021_es <-
       model = "ANCOVA",
       not_cluster_adj = FALSE,
       R2 = 0,
-      q = q
-      
-      )
+      q = n_covariates
+      ),
+    
+    # Test alternative icc val
+    #gamma_sqrt_icc02 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = n_cluster, ICC = icc_alt),
+    #
+    #gt_icc02 = g * gamma_sqrt_icc02,
+    #
+    #vgt_smd_1armcluster(
+    #  N_cl_grp = N_t, 
+    #  N_ind_grp = N_c, 
+    #  avg_grp_size = n_cluster, 
+    #  ICC = icc, 
+    #  g = gt, 
+    #  model = "ANCOVA",
+    #  not_cluster_adj = FALSE,
+    #  R2 = 0,
+    #  q = n_covariates,
+    #  add_name_to_vars = "_icc02"
+    #  )[-3]
     
   ); Wuthrich2013_2021_es
 
