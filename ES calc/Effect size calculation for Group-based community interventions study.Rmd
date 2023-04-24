@@ -46,7 +46,12 @@ library(VIVECampbell)
 ### ICC values used for cluster adjustment
 
 ```{r}
+ICC_005 <- 0.05
 ICC_01 <- 0.1
+
+ppcor_imp <- 0.5
+R2_imp <- 0
+
 ```
 
 
@@ -306,7 +311,7 @@ Timmermans2012_est <-
 
 ### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021]**
 
-Entering data from Table 2 (p. 445). Sample size information is retrived from Table 1 (p. 442)
+Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442)
 
 ```{r Smith2021dat}
 
@@ -316,35 +321,30 @@ Entering data from Table 2 (p. 445). Sample size information is retrived from Ta
 # OUTCOME ANCRONYMS AND FULL NAMES
 #-----------------------------------------------------------------
 # GDS = Geriatric Depression Scale
-# CES-D = The Centre for Epidemiological Studies Depression Scale
+# CES-D = The Centre for Epidemiological Studies Depression Scale (loneliness only item used)
 # GAI = Geriatric Anxiety Inventory
 # PSWQ = The Penn State Worry Questionnaire
 # SF12 = The Short Form 12 version 1 Mental Health Subscale
 #-----------------------------------------------------------------
 
-# Prepost-test correlations between anxiety, depression and loneliness measure for the CBT group
 
-ppcor_Wuchrich2021 <- 
-  tibble(
-    
-    outcome = c("Loneliness", "Anxiety", "Depression"),
-    
-    group = "CBT",
-    
-    m_pre = c(1.7, 5.43, 5.67),
-    sd_pre = c(0.82, .74, 1.05)
-    
-  ); ppcor_Wuchrich2021
-
-
-# F-test stats
+# F-stats from the interaction between time and group for mean
 F_stat_Wuthrich <- 
   tibble(
     
     year = c(13, 21, 21, 13, 21, 13, 13, 13),
     
-    outcome = c("Primary problem", "Anxiety", "Depression", "GDS", "Loneliness", "GAI", "PSWQ", "SF12"),
-    df1 = c(1),
+    outcome = c(
+      "Primary problem", 
+      "Anxiety", 
+      "Depression", 
+      "GDS", 
+      "Loneliness (CES-D 14)", 
+      "GAI", 
+      "PSWQ", 
+      "SF12"),
+    
+    df1 = 1,
     df2 = c(
       
       47.95,  # Primary problem severity (2013, p. 783)
@@ -391,37 +391,63 @@ F_stat_Wuthrich <-
 Wuthrich2013_2021 <- 
   tibble(
     
-    outcome = rep(c("Primary problem", "Anxiety", "Depression"), each = 2),
+    outcome = rep(
+      c("Primary problem", 
+        "Anxiety", 
+        "Depression", 
+        "GDS", 
+        "Loneliness (CES-D 14)",
+        "GAI",
+        "PSWQ",
+        "SF12"
+        ), 
+      each = 2),
+    
     group = rep(c("CBT", "Waitlist"), n_distinct(outcome)),
     
     N = rep(c(27, 35), n_distinct(outcome)), # From Table 2, 2013, p. 783
     
     emm_pre = c(
       
-      6.33, 5.81, # ADIS primary disorder severity (from Table 3, 2013, p. 784)
-      5.2, 4.58,  # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
-      5.48, 4.98  # ADIS depressive disorder severity (from Table 2, 2021, p. 445)
+      6.33, 5.81,    # ADIS primary disorder severity (from Table 3, 2013, p. 784)
+      5.2, 4.58,     # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
+      5.48, 4.98,    # ADIS depressive disorder severity (from Table 2, 2021, p. 445)
+      18.14, 16.35,  # Geriatric Depression Scale (from Table 3, 2013, p. 784)
+      1.59, 1.36,    # Loneliness (CES-D item 14) (from Table 2, 2021, p. 445)
+      11.59, 9.48,   # Geriatric Anxiety Inventory (from Table 3, 2013, p. 784)
+      53.62, 49.27,  # Penn State Worry Questionnaire (from Table 3, 2013, p. 784) 
+      37.09, 38.45   # Short Form-12 (Mental) (from Table 3, 2013, p. 784)
       
     ),
     
     emm_post = c(
       
-      3.46, 5.15, # ADIS primary disorder severity (from Table 3, 2013, p. 784)
-      2.68, 4.01, # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
-      2.02, 4.25  # ADIS depressive disorder severity (from Table 2, 2021, p. 445)
+      3.46, 5.15,   # ADIS primary disorder severity (from Table 3, 2013, p. 784)
+      2.68, 4.01,   # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
+      2.02, 4.25,   # ADIS depressive disorder severity (from Table 2, 2021, p. 445)
+      9.21, 14.38,  # Geriatric Depression Scale (from Table 3, 2013, p. 784)
+      .593, 1.24,   # Loneliness (CES-D item 14) (from Table 2, 2021, p. 445)
+      5.84, 8.33,   # Geriatric Anxiety Inventory (from Table 3, 2013, p. 784)
+      46.54, 47.24, # Penn State Worry Questionnaire (from Table 3, 2013, p. 784)
+      47.79, 43.56  # Short Form-12 (Mental) (from Table 3, 2013, p. 784)
       
     ),
     
     sd_pre = c(
       
-      0.653, 1.16, # ADIS primary disorder severity (from Table 2, 2013, p. 783)
-      0.74, 1.07,  # ADIS mean anxiety disorder severity (from Table 1, 2021, p. 442)
-      1.05, 1.27   # ADIS depressive disorder severity (from Table 1, 2021, p. 442)
+      0.653, 1.16,  # ADIS primary disorder severity (from Table 2, 2013, p. 783)
+      0.74, 1.07,   # ADIS mean anxiety disorder severity (from Table 1, 2021, p. 442)
+      1.05, 1.27,   # ADIS depressive disorder severity (from Table 1, 2021, p. 442)
+      6.18, 5.99,   # Geriatric Depression Scale (from Table 2, 2013, p. 783)
+      0.82, 0.97,   # Loneliness (CES-D item 14)  (from Table 1, 2021, p. 442)
+      4.72, 5.43,   # Geriatric Anxiety Inventory (from Table 2, 2013, p. 783)
+      12.39, 13.06, # Penn State Worry Questionnaire (from Table 2, 2013, p. 783)
+      9.22, 6.69    # Short Form-12 (Mental) (from Table 2, 2013, p. 783)
       
     ),
     
     # Number of controlled covariates
-    q = rep(c(2, 4, 4), each = 2)
+    q = rep(c(2, 4, 4, 2, 4, rep(2, 3)), each = 2)
     
   ); Wuthrich2013_2021
 
@@ -451,31 +477,33 @@ Wuthrich2013_2021_es <-
     N_tot = sum(N),
     n_covariates = q[1],
     
+    b = emm_post[1] - emm_post[2],
+    # Reverting outcomes so all outcomes has the same direction
+    b = if_else(unique(outcome) != "SF12", b * -1, b),
+    
     dif_t = emm_post[1] - emm_pre[1],
     dif_c = emm_post[2] - emm_pre[2],
     
+    
     DD = dif_t - dif_c,
+    # Reverting outcomes so all outcomes has the same direction
+    DD = if_else(unique(outcome) != "SF12", DD * -1, DD),
     s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
     
-    b = emm_post[1] - emm_post[2],
-    
     d_post = b/s_pool,
-    d_DD = DD/s_pool,
+    d = DD/s_pool,
     
     .by = outcome
     
   ) |> 
-  left_join(select(F_stat_Wuthrich[1:3,], -year)) |> 
   mutate(
     
-    vd = 1/N_t + 1/N_c + d_DD^2/(2*N_tot),
+    vd = 1/N_t + 1/N_c + d^2/(2*N_tot),
     Wd = 1/N_t + 1/N_c,
-    vd_alt = d_DD^2/F_val + d_DD^2/(2*N_tot),
-    Wd_alt = d_DD^2/F_val,
     
     J = 1 - 3/(4*N_tot-1),
     
-    g = J * d_DD,
+    g = J * d,
     vg = vd,
     Wg = 1/N_t + 1/N_c,
     
