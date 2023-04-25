@@ -8,7 +8,6 @@ output:
     code_folding: show
     code_download: true
 bibliography: Group-based interventions.bib
-biblio-style: apa
 link-citations: yes
 fontsize: 11pt
 spacing: single
@@ -48,6 +47,7 @@ library(VIVECampbell)
 ```{r}
 ICC_005 <- 0.05
 ICC_01 <- 0.1
+ICC_02 <- 0.2
 
 ppcor_imp <- 0.5
 R2_imp <- 0
@@ -310,10 +310,12 @@ Timmermans2012_est <-
 
 
 ### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021]**
+#### (Accounts for clustering via the use of mixed-effects models/multi-level models)
 
-Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442)
 
-```{r Smith2021dat}
+Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442). Below we also conduct a small number of clusters correction, as suggested by WWC [-@WWC_clusterbias].
+
+```{r Wuthrich20132021dat}
 
 # Calculate paired t-test statistics to obtain pre-posttest score correlation estimates
 
@@ -329,6 +331,8 @@ Entering data from Table 2 (p. 445). Sample size information is retrieved from T
 
 
 # F-stats from the interaction between time and group for mean
+# It was uncertain whether we could use these estimates. Therefore, we didn't use
+# the reported F-statistics. 
 F_stat_Wuthrich <- 
   tibble(
     
@@ -382,8 +386,7 @@ F_stat_Wuthrich <-
       .988
       
     )
-    
-    
+  
 ); F_stat_Wuthrich
 
 ## emm = estimated marginal means
@@ -460,8 +463,7 @@ Wuthrich2013_2021_long <-
     values_from = N:sd_pre
   )
 
-Wuthrich2013_2021_long
-
+#Wuthrich2013_2021_long
 
 Wuthrich2013_2021_es <- 
   Wuthrich2013_2021 |> 
@@ -469,8 +471,14 @@ Wuthrich2013_2021_es <-
     
     effect_size = "SMD",
     
-    study = "Wuthrich studies",
-    es_calc_method = "DiD",
+    study = "Wuthrich et al.",
+    es_calc_method = "emmeans",
+    
+    ppcor = NA,  
+    ppcor_calc_method = "Not relevant",
+    
+    R2 = R2_imp,
+    R2_calc_method = "Imputed",
     
     N_t = N[1],
     N_c = N[2],
@@ -490,7 +498,7 @@ Wuthrich2013_2021_es <-
     DD = if_else(unique(outcome) != "SF12", DD * -1, DD),
     s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
     
-    d_post = b/s_pool,
+    d_posttest = b/s_pool,
     d = DD/s_pool,
     
     .by = outcome
@@ -498,315 +506,155 @@ Wuthrich2013_2021_es <-
   ) |> 
   mutate(
     
-    vd = 1/N_t + 1/N_c + d^2/(2*N_tot),
+    vd = (1/N_t + 1/N_c) + d^2/(2*N_tot),
     Wd = 1/N_t + 1/N_c,
     
     J = 1 - 3/(4*N_tot-1),
     
     g = J * d,
     vg = vd,
-    Wg = 1/N_t + 1/N_c,
+    Wg = Wd,
+    
+    g_posttest = J * d_posttest,
+    vg_posttest = (1/N_t + 1/N_c) + d_posttest^2/(2*N_tot),
+    Wg_posttest = 1/N_t + 1/N_c,
     
     # Average cluster size in treatment group
-    n_cluster = 8, 
-    n_type = "From study (2013, p. 781)",
+    # "in blocks of 8 participants." (2013, p. 781)
+    avg_cl_size = 8, 
+    avg_cl_type = "From study (2013, p. 781)",
     
     # Imputed icc value
     icc = ICC_01,
-    icc_alt = 0.2,
     icc_type = "Imputed",
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
-    gamma_sqrt = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = n_cluster, ICC = icc),
+    gamma_sqrt = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
+    gamma_sqrt_005 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
+    gamma_sqrt_02 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
     
     gt = g * gamma_sqrt,
-    
     vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
-      avg_grp_size = n_cluster, 
+      avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt, 
-      model = "ANCOVA",
-      not_cluster_adj = FALSE,
-      R2 = 0,
+      model = es_calc_method,
+      cluster_adj = TRUE,
+      R2 = R2,
       q = n_covariates
       ),
     
-    # Test alternative icc val
-    #gamma_sqrt_icc02 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = n_cluster, ICC = icc_alt),
-    #
-    #gt_icc02 = g * gamma_sqrt_icc02,
-    #
-    #vgt_smd_1armcluster(
-    #  N_cl_grp = N_t, 
-    #  N_ind_grp = N_c, 
-    #  avg_grp_size = n_cluster, 
-    #  ICC = icc, 
-    #  g = gt, 
-    #  model = "ANCOVA",
-    #  not_cluster_adj = FALSE,
-    #  R2 = 0,
-    #  q = n_covariates,
-    #  add_name_to_vars = "_icc02"
-    #  )[-3]
+    gt_icc005 = g * gamma_sqrt_005,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_005, 
+      g = gt_icc005, 
+      model = es_calc_method,
+      cluster_adj = TRUE,
+      R2 = R2,
+      q = n_covariates,
+      add_name_to_vars = "_icc005",
+      vars = vgt_icc005:Wgt_icc005
+      ),
+    
+    gt_icc02 = g * gamma_sqrt_02,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_02, 
+      g = gt_icc02, 
+      model = es_calc_method,
+      cluster_adj = TRUE,
+      R2 = R2,
+      q = n_covariates,
+      add_name_to_vars = "_icc02",
+      vars = vgt_icc02:Wgt_icc02
+      ),
+    
+    gt_alt = gt,
+    vgt_alt = vgt,
+    Wgt_alt = Wgt,
+    
+    gt_posttest = g_posttest * gamma_sqrt,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_posttest, 
+      model = es_calc_method,
+      cluster_adj = TRUE,
+      R2 = R2,
+      q = n_covariates,
+      add_name_to_vars = "_posttest",
+      vars = vgt_posttest:Wgt_posttest
+      ), 
     
     .by = outcome
     
-  ); Wuthrich2013_2021_es
+  )
 
-Wuthrich2013_2021_smd_est <- left_join(Wuthrich2013_2021_long, Wuthrich2013_2021_es)
+# Wuthrich2013_2021_es
 
-#Wuthrich2013 <- 
-#  tibble(
-#    
-#    outcome = rep(c("Primary problem", "Mood", "Anxiety", "GDS", "CES-D", "GAI", "PSWQ", "SF12"), each = 2),
-#    
-#    group = rep(c("CBT", "Waitlist"), n_distinct(outcome)),
-#    
-#    N = rep(c(27, 35), n_distinct(outcome)),
-#    
-#    m_pre = c(
-#      
-#      6.33, 5.81,   # Severity Primary Problem
-#      6.53, 5.61,   # Severity Primary Mood Problem
-#      6.25, 6.05,   # Severity Primary Anxiety Problem
-#      18.14, 16.35, # Geriatric Depression Scale (GDS)
-#      26.37, 22.61, # Centre for Epidemiological Studies-Depression (CES-D)
-#      11.59, 9.48,  # Geriatric Anxiety Inventory (GAI)
-#      53.62, 49.27, # Penn State Worry Questionnaire (PSWQ)
-#      37.09, 38.45  # Short Form-12 (Mental) (SF12)
-#      
-#    ),
-#    
-#    se_pre = c(
-#      
-#      0.25, 0.21,
-#      0.44, 0.29,
-#      0.29, 0.31,
-#      1.28, 1.10,
-#      1.94, 1.70, 
-#      1.10, 0.95,
-#      2.52, 2.29,
-#      2.01, 1.73
-#      
-#    ),
-#    
-#    sd_pre = se_pre * sqrt(N),
-#    
-#    m_post = c(
-#      
-#      3.46, 5.15, 
-#      3.00, 4.93, 
-#      3.71, 5.46,
-#      9.21, 14.38,
-#      13.34, 21.15,
-#      5.84, 8.33,
-#      46.54, 47.24,
-#      47.79, 43.56
-#      
-#    ),
-#    
-#    se_post = c(
-#      
-#      0.29, 0.24,
-#      0.52, 0.31,
-#      0.34, 0.38,
-#      1.44, 1.23,
-#      2.18, 1.90,
-#      1.20, 1.04,
-#      2.80, 2.41,
-#      2.26, 1.97
-#      
-#    ),
-#    
-#    sd_post = se_post *sqrt(N),
-#    
-#    d_paper = c(
-#      
-#      1.46, 0.49,
-#      2.13, 0.49,
-#      1.20, 0.42,
-#      0.98, 0.15, 
-#      1.41, 0.04, 
-#      0.95, 0.23, 
-#      0.50, 0.32,
-#      0.86, 0.41
-#      
-#    ),
-#    
-#    # Obtained from Eq. (7) in Lakens (2013, p. 4)
-#    #t_pair = d_paper * sqrt(N),
-#    
-#    # Using Eq. (31) from Wilson 2016
-#    r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
-#          (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
-#      
-#    z = 0.5 * log( (1+r)/(1-r)),
-#    v = 1/(N-3)
-#    
-#  ); Wuthrich2013
-#
-## There seem to be reporting error for the CES-D outcomes based on our calculation
-#
-#
-#Smith2021 <- 
-#  tibble(
-#  
-#  outcome = rep(c("Loneliness", "Anxiety", "Depressive"), each = 2),
-#  
-#  group = rep(c("CBT", "Waitlist"), 3),
-#  
-#  N = rep(c(27, 35), 3),
-#   
-#  m_pre = c(
-#    
-#    1.59, 1.36, # Loneliness
-#    5.20, 4.58, # Anxiety
-#    5.48, 4.98  # Depressive
-#    
-#  ),
-#  
-#  se_pre = c(
-#    
-#    0.209, 0.169,
-#    0.246, 0.200,
-#    0.272, 0.217
-#    
-#  ),
-#  
-#  sd_pre = se_pre * sqrt(N),
-#  
-#  m_post = c(
-#    
-#    0.593, 1.24,
-#    2.68, 4.01,
-#    2.02, 4.25
-#    
-#  ),
-#  
-#  se_post = c(
-#    
-#    0.169, 0.194,
-#    0.307, 0.227,
-#    0.319, 0.260
-#  
-#  ),
-#  
-#  sd_post = se_post * sqrt(N),
-#  
-#  d_rep = c(
-#    
-#    1.25, 0.11, 
-#    2.33, 0.45, 
-#    2.48, 0.52  
-#    
-#    ),
-#  
-#  ci_l_rep = c(
-#    
-#    0.62, -0.41,
-#    1.55, -0.07,
-#    1.70, -0.02
-#    
-#    ),
-#  
-#  ci_u_rep = c(
-#    
-#    1.88, 0.63,
-#    3.11, 0.97, 
-#    3.26, 1.06
-#    
-#    ),
-#      
-#  se_d_rep = (ci_u_rep - ci_l_rep) / 3.92,
-#  
-#  # Obtained from Eq. (7) in Lakens (2013, p. 4)
-#  t_pair = d_rep * sqrt(N),
-#  
-#  # Using Eq. (31) from Wilson 2016
-#  r = ((sd_pre^2*t_pair^2 + sd_post^2*t_pair^2) - 
-#        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_pair^2),
-#    
-#  z = 0.5 * log( (1+r)/(1-r)),
-#  v = 1/(N-3)
-#  
-#  
-#  ); Smith2021
-#
-#Smith2021_long <- 
-#  Smith2021 |>
-#  mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
-#  pivot_wider(
-#    names_from = group,
-#    values_from = N:v
-#  )
+Wuthrich2013_2021_smd_est <- 
+  left_join(Wuthrich2013_2021_long, Wuthrich2013_2021_es) |> 
+  relocate(study, .before = outcome)
+
+Wuthrich2013_2021_smd_est
 
 ```
 
-Calculating effect sizes and correcting for cluster at the treatment level 
+Calculating odds ratio effect sizes from Recovery rates reported in @Wuthrich2013[p.784]
 
 ```{r}
 
-## ppcor = pre-posttest correlation
-## _calc_method = calculation method 
+# Odd ratio based on recovery rates reported in Wuthrich 2013 (p. 784)
 
-#Smith2021_es <- 
-#  Smith2021 |> 
-#  summarise(
-#    
-#    study = "Smith et al. 2021",
-#    es_calc_method = "DiD",
-#    
-#    N_t = N[1],
-#    N_c = N[2],
-#    
-#    N_tot = sum(N),
-#    
-#    M = sum(v*z)/sum(v),
-#    ppcor = (exp(2*M)-1)/(exp(2*M)+1),
-#    ppcor_calc_method = "From study",
-#    
-#    df_ind = sum(N-1),
-#    
-#    dif_t = (m_post[1] - m_pre[1]),
-#    dif_c = (m_post[2] - m_pre[2]),
-#    
-#    DD = (dif_t - dif_c),
-#    s_pool = sqrt(sum((N - 1) * sd_post^2) / (N-2)),
-#
-#    d = DD/s_pool,
-#    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
-#    
-#    Wd = 2*(1-ppcor) * sum(1/N),
-#    
-#    J = 1 - 3/(4*df_ind-1),
-#    
-#    # Based on d calculated from the sd_post 
-#    g = J * d,
-#    vg = J^2 * vd,
-#    Wg = J^2 * Wd,
-#    
-#    # Cluster bias adjustment
-#    icc = ICC_01,
-#    icc_type = "Imputed",
-#    
-#    # Average cluster size
-#    # Obtained from "6-8 group members" (Wuthrich & Rapee, 2013, p. 781)
-#    n_cluster = 7, 
-#    n_type = "From study (2013, p. 781)",
-#    
-#    
-#    .by = outcome
-#  
-#); Smith2021_es
-#
-#
-#Smith2021_est <- left_join(Smith2021_long, Smith2021_es)
-#Smith2021_est
+Wuthrich2013_OR_dat <- 
+  tibble(
+    study = "Wuthrich et al.",
+    outcome = "Recovery rates",
+    effect_size = "OR",
+    es_calc_method = "Proportions",
+    
+    N_t = 20,
+    N_c = 26,
+    p_t = 0.53, 
+    p_c = 0.11,
+    
+    # Average cluster size in treatment group
+    # "in blocks of 8 participants." (2013, p. 781)
+    avg_cl_size = 8, 
+    avg_cl_type = "From study (2013, p. 781)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # Design effect
+    DE = 1 + (avg_cl_size-1)*icc,
+    
+    p_t_cl = p_t/DE,
+    
+    OR = (p_t*(1-p_c))/(p_c*(1-p_t)),
+    ln_OR = log(OR),
+    vln_OR = 1/(N_t*p_t) + 1/(N_t*(1-p_t)) + 1/(N_c*p_c) + 1/(N_c*(1-p_c)),
+    vln_OR_C = 1/(N_t*p_t_cl) + 1/(N_t*(1-p_t_cl)) + 1/(N_c*p_c) + 1/(N_c*(1-p_c)),
+    
+  ); Wuthrich2013_OR_dat
 
-# Odd ratios from Wuthrich 2013
-#
+
+# Amalgamating the all results
+Wuthrich2013_2021_est <- 
+  bind_rows(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat)
+
+Wuthrich2013_2021_est
+
 #p1 <- 0.42
 #p2 <- 0.074
 #n1 <- 27
