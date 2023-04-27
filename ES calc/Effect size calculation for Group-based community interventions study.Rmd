@@ -37,6 +37,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 library(tidyverse)
 library(readxl)
+library(writexl)
 library(purrr)
 library(VIVECampbell)
 
@@ -313,10 +314,9 @@ Timmermans2012_est <-
 #### (Accounts for clustering via the use of mixed-effects models/multi-level models)
 
 
-Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442). Below we also conduct a small number of clusters correction, as suggested by WWC [-@WWC_clusterbias].
+Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442). 
 
 ```{r Wuthrich20132021dat}
-
 # Calculate paired t-test statistics to obtain pre-posttest score correlation estimates
 
 #-----------------------------------------------------------------
@@ -387,11 +387,13 @@ F_stat_Wuthrich <-
       
     )
   
-); F_stat_Wuthrich
+)
+
+F_stat_Wuthrich
 
 ## emm = estimated marginal means
 
-Wuthrich2013_2021 <- 
+Wuthrich2013_2021_smd <- 
   tibble(
     
     outcome = rep(
@@ -452,10 +454,12 @@ Wuthrich2013_2021 <-
     # Number of controlled covariates
     q = rep(c(2, 4, 4, 2, 4, rep(2, 3)), each = 2)
     
-  ); Wuthrich2013_2021
+  )
+
+Wuthrich2013_2021_smd
 
 Wuthrich2013_2021_long <- 
-  Wuthrich2013_2021 |>
+  Wuthrich2013_2021_smd |>
   select(-q) |> 
   mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
   pivot_wider(
@@ -464,12 +468,17 @@ Wuthrich2013_2021_long <-
   )
 
 #Wuthrich2013_2021_long
+```
 
-Wuthrich2013_2021_es <- 
-  Wuthrich2013_2021 |> 
+Calculating effect sizes and conducting a small number of clusters correction, as suggested by WWC [-@WWC_clusterbias].
+
+```{r Wuthrich20132021SMDcalc}
+Wuthrich2013_2021_es_smd <- 
+  Wuthrich2013_2021_smd |> 
   summarise(
     
     effect_size = "SMD",
+    sd_used = "Pooled pretest SD",
     
     study = "Wuthrich et al.",
     es_calc_method = "emmeans",
@@ -529,12 +538,12 @@ Wuthrich2013_2021_es <-
     icc_type = "Imputed",
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
-    gamma_sqrt = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
     gamma_sqrt_005 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
     gamma_sqrt_02 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
     
     gt = g * gamma_sqrt,
-    vgt_smd_1armcluster(
+    VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
@@ -599,19 +608,21 @@ Wuthrich2013_2021_es <-
     
   )
 
-# Wuthrich2013_2021_es
+# Wuthrich2013_2021_es_smd
 
 Wuthrich2013_2021_smd_est <- 
-  left_join(Wuthrich2013_2021_long, Wuthrich2013_2021_es) |> 
+  left_join(Wuthrich2013_2021_long, Wuthrich2013_2021_es_smd) |> 
   relocate(study, .before = outcome)
 
 Wuthrich2013_2021_smd_est
+
+rm(Wuthrich2013_2021_long, Wuthrich2013_2021_es_smd)
 
 ```
 
 Calculating odds ratio effect sizes from Recovery rates reported in @Wuthrich2013[p.784]
 
-```{r}
+```{r Wuthrich20132021ORcalc}
 
 # Odd ratio based on recovery rates reported in Wuthrich 2013 (p. 784)
 
@@ -636,37 +647,41 @@ Wuthrich2013_OR_dat <-
     icc = ICC_01,
     icc_type = "Imputed",
     
-    # Design effect
-    DE = 1 + (avg_cl_size-1)*icc,
+    # OR calculation and cluster bias adjustment
+    VIVECampbell::OR_calc(
+      p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
+      ICC = icc, avg_cl_size = avg_cl_size, n_cluster_arms = 1
+    ),
     
-    p_t_cl = p_t/DE,
+    # Calculating the sampling variance of the odds ratio based on ICC = 0.05
+    OR_calc(
+      p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
+      ICC = ICC_005, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
+      add_name_to_vars = "_icc005", vars = DE_icc005:vln_OR_C_icc005
+    ),
     
-    OR = (p_t*(1-p_c))/(p_c*(1-p_t)),
-    ln_OR = log(OR),
-    vln_OR = 1/(N_t*p_t) + 1/(N_t*(1-p_t)) + 1/(N_c*p_c) + 1/(N_c*(1-p_c)),
-    vln_OR_C = 1/(N_t*p_t_cl) + 1/(N_t*(1-p_t_cl)) + 1/(N_c*p_c) + 1/(N_c*(1-p_c)),
+    # Calculating the sampling variance of the odds ratio based on ICC = 0.2
+    OR_calc(
+      p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
+      ICC = ICC_02, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
+      add_name_to_vars = "_icc02", vars = DE_icc02:vln_OR_C_icc02
+    )
     
-  ); Wuthrich2013_OR_dat
+    
+  )
+
+Wuthrich2013_OR_dat
 
 
-# Amalgamating the all results
+# Amalgamating the SMD and OR results
 Wuthrich2013_2021_est <- 
   bind_rows(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat)
 
 Wuthrich2013_2021_est
 
-#p1 <- 0.42
-#p2 <- 0.074
-#n1 <- 27
-#n2 <- 35
-#
-#OR <- (p1*(1-p2))/(p2*(1-p1))
-#ln_OR <- log(OR)
-#vln_OR <- 1/(n1*p1) + 1/(n1*(1-p1)) + 1/(n2*p2) + 1/(n2*(1-p2))
-#
+rm(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat)
 
-#round(0.42*27)
-#round(0.074*35)
+
 ```
 
 
@@ -676,28 +691,29 @@ Amalgamating effect size data
 
 ```{r, include=FALSE, eval=FALSE}
 
-select_across_df <- function(dataframes = list(), list_labels){
-  
-  map_dfr(dataframes, ~ select(., !!!list_labels))
-  
-}
+#select_across_df <- function(dataframes = list(), list_labels){
+#  
+#  map_dfr(dataframes, ~ select(., !!!list_labels))
+#  
+#}
+#
+## Extend variables
+#var_label <- c(
+#  "study", "es_method", "ppcor", "ppcor_type", "Nt", "Nc", "N_tot",
+#  "df_ind", "d",  "vd", "Wd", "g", "vg", "Wg", # Continue here more variables are needed
+#  "vary_id"
+#)
+#
+#es_dat <- 
+#  select_across_df(
+#    list(
+#      Timmermans2012_est
+#    ),
+#    
+#    var_label
+#
+#); es_dat
 
-# Extend variables
-var_label <- c(
-  "study", "es_method", "ppcor", "ppcor_type", "Nt", "Nc", "N_tot",
-  "df_ind", "d",  "vd", "Wd", "g", "vg", "Wg", # Continue here more variables are needed
-  "vary_id"
-)
-
-es_dat <- 
-  select_across_df(
-    list(
-      Timmermans2012_est
-    ),
-    
-    var_label
-
-); es_dat
 
 
 ```
@@ -707,16 +723,20 @@ Amalgating covariates and effect size data
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
-  "Descriptive coding scheme for group-based interventions (data).xlsx",
+  "ES calc/Descriptive coding scheme for group-based interventions (data) MHV 2.xlsx",
   na = c(".", "")
 )
 
 group_based_dat <- 
   bind_cols(
     covariates,
-    es_dat
+    Wuthrich2013_2021_est
 
 ); glimpse(group_based_dat)
+
+#write_xlsx(group_based_dat, "ES calc/Group-based interventions data.xlsx")
+
+#save(group_based_dat, file = "ES calc/Group-based interventions data.RData")
 
 ```
 
