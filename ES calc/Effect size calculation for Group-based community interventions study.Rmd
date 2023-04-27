@@ -538,9 +538,15 @@ Wuthrich2013_2021_es_smd <-
     icc_type = "Imputed",
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
-    gamma_sqrt = VIVECampbell::gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
-    gamma_sqrt_005 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
-    gamma_sqrt_02 = gamma_1armcluster(N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    gamma_sqrt_005 = gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      ),
+    gamma_sqrt_02 = gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      ),
     
     gt = g * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -719,7 +725,7 @@ Amalgamating effect size data
 ```
 
 Amalgating covariates and effect size data
-```{r, include=FALSE, eval=FALSE}
+```{r dataamalgamation, eval=FALSE}
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
