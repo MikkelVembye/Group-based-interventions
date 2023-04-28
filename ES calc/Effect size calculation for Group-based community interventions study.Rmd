@@ -56,37 +56,6 @@ R2_imp <- 0
 ```
 
 
-### Function building to conduct cluster design adjustment
-
-We use Hedges & Citkowicz [-@Hedges2015_onetreatcluster] to cluster bias correct effect size variance estimates in study where clustering is not treated properly since we in many cases only will experience clustering in the treatment group. It might happen that clustering should be handled in the Cochrane and Hedges 2007. 
-
-```{r}
-
-# Equation (7) in Hedges & Citkowicz (2015)
-df_h <- function(total_sample_size, ICC, trt_sample_size, avg_grp_size){
-  
-  N <- total_sample_size
-  rho <- ICC
-  NT <- trt_sample_size
-  n <- avg_grp_size
-  
-  h <- ((N-2)*(1-rho) + (NT-n)*rho)^2 /
-       ((N-2)*(1-rho)^2 + (NT-n)*n*rho^2 + 2*(NT-2)*(1-rho)*rho)
-  
-  h
-}
-
-# Test
-#df_h(
-#  total_sample_size = 100,
-#  ICC = 0.2,
-#  trt_sample_size = 80,
-#  avg_grp_size = 5
-#)
-
-```
-
-
 ## **Studies in meta-analysis**
 
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012]**
@@ -102,7 +71,7 @@ Timmermans_sample_size_dat <-
     
     outcome = rep(c("Empoverment", "Hope", "Quality", "Self-e", "Loneliness"), each = 4),
     timing = rep(c("3 months", "6 months"), each = 2, n_distinct(outcome)),
-    measure = rep(c("post", "followup"), each = 2, n_distinct(outcome)),
+    #measure = rep(c("post", "followup"), each = 2, n_distinct(outcome)),
     group = rep(c("Treatment", "Control"), 10),
     
     N_start = rep(rep(c(168, 165), 10)),
@@ -137,7 +106,7 @@ Timmermans_missingness <-
       TRUE ~ NA_character_
     ),
     
-    .by = c(outcome, timing, measure)
+    .by = c(outcome, timing)
   )
 
 Timmermans_missingness 
@@ -247,7 +216,7 @@ wide_format_Timmermans2012 <- function(data, filter){
   
   filter_func <- function(data, filter){
     
-    dat <- data |> dplyr::filter(measure != filter)
+    dat <- data |> dplyr::filter(timing != filter)
     
     dat |> 
     dplyr::mutate(group = case_match(group, "Treatment" ~ "t", "Control" ~ "c")) |> 
@@ -269,7 +238,7 @@ wide_format_Timmermans2012 <- function(data, filter){
 # Continue from here
 
 Timmermans2012_wide <- 
-wide_format_Timmermans2012(data = Timmermans2012, filter = c("followup", "post"))
+wide_format_Timmermans2012(data = Timmermans2012, filter = c("6 months", "3 months"))
 
 rm(wide_format_Timmermans2012)
 
@@ -302,6 +271,8 @@ Timmermans2012_es <-
     
     df_ind = N_tot,
     
+    n_covariates = 1,
+    
     sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_tot-2) ),
     m_diff_raw = m_post[1] - m_post[2],
     
@@ -329,8 +300,8 @@ Timmermans2012_es <-
     #Wd_test = sum(1/N),
     
     d_alt = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
-    vd_alt = sum(1/N) + d_alt^2/(2*df_ind),
-    Wd_alt = sum(1/N),
+    vd_alt = 2*(1-ppcor) * sum(1/N) + d_alt^2/(2*df_ind),
+    Wd_alt = 2*(1-ppcor) * sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
@@ -343,7 +314,7 @@ Timmermans2012_es <-
     Wg = Wd,
     
     g_alt = J * d_alt,
-    vg_alt = sum(1/N) + g_alt^2/(2*df_ind),
+    vg_alt = 2*(1-ppcor) * sum(1/N) + g_alt^2/(2*df_ind),
     Wg_alt = Wd_alt,
     
     
@@ -412,13 +383,48 @@ Timmermans2012_es <-
       SE_std = sqrt(Wg),
       add_name_to_vars = "_icc02",
       vars = vgt_icc02:Wgt_icc02
-    )
+    ),
     
-    # Make alternative and posttest
+    gt_alt = g_alt * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_alt, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      add_name_to_vars = "_alt",
+      vars = vgt_alt:Wgt_alt
+    ),
+    
+    gt_alt_type = "DiD from raw means",
+    
+    gt_posttest = g_posttest * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_posttest, 
+      model = "Posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_posttest",
+      vars = vgt_posttest:Wgt_posttest
+    )
+
     
     
   ) |> 
-  ungroup(); Timmermans2012_es
+  ungroup()
+
+# Timmermans2012_es
+
+Timmermans2012_est <- 
+  left_join(Timmermans2012_wide, Timmermans2012_es) |> 
+  select(-c(es_paper_c, es_paper_t)) |> 
+  mutate(vary_id = paste0(outcome, "/", timing))
 
 
 ```
@@ -589,6 +595,7 @@ Wuthrich2013_2021_wide <-
 Calculating effect sizes and conducting a small number of clusters correction, as suggested by WWC [-@WWC_clusterbias].
 
 ```{r Wuthrich20132021SMDcalc}
+
 Wuthrich2013_2021_es_smd <- 
   Wuthrich2013_2021_smd |> 
   summarise(
@@ -608,6 +615,9 @@ Wuthrich2013_2021_es_smd <-
     N_t = N[1],
     N_c = N[2],
     N_tot = sum(N),
+    
+    df_ind = N_tot,
+    
     n_covariates = q[1],
     
     b_adj_emm = emm_post[1] - emm_post[2],
@@ -622,24 +632,24 @@ Wuthrich2013_2021_es_smd <-
     DD_emm = dif_t_emm - dif_c_emm,
     # Reverting outcomes so all outcomes has the same direction
     DD_emm = if_else(unique(outcome) != "SF12", DD_emm * -1, DD_emm),
-    s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
+    sd_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
     
-    d = DD_emm/s_pool,
-    vd = sum(1/N) + d^2/(2*N_tot),
+    d = DD_emm/sd_pool,
+    vd = sum(1/N) + d^2/(2*df_ind),
     Wd = sum(1/N),
     
-    d_alt = b_adj_emm/s_pool,
-    vd_alt = sum(1/N) + d_alt^2/(2*N_tot),
+    d_alt = b_adj_emm/sd_pool,
+    vd_alt = sum(1/N) + d_alt^2/(2*df_ind),
     Wd_alt = sum(1/N),
     
-    J = 1 - 3/(4*N_tot-1),
+    J = 1 - 3/(4*df_ind-1),
     
     g = J * d,
-    vg = sum(1/N) + g^2/(2*N_tot),
+    vg = sum(1/N) + g^2/(2*df_ind),
     Wg = Wd,
     
     g_alt = J * d_alt,
-    vg_alt = sum(1/N) + g_alt^2/(2*N_tot),
+    vg_alt = sum(1/N) + g_alt^2/(2*df_ind),
     Wg_alt = sum(1/N),
     
     .by = outcome
@@ -852,19 +862,30 @@ Amalgating covariates and effect size data
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
-  "ES calc/Descriptive coding scheme for group-based interventions (data) MHV 2.xlsx",
+  "Descriptive coding scheme for group-based interventions (data) MHV.xlsx",
   na = c(".", "")
 )
+
+
+group_based_dat_es <- 
+  bind_rows(
+    Timmermans2012_est,
+    Wuthrich2013_2021_est
+  ) |> 
+  relocate(sd_pool, .after = sd_used) |> 
+  relocate(emm_pre_t:DD_emm, .after = se_b_adj_c)
 
 group_based_dat <- 
   bind_cols(
     covariates,
-    Wuthrich2013_2021_est
+    group_based_dat_es
 
-); glimpse(group_based_dat)
+)
 
 #write_xlsx(group_based_dat, "ES calc/Group-based interventions data.xlsx")
 #save(group_based_dat, file = "ES calc/Group-based interventions data.RData")
+
+
 
 ```
 
