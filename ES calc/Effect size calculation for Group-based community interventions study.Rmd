@@ -252,9 +252,9 @@ wide_format_Timmermans2012 <- function(data, filter){
     dat |> 
     dplyr::mutate(group = case_match(group, "Treatment" ~ "t", "Control" ~ "c")) |> 
     tidyr::pivot_wider(
-      names_from = c(group, measure),
-      names_glue = "{.value}_{group}_{measure}",
-      values_from = N_start:se_b_adj
+      names_from = group,
+      names_glue = "{.value}_{group}",
+      values_from = N_start:dplyr::last_col()
     )
     
     
@@ -264,7 +264,6 @@ wide_format_Timmermans2012 <- function(data, filter){
     arrange(outcome)
   
   
-  
 }
 
 # Continue from here
@@ -272,15 +271,7 @@ wide_format_Timmermans2012 <- function(data, filter){
 Timmermans2012_wide <- 
 wide_format_Timmermans2012(data = Timmermans2012, filter = c("followup", "post"))
 
-
-#Wuthrich2013_2021_long <- 
-#  Wuthrich2013_2021_smd |>
-#  select(-q) |> 
-#  mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
-#  pivot_wider(
-#    names_from = group,
-#    values_from = N:sd_pre
-#  )
+rm(wide_format_Timmermans2012)
 
 ```
 
@@ -288,82 +279,146 @@ Effect sizes calculation
 
 ```{r}
 
-Timmermans2012_est <- 
-  Timmermans2012 |> 
-  group_by(measure, timing) |> 
+Timmermans2012_es <- 
+  Timmermans2012 |>
   summarise(
     
-    study = "Timmermans2012",
-    es_calc_method = "Posttest",
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
     
-    ppcor = NA,  
-    ppcor_calc_method = "Not relevant",
+    study = "Timmermans et al. 2012",
+    es_calc_method = "Pretest adj. means",
     
-    Nt = N[1],
-    Nc = N[2],
+    ppcor = if_else(unique(outcome) == "Hope", 0.79, ppcor_imp),  
+    ppcor_calc_method = if_else(unique(outcome) == "Hope", "test-retest reliability", "Imputed"),
     
-    N_tot = Nt + Nc, 
+    R2 = NA,
+    R2_calc_method = "Not relevant - calculated from SE(b)",
+    
+    N_t = N[1],
+    N_c = N[2],
+    
+    N_tot = N_t + N_c, 
     
     df_ind = N_tot,
     
     sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_tot-2) ),
+    m_diff_raw = m_post[1] - m_post[2],
     
-    diff_raw = m_post[1] - m_post[2],
+    # Pretest adjusted means
+    b_adj = b_adj[1] - b_adj[2],
+    
+    # Difference in differences measures
+    diff_t = m_post[1] - m_pre[1],  
+    diff_c = m_post[2] - m_pre[2],
+    
+    DD = diff_t - diff_c,
     
     d_paper = es_paper[1],
-    d = diff_raw/sd_pool,
-    vd = sum(N)/prod(N) + d^2/(2*df_ind),
-    Wd = sum(N)/prod(N),
     
-    cov_ds = "Not obtainable",
+    # Converting Loneliness measure since "Possible scores range from 0 to 11, 
+    # with higher scores indicating more loneliness." (p. 58)
+    d_posttest = if_else(unique(outcome) == "Loneliness", m_diff_raw/sd_pool * -1, m_diff_raw/sd_pool),
+    vd_posttest = sum(1/N) + d_posttest^2/(2*df_ind),
+    Wd_posttest = sum(1/N),
     
-    DD = b_adj[1] - b_adj[2],
+    d = if_else(unique(outcome) == "Loneliness", b_adj/sd_pool * -1, b_adj/sd_pool),
+    vd = sum((se_b_adj/sd_pool)^2) + d^2/(2*df_ind),
+    #vd_test = sum(1/N) + d^2/(2*df_ind),
+    Wd = sum((se_b_adj/sd_pool)^2),
+    #Wd_test = sum(1/N),
     
-    d_adj = DD/sd_pool,
-    vd_adj = sum((se_b/sd_pool)^2) + d^2/(2*df_ind),
-    Wd_adj = sum((se_b/sd_pool)^2),
+    d_alt = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
+    vd_alt = sum(1/N) + d_alt^2/(2*df_ind),
+    Wd_alt = sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
-    g = J * d,
-    vg = J^2 * vd,
-    Wg = J^2 * Wd,
+    g_posttest = J * d_posttest,
+    vd_posttest = sum(1/N) + g_posttest^2/(2*df_ind),
+    Wd_posttest = Wd_posttest,
     
-    g_adj = J * d_adj,
-    vg_adj = J^2 * vd_adj,
-    Wg_adj = J^2 * Wd_adj, 
+    g = J * d, 
+    vg = sum((se_b_adj/sd_pool)^2) + g^2/(2*df_ind), 
+    Wg = Wd,
     
-    .groups = "drop"
+    g_alt = J * d_alt,
+    vg_alt = sum(1/N) + g_alt^2/(2*df_ind),
+    Wg_alt = Wd_alt,
+    
+    
+    .by = c(outcome, timing) 
     
     
   ) |> 
   rowwise() |> 
-  # Cluster bias correction
   mutate(
-  
     
-    n_group = 7, 
+    # Average cluster size in treatment group
+    # "was 7.0±2.1 (range of three to 12)" (p. 57)
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 57)",
+    
+    # Imputed icc value
     icc = ICC_01,
     icc_type = "Imputed",
     
-    gamma = 1 - (Nc + n_group-2)*ICC_01 / (N_tot-2), # Change when discussed
-    df_h = df_h(total_sample_size = N_tot, ICC = ICC_01, avg_grp_size = n_group, trt_sample_size = Nt),
-    eta = 1 + ( (n_group*Nc/N_tot)-1 ) * ICC_01,
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    gamma_sqrt_icc005 = gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      ),
+    gamma_sqrt_icc02 = gamma_1armcluster(
+      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      ),
     
-    gt = g * sqrt(gamma),
-    vgt = Wg * eta + gt^2/(2*df_h),
-    Wgt = Wg * eta,
+    gt = g * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt, 
+      model = "Std_reg_coef",
+      cluster_adj = TRUE,
+      SE_std = sqrt(Wg)
+    ),
     
-    gt_alt = g_adj * sqrt(gamma),
-    vgt_alt = Wg_adj * gamma + gt_alt^2/(2*df_h),
-    Wgt_alt = Wg_adj * gamma,
+    gt_icc005 = g * gamma_sqrt_icc005,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = ICC_005, 
+      g = gt_icc005, 
+      model = "Std_reg_coef",
+      cluster_adj = TRUE,
+      SE_std = sqrt(Wg),
+      add_name_to_vars = "_icc005",
+      vars = vgt_icc005:Wgt_icc005
+    ),
     
-    vary_id = paste0(measure, "/", timing)
+    gt_icc02 = g * gamma_sqrt_icc02,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = ICC_02, 
+      g = gt_icc02, 
+      model = "Std_reg_coef",
+      cluster_adj = TRUE,
+      SE_std = sqrt(Wg),
+      add_name_to_vars = "_icc02",
+      vars = vgt_icc02:Wgt_icc02
+    )
+    
+    # Make alternative and posttest
     
     
   ) |> 
-  ungroup(); Timmermans2012_est
-
+  ungroup(); Timmermans2012_es
 
 
 ```
@@ -519,7 +574,7 @@ Wuthrich2013_2021_smd <-
 
 Wuthrich2013_2021_smd
 
-Wuthrich2013_2021_long <- 
+Wuthrich2013_2021_wide <- 
   Wuthrich2013_2021_smd |>
   select(-q) |> 
   mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
@@ -528,7 +583,7 @@ Wuthrich2013_2021_long <-
     values_from = N_start:sd_pre
   )
 
-#Wuthrich2013_2021_long
+#Wuthrich2013_2021_wide
 ```
 
 Calculating effect sizes and conducting a small number of clusters correction, as suggested by WWC [-@WWC_clusterbias].
@@ -542,7 +597,7 @@ Wuthrich2013_2021_es_smd <-
     sd_used = "Pooled pretest SD",
     
     study = "Wuthrich et al.",
-    es_calc_method = "emmeans",
+    es_calc_method = "DiD emmeans",
     
     ppcor = NA,  
     ppcor_calc_method = "Not relevant",
@@ -555,39 +610,42 @@ Wuthrich2013_2021_es_smd <-
     N_tot = sum(N),
     n_covariates = q[1],
     
-    b = emm_post[1] - emm_post[2],
+    b_adj_emm = emm_post[1] - emm_post[2],
+    
     # Reverting outcomes so all outcomes has the same direction
-    b = if_else(unique(outcome) != "SF12", b * -1, b),
+    b_adj_emm = if_else(unique(outcome) != "SF12", b_adj_emm * -1, b_adj_emm),
     
-    dif_t = emm_post[1] - emm_pre[1],
-    dif_c = emm_post[2] - emm_pre[2],
+    dif_t_emm = emm_post[1] - emm_pre[1],
+    dif_c_emm = emm_post[2] - emm_pre[2],
     
     
-    DD = dif_t - dif_c,
+    DD_emm = dif_t_emm - dif_c_emm,
     # Reverting outcomes so all outcomes has the same direction
-    DD = if_else(unique(outcome) != "SF12", DD * -1, DD),
+    DD_emm = if_else(unique(outcome) != "SF12", DD_emm * -1, DD_emm),
     s_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
     
-    d_posttest = b/s_pool,
-    d = DD/s_pool,
+    d = DD_emm/s_pool,
+    vd = sum(1/N) + d^2/(2*N_tot),
+    Wd = sum(1/N),
+    
+    d_alt = b_adj_emm/s_pool,
+    vd_alt = sum(1/N) + d_alt^2/(2*N_tot),
+    Wd_alt = sum(1/N),
+    
+    J = 1 - 3/(4*N_tot-1),
+    
+    g = J * d,
+    vg = sum(1/N) + g^2/(2*N_tot),
+    Wg = Wd,
+    
+    g_alt = J * d_alt,
+    vg_alt = sum(1/N) + g_alt^2/(2*N_tot),
+    Wg_alt = sum(1/N),
     
     .by = outcome
     
   ) |> 
   mutate(
-    
-    vd = (1/N_t + 1/N_c) + d^2/(2*N_tot),
-    Wd = 1/N_t + 1/N_c,
-    
-    J = 1 - 3/(4*N_tot-1),
-    
-    g = J * d,
-    vg = vd,
-    Wg = Wd,
-    
-    g_posttest = J * d_posttest,
-    vg_posttest = (1/N_t + 1/N_c) + d_posttest^2/(2*N_tot),
-    Wg_posttest = 1/N_t + 1/N_c,
     
     # Average cluster size in treatment group
     # "in blocks of 8 participants." (2013, p. 781)
@@ -602,10 +660,10 @@ Wuthrich2013_2021_es_smd <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_005 = gamma_1armcluster(
+    gamma_sqrt_icc005 = gamma_1armcluster(
       N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
       ),
-    gamma_sqrt_02 = gamma_1armcluster(
+    gamma_sqrt_icc02 = gamma_1armcluster(
       N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
       ),
     
@@ -616,20 +674,20 @@ Wuthrich2013_2021_es_smd <-
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt, 
-      model = es_calc_method,
+      model = "emmeans",
       cluster_adj = TRUE,
       R2 = R2,
       q = n_covariates
       ),
     
-    gt_icc005 = g * gamma_sqrt_005,
+    gt_icc005 = g * gamma_sqrt_icc005,
     vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = ICC_005, 
       g = gt_icc005, 
-      model = es_calc_method,
+      model = "emmeans",
       cluster_adj = TRUE,
       R2 = R2,
       q = n_covariates,
@@ -637,14 +695,14 @@ Wuthrich2013_2021_es_smd <-
       vars = vgt_icc005:Wgt_icc005
       ),
     
-    gt_icc02 = g * gamma_sqrt_02,
+    gt_icc02 = g * gamma_sqrt_icc02,
     vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = ICC_02, 
       g = gt_icc02, 
-      model = es_calc_method,
+      model = "emmeans",
       cluster_adj = TRUE,
       R2 = R2,
       q = n_covariates,
@@ -652,24 +710,22 @@ Wuthrich2013_2021_es_smd <-
       vars = vgt_icc02:Wgt_icc02
       ),
     
-    gt_alt = gt,
-    vgt_alt = vgt,
-    Wgt_alt = Wgt,
-    
-    gt_posttest = g_posttest * gamma_sqrt,
+    gt_alt = g_alt * gamma_sqrt,
     vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
-      g = gt_posttest, 
-      model = es_calc_method,
+      g = gt_alt, 
+      model = "emmeans",
       cluster_adj = TRUE,
       R2 = R2,
       q = n_covariates,
-      add_name_to_vars = "_posttest",
-      vars = vgt_posttest:Wgt_posttest
+      add_name_to_vars = "_alt",
+      vars = vgt_alt:Wgt_alt
       ), 
+    
+    gt_alt_type = "Posttest emmeans",
     
     .by = outcome
     
@@ -678,12 +734,12 @@ Wuthrich2013_2021_es_smd <-
 # Wuthrich2013_2021_es_smd
 
 Wuthrich2013_2021_smd_est <- 
-  left_join(Wuthrich2013_2021_long, Wuthrich2013_2021_es_smd) |> 
+  left_join(Wuthrich2013_2021_wide, Wuthrich2013_2021_es_smd) |> 
   relocate(study, .before = outcome)
 
 Wuthrich2013_2021_smd_est
 
-#rm(Wuthrich2013_2021_long, Wuthrich2013_2021_es_smd)
+#rm(Wuthrich2013_2021_wide, Wuthrich2013_2021_es_smd)
 
 ```
 
