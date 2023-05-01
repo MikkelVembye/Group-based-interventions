@@ -258,8 +258,8 @@ Timmermans2012_es <-
     study = "Timmermans et al. 2012",
     es_calc_method = "Pretest adj. means",
     
-    ppcor = if_else(unique(outcome) == "Hope", 0.79, ppcor_imp),  
-    ppcor_calc_method = if_else(unique(outcome) == "Hope", "test-retest reliability", "Imputed"),
+    ppcor = .76,  
+    ppcor_calc_method = "From study (p. 57)",
     
     R2 = NA,
     R2_calc_method = "Not relevant - calculated from SE(b)",
@@ -331,18 +331,12 @@ Timmermans2012_es <-
     avg_cl_type = "From study (p. 57)",
     
     # Imputed icc value
-    icc = ICC_01,
-    icc_type = "Imputed",
+    icc = 0.06,
+    icc_type = "From study (p. 56)",
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
-      ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
       ),
     
     gt = g * gamma_sqrt,
@@ -355,34 +349,6 @@ Timmermans2012_es <-
       model = "Std_reg_coef",
       cluster_adj = TRUE,
       SE_std = sqrt(Wg)
-    ),
-    
-    gt_icc005 = g * gamma_sqrt_icc005,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = ICC_005, 
-      g = gt_icc005, 
-      model = "Std_reg_coef",
-      cluster_adj = TRUE,
-      SE_std = sqrt(Wg),
-      add_name_to_vars = "_icc005",
-      vars = vgt_icc005:Wgt_icc005
-    ),
-    
-    gt_icc02 = g * gamma_sqrt_icc02,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = ICC_02, 
-      g = gt_icc02, 
-      model = "Std_reg_coef",
-      cluster_adj = TRUE,
-      SE_std = sqrt(Wg),
-      add_name_to_vars = "_icc02",
-      vars = vgt_icc02:Wgt_icc02
     ),
     
     gt_alt = g_alt * gamma_sqrt,
@@ -426,6 +392,13 @@ Timmermans2012_est <-
   select(-c(es_paper_c, es_paper_t)) |> 
   mutate(vary_id = paste0(outcome, "/", timing))
 
+
+#clubSandwich::impute_covariance_matrix(
+#  vi = Timmermans2012_est$vgt,
+#  cluster = Timmermans2012_est$study,
+#  r = Timmermans2012_est$ppcor,
+#  smooth_vi = FALSE
+#)
 
 ```
 
@@ -862,7 +835,7 @@ Amalgating covariates and effect size data
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
-  "Descriptive coding scheme for group-based interventions (data) MHV.xlsx",
+  "ES calc/Descriptive coding scheme for group-based interventions (data) MHV.xlsx",
   na = c(".", "")
 )
 
