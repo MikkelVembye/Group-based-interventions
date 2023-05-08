@@ -58,6 +58,62 @@ R2_imp <- 0
 
 ## **Studies in meta-analysis**
 
+### **Acarturk et al**
+#### (Multi-level analysis and reported raw means, at baseline, post, and followup times)
+
+To calculate pretest-adjusted effect sizes, we first estimate pre-post and pre-followup correlations from 
+the reported results in "Treatment effect" section (p. 7)
+```{r}
+
+# _fu = followup
+
+Acarturk_text_res <- 
+  tibble(
+    
+    outcome = rep(c("HSCL-25", "PCL-5", "PSYCHLOPS"), each = 2),
+    
+    timing = rep(c("post", "followup"), 3),
+    
+    N = rep(c(41, 44, 19), c(2, 2, 2)), # Obtained from df(t)/2
+    
+    m_pre = rep(c(2.34, 1.77, 4.06), each = 2),
+    sd_pre = rep(c(0.60, 0.86, 0.76), each = 2),
+    
+    m_post = c(
+      2.15, 2.11, # HSCL-25
+      1.43, 1.19, # PCL-5
+      3.82, 3.45  # PSYCHLOPS
+      
+      ),
+    
+    sd_post = c(
+      0.60, 0.59,
+      0.79, 0.78,
+      0.86, 1.32
+      ),
+    
+    
+    paired_t = c(
+      2.43, 2.83,
+      2.61, 4.45,
+      1.01, 2.57
+      )
+    
+  ) |> 
+  mutate(
+    
+    ppcor = ((sd_pre^2*paired_t^2 + sd_post^2*paired_t^2) - (m_post - m_pre)^2 * N)/
+      (2*sd_pre*sd_post*paired_t^2),
+    
+    var_design_effect = 2*(1-ppcor),
+    
+    .by = c(outcome, timing)
+    
+  ); Acarturk_text_res
+
+```
+
+
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012]**
 #### (Multi-level analysis to handle clustering)
 
@@ -858,7 +914,12 @@ group_based_dat <-
 #write_xlsx(group_based_dat, "ES calc/Group-based interventions data.xlsx")
 #save(group_based_dat, file = "ES calc/Group-based interventions data.RData")
 
-
+#clubSandwich::impute_covariance_matrix(
+#  vi = group_based_dat$vgt,
+#  cluster = group_based_dat$studyid,
+#  r = c(.7, 0.1),
+#  smooth_vi = TRUE
+#)
 
 ```
 
