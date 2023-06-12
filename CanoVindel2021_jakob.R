@@ -122,16 +122,16 @@ cano_vindel2021 <- tibble(
              9.4, 9.8, # ITT Social
              25.7, 27.2, # ITT Environment
             
-            10.2, 6.0, # post
-            11.7, 9.9,
-            12.1, 9.1,
-            3.1, 2.4,
-            4.1, 2.9,
-            4.0, 2.8,
-            22.7, 25.1,
-            17.4, 19.9,
-            9.2, 10.0,
-            25.5, 27.8),
+            10.2, 6.0, # Per-protocol GAD-7 Anxiety post treatment
+            11.7, 9.9,  # Per-protocol PHQ9 Depression
+            12.1, 9.1, # Per-protocol PHQ-15
+            3.1, 2.4, # Per-protocol working life
+            4.1, 2.9, # Per-protocol social life
+            4.0, 2.8, # Per-protocol Family life
+            22.7, 25.1,# Per-protocol Physical 
+            17.4, 19.9, # Per-protocol Psychological
+            9.2, 10.0, # Per-protocol Social
+            25.5, 27.8), # Per-protocol Environment
   
   
   sd_post = c(5.4, 4.7, # ITT GAD-7 Anxiety post-treatment
@@ -145,16 +145,16 @@ cano_vindel2021 <- tibble(
               3.1, 3.1, # ITT Social
               5.3, 5.6, # ITT Environment
               
-              5.5, 4.3, # post
-              6.6, 5.2,
-              5.2, 5.3,
-              3.1, 2.9,
-              3.1, 2.8,
-              3.1, 3.1,
-              4.6, 4.7,
-              4.2, 4.0,
-              2.4, 2.7,
-              4.7, 4.8),
+              5.5, 4.3, # Per-protocol GAD-7 Anxiety post-treatment
+              6.6, 5.2,  # Per-protocol PHQ9 Depression
+              5.2, 5.3,# Per-protocol PHQ-15
+              3.1, 2.9, # Per-protocol working life
+              3.1, 2.8, # Per-protocol social life
+              3.1, 3.1, # Per-protocol Family life
+              4.6, 4.7, # Per-protocol Physical 
+              4.2, 4.0, # Per-protocol Psychological
+              2.4, 2.7,# Per-protocol Social
+              4.7, 4.8),# Per-protocol Environment
   
   mean_diff = m_post - m_pre,
   
@@ -162,7 +162,7 @@ cano_vindel2021 <- tibble(
   m_3months = c(8.7, 7.3, # ITT GAD-7 Anxiety 3 months
                 10.2, 8.4, # ITT PHQ9 Depression
                 11.4, 10.1,# ITT PHQ-15
-                2.7, 2.4, # ITT PHQ-15 
+                2.7, 2.4, # ITT Working life 
                 3.5, 3.2, # ITT social life
                 3.5, 3.1, # ITT Family life
                 23.5, 24.2, # ITT Physical 
@@ -170,19 +170,19 @@ cano_vindel2021 <- tibble(
                 9.5, 9.7, # ITT Social
                 26.1, 26.9, # ITT Environment 
                 
-                8.9, 6.7, # Per protocol
-                10.3, 7.8, # Per protocol
-                11.7, 9.5, # Per protocol
-                2.6, 2.5, # Per protocol
-                3.4, 3.1, # Per protocol
-                3.5, 3.0, # Per protocol
-                23.2, 24.4, # Per protocol
-                18.0, 19.3, # Per protocol
-                9.3, 9.8, # Per protocol
-                26.1, 27.5), # Per protocol 
+                8.9, 6.7, # Per-protocol GAD-7 Anxiety 3 months
+                10.3, 7.8, # Per protocol PHQ9 Depression
+                11.7, 9.5, # Per protocol PHQ-15
+                2.6, 2.5, # Per protocol Working life
+                3.4, 3.1, # Per protocol social life
+                3.5, 3.0, # Per protocol Family life
+                23.2, 24.4, # Per protocol Physical 
+                18.0, 19.3, # Per protocol Psychological
+                9.3, 9.8, # Per protocol Social
+                26.1, 27.5), # Per protocol Environment
   
   
-  sd_3months = c(5.3, 5.0, # ITT GAD-7 Standard deviation 
+  sd_3months = c(5.3, 5.0, # ITT GAD-7 Standard deviation 3 months
                   6.4, 5.7, # ITT PHQ9 Depression
                   5.1, 5.3, # ITT PHQ-15
                   3.0, 3.0, # ITT working life
@@ -193,7 +193,7 @@ cano_vindel2021 <- tibble(
                   2.3, 2.3, # ITT Social
                   4.9, 5.1, # ITT Environment
                   
-                  5.4, 4.9, # Per-protocol GAD-7 Anxiety 
+                  5.4, 4.9, # Per-protocol GAD-7 Anxiety months
                   6.5, 6.0, # Per-protocol PHQ9 Depression
                   5.0, 5.4, # Per-protocol PHQ-15
                   3.0, 2.9, # Per-protocol working life
@@ -218,18 +218,18 @@ cano_vindel2021 <- tibble(
                 9.5, 9.7, # ITT Social
                 26.5, 27.1, # ITT Environment
                 
-                8.8, 6.2, # 6 months
-                10.0, 7.3,
-                11.5, 9.2,
-                2.8, 1.9,
-                3.6, 2.6,
-                3.6, 2.6,
-                23.1, 24.7,
-                18.3, 19.3,
-                9.6, 9.8,
-                26.4, 27.7),
+                8.8, 6.2, # Per-protocol GAD-7 Anxiety  6 months
+                10.0, 7.3,  # Per-protocol PHQ9 Depression
+                11.5, 9.2, # Per-protocol PHQ-15
+                2.8, 1.9, # Per-protocol working life
+                3.6, 2.6, # Per-protocol social life
+                3.6, 2.6, # Per-protocol Family life
+                23.1, 24.7, # Per-protocol Physical 
+                18.3, 19.3, # Per-protocol Psychological
+                9.6, 9.8, # Per-protocol Social
+                26.4, 27.7), # Per-protocol Environment
   
-  sd_6months = c(5.4, 5.1, # ITT GAD-7 Standard deviation 
+  sd_6months = c(5.4, 5.1, # ITT GAD-7 Standard deviation 6 months
                  6.4, 6.1, # ITT PHQ9 Depression
                  5.3, 5.6, # ITT PHQ-15
                  3.0, 2.9, # ITT working life
@@ -240,7 +240,7 @@ cano_vindel2021 <- tibble(
                  2.5, 2.2, # ITT Social
                  4.8, 4.8, # ITT Environment
                  
-                 5.7, 4.9, # Per-protocol GAD-7 Anxiety 
+                 5.7, 4.9, # Per-protocol GAD-7 Anxiety 6 months
                  6.6, 6.1, # Per-protocol PHQ9 Depression
                  5.3, 5.7, # Per-protocol PHQ-15
                  3.0, 2.7, # Per-protocol working life
@@ -265,18 +265,18 @@ cano_vindel2021 <- tibble(
                 9.7, 11.1, # ITT Social
                 27.5, 31.2, # ITT Environment
                 
-                8.7, 5.8, # 12 months
-                10.7, 9.4,
-                11.7, 8.8,
-                3.3, 2.0,
-                4.0, 2.6,
-                3.9, 2.5,
-                22.7, 25.6,
-                18.3, 20.2,
-                9.3, 10.0,
-                26.6, 28.3),
+                8.7, 5.8, # Per-protocol GAD-7 Anxiety 12 months 12 months
+                10.7, 9.4, # Per-protocol PHQ9 Depression
+                11.7, 8.8, # Per-protocol PHQ-15
+                3.3, 2.0, # Per-protocol working life
+                4.0, 2.6, # Per-protocol social life
+                3.9, 2.5, # Per-protocol Family life
+                22.7, 25.6, # Per-protocol Physical 
+                18.3, 20.2, # Per-protocol Psychological
+                9.3, 10.0, # Per-protocol Social
+                26.6, 28.3), # Per-protocol Environment
   
-  sd_12months = c(5.7, 5.4, # ITT GAD-7 Standard deviation 
+  sd_12months = c(5.7, 5.4, # ITT GAD-7 Standard deviation 12 months
                   6.3, 5.9, # ITT PHQ9 Depression
                   5.6, 5.6, # ITT PHQ-15
                   3.3, 3.2, # ITT working life
@@ -287,7 +287,7 @@ cano_vindel2021 <- tibble(
                   2.2, 2.6, # ITT Social
                   5.0, 5.3, # ITT Environment
                   
-                  5.8, 5.3, # Per-protocol GAD-7 Anxiety 
+                  5.8, 5.3, # Per-protocol GAD-7 Anxiety 12 months
                   6.5, 6.2, # Per-protocol PHQ9 Depression
                   5.6, 5.7, # Per-protocol PHQ-15
                   3.3, 2.7, # Per-protocol working life
