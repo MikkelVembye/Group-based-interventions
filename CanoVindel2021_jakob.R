@@ -301,6 +301,10 @@ cano_vindel2021 <- tibble(
   
   mean_diff_12months = m_12months - m_pre,
   
+  # Number of covariates based on the quote: "group differences were analysed 
+  # after controlling for baseline characteristics: gender, age, and treatment centre"
+  q = rep(c(4), each = 40) # Number of controlled covariates
+  
   )
   
 cano_vindel2021
