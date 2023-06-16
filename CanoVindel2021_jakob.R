@@ -57,8 +57,8 @@ cano_vindel2021 <- tibble(
                 each = 1,2)
   ,
   
-  n = c(rep(c(534, 527), each = 1,10),
-        rep(c(534, 527, 316, 315, 238, 273, 204, 229, 180, 208), each = 1,2)
+  n_baseline = c(rep(c(534, 527), each = 1,10),
+        rep(c(534, 527), each = 1,10)
     )
   ,
   
@@ -109,6 +109,11 @@ cano_vindel2021 <- tibble(
             3.8, 3.8, # Per-protocol Psychological
             2.4, 2.4, # Per-protocol Social
             4.5, 4.6), # Per-protocol Environment
+  
+  n_post = c(rep(c(534, 527), each = 1,10),
+             rep(c(316, 315), each = 1,10)
+  )
+  ,
             
   
   m_post = c(9.5, 6.8, # ITT GAD-7 Anxiety post-treatment
@@ -159,6 +164,12 @@ cano_vindel2021 <- tibble(
   mean_diff = m_post - m_pre,
   
   
+  n_3months = c(rep(c(534, 527), each = 1,10),
+                rep(c(238, 273), each = 1,10)
+  )
+  ,
+  
+  
   m_3months = c(8.7, 7.3, # ITT GAD-7 Anxiety 3 months
                 10.2, 8.4, # ITT PHQ9 Depression
                 11.4, 10.1,# ITT PHQ-15
@@ -205,6 +216,11 @@ cano_vindel2021 <- tibble(
                   4.8, 5.2), # Per-protocol Environment
   
   mean_diff_3months = m_3months - m_pre,
+  
+  n_6months = c(rep(c(534, 527), each = 1,10),
+                rep(c(204, 229), each = 1,10)
+  )
+  ,
  
   
   m_6months = c(8.6, 6.9, # ITT GAD-7 Anxiety 6 months
@@ -253,6 +269,11 @@ cano_vindel2021 <- tibble(
   
 
   mean_diff_6months =  m_6months - m_pre,
+  
+  n_12months = c(rep(c(534, 527), each = 1,10),
+                 rep(c(180, 208), each = 1,10)
+  )
+  ,
   
   m_12months =c(8.3, 6.6, # ITT GAD-7 Anxiety 12 months
                 9.4, 7.8, # ITT PHQ9 Depression
@@ -308,4 +329,5 @@ cano_vindel2021 <- tibble(
   )
   
 cano_vindel2021
+
   
