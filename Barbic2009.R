@@ -1,11 +1,9 @@
-library(tibble)
-
-library(VIVECampbell)
-library(purrr)
-library(dplyr)
-library(tidyr)
-library(gt)
-library(ggplot2)
+#library(VIVECampbell)
+#library(purrr)
+#library(dplyr)
+#library(tidyr)
+#library(gt)
+#library(ggplot2)
 
 
 #Data extraction from Barbic et al. (2009)
@@ -14,10 +12,12 @@ library(ggplot2)
 library(tidyverse)
 
 
+# n_distinct() = length(unique())
+
 Barbic2009 <- tibble(
   Outcome = rep(c("Hope Index", "Empowerment scale", "Quality of life", "Recovery assessment"), each = 2),
-  Treatment = rep(c("Recovery workbook", "Control group"), length(unique(Outcome))),
-  N = rep(c(16, 17), length(unique(Outcome))),
+  Treatment = rep(c("Recovery workbook", "Control group"), dplyr::n_distinct(Outcome)),
+  N = rep(c(16, 17), dplyr::n_distinct(Outcome)),
   
   m_pre = c(
     37.13, 36.00, 
@@ -44,4 +44,5 @@ Barbic2009 <- tibble(
     20.11, 22.09)
 )
 
-print(Barbic2009)
+# Ingen grund til print her, derfor slettet
+Barbic2009
