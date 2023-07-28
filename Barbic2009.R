@@ -1,9 +1,11 @@
-#library(VIVECampbell)
-#library(purrr)
-#library(dplyr)
-#library(tidyr)
-#library(gt)
-#library(ggplot2)
+library(tibble)
+
+library(VIVECampbell)
+library(purrr)
+library(dplyr)
+library(tidyr)
+library(gt)
+library(ggplot2)
 
 
 #Data extraction from Barbic et al. (2009)
@@ -11,8 +13,6 @@
 
 library(tidyverse)
 
-
-# n_distinct() = length(unique())
 
 Barbic2009 <- tibble(
   Outcome = rep(c("Hope Index", "Empowerment scale", "Quality of life", "Recovery assessment"), each = 2),
@@ -44,5 +44,4 @@ Barbic2009 <- tibble(
     20.11, 22.09)
 )
 
-# Ingen grund til print her, derfor slettet
-Barbic2009
+View(Barbic2009)
