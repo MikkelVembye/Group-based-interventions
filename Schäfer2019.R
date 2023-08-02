@@ -13,11 +13,29 @@ library(tidyverse)
 #Draft by Jasmin
 
 
+# Setting the relevant options -------------------
+# The code benith sets global options in R for various packages and functions
+options(pillar.sigfig = 4) # ensure tibble include 4 digits
+
+options(tibble.width = Inf) # This sets the width of output from the tibble 
+# package to infinity, meaning that the output will 
+# not be truncated or wrapped.
+
+options(dplyr.print_min = 310) # This sets the minimum number of rows that will 
+# be printed when using the dplyr package to 310
+
+options(scipen = 10) # This sets the scientific notation precision in R to 10, 
+# meaning that numbers will be displayed with 10 digits of precision
+
+
+
+
 Schafer2019 <- tibble(
   Outcome = rep(c("PSS-I", "PDS", "Drug and alcohol free days", "ASI alcohol severity", "ASI drug severity", "BDI-II", "DERS"), each = 3),
   Treatment = rep(c("Seeking Safety", "Relapse prevention training", "TAU"), dplyr::n_distinct(Outcome)),
   N = rep(c(111, 115, 117), dplyr::n_distinct(Outcome)),
-  
+
+
   
   m_pre = c(
     25.4, 27.5, 29.8, 
@@ -93,5 +111,8 @@ Schafer2019 <- tibble(
     24.7, 25.2, 25.4)
   
 )
+
+Schafer2019
+
 
 View(Schafer2019)
