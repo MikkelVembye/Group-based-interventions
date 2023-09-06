@@ -39,14 +39,14 @@ gutman_2019_raw <- tibble(
     97, 113, 98, 93, 86, 93, 98, 57, 91, 101
   ), 
   
-  postest_WHOQOL = c(
+  posttest_WHOQOL = c(
    125, 118, 95, 89, 87, 91, 93, 77, 125, 107,
    100, 112, 95, 90, 88, 85, 100, 43, 74, 102
   )
 ) %>% 
     mutate(
       growthtest_PSS = posttest_PSS-pretest_PSS,
-      growthtest_WHOQOL = postest_WHOQOL-pretest_WHOQOL,
+      growthtest_WHOQOL = posttest_WHOQOL-pretest_WHOQOL,
       
       # Standardizing variables  
       m_pre_sd_PSS = (pretest_PSS - mean(pretest_PSS))/sd(pretest_PSS),
@@ -55,14 +55,44 @@ gutman_2019_raw <- tibble(
       
       m_pre_sd_WHOQOL = (pretest_WHOQOL - mean(pretest_WHOQOL))/sd(pretest_WHOQOL),
       
-      m_post_sd_WHOQOL = (postest_WHOQOL - mean(postest_WHOQOL))/sd(postest_WHOQOL)
+      m_post_sd_WHOQOL = (posttest_WHOQOL - mean(posttest_WHOQOL))/sd(posttest_WHOQOL)
       
       
     
 ); gutman_2019_raw
 
 
+#My try on using the standard deviation from the pretest scores 
 
+gutman_2019 <- gutman_2019_raw %>%
+  
+  group_by(group) %>% 
+  
+  mutate(
+    prepost_cor_PSS = cor(pretest_PSS, posttest_PSS),
+    prepost_cor_WHOQOL = cor(pretest_WHOQOL, posttest_WHOQOL)) %>% 
+  
+  
+  
+  summarise(
+    mean_pre_PSS = mean(pretest_PSS),
+    mean_post_PSS = mean(posttest_PSS),
+    sd_pre_PSS = sd(pretest_PSS),
+    sd_post_PSS = sd(posttest_PSS),
+    mean_pre_WHOQOL = mean(pretest_WHOQOL),
+    mean_post_WHOQOL = mean(posttest_WHOQOL),
+    sd_pre_WHOQOL = sd(pretest_WHOQOL),
+    sd_post_WHOQOL = sd(posttest_WHOQOL),
+    n_PSS = n(),
+    n_WHOQOL = n(),
+    prepost_cor_PSS = unique(prepost_cor_PSS),
+    prepost_cor_WHOQOL = unique(prepost_cor_WHOQOL)
+  )
+  
+
+
+
+# Taken from table 2, p. 67
 gutman_2019_mean <-tibble(
   
   group = as.factor(rep(c("intervention", "control"), each = 1,2)),
