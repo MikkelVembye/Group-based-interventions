@@ -46,8 +46,8 @@ izquierdo_2021 <- tibble(
     6.57, 10.57, # EE
     6.86, 8.29,  # OE
     13.43, 18.86,# CS
-    NA, NA,      # ACI
-    NA, NA,      # SCI
+    NA, NA,      # ACI - Basline data not reported
+    NA, NA,      # SCI - Basline data not reported
     21.29, 15.14,# POSIT
     10.57, 6.86, # NEGAT
     35.86, 37.14,# AFFECT
