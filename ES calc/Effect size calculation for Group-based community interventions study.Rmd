@@ -29,6 +29,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 ```
 
 ### Introduction 
+This document contains effect size calculation for the Campbell systematic review 'Group-based community interventions to support the social reintegration of marginalised adults with mental illness' [@Dalgaard2022a]. 
 
 ### R package used for effect size calculation
 
@@ -58,7 +59,7 @@ R2_imp <- 0
 
 ## **Studies in meta-analysis**
 
-### **Acarturk et al [-@Acarturk2022]**
+### **Acarturk et al. [-@Acarturk2022]**
 #### (Multi-level analysis and reported raw means, at baseline, post, and followup times)
 
 To calculate pretest-adjusted effect sizes, we first estimate pre-post and pre-followup correlations from 
@@ -416,6 +417,212 @@ Acarturk2022_est <-
   )
 
 Acarturk2022_est
+
+```
+
+
+
+### ** Barbic et al.[-@Acarturk2022]**
+#### (Randomized trial reporting raw means at baseline and after treatment. Uses repeated ANOVA and does not account for clusting in treament)
+
+Entering data from Table 3 (p. 495).
+
+```{r}
+Barbic2009 <- tibble(
+  outcome = rep(c("Hope Index", "Empowerment Scale", "Quality of Life", "Recovery Assessment"), each = 2),
+  group = rep(c("Recovery Workbook", "Control"), dplyr::n_distinct(outcome)),
+  N = rep(c(16, 17), dplyr::n_distinct(outcome)),
+  
+  m_pre = c(
+    37.13, 36.00, 
+    55.93, 63.88, 
+    20.34, 20.70, 
+    163.75, 156.41),
+  
+   sd_pre = c(
+    6.53, 5.36, 
+    6.91, 6.91, 
+    5.01, 4.13, 
+    22.60, 14.22),
+  
+  m_post = c(
+    38.93, 35.06, 
+    14.93, 61.96, 
+    21.60, 22.27, 
+    168.81, 149.11),
+  
+  
+  sd_post = c(
+    5.34, 6.21, 
+    10.43, 7.33, 
+    3.35, 4.91, 
+    20.11, 22.09)
+)
+
+Barbic2009
+
+Barbic2009_wide <- 
+  Barbic2009 |> 
+    mutate(group = case_match(group, "Recovery Workbook" ~ "t", "Control" ~ "c")) |> 
+    tidyr::pivot_wider(
+      names_from = group,
+      names_glue = "{.value}_{group}",
+      values_from = N:last_col()
+    ) |> 
+  mutate(
+# Based on the degrees of freedom value reported in Barbic et al. (2009),
+# we cannot replicate the report F_values. Therefore, we do not use any F_values for 
+# for the effect size correlation
+
+  p_val_f = c(.05, .21, .96, .02), 
+  df1 = 1, 
+  df2 = 32,
+  F_val = qf(p_val_f, df1 = df1, df2 = df2, lower.tail = FALSE)
+  )
+```
+
+Effect size calculating, including cluster-bias correction
+```{r}
+Barbic2009_est <- 
+  Barbic2009_wide |>
+  mutate(
+    analysis_plan = rep(
+      c("Hope, Empowerment & Self-efficacy", "Wellbeing and Quality of Life", 
+        "Hope, Empowerment & Self-efficacy("), 
+      c(2, 1, 1))
+  ) |> 
+  rowwise() |> 
+  mutate(
+    
+    F_val = if_else(outcome == "Empowerment Scale", 14.93, F_val), # Retrieved from (p. 495)
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    study = "Barbic et al. 2009",
+    main_es_calc_method = "Raw diff-in-diffs",
+    
+    ppcor = ppcor_imp,  
+    ppcor_calc_method = "Imputed",
+    
+    R2 = NA_real_,
+    R2_calc_method = "Not relevant",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # Calculate d post
+    m_post = if_else(outcome != "Empowerment Scale", m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/df_ind,
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
+    Wg_post = Wd_post,
+    
+    # Account for the fact that some outcomes are on different scales
+    m_diff_t = if_else(outcome != "Empowerment Scale", m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
+    m_diff_c = if_else(outcome != "Empowerment Scale", m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/df_ind,
+    
+    g_DD = J * d_DD, 
+    vg_DD = vd_DD,
+    Wg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
+    # Average cluster size in treatment group
+    # "12 weekly two-hour group sessions with seven to nine participants." (p. 493)
+    avg_cl_size = 8, 
+    avg_cl_type = "From study (p. 493)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    gamma_sqrt_icc005 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      ),
+    gamma_sqrt_icc02 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      ),
+    
+    n_covariates = 1,
+    
+    # Cluster-adjusting g_post
+    gt_post = g_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "Posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
+      ),
+    
+    gt_DD = g_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD"
+      ),
+    
+    gt_DD_icc005 = g_DD * gamma_sqrt_icc005,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_005, 
+      g = gt_DD_icc005, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD_icc005",
+      vars = vgt_DD_icc005:Wgt_DD_icc005
+      ),
+    
+    gt_DD_icc02 = g_DD * gamma_sqrt_icc02,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_02, 
+      g = gt_DD_icc02, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD_icc02",
+      vars = vgt_DD_icc02:Wgt_DD_icc02
+      )
+    
+
+  ) |> 
+  ungroup() |> 
+  relocate(N_total, .after = N_c); Barbic2009_est
+
+
+
 
 ```
 
