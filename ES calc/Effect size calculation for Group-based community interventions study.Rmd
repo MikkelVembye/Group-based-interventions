@@ -421,8 +421,7 @@ Acarturk2022_est
 ```
 
 
-
-### ** Barbic et al.[-@Acarturk2022]**
+### **Barbic et al.[-@Acarturk2022]**
 #### (Randomized trial reporting raw means at baseline and after treatment. Uses repeated ANOVA and does not account for clusting in treament)
 
 Entering data from Table 3 (p. 495).
@@ -614,7 +613,9 @@ Barbic2009_est <-
       q = n_covariates,
       add_name_to_vars = "_DD_icc02",
       vars = vgt_DD_icc02:Wgt_DD_icc02
-      )
+      ),
+    
+    vary_id = outcome
     
 
   ) |> 
@@ -1434,6 +1435,16 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 #  r = c(.7, 0.1),
 #  smooth_vi = TRUE
 #)
+
+```
+
+```{r, eval=FALSE, include=FALSE}
+
+test_dat <- covariates |> 
+  filter(str_detect(authors, "Barbic")) |> 
+  bind_cols(Barbic2009_est)
+
+select(test_dat, varifier, vary_id)
 
 ```
 
