@@ -487,7 +487,7 @@ Barbic2009_est <-
   mutate(
     analysis_plan = rep(
       c("Hope, Empowerment & Self-efficacy", "Wellbeing and Quality of Life", 
-        "Hope, Empowerment & Self-efficacy("), 
+        "Hope, Empowerment & Self-efficacy/uses all"), 
       c(2, 1, 1))
   ) |> 
   rowwise() |> 
