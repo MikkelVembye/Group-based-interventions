@@ -19,8 +19,9 @@ options(dplyr.print_min = 310) # This sets the minimum number of rows that will
 options(scipen = 10) # This sets the scientific notation precision in R to 10, 
 # meaning that numbers will be displayed with 10 digits of precision
 
-# Data from table 2 containing means and standard deviation + within effect size
-# on page 351
+# Data from table 2 containing means and standard deviation + within effect size.
+# Table also contains "between group-group post treatment effect size at post-tratement"
+# with a coefficient and "Post hoc power" on page 351
 
 popolo2019 <- tibble(
   group = as.factor(rep(c("Intervention", 
