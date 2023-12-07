@@ -628,6 +628,182 @@ Barbic2009_est <-
 ```
 
 
+### **Bond et al. [-@Bond2015]**
+#### (RCT - no treatment of clustering)
+
+Entering data from Table 3 and 4 (p. 1032). Recovery Assessnebt Scale Scores are retrieved from the text on page 1032. 
+In out analysis, we do not distinguish between different types of work as done in the paper. We, threrefore, amalgamate all work category. 
+We code the control group as the our treatment group because the control is the group-based treatment, we are main concerned about
+```{r}
+# _t = Work choice
+
+Bond2015_continious <- 
+  tibble(
+    outcome = c("Recovery Assessment Scale", "Days hospitalized"),
+    N_t = 43,
+    N_c = c(42, 41),
+    m_post_t = c(4.14, 4.93),
+    sd_post_t = c(0.49, 7.59),
+    m_post_c = c(4.14, 10.44), 
+    sd_post_c = c(0.57, 23.07),
+    
+    analysis_plan = c("Hope, Empowerment & Self-efficacy/uses all", "Psychiatric hospitalization"),
+    
+    main_effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    study = "Bond et al. 2015",
+    main_es_calc_method = "Posttest means",
+    
+    ppcor_calc_method = "Not relevant",
+    R2_calc_method = "Not relevant",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # Calculate d post
+    m_post = if_else(outcome != "Days hospitalized", m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/df_ind,
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
+    Wg_post = Wd_post,
+    
+    # Cluster bias correction
+    # Average cluster size in treatment group
+    avg_cl_size = 21, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    
+    gamma_sqrt_icc005 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      ),
+    gamma_sqrt_icc02 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      ),
+    
+    gt_post = g_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "Posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:adj_value_post
+      ),
+    
+    gt_post_icc005 = g_post * gamma_sqrt_icc005,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_005, 
+      g = gt_post_icc005, 
+      model = "Posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post_icc005",
+      vars = vgt_post_icc005:Wgt_post_icc005
+      ),
+    
+    gt_post_icc02 = g_post * gamma_sqrt_icc02,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_02, 
+      g = gt_post_icc02, 
+      model = "Posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post_icc02",
+      vars = vgt_post_icc02:Wgt_post_icc02
+      ),
+    
+    vary_id = outcome
+    
+  )
+
+Bond2015_binary <- 
+  tibble(
+    outcome = c("Employment", "Risk of Psychiatric Hospitalization"),
+    N_t = c(43, 42), # See note a in Table for sample size of Table 4 (i.e., 42, 40, respectively)
+    N_c = c(42, 40),
+    A = c(13, 12), 
+    B = c(30, 31),  
+    C = c(20, 11),
+    D = c(22, 30),
+    
+    analysis_plan = c("Employment", "Psychiatric hospitalization"),
+    
+    main_effect_size = "OR",
+    sd_used = "Not relevant",
+    
+    study = "Bond et al. 2015",
+    main_es_calc_method = "Raw events",
+    
+    ppcor_calc_method = "Not relevant",
+    R2_calc_method = "Not relevant",
+    
+    N_total = N_t + N_c,
+    
+    p_t = A/N_t,
+    p_c = C/N_c,
+    
+    RD = p_t - p_c,
+    vRD = (A*B)/N_t^3 + (C*D)/N_c^3,
+    
+    # Average cluster size in treatment group
+    avg_cl_size = 21, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # OR calculation and cluster bias adjustment
+    VIVECampbell::OR_calc(
+      A = A, B = B, C = C, D = D, 
+      ICC = icc, avg_cl_size = avg_cl_size, n_cluster_arms = 1
+    ),
+    
+    # Calculating the sampling variance of the odds ratio based on ICC = 0.05
+    OR_calc(
+      A = A, B = B, C = C, D = D, 
+      ICC = ICC_005, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
+      add_name_to_vars = "_icc005", vars = DE_icc005:vln_OR_C_icc005
+    ),
+    
+    # Calculating the sampling variance of the odds ratio based on ICC = 0.2
+    OR_calc(
+      A = A, B = B, C = C, D = D, 
+      ICC = ICC_02, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
+      add_name_to_vars = "_icc02", vars = DE_icc02:vln_OR_C_icc02
+    ),
+    
+    vary_id = outcome
+    
+)
+
+Bond2015_est <- bind_rows(Bond2015_continious, Bond2015_binary)
+Bond2015_est
+```
+
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012]**
 #### (Multi-level analysis to handle clustering)
 
