@@ -677,8 +677,10 @@ Bond2015_continious <-
     
     # Cluster bias correction
     # Average cluster size in treatment group
-    avg_cl_size = 21, 
-    avg_cl_type = "Imputed",
+    # "Classes were scheduled weekly at two conveniently located sites" (p. 1029)
+    # Assuming two class in the Work Choice group is 44/2 = 22
+    avg_cl_size = 22, 
+    avg_cl_type = "Guessed from study",
     
     # Imputed icc value
     icc = ICC_01,
@@ -769,8 +771,10 @@ Bond2015_binary <-
     vRD = (A*B)/N_t^3 + (C*D)/N_c^3,
     
     # Average cluster size in treatment group
-    avg_cl_size = 21, 
-    avg_cl_type = "Imputed",
+    # "Classes were scheduled weekly at two conveniently located sites" (p. 1029)
+    # Assuming two class in the Work Choice group is 44/2 = 22
+    avg_cl_size = 22, 
+    avg_cl_type = "Guessed from study",
     
     # Imputed icc value
     icc = ICC_01,
@@ -1617,8 +1621,8 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 ```{r, eval=FALSE, include=FALSE}
 
 test_dat <- covariates |> 
-  filter(str_detect(authors, "Barbic")) |> 
-  bind_cols(Barbic2009_est)
+  filter(str_detect(authors, "Bond")) |> 
+  bind_cols(Bond2015_est)
 
 select(test_dat, varifier, vary_id)
 
