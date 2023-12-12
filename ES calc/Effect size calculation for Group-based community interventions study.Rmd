@@ -385,7 +385,7 @@ Acarturk2022_es <-
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt_alt, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = TRUE,
       q = n_covariates,
       add_name_to_vars = "_alt",
@@ -401,7 +401,7 @@ Acarturk2022_es <-
       avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt_posttest, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_posttest",
       vars = vgt_posttest:Wgt_posttest
@@ -567,7 +567,7 @@ Barbic2009_est <-
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt_post, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
       vars = vgt_post:Wgt_post
@@ -705,7 +705,7 @@ Bond2015_continious <-
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt_post, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
       vars = vgt_post:adj_value_post
@@ -718,7 +718,7 @@ Bond2015_continious <-
       avg_grp_size = avg_cl_size, 
       ICC = ICC_005, 
       g = gt_post_icc005, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post_icc005",
       vars = vgt_post_icc005:Wgt_post_icc005
@@ -731,7 +731,7 @@ Bond2015_continious <-
       avg_grp_size = avg_cl_size, 
       ICC = ICC_02, 
       g = gt_post_icc02, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post_icc02",
       vars = vgt_post_icc02:Wgt_post_icc02
@@ -816,7 +816,7 @@ Bond2015_est
 ```
 
 ### **Craigie & Nathan [-@Craigie2009]**
-### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
+#### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
 
 Entering data from Table 2 and Treatment Format $\times$ Time interaction estimate from text results reported on pages 307-08
 
@@ -975,9 +975,8 @@ Craigie2009_est <-
   mutate(
     
     # Average cluster size in treatment group
-    # We calculate the average group size based on the knowledge 
-    # that there was 50 group in the group-based arm
-    avg_cl_size = 240/50, 
+    # "groups consisted of between 5 to 12 patients" p. 306
+    avg_cl_size = 8.5, 
     avg_cl_type = "From study (p. 305)",
     
     # Imputed icc value
@@ -1005,7 +1004,7 @@ Craigie2009_est <-
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
       g = gt_post, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
       vars = vgt_post:Wgt_post
@@ -1020,7 +1019,7 @@ Craigie2009_est <-
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      t_val = sqrt(F_val),
+      F_val = F_val,
       q = n_covariates,
       add_name_to_vars = "_DD"
       ),
@@ -1034,7 +1033,7 @@ Craigie2009_est <-
       g = gt_DD_icc005, 
       model = "DiD",
       cluster_adj = FALSE,
-      t_val = sqrt(F_val),
+      F_val = F_val,
       q = n_covariates,
       add_name_to_vars = "_DD_icc005",
       vars = vgt_DD_icc005:Wgt_DD_icc005
@@ -1049,7 +1048,7 @@ Craigie2009_est <-
       g = gt_DD_icc02, 
       model = "DiD",
       cluster_adj = FALSE,
-      t_val = sqrt(F_val),
+      F_val = F_val,
       q = n_covariates,
       add_name_to_vars = "_DD_icc02",
       vars = vgt_DD_icc02:Wgt_DD_icc02
@@ -1352,7 +1351,7 @@ Timmermans2012_es <-
       avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt, 
-      model = "Std_reg_coef",
+      model = "std_reg_coef",
       cluster_adj = TRUE,
       SE_std = sqrt(Wg)
     ),
@@ -1380,7 +1379,7 @@ Timmermans2012_es <-
       avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt_posttest, 
-      model = "Posttest",
+      model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_posttest",
       vars = vgt_posttest:Wgt_posttest
@@ -1877,8 +1876,8 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 ```{r, eval=FALSE, include=FALSE}
 
 test_dat <- covariates |> 
-  filter(str_detect(authors, "Bond")) |> 
-  bind_cols(Bond2015_est)
+  filter(str_detect(authors, "Craigie")) |> 
+  bind_cols(Craigie2009_est)
 
 select(test_dat, varifier, vary_id)
 
