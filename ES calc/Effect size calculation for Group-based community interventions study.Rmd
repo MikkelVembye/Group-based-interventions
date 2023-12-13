@@ -632,8 +632,7 @@ Barbic2009_est <-
 #### (RCT - no treatment of clustering)
 
 Entering data from Table 3 and 4 (p. 1032). Recovery Assessnebt Scale Scores are retrieved from the text on page 1032. 
-In out analysis, we do not distinguish between different types of work as done in the paper. We, threrefore, amalgamate all work category. 
-We code the control group as the our treatment group because the control is the group-based treatment, we are main concerned about
+In out analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work category.  We code the control group as the our treatment group because the control is the group-based treatment, we are main concerned about
 ```{r}
 # _t = Work choice
 
@@ -811,9 +810,480 @@ Bond2015_est
 
 ### **Cano-Vindel et al. [-@Cano-Vindel2022]**
 
+Data entered from Tables 2 and 3 (pp. 3342-45)
+
 ```{r}
-#Insert Jakobs codes
+Cano_vindel2021 <- tibble(
+  analysis = rep(c("ITT", "Per-protocol"), each = 80),
+  group = rep(c("TAU", "TAU-GCBT"), each = 1,80),
+  
+  outcome = rep(c("GAD-7", "PHQ-9", "PHQ15", "working_life_Function",
+                  "Socal_life_Function", "Family_life_Function", "Physical_QoL",
+                  "Psychological_QoL", "Social_QoL", "Environment_QoL"), 
+                each = 8,2),
+  
+  timing = rep(c("Post", "3m", "6m", "12m"), each = 2,20),
+  
+  N = c(rep(c(534, 527), 40), # ITT
+        rep(c(316, 315, # per-protocol post-treatment
+              238, 273,# per-protocol 3 months
+              204, 229,# per-protocol 6 months
+              180, 208), 1,80) # per-protocol 12 months
+  ),
+  
+  m_pre = c(
+    rep(c(12.1, 12.5), each = 1,4),  # ITT GAD-7 Anxiety Baseline)
+    rep(c(13.5, 13.7), each = 1,4),  # ITT PHQ9
+    rep(c(14, 14.3), each = 1,4), # ITT PHQ15
+    rep(c(3.5, 3.6), each = 1,4), # ITT working life
+    rep(c(4.6, 4.7), each = 1,4), # ITT social life
+    rep(c(4.6, 4.8), each = 1,4), # ITT family life
+    rep(c(22.4, 22.1), each = 1,4), # ITT Physical
+    rep(c(16.9, 16.9), each = 1,4), # ITT Psychological
+    rep(c(9.1, 9.1), each = 1,4), # ITT Social
+    rep(c(25.3, 25.7), each = 1,4),  # ITT Environment 
+      
+    rep(c(12.1, 12.5), each = 1,4), # per-protocol GAD-7 Anxiety Baseline)
+    rep(c(13.5, 13.7), each = 1,4), # per-protocol GAD-7 PHQ9
+    rep(c(14, 14.3), each = 1,4),   # per-protocol GAD-7 PHQ15
+    rep(c(3.5, 3.6), each = 1,4),   # per-protocol GAD-7 working life
+    rep(c(4.6, 4.7), each = 1,4),   # per-protocol GAD-7 social life
+    rep(c(4.6, 4.8), each = 1,4),   # per-protocol GAD-7 family life
+    rep(c(22.4, 22.1), each = 1,4), # per-protocol GAD-7 Physical
+    rep(c(16.9, 16.9), each = 1,4), # per-protocol GAD-7 Psychological
+    rep(c(9.1, 9.1), each = 1,4),   # per-protocol GAD-7 Social
+    rep(c(25.3, 25.7), each = 1,4)  # per-protocol GAD-7 Environment 
+  ), 
+  
+  sd_pre = c(
+    rep(c(4.7, 4.6), each = 1,4),  # ITT GAD-7 Standard deviation
+    rep(c(5.4, 5.3), each = 1,4), # ITT PHQ9
+    rep(c(4.8, 4.9),each = 1,4), # ITT PHQ15
+    rep(c(3.1, 3.2), each = 1,4), # ITT working life
+    rep(c(3, 3), each = 1,4), # ITT social life
+    rep(c(3.1, 3), each = 1,4), # ITT family life
+    rep(c(4.3, 4.3), each = 1,4), # ITT Physical
+    rep(c(3.8, 3.8), each = 1,4), # ITT Psychological
+    rep(c(2.4, 2.4), each = 1,4), # ITT Social
+    rep(c(4.5, 4.6), each = 1,4),  # ITT Environment 
+    
+    rep(c(4.7, 4.6), each = 1,4),  # per-protocol GAD-7 Standard deviation
+    rep(c(5.4, 5.3), each = 1,4), # per-protocol PHQ9
+    rep(c(4.8, 4.9),each = 1,4), # per-protocol PHQ15
+    rep(c(3.1, 3.2), each = 1,4), # per-protocol working life
+    rep(c(3, 3), each = 1,4), # per-protocol social life
+    rep(c(3.1, 3), each = 1,4), # per-protocol family life
+    rep(c(4.3, 4.3), each = 1,4), # per-protocol Physical
+    rep(c(3.8, 3.8), each = 1,4), # per-protocol Psychological
+    rep(c(2.4, 2.4), each = 1,4), # per-protocol Social
+    rep(c(4.5, 4.6), each = 1,4)  # per-protocol Environment 
+      
+    
+  ), 
+  m_post = c(
+    9.5, 6.8, # ITT GAD-7 Anxiety post-treatment
+    8.7, 7.3, # ITT GAD-7 Anxiety 3 months
+    8.6, 6.9, # ITT GAD-7 Anxiety 6 months
+    8.3, 6.6,  # ITT GAD-7 Anxiety 12 months
+    
+    10.8, 8.0, # ITT PHQ9 Depression post treatment
+    10.2, 8.4, # ITT PHQ9 Depression 3 months
+    9.8, 7.9, # ITT PHQ9 Depression 6 months
+    9.4, 7.8, # ITT PHQ9 Depression 12 months
+    
+    11.7, 9.9, # ITT PHQ-15 post-treatment
+    11.4, 10.1,# ITT PHQ-15 3 months
+    11.1, 9.8, # ITT PHQ-15 6 months
+    10.7, 9.4, # ITT PHQ-15 12 months
+    
+    3.0, 2.6, # ITT working life post-treatment
+    2.7, 2.4, # ITT Working life 3 months 
+    2.7, 2.1, # ITT working life 6 months
+    3.1, 2.4, # ITT working life 12 months
+    
+    
+    4.1, 3.2, # ITT social life post-treatment
+    3.5, 3.2, # ITT social life 3 months 
+    3.4, 2.7, # ITT social life 6 months
+    3.8, 2.9, # ITT social life 12 months
+    
+    3.9, 3.1, # ITT Family life post-treatment
+    3.5, 3.1, # ITT Family life 3 months 
+    3.6, 2.7, # ITT Family life 6 months
+    3.8, 2.8, # ITT Family life  12 months
+    
+    23.2, 24.7, # ITT Physical post-treatment
+    23.5, 24.2, # ITT Physical 3 months
+    23.6, 24.3, # ITT Physical 6 months
+    24.2, 26.4, # ITT Physical12 months
+    
+    17.7, 19.2, # ITT Psychological post-treatment
+    18.1, 18.9, # ITT Psychological 3 months
+    18.5, 18.9, # ITT Psychological 6 months
+    18.7, 19.9, # ITT Psychological 12 months
+    
+    9.4, 9.8, # ITT Social post-treatment
+    9.5, 9.7, # ITT Social 3 months
+    9.5, 9.7, # ITT Social 6 months
+    9.7, 11.1, # ITT Social 12 months
+    
+    25.7, 27.2, # ITT Environment post-treatment 
+    26.1, 26.9, # ITT Environment 3 months
+    26.5, 27.1, # ITT Environment 6 months
+    27.5, 31.2,  # ITT Environment 12 months
+    
+    10.2, 6.0, # Per-protocol GAD-7 Anxiety post treatment
+    8.9, 6.7, # Per-protocol GAD-7 Anxiety 3 months
+    8.8, 6.2, # Per-protocol GAD-7 Anxiety  6 months
+    8.7, 5.8, # Per-protocol GAD-7 Anxiety 12 months 
+    
+    11.7, 9.9,  # Per-protocol PHQ9 Depression post-treatment
+    10.3, 7.8, # Per protocol PHQ9 Depression 3 months
+    10.0, 7.3,  # Per-protocol PHQ9 Depression 6 months
+    10.7, 9.4, # Per-protocol PHQ9 Depression 12 months
+    
+    12.1, 9.1, # Per-protocol PHQ-15 post treatment
+    11.7, 9.5, # Per protocol PHQ-15 3 months
+    11.5, 9.2, # Per-protocol PHQ-15 6 months
+    11.7, 8.8, # Per-protocol PHQ-15 12 months
+    
+    3.1, 2.4, # Per-protocol working life post treatment
+    2.6, 2.5, # Per protocol Working life 3 months
+    2.8, 1.9, # Per-protocol working life 6 months
+    3.3, 2.0, # Per-protocol working life 12 months
+    
+    
+    4.1, 2.9, # Per-protocol social life post treatment
+    3.4, 3.1, # Per protocol social life 3 months
+    3.6, 2.6, # Per-protocol social life 6 months
+    4.0, 2.6, # Per-protocol social life 12 months
+    
+    4.0, 2.8, # Per-protocol Family life post treatment
+    3.5, 3.0, # Per protocol Family life 3 months
+    3.6, 2.6, # Per-protocol Family life 6 months
+    3.9, 2.5, # Per-protocol Family life 12 months
+    
+    
+    22.7, 25.1,# Per-protocol Physical post treatment
+    23.2, 24.4, # Per protocol Physical 3 months
+    23.1, 24.7, # Per-protocol Physical 6 months 
+    22.7, 25.6, # Per-protocol Physical 12 months
+    
+    17.4, 19.9, # Per-protocol Psychological post treatment
+    18.0, 19.3, # Per protocol Psychological 3 months
+    18.3, 19.3, # Per-protocol Psychological 6 months
+    18.3, 20.2, # Per-protocol Psychological 12 months
+    
+    9.2, 10.0, # Per-protocol Social post treatment
+    9.3, 9.8, # Per protocol Social 3 months
+    9.6, 9.8, # Per-protocol Social 6 months
+    9.3, 10.0, # Per-protocol Social 12 months
+    
+    25.5, 27.8, # Per-protocol Environment post treatment
+    26.1, 27.5, # Per protocol Environment 3 months
+    26.4, 27.7, # Per-protocol Environment 6 months
+    26.6, 28.3) # Per-protocol Environment 12 months
+    ,
+  
+  sd_post = c(
+    5.4, 4.7, # ITT GAD-7 Anxiety post-treatment
+    5.3, 5.0, # ITT GAD-7 Standard deviation 3 months
+    5.4, 5.1, # ITT GAD-7 Standard deviation 6 months
+    5.7, 5.4,  # ITT GAD-7 Standard deviation 12 months
+    
+    6.4, 5.7, # ITT PHQ9 Depression standard deviation post-treatment 
+    6.4, 6.0, # ITT PHQ9 Depression standard deviation 3 months
+    6.4, 6.1, # ITT PHQ9 Depression standard deviation 6 months
+    6.3, 5.9, # ITT PHQ9 Depression standard deviation 12 months
+    
+    5.2, 5.4, # ITT PHQ-15 standard deviation post-treatment
+    5.1, 5.3, # ITT PHQ-15 standard deviation 3 months
+    5.3, 5.6, # ITT PHQ-15 standard deviation 6 months
+    5.6, 5.6, # ITT PHQ-15 standard deviation 12 months
+    
+    3.1, 3.2, # ITT working life standard deviation post-treatment
+    3.0, 3.0, # ITT working life standard deviation 3 months
+    3.0, 2.9, # ITT working life standard deviation 6 months
+    3.3, 3.2, # ITT working life standard deviation 12 months
+    
+    3.1, 3.0, # ITT social life standard deviation post-treatment
+    3.1, 2.9, # ITT social life standard deviation 3 months
+    3.2, 3.1, # ITT social life standard deviation 6 months
+    3.4, 3.4, # ITT social life standard deviation 12 months
+    
+    3.1, 2.9, # ITT Family life standard deviation post-treatment
+    3.1, 3.1, # ITT Family life standard deviation 3 months
+    3.2, 3.1, # ITT Family life standard deviation 6 months
+    3.3, 3.2, # ITT Family life standard deviation 12 months
+    
+    4.5, 4.6, # ITT Physical standard deviation post-treatment
+    4.6, 4.8, # ITT Physical standard deviation 3 months
+    4.5, 4.4, # ITT Physical standard deviation 6 months
+    5.1, 5.3, # ITT Physical standard deviation 12 months
+    
+    3.9, 4.9, # ITT Psychological standard deviation post-treatment
+    3.9, 4.2, # ITT Psychological standard deviation 3 months
+    3.8, 3.9, # ITT Psychological standard deviation 6 months
+    4.4, 4.6, # ITT Psychological standard deviation 12 months
+    
+    3.1, 3.1, # ITT Social standard deviation post-treatment
+    2.3, 2.3, # ITT Social standard deviation 3 months
+    2.5, 2.2, # ITT Social standard deviation 6 months
+    2.2, 2.6, # ITT Social standard deviation 12 months
+    
+    5.3, 5.6, # ITT Environment standard deviation post-treatment
+    4.9, 5.1, # ITT Environment standard deviation 3 months
+    4.8, 4.8, # ITT Environment standard deviation 6 months
+    5.0, 5.3, # ITT Environment standard deviation 12 months
+    
+    5.5, 4.3, # Per-protocol GAD-7 Anxiety standard deviation post-treatment
+    5.4, 4.9, # Per-protocol GAD-7 Anxiety standard deviation 3 months
+    5.7, 4.9, # Per-protocol GAD-7 Anxiety standard deviation 6 months
+    5.8, 5.3, # Per-protocol GAD-7 Anxiety standard deviation 12 months
+    
+    6.6, 5.2, # Per-protocol PHQ9 Depression standard deviation post-treatment
+    6.5, 6.0, # Per-protocol PHQ9 Depression standard deviation 3 months
+    6.6, 6.1, # Per-protocol PHQ9 Depression standard deviation 6 months
+    6.5, 6.2, # Per-protocol PHQ9 Depression standard deviation 12 months
+    
+    5.2, 5.3, # Per-protocol PHQ-15 standard deviation post-treatment
+    5.0, 5.4, # Per-protocol PHQ-15 standard deviation 3 months
+    5.3, 5.7, # Per-protocol PHQ-15 standard deviation 6 months
+    5.6, 5.7, # Per-protocol PHQ-15 standard deviation 12 months
+    
+    3.1, 2.9, # Per-protocol working life standard deviation post-treatment
+    3.0, 2.9, # Per-protocol working life standard deviation 3 months
+    3.0, 2.7, # Per-protocol working life standard deviation 6 months
+    3.3, 2.7, # Per-protocol working life standard deviation 12 months
+    
+    3.1, 2.8, # Per-protocol social life standard deviation post-treatment
+    3.2, 2.9, # Per-protocol social life standard deviation 3 months
+    3.2, 2.8, # Per-protocol social life standard deviation 6 months
+    3.3, 3.1, # Per-protocol social life standard deviation 12 months
+    
+    3.1, 3.1, # Per-protocol Family life standard deviation post-treatment
+    3.1, 3.0, # Per-protocol Family life standard deviation 3 months
+    3.1, 2.7, # Per-protocol Family life standard deviation 6 months
+    .3, 2.8,  # Per-protocol Family life standard deviation 12 months
+    
+    4.6, 4.7, # Per-protocol Physical standard deviation post-treatment
+    4.8, 4.9, # Per-protocol Physical standard deviation 3 months
+    4.8, 4.9, # Per-protocol Physical standard deviation 6 months
+    5.1, 5.3, # Per-protocol Physical standard deviation 12 months
+    
+    4.2, 4.0, # Per-protocol Psychological standard deviation post-treatment
+    4.0, 4.2, # Per-protocol Psychological standard deviation 3 months
+    4.2, 4.2, # Per-protocol Psychological standard deviation 6 months
+    4.4, 4.6, # Per-protocol Psychological standard deviation 12 months
+    
+    2.4, 2.7, # Per-protocol Social standard deviation post-treatment
+    2.2, 2.4, # Per-protocol Social standard deviation 3 months
+    2.5, 2.2, # Per-protocol Social standard deviation 6 months
+    2.2, 2.6, # Per-protocol Social standard deviation 12 months
+    
+    4.7, 4.8, # Per-protocol Environment standard deviation post-treatment
+    4.8, 5.2, # Per-protocol Environment standard deviation 3 months
+    4.8, 5.0, # Per-protocol Environment standard deviation 6 months
+    5.0, 4.6) # Per-protocol Environment standard deviation 12 months
+  
+)
 ```
+
+Since we could not backout any pre-posttests correlation estiamtes, we used test-retest reliability measures from the given scale literature [@Spitzer2006; @Zuithoff2010; @Ilic2019; @VanRavesteijn2009; @Arbuckle2009] as recommended by Hedges et al [-@Hedges2023_es_ancova]. 
+```{r}
+
+test_retest_cano2021 <- 
+  tibble(
+    # Repeat 8 times to make it fit the es data (see below)
+    outcome = unique(Cano_vindel2021$outcome), 
+    tr_reliability = c(
+      0.83, # From Spitzer et al. 2006
+      0.94, # From Zuithoff et al. 2010
+      0.60, # From Ravesteijn et al. 2009
+      
+      0.63, # From Arbuckle et al. 2009
+      0.70, # From Arbuckle et al. 2009
+      0.61, # From Arbuckle et al. 2009
+      
+      0.665, # Ilíc et al. 2019
+      0.724, # Ilíc et al. 2019
+      0.725, # Ilíc et al. 2019
+      0.60   # Ilíc et al. 2019
+      )
+    
+  ); test_retest_cano2021 
+
+
+```
+
+Effect size calculation, including cluster bias correction
+
+```{r}
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(unique(Cano_vindel2021$analysis), each = 4),
+  filter_val2 = rep(c("Post", paste0(c(3, 6, 12), "m")), 2)
+)
+
+wide_cano2021_func <- 
+  function(filter_val1, filter_val2){
+  
+    Cano_vindel2021 |> 
+    filter(analysis == filter_val1 & timing == filter_val2) |> 
+    mutate(group = case_match(group, "TAU-GCBT" ~ "t", "TAU" ~ "c")) |>
+    tidyr::pivot_wider(
+      names_from = group,
+      names_glue = "{.value}_{group}",
+      values_from = N:last_col()
+    )   
+      
+  }
+ 
+Cano_vindel2021_est <- 
+  pmap(params, wide_cano2021_func) |> 
+  list_rbind() |> 
+  left_join(test_retest_cano2021) |> 
+  rename(ppcor = tr_reliability) |> 
+  mutate(
+    analysis_plan = case_when(
+      outcome == "GAD-7" ~ "using all/Anxiety",
+      outcome == "PHQ-9" ~ "using all/Depression",
+      outcome == "PHQ15" ~ "using all",
+      str_detect(outcome, "Funct") ~ "Social functioning",
+      str_detect(outcome, "QoL") ~ "Wellbeing and Quality of Life",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  relocate(analysis_plan) |> 
+  rowwise() |> 
+  mutate(
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    study = "Cano-Vindel et al. 2021",
+    main_es_calc_method = "Raw diff-in-diffs",
+    
+    ppcor_calc_method = "Based on test-retest reliability estimates",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+     
+    # Calculate d post
+    m_post = if_else(str_detect(outcome, "QoL"), m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/df_ind,
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
+    Wg_post = Wd_post,
+   
+    # Account for the fact that some outcomes are on different scales
+    m_diff_t = if_else(str_detect(outcome, "QoL"), m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
+    m_diff_c = if_else(str_detect(outcome, "QoL"), m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/df_ind,
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
+    g_DD = J * d_DD, 
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/df_ind,
+    Wg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
+    # Average cluster size in treatment group
+    # "held over a 12–14-week period in small groups (8–10 patients) in the primary care centre" (p. 3338)
+    avg_cl_size = 9, 
+    avg_cl_type = "From study (p. 3338)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    gamma_sqrt_icc005 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      ),
+    gamma_sqrt_icc02 = gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      ),
+    
+    n_covariates = 1,
+    
+    # Cluster-adjusting g_post
+    gt_post = g_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
+      ),
+    
+    gt_DD = g_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD"
+      ),
+    
+    gt_DD_icc005 = g_DD * gamma_sqrt_icc005,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_005, 
+      g = gt_DD_icc005, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD_icc005",
+      vars = vgt_DD_icc005:Wgt_DD_icc005
+      ),
+    
+    gt_DD_icc02 = g_DD * gamma_sqrt_icc02,
+    vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = ICC_02, 
+      g = gt_DD_icc02, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD_icc02",
+      vars = vgt_DD_icc02:Wgt_DD_icc02
+      ),
+    
+    vary_id = paste(analysis, outcome, timing, sep = "/")
+    
+  ) |> 
+  ungroup(); Cano_vindel2021_est 
+  
+
+```
+
 
 ### **Craigie & Nathan [-@Craigie2009]**
 #### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
@@ -933,13 +1403,25 @@ Craigie2009_est <-
     ) |> 
   left_join(ppcors_Craigie2009) |> 
   mutate(
-    F_val = c(
-      5.96, 9.84, 0.17, # (p. 307 left side bottom)
-      13.86, 16.96, 2.74 # (p. 308 right side top)
-    ),
+  
+  analysis_plan = rep(c("using all/Depression", "using all/Anxiety", "Wellbeing and Quality of Life"), 2),  
+  
+  effect_size = "SMD",
+  sd_used = "Pooled posttest SD",
     
+  study = "Craigie & Nathan 2009",
+  main_es_calc_method = "Raw diff-in-diffs",
+  
+  ppcor_calc_method = "Not relevant",
+  
   R2 = NA_real_,
   R2_calc_method = "Not relevant",
+  
+  F_val = c(
+    5.96, 9.84, 0.17, # (entered from p. 307 left side bottom)
+    13.86, 16.96, 2.74 # (entered from p. 308 right side top)
+  ),
+    
   
   N_total = N_t + N_c,
   df_ind = N_total,
@@ -1882,6 +2364,7 @@ test_dat <- covariates |>
 select(test_dat, varifier, vary_id)
 
 ```
+
 
 
 ## **Reference**
