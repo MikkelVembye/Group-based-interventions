@@ -476,7 +476,7 @@ Barbic2009_wide <-
 
   p_val_f = c(.05, .21, .96, .02), 
   df1 = 1, 
-  df2 = 32,
+  df2 = 31,
   F_val = qf(p_val_f, df1 = df1, df2 = df2, lower.tail = FALSE)
   )
 ```
@@ -488,7 +488,7 @@ Barbic2009_est <-
   mutate(
     analysis_plan = rep(
       c("Hope, Empowerment & Self-efficacy", "Wellbeing and Quality of Life", 
-        "Hope, Empowerment & Self-efficacy/uses all"), 
+        "Hope, Empowerment & Self-efficacy/using all"), 
       c(2, 1, 1))
   ) |> 
   rowwise() |> 
@@ -1368,7 +1368,7 @@ Craigie2009 <- tibble(
     62.45, 101.19
   ),
   
-  # From Wilson (2016)
+  # From Wilson (2016) Eq 31.
   r = ((sd_pre^2*F_within + sd_post^2*F_within) - 
         (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*F_within),
     
@@ -1405,7 +1405,6 @@ Craigie2009_est <-
   mutate(
   
   analysis_plan = rep(c("using all/Depression", "using all/Anxiety", "Wellbeing and Quality of Life"), 2),  
-  
   effect_size = "SMD",
   sd_used = "Pooled posttest SD",
     
@@ -1419,10 +1418,9 @@ Craigie2009_est <-
   
   F_val = c(
     5.96, 9.84, 0.17, # (entered from p. 307 left side bottom)
-    13.86, 16.96, 2.74 # (entered from p. 308 right side top)
+    13.86, 16.93, 2.74 # (entered from p. 308 right side top)
   ),
     
-  
   N_total = N_t + N_c,
   df_ind = N_total,
   
