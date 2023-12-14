@@ -2356,8 +2356,8 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 ```{r, eval=FALSE, include=FALSE}
 
 test_dat <- covariates |> 
-  filter(str_detect(authors, "Craigie")) |> 
-  bind_cols(Craigie2009_est)
+  filter(str_detect(authors, "Cano")) |> 
+  bind_cols(Cano_vindel2021_est)
 
 select(test_dat, varifier, vary_id)
 
