@@ -477,7 +477,7 @@ Barbic2009_wide <-
   p_val_f = c(.05, .21, .96, .02), 
   df1 = 1, 
   df2 = 31,
-  F_val = qf(p_val_f, df1 = df1, df2 = df2, lower.tail = FALSE)
+  F_val = qf(p_val_f/2, df1 = df1, df2 = df2, lower.tail = FALSE)
   )
 ```
 
@@ -1543,6 +1543,125 @@ Craigie2009_est <-
 ```
 
 
+### **Druss et al. [Insert]**
+
+```{r}
+
+Druss2010 <- tibble(
+  
+  outcome = rep(c(
+    "patient_activation",
+    "Physical_activity",
+    "medication_adherence",
+    "QoL_physical",
+    "QoL_mental"
+  ), each = 2,1),
+  
+  group = rep(c(
+    "HARP",
+    "TAU"
+  ), each = 1,5),
+  
+  N = rep(c(
+    41,39
+  ), each = 1,5),
+  
+  m_pre = c(
+    48.3, 47.6, # patient activation
+    150, 154, # Physical_activity
+    1.5, 1.5, # medication_adherence
+    36.9, 37.0, # QoL_physical
+    33.3, 33.9 # QoL_mental
+  ),
+  
+  sd_pre = c(
+    11.5, 12.3,
+    236, 194,
+    1.2, 1.4,
+    10.3, 12.5,
+    9.13, 9.3
+  ),
+  
+  m_post = c(
+    52.0, 44.9,
+    191, 152,
+    1.3, 1.6,
+    42.9, 40,
+    36.8, 37.0
+  ),
+  
+  sd_post = c(
+    10.1, 9.6,
+    278, 249,
+    1.3, 1.4,
+    14.2, 13.7,
+    10.0, 11.8
+  )
+  
+)
+
+Druss2010_wide <- 
+  Druss2010 |> 
+  mutate(group = case_match(group, "HARP" ~ "t", "TAU" ~ "c")) |> 
+    tidyr::pivot_wider(
+      names_from = group,
+      names_glue = "{.value}_{group}",
+      values_from = N:last_col()
+  ) |> 
+  mutate(
+    N_total = N_t + N_c,
+    p_val_baseline_diff = c(0.96, 0.88, 0.78, 0.98, 0.80), # From Table 2 (p. 268)
+    p_val_post_diff = c(0.01,0.14, 0.25, 0.27, 0.95), # From Table 2 (p. 268)
+    t_val_baseline_diff = qt(p_val_baseline_diff/2, df = N_total - 2, lower.tail = FALSE),
+    t_val_post_diff = qt(p_val_post_diff/2, df = N_total - 2, lower.tail = FALSE),
+    p_val_f = c(0.03, 0.4, 0.22, 0.41, 0.96),
+    F_val = qf(p_val_f/2, df1 = 1, df2 = N_total - 2, lower.tail = FALSE),
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    study = "Druss et al. 2010",
+    main_es_calc_method = "Raw diff-in-diffs",
+    
+    ppcor = NA,  
+    ppcor_calc_method = "F value used",
+    
+    R2 = NA_real_,
+    R2_calc_method = "Not relevant",
+    
+    df_ind = N_total,
+    
+    m_post = if_else(outcome != "medication_adherence", m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/df_ind,
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
+    Wg_post = Wd_post,
+    
+    m_diff_t = if_else(outcome != "medication_adherence", m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
+    m_diff_c = if_else(outcome != "medication_adherence", m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/F_val + d_DD^2/df_ind,
+    Wd_DD = d_DD^2/F_val,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/F_val + g_DD^2/df_ind,
+    Wg_DD = g_DD^2/F_val,
+    
+    
+    
+  ); Druss2010_wide
+
+```
+
+
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012]**
 #### (Multi-level analysis to handle clustering)
 
@@ -2317,6 +2436,8 @@ Amalgamating effect size data
 
 Amalgating covariates and effect size data
 ```{r dataamalgamation, eval=FALSE}
+# REMEMBER TO REMOVE EMPOWERMENT OUTCOME FROM BARBIC2009
+
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
 covariates <- read_xlsx(
