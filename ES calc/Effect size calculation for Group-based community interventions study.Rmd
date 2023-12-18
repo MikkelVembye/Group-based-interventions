@@ -2060,9 +2060,9 @@ Druss2010_est <-
 ```
 
 
-### **Gatz et al. 2007**
+### **Gatz et al. [-@Gatz2007]**
 
-Entering data from Table 2 (p. 872)
+Entering data from Table 2 (p. 872)   
 
 ```{r}
 
@@ -2116,9 +2116,12 @@ Gatz2007_est <-
       values_from = N:last_col()
     ) |> 
   mutate(
-    F_val = c(0.53, 1.23, 0.34, 3.99, 4.12),
+    F_val = c(0.53, 1.23, 0.34, 3.99, 4.12), # Table 2 (p. 872)
     
-    analysis_plan = c("Fill-in"),
+    analysis_plan = c(
+      "Alcohol and drug abuse/misuse", "Alcohol and drug abuse/misuse",
+      "using all", "using all", "Hope, Empowerment & Self-efficacy"
+    ),
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -3064,8 +3067,8 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 ```{r, eval=FALSE, include=FALSE}
 
 test_dat <- covariates |> 
-  filter(str_detect(authors, "Crawford")) |> 
-  bind_cols(Crawford2012_est)
+  filter(str_detect(authors, "Gatz")) |> 
+  bind_cols(Gatz2007_est)
 
 select(test_dat, varifier, vary_id)
 
