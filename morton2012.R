@@ -210,7 +210,7 @@ morton2012_est <-
       c(
         "The Borderline Evaluation of Severity over Time (BEST)", 
         "The Depression Anxiety Stress Scale (DASS)",
-        "The Beck Hopelessness Scale " 
+        "The Beck Hopelessness Scale (BHS)" 
         #"AAQ-II", 
         #"DERS total", 
         #"FFMQ total", 
