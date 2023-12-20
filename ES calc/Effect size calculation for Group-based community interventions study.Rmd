@@ -424,7 +424,7 @@ Acarturk2022_est
 ```
 
 
-### **Barbic et al.[-@Acarturk2022]**
+### **Barbic et al. [-@Barbic2009]**
 #### (Randomized trial reporting raw means at baseline and after treatment. Uses repeated ANOVA and does not account for clusting in treament)
 
 Entering data from Table 3 (p. 495).
