@@ -18,8 +18,8 @@ options(dplyr.print_min = 310) # This sets the minimum number of rows that will
 options(scipen = 10) # This sets the scientific notation precision in R to 10, 
 # meaning that numbers will be displayed with 10 digits of precision
 
-# Data from table 2, containing means and SD for health related quality of life 
-# (PCS and MCS),and table 3, containing means and SD for RAS
+# Data from table 2 (p. 532), containing means and SD for health related quality of life 
+# (PCS and MCS),and table 3 (p. 533), containing means and SD for RAS
 
 druss2018 <- tibble(
   group = as.factor(rep(c("Intervention", 
@@ -131,4 +131,5 @@ druss2018_est <-
     
   ) |> 
   ungroup()
+
 
