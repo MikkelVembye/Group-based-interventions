@@ -220,10 +220,15 @@ morton2012_est <-
   ) |> 
   rowwise() |> 
   mutate(
+    study = "Morton et al. 2012",
+    
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    m_post =  m_post_t - m_post_c,
+# For all outcomes lower scores are beneficial, besides AAQ-11, why these are reverted
+    m_post = if_else(outcome != "AAQ-II", (m_post_t - m_post_c)*-1, 
+                     m_post_t - m_post_c),
+                     
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
