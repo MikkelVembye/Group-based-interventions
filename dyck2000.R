@@ -84,13 +84,13 @@ dyck2000_est <-
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
-    vd_post = (1/N_t + 1/N_c) + d_post^2/df_ind,
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
     Wd_post = (1/N_t + 1/N_c),
     
     J = 1 - 3/(4*df_ind-1),
     
     g_post = J * d_post,
-    vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
   ) |> 
