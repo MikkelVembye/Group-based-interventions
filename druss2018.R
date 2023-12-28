@@ -109,14 +109,17 @@ druss2018_est <-
     c("Patient activation measureMorisky scale Recovery assessment scale (RAS)", # RAS
       "Short-Form Health Survey (SF-36)= Quality of life", # PCS & MCS
       "Short-Form Health Survey (SF-36)= Quality of life" # PCS & MCS
-    ), each = 1,4)
+    ), each = 1,4),
+    
+    study = "Druss et al. 2018"
+    
  ) |> 
   rowwise() |> 
   mutate(
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    m_post =  m_post_t - m_post_c,
+    m_post =  (m_post_t - m_post_c),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
