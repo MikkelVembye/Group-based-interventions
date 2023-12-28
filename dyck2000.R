@@ -79,7 +79,8 @@ dyck2000_est <-
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    m_post =  m_post_t - m_post_c,
+  # The outcome MSANS reverted because lower score is beneficial
+    m_post =  (m_post_t - m_post_c)*-1,
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
