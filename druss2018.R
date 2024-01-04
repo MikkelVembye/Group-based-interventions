@@ -78,7 +78,7 @@ druss2018 <- tibble(
 
 # Turning data into wide format
 params <- tibble(
-  filter_val1 = rep(c(paste0(c(3, 6), "m")), 2)
+  filter_val1 = rep(c(paste0(c(3, 6), "m")), 1)
 )
 
 wide_druss2018_func <- 
@@ -101,15 +101,15 @@ druss2018_est <-
   list_rbind() |>
 # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
   mutate(
-    p_val_f = rep(c(0.02, 0.046, 0.039), each = 1,4),
+    p_val_f = rep(c(0.02, 0.046, 0.039), each = 1,2),
     df1 = 2,
-    df2 = rep(c(704, 697, 697), each = 1,4), 
-    F_val = rep(c(3.79, 3.09, 3.25), each = 1,4),
+    df2 = rep(c(704, 697, 697), each = 1,2), 
+    F_val = rep(c(3.79, 3.09, 3.25), each = 1,2),
     analysis_plan = rep(
     c("Patient activation measureMorisky scale Recovery assessment scale (RAS)", # RAS
       "Short-Form Health Survey (SF-36)= Quality of life", # PCS & MCS
       "Short-Form Health Survey (SF-36)= Quality of life" # PCS & MCS
-    ), each = 1,4),
+    ), each = 1,2),
     
     study = "Druss et al. 2018"
     
