@@ -18,7 +18,7 @@ options(scipen = 10) # This sets the scientific notation precision in R to 10,
 morton2012 <- tibble(
   group = as.factor(rep(c("Intervention", 
                           "Control"), 
-                        each = 1,9)),
+                        each = 1,5)),
   
   outcome = as.factor(rep(c("BEST_composite",
   #                          "BEST_BPD_thoughts_&_feelings", The subscaled are removed 
@@ -29,15 +29,15 @@ morton2012 <- tibble(
                             "DASS_anxiety",
                             "DASS_depression",
                             "BHS",
-                            "AAQ-II",
-                            "DERS_total",
-                            "FFMQ_total",
-                            "ACS_total"
+ #                            "AAQ-II",
+ #                           "DERS_total",
+ #                           "FFMQ_total",
+ #                            "ACS_total"
   ),
   each = 2,1)),
   
   N = rep(c(21, 20),
-          each = 1,9),
+          each = 1,5),
   
   
   m_pre = c(
@@ -131,7 +131,11 @@ morton2012_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
     Wg_post = Wd_post,
     
-  )
+  ) |> 
+  ungroup()
+
+Kig på på Carige fro videre 
+
   
 
 

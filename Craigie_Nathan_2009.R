@@ -131,7 +131,7 @@ craigie_and_nathan2009_est <-
                      m_post_t - m_post_c,
                      (m_post_t - m_post_c) * -1),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
-    gr
+  
     d_post = m_post/sd_pool, 
     vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
     Wd_post = (1/N_t + 1/N_c),
