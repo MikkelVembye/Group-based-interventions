@@ -29,11 +29,11 @@ craigie_and_nathan2009 <- tibble(
   "BAI",
   "Q_LES_Q"), each = 2,2),
   
-  treatment = rep(c(
+  group = rep(c(
     "individual",
     "group"), each = 1, 6), 
   
-  n = c(rep(c(116, 240), each = 1,3),
+  N = c(rep(c(116, 240), each = 1,3),
         rep(c(77, 157), each = 1,3)
         
   ),
@@ -84,10 +84,64 @@ craigie_and_nathan2009 <- tibble(
     9.9, 12.4,
     8.3, 10.7,
     14.7, 15.8
-  ),
-  
-  # Calculating the differences
-  m_diff = m_post  - m_pre,
+  )
   
 )
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(unique(craigie_and_nathan2009$analysis))
+)
+
+
+wide_craigie_and_nathan2009_func <- 
+  function(filter_val1){
+    
+    craigie_and_nathan2009 |> 
+      filter(analysis == filter_val1) |> 
+      mutate(group = case_match(group, "group" ~ "t", "individual" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+
+craigie_and_nathan2009_est <- 
+  pmap(params, wide_craigie_and_nathan2009_func) |> 
+  list_rbind() |> 
+  mutate(
+    analysis_plan = rep(c(
+      "Beck Depression Inventory-II",
+      "Beck Anxiety Inventory (BAI)",
+      "Quality of Life Enjoyment and Satisfaction Questionnaire (Q-LES-Q)"), each = 1,2
+      )
+  ) |> 
+  rowwise() |> 
+  mutate(
+    study = "Craig & Nathan 2009",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # The outcomes BAI and BDI-II are reverted because lower score is beneficial
+    m_post = if_else(analysis_plan != "Quality of Life Enjoyment and Satisfaction Questionnaire (Q-LES-Q)", 
+                     m_post_t - m_post_c,
+                     (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    gr
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+  ) |> 
+  ungroup()
 
