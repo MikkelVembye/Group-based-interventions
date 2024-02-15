@@ -263,9 +263,9 @@ Acarturk2022_es <-
     N_t = N[1],
     N_c = N[2],
     
-    N_tot = N_t + N_c, 
+    N_total = N_t + N_c, 
     
-    df_ind = N_tot,
+    df_ind = N_total,
     
     n_covariates = 1,
     
@@ -276,7 +276,7 @@ Acarturk2022_es <-
     se_d_paper = if_else(se_d_paper == 0, sqrt(sum(1/N)) * eta_acarturk_sqrt, se_d_paper),
     vd_paper = se_d_paper^2,
     
-    sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_tot-2) ),
+    sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_total-2) ),
     m_diff_post = (m_post[1] - m_post[2]) * -1,
     
     # Difference in differences measures
@@ -285,9 +285,9 @@ Acarturk2022_es <-
     
     DD = diff_t - diff_c,
     
-    d_posttest = m_diff_post/sd_pool, 
-    vd_posttest = sum(1/N) + d_posttest^2/(2*df_ind),
-    Wd_posttest = sum(1/N),
+    d_post = m_diff_post/sd_pool, 
+    vd_post = sum(1/N) + d_post^2/(2*df_ind),
+    Wd_post = sum(1/N),
     
     d = DD/sd_pool,
     vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
@@ -299,9 +299,9 @@ Acarturk2022_es <-
     
     J = 1 - 3/(4*df_ind-1),
     
-    g_posttest = J * d_posttest,
-    vg_posttest = sum(1/N) + g_posttest^2/(2*df_ind),
-    Wg_posttest = Wd_posttest,
+    g_post = J * d_post,
+    vg_post = sum(1/N) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
     
     g = J * d, 
     vg = 2*(1-ppcor) * sum(1/N) + g^2/(2*df_ind), 
@@ -328,13 +328,13 @@ Acarturk2022_es <-
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
       ),
     gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
       ),
     
     gt = g * gamma_sqrt,
@@ -396,7 +396,7 @@ Acarturk2022_es <-
     
     gt_alt_type = "Posttest reported in paper",
 
-    gt_posttest = g_posttest * gamma_sqrt,
+    gt_posttest = g_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
@@ -2333,13 +2333,13 @@ Timmermans2012_es <-
     N_t = N[1],
     N_c = N[2],
     
-    N_tot = N_t + N_c, 
+    N_total = N_t + N_c, 
     
-    df_ind = N_tot,
+    df_ind = N_total,
     
     n_covariates = 1,
     
-    sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_tot-2) ),
+    sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_total-2) ),
     m_diff_post = m_post[1] - m_post[2],
     
     # Pretest adjusted means
@@ -2355,9 +2355,9 @@ Timmermans2012_es <-
     
     # Converting Loneliness measure since "Possible scores range from 0 to 11, 
     # with higher scores indicating more loneliness." (p. 58)
-    d_posttest = if_else(unique(outcome) == "Loneliness", m_diff_post/sd_pool * -1, m_diff_post/sd_pool),
-    vd_posttest = sum(1/N) + d_posttest^2/(2*df_ind),
-    Wd_posttest = sum(1/N),
+    d_post = if_else(unique(outcome) == "Loneliness", m_diff_post/sd_pool * -1, m_diff_post/sd_pool),
+    vd_post = sum(1/N) + d_post^2/(2*df_ind),
+    Wd_post = sum(1/N),
     
     d = if_else(unique(outcome) == "Loneliness", b_adj/sd_pool * -1, b_adj/sd_pool),
     vd = sum((se_b_adj/sd_pool)^2) + d^2/(2*df_ind),
@@ -2371,9 +2371,9 @@ Timmermans2012_es <-
     
     J = 1 - 3/(4*df_ind-1),
     
-    g_posttest = J * d_posttest,
-    vg_posttest = sum(1/N) + g_posttest^2/(2*df_ind),
-    Wg_posttest = Wd_posttest,
+    g_post = J * d_post,
+    vg_post = sum(1/N) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
     
     g = J * d, 
     vg = sum((se_b_adj/sd_pool)^2) + g^2/(2*df_ind), 
@@ -2402,7 +2402,7 @@ Timmermans2012_es <-
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
     gt = g * gamma_sqrt,
@@ -2433,7 +2433,7 @@ Timmermans2012_es <-
     
     gt_alt_type = "DiD from raw means",
     
-    gt_posttest = g_posttest * gamma_sqrt,
+    gt_posttest = g_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
@@ -3290,9 +3290,9 @@ Wuthrich2013_2021_es_smd <-
     
     N_t = N[1],
     N_c = N[2],
-    N_tot = sum(N),
+    N_total = sum(N),
     
-    df_ind = N_tot,
+    df_ind = N_total,
     
     n_covariates = q[1],
     
@@ -3308,7 +3308,7 @@ Wuthrich2013_2021_es_smd <-
     DD_emm = dif_t_emm - dif_c_emm,
     # Reverting outcomes so all outcomes has the same direction
     DD_emm = if_else(unique(outcome) != "SF12", DD_emm * -1, DD_emm),
-    sd_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_tot-2)),
+    sd_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_total-2)),
     
     d = DD_emm/sd_pool,
     vd = sum(1/N) + d^2/(2*df_ind),
@@ -3344,13 +3344,13 @@ Wuthrich2013_2021_es_smd <-
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
       ),
     gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_tot, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
       ),
     
     gt = g * gamma_sqrt,
@@ -3549,7 +3549,8 @@ group_based_dat_es <-
   bind_rows(
     Timmermans2012_est,
     Wuthrich2013_2021_est,
-    Acarturk2022_est
+    Acarturk2022_est,
+    Craigie2009_est
   ) |> 
   relocate(sd_pool, .after = sd_used) |> 
   relocate(emm_pre_t:DD_emm, .after = se_b_adj_c)
