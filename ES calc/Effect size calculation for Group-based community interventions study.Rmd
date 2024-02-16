@@ -246,6 +246,7 @@ Acarturk2022_es <-
   mutate(
     ppcor = rep(Acarturk_text_res$ppcor, each = 2)
   ) |> 
+  
   summarise(
     
     effect_size = "SMD",
@@ -416,7 +417,13 @@ Acarturk2022_est <-
   left_join(Acarturk2022_wide, Acarturk2022_es) |> 
   relocate(study) |> 
   mutate(
-    vary_id = paste0(outcome, "/", timing)
+    vary_id = paste0(outcome, "/", timing),
+    analysis_plan = case_when(
+      outcome == "HSCL-25" ~ "The Hopkins Symptoms Checklist (HSCL-25) ",
+      outcome == "PCL-5" ~ "PCL-5 consists of 20 items asking about the symptoms of traumatic stress",
+      outcome == "PSYCHLOPS" ~ "PSYCHOLOPS consists of four questions, three domains (problems, functions and well-being)",
+      TRUE ~ NA_character_  # Fallback in case of unexpected outcomes
+    )
   )
 
 Acarturk2022_est
@@ -2456,8 +2463,15 @@ Timmermans2012_es <-
 Timmermans2012_est <- 
   left_join(Timmermans2012_wide, Timmermans2012_es) |> 
   select(-c(es_paper_c, es_paper_t)) |> 
-  mutate(vary_id = paste0(outcome, "/", timing))
-
+  mutate(vary_id = paste0(outcome, "/", timing),
+         analysis_plan = case_when(
+           outcome == "Empoverment"  ~  "The Dutch Empowerment Scale", 
+           outcome == "Hope"  ~ "The Herth Hope Index", 
+           outcome == "Quality"  ~ "The Manchester Short Assessment of Quality of Life", 
+           outcome == "Self-e"  ~ "The Mental Health Confidence Scale", 
+           outcome == "Loneliness"  ~ "The Loneliness Scale"
+         )
+      )
 
 #clubSandwich::impute_covariance_matrix(
 #  vi = Timmermans2012_est$vgt,
@@ -3489,8 +3503,21 @@ Wuthrich2013_OR_dat
 Wuthrich2013_2021_est <- 
   bind_rows(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat) |> 
   mutate(
-    vary_id = outcome
+    vary_id = outcome,
+    analysis_plan = case_when(
+      
+           outcome == "Primary problem"  ~  "the Anxiety Disorders Interview Schedule for DSM-IV (ADIS- IV)", 
+           outcome == "Anxiety"  ~ "the Anxiety Disorders Interview Schedule for DSM-IV (ADIS- IV)", 
+           outcome == "Depression"  ~ "Geriatric Depression Scale (GDS)", 
+           outcome == "GDS"  ~ "Geriatric Depression Scale (GDS)", 
+           outcome == "Loneliness (CES-D 14)"  ~ "The Center for Epidemiologic Studies-Depression Scale",
+           outcome == "GAI" ~ "The Geriatric Anxiety Inventory (GAI)",
+           outcome == "PSWQ" ~ "The Penn State Worry Questionnaire (PSWQ)",
+           outcome == "SF12" ~ "Short Form-12",
+           outcome == "Recovery rates" ~ "???" # Couldn't figure this one out (Jakob)
+         )
   )
+
 
 Wuthrich2013_2021_est
 
@@ -3539,21 +3566,39 @@ Amalgating covariates and effect size data
 
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
-covariates <- read_xlsx(
-  "Descriptive coding scheme for group-based interventions (data).xlsx",
-  na = c(".", "")
-)
+# covariates <- read_xlsx(
+#  "Descriptive coding scheme for group-based interventions (data).xlsx",
+#  na = c(".", "")
+# )
 
+# To do it on my computer (Jakob)
+ covariates <- read_xlsx(
+  "JKJ.xlsx",
+  na = c(".", "")
+ )
+
+
+
+# Integrate the timing variable across datasets, it's necessary to convert  the timing 
+# column in the Crawford2012 dataset to a character type, aligning it with the 
+# corresponding column in other datasets
+Crawford2012_est <- Crawford2012_est |> 
+  mutate(timing = as.character(timing))
 
 group_based_dat_es <- 
   bind_rows(
     Timmermans2012_est,
     Wuthrich2013_2021_est,
     Acarturk2022_est,
-    Craigie2009_est
+    Barbic2009_est,
+    Craigie2009_est,
+    Crawford2012_est,
+    Druss2010_est,
+    Gatz2007_est,
+    Gordon2018_est
+    
   ) |> 
-  relocate(sd_pool, .after = sd_used) |> 
-  relocate(emm_pre_t:DD_emm, .after = se_b_adj_c)
+  relocate(sd_pool, .after = sd_used) 
 
 group_based_dat <- 
   bind_cols(
