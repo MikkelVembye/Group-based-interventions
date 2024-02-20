@@ -3810,12 +3810,13 @@ group_based_dat_es <-
     Craigie2009_est,
     Crawford2012_est,
     Druss2010_est,
+    Druss2018_est,
+    Dyck2000_est,
     Gatz2007_est,
     Gordon2018_est
     
   ) |> 
   relocate(sd_pool, .after = sd_used) 
-
 
 group_based_dat <- 
   bind_cols(
