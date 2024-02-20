@@ -2257,6 +2257,94 @@ Druss2018_est <- Druss2018_est |>
 
 ```
 
+### **Dyck et al. [-@Dyck2000]**
+```{r Dyck et al. 2000}
+# Data from table 2 (p. 516) containing means and standard deviation
+
+Dyck2000 <- tibble(
+  group = as.factor(c("Multiple-family group", 
+                          "Standard care")),
+  outcome = "MSANS", #The modified Scale for the Assessment of Negative Symptoms
+  N = 21,
+  
+  m_pre = c(
+    7.9, 8.7
+  ),
+  
+  m_post = c(
+#    7.4, 9.1, # 3 months
+#    7.2, 8.9, # 6 months
+#    7.2, 8.9, # 9 months
+    7.2, 8.4 # 12 months, the real post-treatment measure because the treatment
+             # ends after 12 months.
+  ),
+  
+  
+  sd_pre = c(
+    3.1, 3.3 
+  ),
+  
+  sd_post = c(
+#    2.3, 3.2, # 3 months
+#    2.1, 2.7, # 6 months
+#    2.1, 3,   # 9 months
+    2, 3.1    # 12 months, the real post-treatment measure because the treatment
+              # ends after 12 months.
+  )
+)
+
+
+
+# Making the dyck2000 tibble wide in order to estimate the effect sizes and
+# further analysis. 
+Dyck2000_wide <-
+  Dyck2000 |> 
+  mutate (group = case_match(
+    group, "Multiple-family group"  ~ "t", "Standard care" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )
+
+# Effect size calculating 
+Dyck2000_est <-           
+  Dyck2000_wide |>
+  mutate(
+    analysis_plan = "The modified Scale for the Assessment of Negative Symptoms" 
+    )|> 
+  rowwise() |> 
+  mutate(
+    study = "Dyck et al. 2000",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+  # The outcome MSANS reverted because lower score is beneficial
+    m_post =  (m_post_t - m_post_c)*-1,
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+  ) |> 
+  ungroup()
+
+Dyck2000_est <- Dyck2000_est |> 
+   mutate(vary_id = paste0(outcome)
+      )
+
+  
+
+```
+
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Change var names)**
 #### (Multi-level analysis to handle clustering)
 
