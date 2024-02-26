@@ -203,7 +203,7 @@ izquierdo2021_est <-
         "The expanded brief psychiatric rating scale" # Total score
       ), each = 1,3),
     
-    study = "Hagen et al. 2021"
+    study = "Izquierdo et al. 2021"
     
   )
 
