@@ -1615,7 +1615,7 @@ Crawford2012 <-
     group = rep(rep(c("Standard care", "Activity groups", "Art therapy"), 2), n_distinct(outcome)),
     timing = rep(rep(c(12, 24), each = n_distinct(group)), n_distinct(outcome)),
     
-    N_baseline = rep(rep(c(137, 140, 140), 2), n_distinct(outcome)),
+    N_start = rep(rep(c(137, 140, 140), 2), n_distinct(outcome)),
     N = rep(c(121, 121, 119, 117, 121, 117), n_distinct(outcome)),
     
     m_pre = c(
@@ -1711,7 +1711,7 @@ Crawford2012_act_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N_baseline:last_col()
+    values_from = N_start:last_col()
   ) |> 
   mutate(
     treatment = "Activity groups"
@@ -1725,7 +1725,7 @@ Crawford2012_art_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N_baseline:last_col()
+    values_from = N_start:last_col()
   ) |> 
   mutate(
     treatment = "Art therapy"
@@ -3719,7 +3719,7 @@ lloyd_Evans2020_IQR <- tibble(
                           each = 2,1)
   ),
   
-  n_pre = rep(c(30,10),
+  N_start = rep(c(30,10),
           each = 1,5),
   
   firstq_pre = c(
@@ -3827,7 +3827,7 @@ lloyd_Evans2020_IQR <- tibble(
     q1.val = firstq_pre,
     med.val = median_pre,
     q3.val = thirdq_pre,
-    n = n_pre
+    n = N_start
   )[c("est.mean", "est.sd")])) |> 
   unnest_wider(pre, names_sep = "_") |> 
   rowwise() |> 
@@ -3858,7 +3858,7 @@ lloyd_Evans2020_means <- tibble(
   each = 2,1)
   ),
   
-  n_pre = rep(c(30,10),
+  N_start = rep(c(30,10),
           each = 1,1),
   
   m_pre = c(
@@ -3894,7 +3894,7 @@ lloyd_Evans2020_means <- tibble(
 # Combing the obejct so i have the all the data from table 2 in one obejct
 lloyd_Evans2020 <- lloyd_Evans2020_IQR|> 
   full_join(lloyd_Evans2020_means) |> 
-  select(group, outcome, N, m_pre, sd_pre, m_post, sd_post); lloyd_Evans2020
+  select(group, outcome, N, m_pre, sd_pre, m_post, sd_post, N_start); lloyd_Evans2020
 
 
 # Turning dataset into wide format
