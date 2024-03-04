@@ -15,10 +15,10 @@ options(scipen = 10) # This sets the scientific notation precision in R to 10,
 # meaning that numbers will be displayed with 10 digits of precision
 
 
-morton2012 <- tibble(
+Morton2012 <- tibble(
   group = as.factor(rep(c("Intervention", 
                           "Control"), 
-                        each = 1,5)),
+                        each = 1,6)),
   
   outcome = as.factor(rep(c("BEST_composite",
   #                          "BEST_BPD_thoughts_&_feelings", The subscaled are removed 
@@ -30,26 +30,26 @@ morton2012 <- tibble(
                             "DASS_depression",
                             "BHS",
  #                            "AAQ-II",
- #                           "DERS_total",
+                            "DERS_total"
  #                           "FFMQ_total",
  #                            "ACS_total"
   ),
   each = 2,1)),
   
   N = rep(c(21, 20),
-          each = 1,5),
+          each = 1,6),
   
   
   m_pre = c(
     44.57, 49.80, # BEST composite
-    28.48, 30.3, # DASS stress
-    23.33, 24.20,# DASS anxiety
+     28.48, 30.3, # DASS stress
+     23.33, 24.20,# DASS anxiety
     31.52, 33.7, # DASS depression
     14.40, 15.7, # BHS
-    24.10, 22.55,# AAQ-II
-    131.76, 134.42, # DERS total
-    96.52, 92.15,# FFMQ total
-    4.86, 4.93   # ACS total
+    # 24.10, 22.55,# AAQ-II
+     131.76, 134.42 # DERS total
+    # 96.52, 92.15,# FFMQ total
+    # 4.86, 4.93   # ACS total
   ),
   
   sd_pre = c(
@@ -58,10 +58,10 @@ morton2012 <- tibble(
     9.34, 11.76,
     10.86, 8.74,
     4.87, 3.58,
-    9.29, 8.32,
-    25.15, 19.45,
-    23.01, 20.81,
-    0.74, 0.68
+    # 9.29, 8.32,
+     25.15, 19.45
+    # 23.01, 20.81,
+    # 0.74, 0.68
   ),
   
   m_post = c(
@@ -70,10 +70,10 @@ morton2012 <- tibble(
     19.67, 26.28,
     22.67, 31.00,
     9.7, 16.43,
-    35.3, 23.1,
-    113.04, 140.04,
-    108.81, 90.87,
-    4.35, 5.08
+  #  35.3, 23.1,
+    113.04, 140.04
+  #  108.81, 90.87,
+  #  4.35, 5.08
   ), 
   
   sd_post = c(
@@ -82,19 +82,18 @@ morton2012 <- tibble(
     11.02, 8.33,
     14.73, 8.51,
     6.34, 3.69,
-    10.8, 7.1,
-    17.64, 20.88,
-    19.11, 20.67,
-    0.65, 0.56
+  #  10.8, 7.1,
+    17.64, 20.88
+  #  19.11, 20.67,
+  #  0.65, 0.56
   )
   
- # m_diff = m_post - m_pre,
-  
-); morton2012
+
+); Morton2012
 
 
-morton2012_wide <-
-  morton2012 |> 
+Morton2012_wide <-
+  Morton2012 |> 
   mutate (group = case_match(
     group, "Intervention"  ~ "t", "Control" ~ "c")) |> 
   tidyr::pivot_wider(
@@ -105,20 +104,21 @@ morton2012_wide <-
 
 
 
-morton2012_est <- 
-  morton2012_wide |>
+Morton2012_est <- 
+  Morton2012_wide |>
   mutate(
     analysis_plan = rep(
       c("BEST composite", "DASS stress", "DASS anxiety","DASS depression", 
-        "BHS", "AAQ-II", "DERS total", "FFMQ total", "ACS total"), 
-      c(1, 1, 1, 1, 1, 1, 1, 1, 1))
+        "BHS", "DERS total"), 
+      c(1, 1, 1, 1, 1, 1))
   ) |> 
   rowwise() |> 
   mutate(
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    m_post =  m_post_t - m_post_c,
+    # reverting all scores as lower score is beneficial
+    m_post =  (m_post_t - m_post_c) * -1,
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
@@ -131,10 +131,11 @@ morton2012_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/df_ind,
     Wg_post = Wd_post,
     
+    vary_id = outcome
+    
   ) |> 
   ungroup()
 
-Kig på på Carige fro videre 
 
   
 
