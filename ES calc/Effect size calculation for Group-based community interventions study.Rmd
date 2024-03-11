@@ -4550,6 +4550,136 @@ Patterson2003_est <-
   ungroup()
 ```
 
+### **Popolo et al. [-@Popolo2019]**
+```{r Popolo et al. 2019}
+# Data from table 2 containing means and standard deviation + within effect size.
+# Table also contains "between group-group post treatment effect size at post-tratement"
+# with a coefficient and "Post hoc power" on page 351
+
+Popolo2019 <- tibble(
+  group = as.factor(rep(c("Intervention", 
+                          "Control"), 
+                        each = 1,3)),
+  
+  outcome = as.factor(rep(c("CORE_OM",
+                            "DERS",
+                            "TAS"
+#                            "Metacognition_self",
+#                            "Metacognition_others",
+#                            "Metacognition_decentration",
+#                            "Metacognition_mastery"
+), each = 2,1)),
+  
+  N = rep(c(10, 10), each = 3), 
+  
+  m_pre = c(
+    12.85, 15.24, # CORE-OM Total
+    95, 100.9, # DERS Total
+    54.2, 51.5 # TAS Total
+#    4.3, 4.1, # Metacognition Self
+#    2.1, 2.85, # Metacognition Others
+#    0.75, 1.15, # Metacognition Decentration 
+#    2.9, 3.3    # Metacognition Mastery
+  ),
+  
+  sd_pre = c(
+    4.6, 6.68,
+    16.19, 17.67,
+    11.52, 10.99
+#    1.32, 0.97,
+#    0.52, 1.31,
+#    0.75, 1.03,
+#    1.07, 0.67
+  ),
+  
+  m_post = c(
+    7.68, 11.78,
+    76.4, 97.11,
+    43.5, 52.63
+#    5.75, 3.35,
+#    2.9, 3.3,
+#    1.15, 0.7,
+#    4.18, 3.05
+  ),
+  
+  sd_post = c(
+    1.94, 4.59,
+    26.78, 29.12,
+    11.7, 12.59
+#    1.36, 1.27,
+#    1.07, 0.67,
+#    1.03, 0.48,
+#    1.35, 1.23
+  ), 
+  
+# Within-group effect size baseline – 3-month follow-up
+  within_group_effect = c( 
+    1.14, 0.64,
+    0.74, 0.16,
+    1.11, 0.10
+#    1.73, 0.56,
+#    0.99, 0.32,
+#    0.59, 0.51,
+#    1.51, 0.20
+  )
+
+)
+
+
+Popolo2019_wide <-
+  Popolo2019 |> 
+  mutate (group = case_match(
+    group, "Intervention"  ~ "t", "Control" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )
+
+
+
+Popolo2019_est <- 
+  Popolo2019_wide |>
+  mutate(
+    
+    study = "Morton et al. 2012",
+    
+    analysis_plan =
+      c("Clinical Outcomes in Routine Evaluation Outcome Measure (CORE-OM)", 
+        "Difficulties in Emotion Regulation Scale (DERS)", 
+        "The Toronto Alexithymia Scale – 20 (TAS-2)"),
+    
+    # Between-group post-treatment effect size at post-treatment from table 2, p. 351
+    d = c(1.16, 0.73, 0.75), 
+    post_hoc_power = c(0.8, 0.47, 0.49)
+    
+    )|> 
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # reverting all scores as lower score is beneficial
+    m_post =  (m_post_t - m_post_c) * -1,
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = outcome
+    
+  ) |>
+  ungroup()
+
+```
+
 ### **Sajatovic et al. [-@Sajatovic2009]**
 ```{r}
 # Data from table 2 (p. 1186) provides mean and standard deviation. Table also 
@@ -5197,6 +5327,7 @@ group_based_dat_es <-
     Morley2014_est,
     Morton2012_est, 
     Patterson2003_est,
+    Popolo2019_est,
     Sajatovic2009_est
     
   ) |> 
