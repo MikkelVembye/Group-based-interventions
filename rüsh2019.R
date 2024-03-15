@@ -25,33 +25,34 @@ options(scipen = 10) # This sets the scientific notation precision in R to 10,
 Rüsch2019 <- tibble(
   group = as.factor(rep(c("Intervention", 
                           "Control"), 
-                        each = 1,14)),
+                        each = 1,12)),
   
   timing = rep(c("6w", 
                  "12w"), 
-               each = 14,1),
+               each = 12,1),
 
   outcome = as.factor(rep(c("Job_search", 
                             "Help_seeking", 
                             "SISR",
                             "SSMIS_SF",
                             "CES-D", 
-                            "BHS",  
-                            "Secrecy"), 
+                            "BHS"  
+                          #  "Secrecy"
+                            ), 
                           each = 2,2 )
                       ),
   
   N = c(rep(c(
     18, 17), # 6 weeks 
-     times = 7), 
+     times = 6), 
         rep(c(
     
     20, 13), # 12 weeks
-    times = 7)),
+    times = 6)),
   
   N_start = rep(c(
     23, 19
-  ), each = 1,14),
+  ), each = 1,12),
   
   m_pre = rep(c(
     3.1, 3.3, # Job-search self-efficacy (1–5)
@@ -59,8 +60,8 @@ Rüsch2019 <- tibble(
     15.3, 16.3, # Recovery (SISR: 4–24)
     17.3, 17.3,  # Self-stigma (SSMIS-SF: 5–45)
     39.2, 41.4, # Depressive symptoms (CES-D: 15–60)
-    14.9, 14.1, # Hopelessness (BHS: 4–24)
-    4.0, 3.7   # Link’s 5-item Secrecy Scale
+    14.9, 14.1 # Hopelessness (BHS: 4–24)
+#    4.0, 3.7   # Link’s 5-item Secrecy Scale
   ), each = 1,2),
   
   sd_pre = rep(c(
@@ -69,12 +70,12 @@ Rüsch2019 <- tibble(
     4.1, 4.2,
     4.3, 8.1,
     7.4, 7.2,
-    3.6, 4.5, 
-    1.2, 1.6
+    3.6, 4.5 
+#    1.2, 1.6
   ), each = 1,2),
   
   m_post = c(
-    # 3 Weeks
+  # 3 Weeks
   #  3.2, 3.2, 
   #  3.6, 3,
   #  16.1, 15.9, 
@@ -90,7 +91,7 @@ Rüsch2019 <- tibble(
     14.6, 19.1, 
     31.5, 40.1, 
     12.6, 14.2, 
-    3.5, 3.9,
+#    3.5, 3.9,
     
     # 12 weeks 
     3.2, 3.2,
@@ -98,8 +99,8 @@ Rüsch2019 <- tibble(
     17.3, 15.7,
     15.4, 18.3,
     32, 37.5,
-    12.3, 14.4,
-    3.7, 4.4
+    12.3, 14.4
+#    3.7, 4.4
     
   ),
   
@@ -121,7 +122,7 @@ sd_post = c(
   7.9, 8.7,
   8.5, 10.1,
   3.6, 5, 
-  1.3, 1.7,
+#  1.3, 1.7,
   
   # 12 weeks
   1, 0.9, 
@@ -129,8 +130,8 @@ sd_post = c(
   3.5, 2.6,
   7, 9.6,
   7.6, 9.8,
-  4.2, 3,
-  0.9, 1.4
+  4.2, 3
+#  0.9, 1.4
  )
 ); Rüsch2019
 
@@ -159,13 +160,72 @@ wide_Rüsch2019_func <-
 Rüsch2019_est <- 
   pmap(params, wide_Rüsch2019_func) |>
   list_rbind() |>
-  # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
+  
   mutate(
     analysis_plan = rep(
       c(
-        "Positive And Negative Syndromes Scale (PANSS)", # PANSS
-        "Positive And Negative Syndromes Scale (PANSS)", # PANSS
-        "Positive And Negative Syndromes Scale (PANSS)", # PANSS
-        "Hamilton Depression Rating Scale (HAM-D)", # HAM-D
-        "Health-related quality of life, with the Quality of Well-Being (QWB) Scale" # QWB
-      )
+        "6-item Job Search Self-Efficacy Scale",
+        "item General Help-Seeking Questionnaire",
+        "the 4-item part B of the Self-Identified Stage of Recovery Scale",
+        "5-item self-concurrence subscale of the Self-Stigma of Mental Illness Scale-Short Form",
+        "the 15-item German version of the Center for Epidemiologic Studies-Depression Scale",
+        "short 4-item version of Beck’s Hopelessness Scale"
+      #  "Link’s 5-item Secrecy Scale"
+        
+      ), each = 1,2),
+    
+    # ANCOVA estimates taken from table 1, p. 335
+    F_val = c(
+      # 6 weeks
+      1.4, 0.2, 4.6, 10.8, 6.3, 3.4,
+      # 12 weeks
+      0.01, 0.04, 1.9, 1.5, 0.9, 2.4
+    ),
+    
+    eta_sqrt = c(
+      # 6 weeks
+      0.04, 0.007, 0.13, 0.25, 0.17, 0.10,
+      
+      # 12 weeks
+      0.01, 0.01, 0.06, 0.05, 0.03, 0.07
+    ),
+    
+    p_val_f = c(
+      # 6 weeks
+      0.24, 0.64, 0.039, 0.08, 0.17, 0.08,
+      
+      # 12 weeks
+      0.96, 0.85, 0.17, 0.23, 0.35, 0.14
+      
+    ),
+      
+      study = "Rüsch et al. 2019") |> 
+      
+      rowwise() |> 
+      mutate(
+        N_total = N_t + N_c,
+        df_ind = N_total,
+        
+
+        m_post = case_when(
+          outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_t - m_post_c), # Higher is beneficial
+          outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_t - m_post_c) * -1), # Lower is beneficial
+          
+        sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+        
+        d_post = m_post/sd_pool, 
+        vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+        Wd_post = (1/N_t + 1/N_c),
+        
+        J = 1 - 3/(4*df_ind-1),
+        
+        g_post = J * d_post,
+        vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+        Wg_post = Wd_post,
+        
+        vary_id = paste0(outcome, "/", timing)
+      
+      ) |> 
+      ungroup()
+
+      
