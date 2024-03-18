@@ -5245,6 +5245,482 @@ Rüsch2019_est <-
       ungroup()
 ```
 
+### **Valiente et al. [-@Valiente2022]**
+```{r Valiente et al. 2022}
+# Data from table 3 and table (p. 4)  containing means, standard deviation. It also contains
+# difference Morris' d and p
+
+Valiente2022  <- tibble(
+  group = rep(c("Multicomponent PPI", # Intervention
+                "Treatment as usual"), # Control
+              each = 1,16),
+  
+  outcome = rep(c(
+                  # Table 3
+                  "SPWB Autonomy",          #Scales of Psychological Well-Being (SPWB)
+                  "SPWB Positive_relationship", 
+                  "SPWB Self_acceptance",
+                  "SPWB Enviormental mastery",
+                  "SPWB Purpose_in_life",
+                  "SPWB Personal_Growth",
+                  "SWLS",                  # Satisfaction With Life Scale (SWLS)
+                  
+                  # Table 4
+                  "Somatization",         # Symptom checklist-90-Revised (SCL-90-R)
+                  "Obsessive–compulsive", 
+                  "Interpersonal sensibility",
+                  "Depression", 
+                  "Anxiety", 
+                  "Hostility", 
+                  "Phobic anxiety",
+                  "Paranoid ideation", 
+                  "Psychoticism"
+                  
+                  ), 
+                each = 2,1),
+  
+  N = rep(c(52,61),
+          each = 1,16),
+  
+  N_start = rep(c(71, 70), n_distinct(outcome)),
+  
+  
+  m_pre = c(
+    
+    # Table 3
+    19.5, 20.1,
+    34.7, 33.9,
+    29.9, 31.6,
+    30.6, 31.4,
+    34.4, 34.4,
+    35.3, 35.7,
+    17.4, 18.2,
+   
+    # Table 4
+    1.00, 1.02,
+    1.66, 1.62,
+    1.42, 1.41,
+    1.51, 1.47,
+    1.12, 1.31,
+    0.75, 0.63,
+    0.89, 1.09,
+    1.15, 1.15,
+    1.14, 0.99
+    
+  ),
+  
+  sd_pre = c(
+    # Table 3
+    4.4,  4.2,
+    8.0, 7.5,
+    8.7, 7.8,
+    7.8, 7.3,
+    7.7, 5.9,
+    7.4, 6.8,
+    7.1, 6.8,
+    
+    # Table 4
+    0.83, 0.81,
+    0.87, 0.93,
+    0.81, 0.95,
+    0.87, 0.89,
+    0.82, 0.97,
+    0.83, 0.80,
+    0.77, 1.01,
+    0.86, 0.86,
+    0.82, 0.83
+    
+  ),
+        
+ 
+  
+  m_post = c(
+    # Table 3
+    19.9, 19.7,
+    35.7, 34.4,
+    31.7, 31.1,
+    32.7, 30.8,
+    34.9, 34.2,
+    35.5, 35.5,
+    19.0, 19.2,
+    
+    # Table 4
+    0.90, 0.96,
+    1.50, 1.48,
+    1.28, 1.27,
+    1.30, 1.40,
+    1.07, 1.14,
+    0.71, 0.61,
+    0.91, 1.07,
+    1.18, 1.21,
+    0.99, 0.98
+  ),
+  
+  sd_post = c(
+    # Table 3
+    3.4, 4.2, 
+    7.1, 7.6, 
+    7.5, 7.8, 
+    7.5, 7.3, 
+    6.9, 5.9,
+    6.8, 6.8,
+    6.6, 6.8,
+    
+    # Table 4
+    0.82, 0.84,
+    0.86, 0.96,
+    0.79, 0.89,
+    0.80, 0.94,
+    0.84, 0.91,
+    0.76, 0.79,
+    0.80, 0.97,
+    0.90, 0.87,
+    0.85, 0.86
+  )
+    
+)
+
+# Making the tibble wide 
+
+Valiente2022_wide <-
+  Valiente2022 |> 
+  mutate (group = case_match(
+    group, "Multicomponent PPI"  ~ "t", "Treatment as usual" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )
+  
+# Effect sizes: Estimating G and D (pre-post test) (Not finished yest)
+Valiente2022_est <-           
+  Valiente2022_wide |>
+  mutate(
+    analysis_plan = rep(c(
+                      "Scales of Psychological Well-Being (SPWB)",
+                      "Satisfaction With Life Scale (SWLS)",
+                      "Symptom checklist-90-Revised (SCL-90-R)"
+                      ), c(6,1,9))
+    
+    
+  )|> 
+  rowwise() |> 
+  mutate(
+    study = "Valiente et al. 2022",
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # The outcome SCL-90-R reverted because lower score is beneficial
+    m_post = if_else(analysis_plan != "Symptom checklist-90-Revised (SCL-90-R)", 
+                     m_post_t - m_post_c,
+                     (m_post_t - m_post_c) * -1),
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = outcome
+    
+  ) |> 
+  ungroup()
+```
+
+### **Wojtalik et al. [-@Wojtalik2022]**
+```{r}
+# Data from table 2 and table (p. 505)  containing marginal means with standard error
+# It also contains standard error. To calculate pre-post test we will use the standard 
+# deviation from table 1 (p. 504)
+
+Wojtalik2019 <- tibble( 
+  group = as.factor(rep(c("Cognitive enhancement therapy (CET)", # Intervention
+                "Enriched supportive therapy (EST)"), # Control
+              each = 1,4)),
+  
+  analysis = rep(c("ITT", "Completers"), each = 4),
+  
+  
+  timing = rep(c(
+          #       "9m", 
+                 "18m"), 
+               each = 4, 2),
+  
+  outcome = as.factor(rep(c(
+           #      "Cognition composite",
+                  "Social adjustment composite",
+                  "Symptoms composite"), 
+                each = 2,2)),
+  
+  N = c(rep(c(58, 44), each = 1,2),
+        rep(c(26, 23),each = 1,2)),
+  
+  N_start = rep(c(
+    58, 44
+  ), each = 1,4),
+  
+  me_pre = c(rep(c(
+    # ITT
+#    34.4, 38,  # Baseline Cognition composite 
+    49.5, 51.0,# Baseline Social adjustment composite
+    40.1, 50.4), # Baseline Symptoms composite
+    each = 1,1),
+    
+    # Completers
+    rep(c(
+#    34.6, 39.4, # Baseline Cognition composite
+    47.1, 50.4, # Baseline Social adjustment composite
+    49.4, 50.2 # Baseline Symptoms composite
+  ), each = 1,1)
+  ),
+  
+  # Taken from table 1 (p. 504)
+  sd_pre = c(rep(c(
+    # ITT
+#    11.3, 11.8, # Baseline Cognition composite  
+    9.6, 10.5,  # Baseline Social adjustment composite
+    10.4, 10.0), each = 1,1),  # Baseline Symptoms composite
+    
+    # Completer (taken from online supplements)
+    rep(c(
+#    12.52, 12.52,
+    8.80, 8.80,
+    9.18, 9.18
+  ), each = 1,1)),
+  
+  se_pre = rep(c(
+    # ITT
+#    1.5, 1.7,  # Baseline Cognition composite 
+    1.3, 1.4,  # Baseline Social adjustment composite
+    1.3, 1.5,   # Baseline Symptoms composite
+    
+    # Completer
+#    2.4, 2.6,
+    1.8, 1.8,
+    1.9, 2.0
+    
+  ), each = 1,1),
+  
+  me_post = c(
+    # ITT
+#    38.4, 37.1, # 9 months Cognition composite
+#    54.1, 56.8, # 9 months Social adjustment composite
+#    53.5, 53.4, # 9 months Symptoms composite
+    
+#    40.1, 39.8, # 18 months Cognition composite
+    56.3, 55.5, # 18 months Social adjustment composite
+    54.3, 53.5,  # 18 months Symptoms composite
+    
+    # Completer
+#    40.0, 37.5, # 9 months Cognition composite
+#    52.2, 54.9, # 9 months Social adjustment composite
+#    53.2, 52.8, # 9 months Symptoms composite
+    
+#    41.3, 40.6, # 18 months Cognition composite
+    54.5, 53.4, # 18 months Social adjustment composite
+    54.0, 53.1  # 18 months Symptoms composite
+    
+  ),
+  
+  se_post = c(
+    # ITT
+#    1.6, 1.9, # 9 months Cognition composite
+#    1.4, 1.7, # 9 months Social adjustment composite
+#    1.4, 1.7, # 9 months Symptoms composite
+    
+#    1.8, 2.0, # 18 months Cognition composite
+    2.0, 2.3, # 18 months Social adjustment composite
+    1.8, 1.9,  # 18 months Symptoms composite
+    
+    # Completer
+#    2.4, 2.6, # 9 months Cognition composite
+#    1.9, 2.0, # 9 months Social adjustment composite
+#    1.8, 1.9, # 9 months Symptoms composite
+    
+#    2.5, 2.6, # 18 months Cognition composite
+    2.4, 2.5, # 18 months Social adjustment composite
+    2.0, 2.1  # 18 months Symptoms composite
+    
+  )
+  
+)
+
+
+# Making the wojtalik2019 tibble wide in order to estimate the effect sizes and
+# further analysis. 
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(unique(Wojtalik2019$analysis), each = 1)
+ # filter_val2 = rep(c(paste0(c(9, 18), "m")), 2)
+)
+
+
+wide_wojtalik2019_func <- 
+  function(filter_val1 
+           #,filter_val2
+           ){
+    
+    Wojtalik2019 |> 
+      filter(analysis == filter_val1) |> 
+      mutate(group = case_match(group, "Cognitive enhancement therapy (CET)" ~ "t", 
+                                "Enriched supportive therapy (EST)" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+
+Wojtalik2019_est <- 
+  pmap(params, wide_wojtalik2019_func) |>
+  list_rbind() |> 
+  
+  mutate(
+    
+     analyse_plan = rep(c(
+       "Social Functioning",
+       "Symptoms"
+     ), each = 1,2),
+    
+    study = "Wojtalik et al. 2019", 
+    
+    t_val = c(
+      # ITT
+     # 2.81, # 9 months Cognition composite
+     #   -0.78, # 9 months Social adjustment composite
+     #    0.20, # 9 months Symptoms composite
+      
+    #  2.04, # 18 months Cognition composite
+      0.80, # 18 months Social adjustment composite
+      0.43,  # 18 months Symptoms composite
+      
+      # Completer
+    #  3.44, # 9 months Cognition composite
+    #  0.32, # 9 months Social adjustment composite
+    #  0.51, # 9 months Symptoms composite
+      
+    #  2.58, # 18 months Cognition composite
+      1.60, # 18 months Social adjustment composite
+      0.60  # 18 months Symptoms composite
+      
+    ),
+    
+    df = c(
+      # ITT
+    #  106,  # 9 months Cognition composite
+    #  107,  # 9 months Social adjustment composite
+    #  107,  # 9 months Symptoms composite
+      
+    #  106, # 18 months Cognition composite
+      107, # 18 months Social adjustment composite
+      107, # 18 months Symptoms composite
+      
+      # Completer
+    #  88, # 9 months Cognition composite
+    #  91, # 9 months Social adjustment composite
+    #  91, # 9 months Symptoms composite
+      
+    #  88, # 18 months Cognition composite
+      91, # 18 months Social adjustment composite
+      91  # 18 months Symptoms composite
+      
+    ),
+    
+    p_values_t = c(
+      # ITT
+    #  0.003,  # 9 months Cognition composite
+    #  0.219,  # 9 months Social adjustment composite
+    #  0.421,  # 9 months Symptoms composite
+      
+    #  0.022, # 18 months Cognition composite
+      0.214, # 18 months Social adjustment composite
+      0.335,  # 18 months Symptoms composite
+      
+      # Completer
+    #  0.001,  # 9 months Cognition composite
+    #  0.376,  # 9 months Social adjustment composite
+    #  0.305,  # 9 months Symptoms composite
+      
+    #  0.006, # 18 months Cognition composite
+      0.057, # 18 months Social adjustment composite
+      0.275  # 18 months Symptoms composite
+      
+    ),
+    
+    d = c(
+      # ITT
+    #  0.44,  # 9 months Cognition composite
+    #  -0.14, # 9 months Social adjustment composite
+    #  0.04,  # 9 months Symptoms composite
+      
+    #  0.35, # 18 months Cognition composite
+      0.23, # 18 months Social adjustment composite
+      0.11, # 18 months Symptoms composite
+      
+      # Completer
+    #  0.59, # 9 months Cognition composite
+    #  0.07, # 9 months Social adjustment composite
+    #  0.12, # 9 months Symptoms composite
+      
+   #   0.45, # 18 months Cognition composite
+      0.51, # 18 months Social adjustment composite
+      0.18  # 18 months Symptoms composite
+      
+    )
+  ) |> 
+  rowwise() |> 
+  mutate(
+    study = "Wojtalik et al. 2020",
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    
+    # m_post og sd_pool skal regnes efter
+    
+    m_post = if_else(analysis == "ITT",
+                     
+                     # ((T_post1-T_pre0) - (C_post1 - C_pre0)) / SD_basline 
+                     
+                                                                      # This is done to get the combined SD
+                     (me_post_t - me_pre_t - me_post_c + me_pre_c) / sqrt((N_t * sd_pre_t^2 + N_c * sd_pre_c^2) / (N_t + N_c)),
+                     
+                     (me_post_t - me_pre_t - me_post_c + me_pre_c) / sd_pre_c
+    ),
+                      # E.14 (WWC Handbook 5, p. 168)
+    sd_pool = if_else(analysis == "ITT",
+                      #ITT                                  # To get the combined SD           
+                      sqrt((N_total - 1) / (N_total - 2) * (N_t * sd_pre_t^2 + N_c * sd_pre_c^2) / (N_t + N_c) - (N_t * N_c) / (N_total * (N_total - 2)) * (me_pre_t - me_pre_c)^2),
+                      # Completers
+                      sqrt((N_total - 1) / (N_total - 2) * sd_pre_c^2 - (N_t * N_c) / (N_total * (N_total - 2)) * (me_pre_t - me_pre_c)^2)
+      ),
+    
+    
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", analysis)
+  )|> 
+  ungroup ()
+```
+
 ### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021] (Change var names)**
 #### (Accounts for clustering via the use of mixed-effects models/multi-level models)
 
@@ -5734,7 +6210,9 @@ group_based_dat_es <-
     Popolo2019_est,
     Sacks2011_est,
     Sajatovic2009_est,
-    Rüsch2019_est
+    Rüsch2019_est, 
+    Valiente2022_est,
+    Wojtalik2019_est
     
   ) |> 
   relocate(sd_pool, .after = sd_used) 
