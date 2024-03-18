@@ -6166,14 +6166,8 @@ Amalgating covariates and effect size data
 
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
-# covariates <- read_xlsx(
-#  "Descriptive coding scheme for group-based interventions (data).xlsx",
-#  na = c(".", "")
-# )
-
-# To do it on my computer (Jakob)
  covariates <- read_xlsx(
-  "JKJ.xlsx",
+  "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx",
   na = c(".", "")
  )
 
