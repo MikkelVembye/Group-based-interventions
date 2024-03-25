@@ -22,13 +22,13 @@ Volpe_2015 <- tibble(
     "PHQ-9", # Patient Health Questionnaire
     "PSP", # Personal and Social Performance Scale
     "DAS-II" # Disability Assessment Schedule 2.0
-  ), each = 2,1),
+  ), each = 2,1), #
   
   group = rep(c(
     "Reading group",
     "Control group"
     
-  ), each = 1,4),
+  ), each = 1,4),#
   
   N = rep(c(21,20), each = 1, 4), 
   
