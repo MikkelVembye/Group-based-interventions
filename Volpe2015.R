@@ -17,19 +17,27 @@ options(scipen = 10) # This sets the scientific notation precision in R to 10,
 # meaning that numbers will be displayed with 10 digits of precision
 
 Volpe_2015 <- tibble(
+  # 'outcome' kolonnen oprettes ved at gentage en vektor af psykologiske skalaer.
+  # Funktionen rep() anvendes her til at gentage elementerne i vektoren.
+  # Argumentet 'each' bestemmer, hvor mange gange hvert element skal gentages i træk.
   outcome = rep(c(
-    "BPRS", # Brief Psychiatric Rating Scale
-    "PHQ-9", # Patient Health Questionnaire
-    "PSP", # Personal and Social Performance Scale
-    "DAS-II" # Disability Assessment Schedule 2.0
-  ), each = 2,1), #
+    "BPRS",   # Brief Psychiatric Rating Scale
+    "PHQ-9",  # Patient Health Questionnaire
+    "PSP",    # Personal and Social Performance Scale
+    "DAS-II"  # Disability Assessment Schedule 2.0
+  ), each = 2, 1), 
   
+  # 'group' kolonnen specificerer, hvilken gruppe hver måling tilhører. 
+  # Her bruges rep() funktionen igen til at skifte mellem "Reading group" og "Control group".
+  # Argumentet 'each=1' sørger for, at hver gruppebetegnelse gentages én gang før skiftet til den næste.
   group = rep(c(
     "Reading group",
     "Control group"
-    
-  ), each = 1,4),#
+  ), each = 1, 4), 
   
+  # 'N' kolonnen angiver antallet af deltagere (21 for læsegruppen, 20 for kontrolgruppen) for hvert outcome.
+  # Funktionen rep() med 'each=1' sikrer, at hvert tal (21 og 20) gentages én gang per outcome,
+  # mens det ydre '4' indikerer, at hele mønstret (21, 20) gentages fire gange for de fire outcomes.
   N = rep(c(21,20), each = 1, 4), 
   
   m_pre = c(
@@ -60,6 +68,8 @@ Volpe_2015 <- tibble(
     0.5, 0.25
   )
 )
+
+# Ved brug af piping kan du bruge ctrl + shift + m få denne frem |> 
 
 # Making the tibble into wideformat
 Volpe2015_est <-
