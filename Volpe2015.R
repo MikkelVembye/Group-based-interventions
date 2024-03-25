@@ -91,6 +91,7 @@ Volpe2015_est <-
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
+    
     vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
     Wd_post = (1/N_t + 1/N_c),
     
@@ -102,4 +103,5 @@ Volpe2015_est <-
     
     vary_id = outcome
     
-  )
+  ) |> 
+  ungroup()
