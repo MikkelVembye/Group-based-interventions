@@ -31,14 +31,6 @@ Rosenblum2014 <- tibble(
     "Michigan"
   ), each = 10,1),
   
-  N = c(
-    rep(c(91,70), each = 1,5), # Total 
-    
-    rep(c(35, 32), each = 1,5), # New York
-    
-    rep(c(56, 38), each = 1,5) # Michigan
-    
-  ),
   
   outcome = rep(c(
     "Days any alcohol past 30",
@@ -50,6 +42,15 @@ Rosenblum2014 <- tibble(
     
    # "RQOL (quality of life)c (total scale)" Only measured at follow-up 
    ), each = 2,3
+ ),
+ 
+ N = c(
+   rep(c(91,70), each = 1,5), # Total 
+   
+   rep(c(35, 32), each = 1,5), # New York
+   
+   rep(c(56, 38), each = 1,5) # Michigan
+   
  ),
  
  m_pre = c(
