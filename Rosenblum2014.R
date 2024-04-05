@@ -143,8 +143,82 @@ sd_post = c(
   10.6, 11.4, 
   0.5, 0.4
 # 1.8, 1.3
+),
+
+q = c(
+  rep(c(1), each = 1,10), # The baseline equivalent of the dependent variable was used as a covariate, p. 85
+  rep(c(2), each = 1, 4), # The baseline variable PTSD diagnosis was added as a covariate to these analyses because it was correlated with study condition and the outcome variable, p. 85
+  rep(c(1), each  = 1,2),
+  rep(c(2), each = 1,2),
+  rep(c(1), each = 1,12)
+  )
+); Rosenblum2014
+
+
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(unique(Rosenblum2014$sample), each = 1)
 )
 
+
+wide_Rosenblum2014_func <- 
+  function(filter_val1){
     
-)
+    Rosenblum2014 |> 
+      filter(sample == filter_val1) |> 
+      mutate(group = case_match(group, "Double Trouble in Recovery (DTR)" ~ "t", "waiting list control group" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
 
+
+Rosenblum2014_est <- 
+  pmap(params, wide_Rosenblum2014_func) |>
+  list_rbind() |> 
+  mutate(
+    
+    p_val = c(0.03, 0.11, 0.07, 0.02, 0.45, 
+              0.84, 0.47, 0.07, 0.17, 0.73,
+              0.01, 0.10, 0.31, 0.06, 0.15),
+    
+    analyse_plan = rep(c(
+      rep(c("substance and alcohol use (and adaptation of the Addiction Severity Index plus Saliva testing)"), each = 1,4),
+      rep(c("medication adherence (Medication Adherence Rating Scale; MARS)"), each = 1,1)
+    ), each = 1,3),
+    
+    study = "Rosenblum et al. 2014" 
+    
+) |> 
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # all scores are reverted because lower scores is beneficial 
+    m_post =  (m_post_t - m_post_c)*-1,
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    
+    vary_id = paste0(sample, "/", outcome)
+    
+  ) |> 
+  ungroup() 
+  
+  
+  
