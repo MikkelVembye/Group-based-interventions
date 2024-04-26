@@ -3467,6 +3467,302 @@ Hagen2005_est <-
   ungroup()
 ```
 
+### Hilden et al. [-@Hilden2021]
+```{r Hilden et al. 2021}
+# Table 2, p. 181
+Hilden2021 <- tibble(
+  outcome = rep(c(
+    "BSL-23 total",   
+    "Overall Anxiety Severity and Impairment scale",  
+    "Patient Health Questionnaire 9 scale",    
+    "Alcohol Use Disorders Identification Test scale",
+    "Sheehan disability work or studylife",
+    "Sheehan disability social life",
+    "Sheehan disability family life"
+  ), each = 2, 1), 
+  
+
+  group = rep(c(
+    "Schema therapy group",
+    "TAU"
+  ), each = 1, 7), 
+  
+  N = rep(c(23,12), each = 1, 7), 
+  N_start = rep(c(25,12), each = 1, 7),
+  
+  m_pre = c(
+    39., 55.7, 
+    11.3, 13.2, 
+    14, 16.3,
+    6.4, 8.4,
+    6., 6.8,
+    5.2, 6.7,
+    5.2, 6.7),
+  
+  sd_pre = c(
+    15.1, 14.9, 
+    3.8, 2.6, 
+    5.7, 4.1,
+    4.8, 5.6,
+    3.1, 2.3,
+    2.8, 1.6,
+    2.8, 1.6),
+  
+  m_post = c(
+    32., 42.6, 
+    10.3, 11.4, 
+    5.7, 9.2,
+    11.9, 14.3,
+    5.2, 6.9,
+    5.6, 5.9,
+    4.9, 6.3),
+  
+  sd_post = c(
+    16.4, 18.8, 
+    3.9, 3.5, 
+    5.5, 8.2,
+    5.2, 5.9,
+    3.3, 2.4,
+    2.6, 2.7,
+    2.9, 2.1)
+  
+)
+
+# Making the tibble into wideformat
+Hilden2021_wide <-
+  Hilden2021 |> 
+  mutate(group = case_match(group, "Schema therapy group" ~ "t", 
+                            "TAU" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) 
+  
+Hilden2021_est <-           
+  Hilden2021_wide |>
+  mutate(
+    analysis_plan =
+      c("the short Borderline Symptom List (BSL-23)",
+        "the Overall Anxiety Severity and Impairment test (OASIS)",
+        "the Patient Health Questionnaire 9 (PHQ-9)",
+        "the Alcohol Use Disorders Identification test (AUDIT)",
+        "the Sheehan Disability Scale (SDS)",
+        "the Sheehan Disability Scale (SDS)",
+        "the Sheehan Disability Scale (SDS)"),
+    
+    study = c("Hilden et al. 2021")
+    ) |> 
+    
+    rowwise() |> 
+      mutate(
+        
+        N_total = N_t + N_c,
+        df_ind = N_total,
+        
+        # For Social functioning lower scores is beneficial why these is reverted
+        m_post = if_else(outcome %in% c("BSL-23 total", 
+                                        "Patient Health Questionnaire 9 scale",
+                                        "Overall Anxiety Severity and Impairment scale",
+                                        "Alcohol Use Disorders Identification Test scale"), 
+                         (m_post_t - m_post_c)*-1,
+                         m_post_t - m_post_c), 
+                         
+        sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+        
+        d_post = m_post/sd_pool, 
+        vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+        Wd_post = (1/N_t + 1/N_c),
+        
+        J = 1 - 3/(4*df_ind-1),
+        
+        g_post = J * d_post,
+        vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+        Wg_post = Wd_post,
+        
+        vary_id = outcome
+        
+      ) |> 
+  ungroup()
+  
+```
+
+### ** Himle et al. [-@Himle2014]**
+```{r Himle et al. 2014}
+# From table 2, p. 174
+Himle2014 <- tibble(
+  group = as.factor(rep(c("Intervention group",
+                          "Control group"),
+                          each = 1, 12)), # 18 rækker af hver gruppe fordi der er 9 outcomes of to opfølgningsperioder
+
+timing = rep(c("Post","3m"), each = 12,1), #den respektive opfølgning skal gentages 18 gange
+  
+
+  outcome = rep(c(
+                  "LSAS -Total", 
+                  #"Work-related social anxiety- total", 
+                  "Brief fear of negative evaluation", 
+                  "Mini social phobia inventory", 
+                  "Beck anxiety inventory", 
+                  "PHQ9 depression screen", 
+                  "Sheehan disability scale"
+                #  "Social phobia symptom severity", 
+                #  "Clinician global impressions - symptom severity" 
+                  ), each = 2, 2), # Outcomes gentages to gange for hver opfølgningsperiode
+  
+
+  N = rep(c(29, 29), each = 1, 12), #i hver gruppe er der 29 observationer
+                                    # som skal gentages 18 gange for hver opfølgning
+  
+  
+  m_pre = rep(c(
+    84.31, 87.59, 
+  #  18.72, 19.72,
+    46.59, 45.,
+    6.72, 7.52,
+    17.69, 22.9,
+    10.59, 12.17,
+    5.93, 6.07
+   #  2.07, 2.1,
+   # 4.59, 4.24)
+  ),
+    each = 1,2),
+
+
+    sd_pre = rep(c(
+      31.51, 26.33, 
+   #   7.42, 6.53,
+      12.83, 13.19,
+      2.2, 2.87,
+      12.83, 14.73,
+      8.08, 5.62,
+      2.6, 2.33
+    #  .65, .62,
+    #  1.52, .99)
+    ),
+      each = 1,2),
+    
+  
+  
+  m_post = c(
+    
+    #Postvalues
+    66.72, 90.62, 
+  #  13.21, 19.76,
+    39.01, 43.07,
+    7.79, 9.66,
+    11.34, 24.72,
+    5.62, 10.41,
+    3.63, 4.77,
+  #  1.31, 2.17,
+  #  3.76, 4.14,
+
+    #3m follow-up
+    65.31, 92.79, 
+   # 13.31, 19.31,
+    35.62, 44.,
+    7.48, 10.28,
+    12.83, 22.45,
+    5.83, 10.72,
+    3.48, 5.61
+  #  1.28, 2.21,
+  #  3.21, 4.21
+  ),
+  
+  ## Standard deviation-values ##
+  
+ 
+  sd_post = c(
+    # Post SD values
+    29.02, 36.67, 
+   # 7.10, 7.83,
+    13.57, 14.48,
+    2.81, 2.58,
+    9.54, 17.10,
+    5.49, 6.92,
+    2.1, 2.02,
+  #  .81, .66,
+  #  1.35, 1.27,
+  
+    37.44, 36.26, 
+  #  8.38, 7.72,
+    13.57, 12.57,
+    3.01, 1.28,
+    13.4, 14.96,
+    5.74, 6.68,
+    2.27, 2.38
+#    .84, .73,
+#    1.35, 1.37
+ )
+)
+
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(c("Post", paste0(c(3, 6), "m")), 1)
+  
+)
+
+
+
+wide_Himle2014_func <- 
+  function(filter_val1){
+    
+    Himle2014 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "Intervention group" ~ "t", "Control group" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+# Multi level effect estimates can be obtained from table 3, p. 3
+Himle2014_est <- 
+  pmap(params, wide_Himle2014_func) |>
+  list_rbind() |> 
+  mutate(
+    analysis_plan = rep(c(
+      "the Liebowitz Social Anxiety Scale",
+      "The Brief Fear of Negative Evaluation scale",
+      "The Mini Social Phobia Inventory",
+      "Beck Anxiety Inventory",
+      "Patient Health Questionnaire (PHQ-9)",
+      "Shehan disability scale"
+    ), each = 1,2), 
+    
+    study = c("Himle et al. 2014")
+  ) |> 
+  rowwise() |> 
+  mutate(
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # Reverting all outcomes
+    m_post = (m_post_t - m_post_c)*-1,
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
+```
+
 ### **Izquierdo et al. [-@Izquierdo2021]**
 ```{r Izquierdo et al. 2021}
 # Rows 1-10 is data from table 3, p. 10 and rows 11-22 is from table 4 p. 13. 
@@ -3677,6 +3973,334 @@ izquierdo2021_est <-
   ) |> 
   ungroup()
 ```
+
+### **Jacob et al. [-@Jacob2010]**
+````{r Jacob et al. 2010}
+Jacob2010 <- tibble(group = as.factor(rep(c("Intervention group",
+    "Control group"), 
+    each = 1, 10)), 
+  
+  timing = rep(c("Post","6m"), each = 10,1), #den respektive opfølgning skal gentages 18 gange
+  
+  outcome = rep(c(
+    "RSES",   
+    "SSES Achievement",  
+    "SSES Social",    
+    "SSES Appearance",
+    "BDI"), each = 2, 2), 
+  
+
+  N = rep(c(19, 24), each = 1,10), 
+
+  m_pre = rep(c(
+    13.3, 13.3, # Social Cognition Screening Questionnaire
+    18.7, 19.2, # Brief Assessment of Cognition in Schizophrenia
+    13.8, 16.3, # Positive and Negative Syndrome Scale
+    11.7, 10.8, # Global Assessment of Functioning
+    27.8, 30.0) # Social Functioning Scale
+    , each = 1,2),
+  
+  
+  sd_pre = rep(c(
+    8.6, 9.9,
+    4., 6.6,
+    6.6, 7.4,
+    5.7, 5.2,
+    11.8, 12.2)
+    , each = 1,2),
+  
+  
+  m_post = c(
+    # Post measurement
+    16.7, 11.6, 
+    20.7, 18.1, 
+    14.5, 16., 
+    11.6, 10.4,
+    22.6, 30.9,
+    
+    # 6 months measurement
+    17.8, 13.2,
+    21.5, 19.1,
+    15.3, 16.,
+    11.7, 11.5,
+    22.6, 29.6),
+  
+  sd_post = c(
+    # Post measurement
+    10.3, 9.3, 
+    6.3, 6.9,
+    7.0, 7.2, 
+    5.4, 5.3,
+    13.1, 12.3,
+    
+    # 6 months measurement
+    11., 11.2,
+    6.4, 6.3,
+    8., 7.4,
+    5.2, 5.7,
+    14.5, 13.3)
+  
+  )
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(c("Post", paste0(c(6), "m")), 1)
+  
+)
+
+
+
+wide_Jacob2010_func <- 
+  function(filter_val1){
+    
+    Jacob2010 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "Intervention group" ~ "t", "Control group" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+# MANCOVA estimates can be obtained from the text on p. 382
+Jacob2010_est <- 
+  pmap(params, wide_Jacob2010_func) |>
+  list_rbind() |> 
+  mutate(
+    analysis_plan = rep(c(
+      "the Rosenberg Self-Esteem Scale (RSES)",
+      "the State Self-Esteem Scale (SSES)",
+      "the State Self-Esteem Scale (SSES)",
+      "the State Self-Esteem Scale (SSES)",
+      "Beck Depression Inventory (BDI)"
+    ), each = 1,2), 
+    
+    study = c("Jacob et al. 2010")
+  ) |> 
+  rowwise() |> 
+  mutate(
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # Reverting all outcomes
+   # Reverting m_post for specific outcomes
+    m_post = if_else(outcome %in% c("BDI"),
+                     (m_post_t - m_post_c) * -1, 
+                     m_post_t - m_post_c),
+    
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
+
+```
+
+### **Kanie et al. [-@Kanie2019]**
+```{r Kanie et al. 2019}
+# Taken from table 4, p. 8
+Kanie2019 <- tibble(
+  group = as.factor(rep(c(
+    "SCIT group", 
+    "TAU group"),
+    each = 1,10)), # 10 rækker af hver gruppe, fordi der er fem outcomes og to opfølgningsperioder
+  
+  timing = rep(c("3m", "6m"), 
+               each = 10,1), # Den respektive opfølgning skal gentages 10 gange
+  
+  
+  outcome = rep(c(
+    "SCSQ total", # Social Cognition Screening Questionnaire
+    "BACS", # Brief Assessment of Cognition in Schizophrenia
+    "PANSS total", # Positive and Negative Syndrome Scale
+    "GAF", # Global Assessment of Functioning
+    "SFS" # Social Functioning Scale
+  ),  each = 2,2), # outcomes gentages to gange for hver opfølgningsperiode
+  
+  
+  N = rep(c(32, 32), each = 1,10), # i hver gruppe er der 32 observationer
+                                  # som skal gentages 10 gange for hver opfølgning
+  
+  
+  
+  m_pre = rep(c(
+    31.04, 32.83, # Social Cognition Screening Questionnaire
+    -1.64, -1.33, # Brief Assessment of Cognition in Schizophrenia
+    64.78, 63.78, # Positive and Negative Syndrome Scale
+    51.59, 53.44, # Global Assessment of Functioning
+    116.06, 106.53) # Social Functioning Scale
+    , each = 1,2),
+  
+
+  sd_pre = rep(c(
+    3.58, 3.47, 
+    1.01, 1.42, 
+    18.18, 18.98, 
+    8.81, 9.49,
+    23.95, 23.48)
+    , each = 1,2), ## den gentager præ-værdierne ved næste opfølgning
+                   # så den sammenligner baseline data med 6 måneders opfølgning
+                  # så sørger vi for at der er lige mange kolonner
+  
+  m_post = c(
+    # 3 months measurement
+    32.94, 33.45, 
+    -1.37, -1.16, 
+    61.34, 59.94, 
+    52.25, 58.06,
+    118.44, 107.41,
+    
+    
+    # 6 months measurement
+    32.79, 33.4,
+    -1.13, -0.77,
+    60.03, 59.81,
+    56.09, 55.59,
+    117.45, 108.91),
+  
+  sd_post = c(
+    # 3 months measurement
+    3.2, 2.63, 
+    1.09, 1.36,
+    19.15, 18.02, 
+    13.63, 13.47,
+    25.31, 28.03,
+    
+    # 6 months measurement
+    3.17, 2.63,
+    1.22, 1.35,
+    18.68, 17.32,
+    15.33, 14.5,
+    25.42, 26.6)
+  
+)
+
+
+# Turning data into wide format
+params <- tibble(
+   filter_val1 = rep(c(paste0(c(3, 6), "m")), 1)
+)
+
+wide_Kanie2019_func <- 
+  function(filter_val1){
+    
+    Kanie2019 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "SCIT group" ~ "t", "TAU group" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+Kanie2019_est <- 
+  pmap(params, wide_Kanie2019_func) |>
+  list_rbind() |>
+  # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
+  mutate(
+    analysis_plan = rep(
+      c(
+        "Social Cognition Screening Questionnaire",
+        "The Brief Assessment of Cognition in Schizophrenia",
+        "Positive and Negative Syndrome Scale for Schizophrenia (PANSS)", 
+        "Global assessment of Functioning (Observer rated)", 
+        "The Social Functioning Scale"
+      ), each = 1,2),
+    
+    df1 = c(
+      rep(c(NA_real_), each = 5,1,
+      ),
+      rep(c(2), each = 5,1)
+        ),
+    df2 = c(
+      rep(c(NA_real_), each = 5,1),
+      c(123,
+         124,
+         124,
+         124,
+         121)
+      ),
+    
+    F_val = c(
+      rep(c(NA_real_), each = 5,1),
+      c(1.74,  
+        0.57, 
+        0.10,
+        2.23, 
+        0.30)
+      ),
+    
+    p_val_F = c(
+      rep(c(NA_real_), each = 5,1),
+      c(
+        0.08,
+        0.57,
+        0.10,
+        0.11,
+        0.74
+      )
+    ),
+    
+    
+    d = c(
+      rep(c(NA_real_), each = 5,1),
+      c(0.33,
+         -0.05,
+        -0.04,
+         0.26,
+         -0.04)),
+    
+    study = "Kanie et al. 2019") |> 
+  
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    
+    # For PANSS: reverted
+    m_post = if_else(outcome != "PANSS total", 
+                     (m_post_t - m_post_c)*-1,
+                     m_post_t - m_post_c),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+   vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
+
+```
+
+
 ### **Lim et al. [-@Lim2020]**
 ```{r Lim et al. 2020}
 # Data from table 2 (p.5)  containing means, standard deviation and ANOVA estimations
@@ -3775,7 +4399,7 @@ Lim2020_est <-
         N_total = N_t + N_c,
         df_ind = N_total,
         
-        # For PANSS lower scores is beneficial why these is reverted
+        # For Social functioning lower scores is beneficial why these is reverted
         m_post = if_else(outcome != "Social Functioning (QLS)", (m_post_t - m_post_c)*-1,
                          m_post_t - m_post_c), 
                          
@@ -4075,6 +4699,203 @@ lloyd_Evans2020_est <-
 
 
 ```
+
+
+## **Madigan et al. [-@Madigan2013]**
+```{r Madigan et al. 2013}
+# Table 2, p. 141
+Madigan2013 <- tibble(
+  group = rep(c("GPI",
+                "TAU"),
+              each = 1,12),
+  
+  outcome = rep(c("ASI", 
+                 # "BIS",
+                # "Attitude to treatment",
+                  "Positive symptoms",
+                  "Negative symptoms",
+                  "Depressive symptoms",
+                  "Global functioning",
+                  "WHOQoL"), 
+                each = 2,2),
+  
+  timing = rep(c("3m", "12m"), each = 12),
+  
+  N = c(
+    # 3 months
+    36, 18,
+  #  39, 19,
+  #  33, 15,
+    42, 22,
+    40, 20,
+    40, 20,
+    39, 19,
+    34, 15,
+    
+    # 12 months
+    28, 14,
+   # 32, 14,
+   # 30, 12,
+    32, 17,
+    32, 19,
+    33, 11,
+    31, 16,
+    34, 14),
+  
+  N_start = rep(c(
+    59, 29,
+  # 47, 19,
+  # 39, 17,
+    59, 28,
+    59, 28,
+    59, 28,
+    58, 29,
+    39, 14
+  ), each = 1, 2),
+ 
+  m_pre = rep(c(
+    10., 10.1,
+  #  6.8, 6.3,
+  #  5.8, 5.8,
+    5.4, 5.7,
+    7.7, 7.4,
+    5.1, 5.,
+    38.3, 38.,
+    12.5, 13.3),
+    each = 1,2),
+  
+  
+  sd_pre = rep(c(
+    3.6, 3.7,
+   # 2.8, 2.7,
+   # 9.6, 9.7, 
+    4., 4.8,
+    3.1, 3.,
+    5.7, 6.4,
+    13.1, 9.,
+    4., 2.8),
+    each = 1,2),
+  
+  m_post = c(
+    # 3 months
+    9.9, 10.1,
+  #  7.7, 6.6,
+  #  8.1, 5.9,
+    4.8, 5.1,
+    3.8, 3.2,
+    4.4, 4.6,
+    37.4, 36.6,
+    13.5, 12.6,
+    
+    #12 months
+    9.8, 10.1,
+   # 7., 6.6,
+   # 7., 6.5,
+    4.9, 5.1,
+    4.6, 4.8,
+    4.3, 4.3,
+    37.6, 37.2,
+    12.6, 11.1
+    ),
+  
+  
+  sd_post = c(
+    # 3 months
+    4., 4.2,
+  #  2.2, 2.4,
+  #  9.9, 9.6,
+    3.7, 4.1,
+    2.4, 2.3,
+    4.3, 4.8,
+    8., 9.6,
+    3.3, 3.4,
+    
+    #12 months
+    3.9, 4.,
+  #  2.9, 1.5,
+  #  9.5, 9.3,
+    4., 4.2,
+    3., 3.2,
+    4.4, 4.2,
+    8.34, 11.5,
+    3.4, 2.9)
+  
+)
+
+
+# Turning data into wide format
+params <- tibble(
+  filter_val1 = rep(c("Post", paste0(c(3, 12), "m")), 1)
+  
+)
+
+
+
+wide_Madigan2013_func <- 
+  function(filter_val1){
+    
+    Madigan2013 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "GPI" ~ "t", "TAU" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+# Multi level effect estimates can be obtained from table 3, p. 3
+Madigan2013_est <- 
+  pmap(params, wide_Madigan2013_func) |>
+  list_rbind() |> 
+  mutate(
+    analysis_plan = rep(c(
+      "the Addiction Severity Index",
+      "the Scale for the Assessment of Positive Symptoms (SAPS)",
+      "the Scale for the Assessment of Negative Symptoms (SANS)",
+      "Calgary Depression Scale for Schizophrenia (CDSS)",
+      "Global Assessment of Functioning Scale (GAF)",
+      "WHO-Quality of Life assessment (WHOQOL, BREF)"
+    ), each = 1,2), 
+    
+    study = c("Madigan et al. 2013")
+  ) |> 
+  rowwise() |> 
+  mutate(
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # Reverting all outcomes
+   # Reverting m_post for specific outcomes
+    m_post = if_else(outcome %in% c("ASI", 
+                                    "Positive symptoms", 
+                                    "Negative symptoms",
+                                    "Depressive symptoms"),
+                     (m_post_t - m_post_c) * -1, 
+                     m_post_t - m_post_c),
+    
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
+```
+
 ## **McCay et al. [-@McCay2014]**
 ```{r}
 
@@ -4534,7 +5355,7 @@ Patterson2003_est <-
     
     
     # For PANSS and HAM-D lower scores are beneficial why these is reverted
-    m_post = if_else(outcome != "QWB", (m_post_t - m_post_c)*-1,
+    m_post = if_else(outcome != c("QWB","HAM_D"), (m_post_t - m_post_c)*-1,
                      m_post_t - m_post_c),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
@@ -4820,9 +5641,20 @@ Rabenstein2015_est <-
         "Beck Depression Inventory (BDI)",
         "WHO Quality of Life-BREF"),
     
-    study = "Rabenstein et al. 2015"
+    study = "Rabenstein et al. 2015",
     
     # There are also some effect sizes in the raw text on p. 7
+    # the time X group effect: ANOVA
+    df1 = c(1), 
+    df2 = c(138, 187, 169),
+    F_val = c(25.584, 20.582, 13.252),
+    p_val_F = c(0.001, 0.001, 0.001),
+    eta_sqrt = c(0.156, 0.002, 0.0073),
+    
+    # t-test
+    t_val = c(-4.468, -4.531,2.146),
+    p_val_t = c(0.001, 0.001, 0.012),
+    d = c(0.76, 0.66, 0.55)
     
   ) |> 
   mutate(
@@ -5059,6 +5891,229 @@ Rosenblum2014_est <-
     
   ) |> 
   ungroup() 
+```
+### **Russinova et al. [-@Russinova2018]**
+```{r Russinova et al. 2018}
+# Taken from table 
+Russinova2018 <- tibble(
+  group = rep(c("VEP", "Control group"),
+              each = 1,10),
+  
+  
+  outcome = rep(c("Empowerment scale", 
+                  "ISMI Scale", 
+                  "Work Hope Scale",
+                  "Vocational identity", 
+                  "Work motivation"), 
+                each = 2, 2),
+
+  timing = rep(c(
+    #" 10 weeks post-baseline", 
+                 "Post", 
+                 "3m"), each = 10),
+  
+  
+  N = c(
+    # 10 weeks post-base
+#    23, 25,
+#    23, 25,
+#    23, 25,
+#    23, 24,
+#    21, 23, 
+  
+  # Post intervention
+    22, 26,
+    22, 26,
+    22, 26,
+    22, 26,
+    21, 24,
+  
+  # 3m followup
+    22, 25,
+    22, 25,
+    22, 25,
+    22, 25,
+    21, 24),
+
+  N_start = rep(c(
+    24, 27,
+    24, 26,
+    24, 27,
+    24, 27,
+    21, 23
+  ), each = 1,2),
+  
+  m_pre = rep(c(
+    2.86, 2.84,
+    2.11, 2.16, 
+    4.38, 4.16,
+    7.79, 7.04,
+    3.09, 2.96),
+    each = 1,2), # fordi der er tre opfølgningsperioder
+  
+  sd_pre = rep(c(
+    .3, .21,
+    .5, .43,
+    1.13, .79,
+    5.02, 5.31,
+    .59, .47),
+    each = 1,2),
+  
+  m_post = c(
+    # 10 weeks post-base
+  #  3.02, 2.85,
+  #  1.93, 2.17, 
+  #  4.63, 4.26,
+  #  8.61, 6.88,
+  #  3.11, 2.97,
+  
+    # Post intervention
+    2.98, 2.92,
+    1.86, 2.23,
+    4.64, 2.29,
+    9.09, 6.77,
+    3.15, 3.09,
+    
+    # 3m followup
+    2.96, 2.88,
+    1.92, 2.08,
+    4.67, 4.58,
+    9.23, 8.32,
+    3.17, 3.04
+    ),
+  
+  sd_post = c(
+    # 10 weeks post-base
+  #  .34, .21,
+  #  .43, .44,
+  #  1.21, .96,
+  #  4.49, 4.48,
+  #  .67, .49,
+    
+    # Post intervention
+    .34, .24,
+    .44, .41,
+    1.29, 1.15,
+    5.08, 4.99,
+    .58, .55,
+    
+    # 3m followup
+    .34, .29,
+    .5, .43,
+    1.24, .94,
+    5.05, 5.17,
+    .6, .5) 
+  
+  )
+
+# Turning to wideformat
+
+params <- tibble(
+  filter_val1 = rep(unique(Russinova2018$timing)
+                    , each = 1
+                    )
+)
+
+wide_Russinova2018_func <- 
+  function(filter_val1){
+    
+    Russinova2018 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "VEP" ~ "t", "Control group" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+Russinova2018_est <- 
+  pmap(params, wide_Russinova2018_func) |>
+  list_rbind() |> 
+  mutate(
+    # Group effect af 3 months from table 4, p. 203 
+    df1 = c(
+      rep(c(NA_real_), each = 5,1)
+    ,
+      rep(c(1), each = 5,1)),
+    
+    df2 = c(
+      rep(c(NA_real_), each = 5,1)
+    ,
+      c(91,
+        90,
+        92,
+        91,
+        75)),
+    
+    F_val = c(
+      rep(c(NA_real_), each = 5,1),
+      
+      6.65,
+      5.84,
+      1.39,
+      1.98,
+      0.08    
+    ),
+    p_val_F = c(
+      
+       rep(c(NA_real_), each = 5,1),
+      
+      0.01,
+      0.02,
+      0.24,
+      0.16,
+      0.78
+    ),
+    
+    d = c(
+       rep(c(NA_real_), each = 5,1),
+       
+       0.39,
+       -0.65,
+       0.32,
+       0.41,
+       0.30
+    ),
+    
+    analysis_plan = rep(c(
+      "The Empowerment Scale (28-item)",
+      "The Internalized Stigma of Mental Illness (ISMI 29-itm) scale",
+      "The Work Hope Scale",
+      "Vocational Identity Scale",
+      "The Work Motivation Scale (12-item)"
+    ), each = 1,2),
+    
+    
+    study = c("Russinova et al. 2018")
+  ) |> 
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    # For GSI and BDI lower scores are beneficial why these are reverted
+    m_post = if_else(!outcome %in% c("ISMI Scale"), m_post_t - m_post_c,
+                     (m_post_t - m_post_c)*-1),
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),    
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
 ```
 
 ### **Sacks et al. [-@Sacks2011]**
@@ -5575,6 +6630,118 @@ Schrank2016_est <-
   ungroup()
 ```
 
+### **Schäfer et al. [-@Schäfer]**
+```{r Schäfer et al. 2019}
+
+# Taken from table 2, p. 9 
+schafer2019 <- tibble(
+  group = as.factor(rep(c("Seeking Safety",
+                          "Relapse Prevention Training",
+                          "TAU"),
+                        each = 1, 21)),
+  
+  outcome = (rep(c("PSS-I", 
+                   "PDS", 
+                   "Drug and alcohol free days",
+                   "ASI alcohol severity",
+                   "ASI drug severity",
+                   "BDI-II",
+                   "DERS"),
+                 each = 3,3)),
+  
+  timing = rep(c("Post", "3m", "6m"), each = 21),
+  
+  N = rep(c(111, 115, 117), each = 1, 21),
+  
+  
+  m_pre = rep(c(
+    25.4, 27.5, 28.9,
+    25.7, 27.6, 27.7,
+    16.6, 15.6, 15.6,
+    .28, .33, .32,
+    .09, .1, 09,
+    25.3, 29.4, 28.6,
+    100.5, 110.7, 11.9),
+    each = 1,3), # fordi der er tre opfølgningsperioder
+  
+  sd_pre = rep(c(
+    9.7, 9.8, 9.4,
+    11.2, 10., 10.2,
+    12.1, 11.9, 12.3,
+    .25, .29, .27,
+    .11, .14, .11,
+    13.2, 11.7, 10.9,
+    26.9, 24.6, 25.3),
+    each = 1,3), #fordi tre opfølgningsperioder
+  
+  
+  
+  m_post = c(
+    # post mean values
+    
+    22.9, 24.3, 26.1,
+    20.8, 23., 24.,
+    18.3, 19.4, 16.3,
+    .22, .25, .3,
+    .07, .06, .08,
+    19., 26.2, 25.8,
+    95.6, 102.9, 109.1, 
+    
+    
+    # 3m follow-up
+    22.1, 23.7, 24.5,
+    20.9, 22.5, 24.3,
+    19.5, 21.1, 17.6,
+    0.2, 0.25, 0.28,
+    .06, .06, .06,
+    19.9, 25., 25.2,
+    94.1, 100.9, 106.8,
+    
+    #6m follow-up
+    22.1, 20.7, 24.3,
+    19.4, 19.9, 23.7,
+    20.5, 22.4, 16.4,
+    .24, .19, .27,
+    .05, .04, .07,
+    18.5, 22.3, 24.1,
+    92.7, 100., 107.3),
+    
+  sd_post = c(
+    # post sd values
+    12.4, 11.9, 10.3,
+    12.0, 11.2, 10.7,
+    11.9, 11.7, 12.4,
+    .24, .24, .28,
+    .12, .11, .11,
+    12.4, 12., 12.6,
+    24.7, 26.4, 24.5,
+    
+    # 3m sd values
+    12.2, 11.5, 11.8,
+    13.8, 11.5, 12.5,
+    11.6, 10.2, 11.9,
+    .23, .26, .28,
+    .11, .12, .10,
+    14.4, 14., 13.0,
+    27.2, 27.8, 26.1,
+    
+    # 6m sd values
+    11.5, 11., 11.4,
+    11.9, 11.7, 12.5,
+    11.3, 10.7, 12.7,
+    .26, .22, .28,
+    .10, .10, .110,
+    12.5, 13.3, 14.0,
+    24.7, 25.2, 25.4
+  )    
+)
+
+
+# Effect sizes can be seen in table 2, p. 9
+# mangler effektudregning ----
+
+```
+
 ### **Rüsch et al. [-@Rüsch2019]**
 ```{r}
 # Data from table 1 containing means and standard deviation on page 335
@@ -5785,6 +6952,158 @@ Rüsch2019_est <-
       
       ) |> 
       ungroup()
+```
+
+### *Tjaden et al. [-@Tjaden2022]**
+```{r Tjaden et al. 2021}
+Tjaden2021 <- tibble(
+  group = rep(c("Ressource group + FACT", #Ressource group
+                "FACT"),                  #Control group
+  each = 1, 8),
+  
+
+  outcome = rep(c("NEL",     # Netherlands Empowerment List
+                  "BSI",     # Brief Symptom Inventory
+                  "MANSA",   # Manchester Short assesment of Quality of Life
+                  "GAF"),    # Global Assesment of functioning 
+  each = 2, 2), 
+ 
+  
+  timing = rep(c("9m", "18m"), each = 8), 
+  
+  N = c(
+    # 9 months
+    70, 67,
+    70, 67,
+    70, 67,
+    70, 67,
+    
+    # 18 months
+    63, 58,
+    63, 58,
+    63, 58,
+    63, 58),
+  
+ N_start = rep(c(
+    80, 78,
+    80, 78,
+    80, 78,
+    80, 78), 
+  each = 1, 2),
+   
+  m_pre = rep(c(
+    3.32, 3.34,
+    2.11, 2.15,
+    4.12, 4.26,
+    47.91, 51.45),
+    each = 1,2), 
+  
+  
+  sd_pre = rep(c(
+    0.51, 0.52,
+    0.72, 0.85,
+    0.88, 0.85,
+    10.22, 10.58), 
+    each = 1,2), 
+  
+  m_post = c(
+    # 9 months
+    3.55, 3.34,
+    1.98, 1.98,
+    4.49, 4.34,
+    53.8, 51.45,
+    
+    # 18 months
+    3.77, 3.38,
+    1.92, 1.91,
+    4.67, 4.48,
+    58.33, 54.84),
+  
+  sd_post = c(
+    # 9 months
+    0.53, 0.62,
+    0.86, 0.81,
+    0.74, 0.90,
+    10.16, 11.26,
+    
+    # 18 months
+    0.57, 0.70,
+    0.82, 0.76,
+    0.74, 1.04,
+    11.76, 13.43)
+  
+)
+
+# Turning data into wide format
+params <- tibble(
+   filter_val1 = rep(c(paste0(c(9, 18), "m")), 1)
+)
+
+wide_Tjaden2021_func <- 
+  function(filter_val1){
+    
+    Tjaden2021 |> 
+      filter(timing == filter_val1) |> 
+      mutate(group = case_match(group, "Ressource group + FACT" ~ "t", "FACT" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      )   
+    
+  }
+
+Tjaden2021_est <- 
+  pmap(params, wide_Tjaden2021_func) |>
+  list_rbind() |>
+  # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
+  mutate(
+    analysis_plan = rep(
+      c( "The NetherlandsEmpowerment List",
+        "BriefSymptom Inventory-18",
+        "Manchester Short Assessment of Quality of Life",
+        "Global Assesment functioning"
+      ), each = 1,2),
+    
+      
+    d = c(
+      rep(c(NA_real_), each = 4,1),
+      c(0.54,
+         0.25,
+        0.07,
+         0.30)),
+    
+    study = "Tjaden et al. 2021") |> 
+  
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    
+    # For PANSS: reverted
+    m_post = if_else(outcome %in% c("BSI"), 
+                     (m_post_t - m_post_c)*-1,
+                     m_post_t - m_post_c),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+   vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
+
+
+
 ```
 
 ### **Valiente et al. [-@Valiente2022]**
@@ -6859,19 +8178,27 @@ group_based_dat_es <-
     Gatz2007_est,
     Gordon2018_est,
     Hagen2005_est,
+    Hilden_est,
+    Himle2014_est,
     izquierdo2021_est,
+    Jacob2010_est,
+    Kanie2019_est,
     Lim2020_est,
     lloyd_Evans2020_est,
+    Madigan2013_est,
     Morley2014_est,
     Morton2012_est, 
     Patterson2003_est,
     Popolo2019_est,
     Rabenstein2015_est,
     Rosenblum2014_est,
+    Russinova2018_est,
     Rüsch2019_est, 
     Sacks2011_est,
     Sajatovic2009_est,
     Schrank2016_est,
+#    schafer2019, Effekt udregning der ikke virker endnu
+    Tjaden2021_est
     Valiente2022_est,
     Volpe2015_est,
     Wojtalik2019_est
@@ -6885,6 +8212,10 @@ group_based_dat <-
     group_based_dat_es
 
 )
+
+# To check the symmetry between R-file and Excel-extraction sheet
+D <- group_based_dat |> 
+  select(Author, vary_id, varifier)
 
 write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
 save(group_based_dat, file = "Group-based interventions data.RData")
