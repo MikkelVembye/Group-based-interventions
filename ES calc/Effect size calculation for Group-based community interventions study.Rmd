@@ -5228,7 +5228,7 @@ morton2012_es <- tibble(
 ```
 
 ### **Patterson et al. [-@Patterson2003]**
-```{r}
+```{r Patterson et al. 2003}
 # Data from table 3 (p.21)  containing means, standard deviation. It also contains
 # Time X Interaction coefficients with p-values (estimated with ANOVA) 
 
@@ -5355,7 +5355,7 @@ Patterson2003_est <-
     
     
     # For PANSS and HAM-D lower scores are beneficial why these is reverted
-    m_post = if_else(outcome != c("QWB","HAM_D"), (m_post_t - m_post_c)*-1,
+    m_post = if_else(outcome  %in% c("QWB","HAM_D"), (m_post_t - m_post_c)*-1,
                      m_post_t - m_post_c),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
@@ -8178,27 +8178,27 @@ group_based_dat_es <-
     Gatz2007_est,
     Gordon2018_est,
     Hagen2005_est,
-    Hilden_est,
-    Himle2014_est,
+#    Hilden_est,     # Not extracted to excel
+#    Himle2014_est,  # Not extracted to excel
     izquierdo2021_est,
-    Jacob2010_est,
-    Kanie2019_est,
+#    Jacob2010_est,  # Not extracted to excel
+#    Kanie2019_est,  # Not extracted to excel
     Lim2020_est,
     lloyd_Evans2020_est,
-    Madigan2013_est,
+#    Madigan2013_est, # Not extracted to excel
     Morley2014_est,
     Morton2012_est, 
     Patterson2003_est,
     Popolo2019_est,
     Rabenstein2015_est,
     Rosenblum2014_est,
-    Russinova2018_est,
+#    Russinova2018_est, # Not extracted to excel
     Rüsch2019_est, 
     Sacks2011_est,
     Sajatovic2009_est,
     Schrank2016_est,
 #    schafer2019, Effekt udregning der ikke virker endnu
-    Tjaden2021_est
+#    Tjaden2021_est # Not extracted to excel
     Valiente2022_est,
     Volpe2015_est,
     Wojtalik2019_est
