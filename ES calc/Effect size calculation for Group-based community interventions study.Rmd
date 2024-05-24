@@ -3467,7 +3467,7 @@ Hagen2005_est <-
   ungroup()
 ```
 
-### Hilden et al. [-@Hilden2021]
+### **Hilden et al. [-@Hilden2021]
 ```{r Hilden et al. 2021}
 # Table 2, p. 181
 Hilden2021 <- tibble(
@@ -8241,10 +8241,10 @@ group_based_dat_es <-
     Gatz2007_est,
     Gordon2018_est,
     Hagen2005_est,
-#    Hilden_est,     # Not extracted to excel
-#    Himle2014_est,  # Not extracted to excel
+    Hilden2021_est,     
+    Himle2014_est,  
     izquierdo2021_est,
-#    Jacob2010_est,  # Not extracted to excel
+    Jacob2010_est,  
 #    Kanie2019_est,  # Not extracted to excel
     Lim2020_est,
     lloyd_Evans2020_est,
