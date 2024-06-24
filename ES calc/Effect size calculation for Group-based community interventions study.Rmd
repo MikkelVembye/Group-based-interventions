@@ -4119,9 +4119,11 @@ Kanie2019 <- tibble(
   group = as.factor(rep(c(
     "SCIT group", 
     "TAU group"),
-    each = 1,10)), # 10 rækker af hver gruppe, fordi der er fem outcomes og to opfølgningsperioder
+    each = 1,5)), # 10 rækker af hver gruppe, fordi der er fem outcomes og to opfølgningsperioder
   
-  timing = rep(c("3m", "6m"), 
+  timing = rep(c(
+    #"3m", 
+    "6m"), 
                each = 10,1), # Den respektive opfølgning skal gentages 10 gange
   
   
@@ -4131,10 +4133,10 @@ Kanie2019 <- tibble(
     "PANSS total", # Positive and Negative Syndrome Scale
     "GAF", # Global Assessment of Functioning
     "SFS" # Social Functioning Scale
-  ),  each = 2,2), # outcomes gentages to gange for hver opfølgningsperiode
+  ),  each = 2,1), # outcomes gentages to gange for hver opfølgningsperiode
   
   
-  N = rep(c(32, 32), each = 1,10), # i hver gruppe er der 32 observationer
+  N = rep(c(32, 32), each = 1,5), # i hver gruppe er der 32 observationer
                                   # som skal gentages 10 gange for hver opfølgning
   
   
@@ -4145,7 +4147,7 @@ Kanie2019 <- tibble(
     64.78, 63.78, # Positive and Negative Syndrome Scale
     51.59, 53.44, # Global Assessment of Functioning
     116.06, 106.53) # Social Functioning Scale
-    , each = 1,2),
+    , each = 1,1),
   
 
   sd_pre = rep(c(
@@ -4154,17 +4156,17 @@ Kanie2019 <- tibble(
     18.18, 18.98, 
     8.81, 9.49,
     23.95, 23.48)
-    , each = 1,2), ## den gentager præ-værdierne ved næste opfølgning
+    , each = 1,1), ## den gentager præ-værdierne ved næste opfølgning
                    # så den sammenligner baseline data med 6 måneders opfølgning
                   # så sørger vi for at der er lige mange kolonner
   
   m_post = c(
-    # 3 months measurement
-    32.94, 33.45, 
-    -1.37, -1.16, 
-    61.34, 59.94, 
-    52.25, 58.06,
-    118.44, 107.41,
+    # 3 months measurement - This is a midterm measurement 
+  #  32.94, 33.45, 
+  #  -1.37, -1.16, 
+  #  61.34, 59.94, 
+  #  52.25, 58.06,
+  #  118.44, 107.41,
     
     
     # 6 months measurement
@@ -4176,11 +4178,11 @@ Kanie2019 <- tibble(
   
   sd_post = c(
     # 3 months measurement
-    3.2, 2.63, 
-    1.09, 1.36,
-    19.15, 18.02, 
-    13.63, 13.47,
-    25.31, 28.03,
+  #  3.2, 2.63, 
+  #  1.09, 1.36,
+  #  19.15, 18.02, 
+  #  13.63, 13.47,
+  #  25.31, 28.03,
     
     # 6 months measurement
     3.17, 2.63,
@@ -4194,7 +4196,9 @@ Kanie2019 <- tibble(
 
 # Turning data into wide format
 params <- tibble(
-   filter_val1 = rep(c(paste0(c(3, 6), "m")), 1)
+   filter_val1 = rep(c(paste0(c(
+     #3, 
+                                6), "m")), 1)
 )
 
 wide_Kanie2019_func <- 
@@ -4223,15 +4227,15 @@ Kanie2019_est <-
         "Positive and Negative Syndrome Scale for Schizophrenia (PANSS)", 
         "Global assessment of Functioning (Observer rated)", 
         "The Social Functioning Scale"
-      ), each = 1,2),
+      ), each = 1,1),
     
     df1 = c(
-      rep(c(NA_real_), each = 5,1,
-      ),
+   #   rep(c(NA_real_), each = 5,1,
+  #    ),
       rep(c(2), each = 5,1)
         ),
     df2 = c(
-      rep(c(NA_real_), each = 5,1),
+    #  rep(c(NA_real_), each = 5,1),
       c(123,
          124,
          124,
@@ -4240,7 +4244,7 @@ Kanie2019_est <-
       ),
     
     F_val = c(
-      rep(c(NA_real_), each = 5,1),
+    #  rep(c(NA_real_), each = 5,1),
       c(1.74,  
         0.57, 
         0.10,
@@ -4249,7 +4253,7 @@ Kanie2019_est <-
       ),
     
     p_val_F = c(
-      rep(c(NA_real_), each = 5,1),
+  #    rep(c(NA_real_), each = 5,1),
       c(
         0.08,
         0.57,
@@ -4261,7 +4265,7 @@ Kanie2019_est <-
     
     
     d = c(
-      rep(c(NA_real_), each = 5,1),
+  #    rep(c(NA_real_), each = 5,1),
       c(0.33,
          -0.05,
         -0.04,
@@ -4292,7 +4296,7 @@ Kanie2019_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-   vary_id = paste0(outcome, "/", timing)
+   vary_id = paste0(outcome)
     
   ) |> 
   ungroup()
@@ -8245,7 +8249,7 @@ group_based_dat_es <-
     Himle2014_est,  
     izquierdo2021_est,
     Jacob2010_est,  
-#    Kanie2019_est,  # Not extracted to excel
+    Kanie2019_est,
     Lim2020_est,
     lloyd_Evans2020_est,
 #    Madigan2013_est, # Not extracted to excel
