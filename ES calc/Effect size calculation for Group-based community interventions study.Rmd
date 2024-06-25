@@ -8252,20 +8252,20 @@ group_based_dat_es <-
     Kanie2019_est,
     Lim2020_est,
     lloyd_Evans2020_est,
-#    Madigan2013_est, # Not extracted to excel
+    Madigan2013_est,
     Morley2014_est,
     Morton2012_est, 
     Patterson2003_est,
     Popolo2019_est,
     Rabenstein2015_est,
     Rosenblum2014_est,
-#    Russinova2018_est, # Not extracted to excel
-    Rüsch2019_est, 
+    Rüsch2019_est,
+    Russinova2018_est,
     Sacks2011_est,
     Sajatovic2009_est,
     Schrank2016_est,
 #    schafer2019, Mangle effektudregning
-#    Tjaden2021_est # Not extracted to excel
+    Tjaden2021_est,
     Valiente2022_est,
     Volpe2015_est,
     Wojtalik2019_est
@@ -8293,7 +8293,6 @@ save(group_based_dat, file = "Group-based interventions data.RData")
 #  r = c(.7, 0.1),
 #  smooth_vi = TRUE
 #)
-
 ```
 
 ```{r, eval=FALSE, include=FALSE}
