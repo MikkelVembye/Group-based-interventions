@@ -6812,7 +6812,7 @@ schafer2019_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    vary_id = paste0(outcome, "/", timing)
+    vary_id = paste(outcome, timing, treatment, sep = "/")
     
   ) |> 
   ungroup()
@@ -8273,7 +8273,7 @@ group_based_dat_es <-
     Sacks2011_est,
     Sajatovic2009_est,
     Schrank2016_est,
-#    schafer2019, Mangle effektudregning
+    schafer2019_est,
     Tjaden2021_est,
     Valiente2022_est,
     Volpe2015_est,
