@@ -839,7 +839,126 @@ Bond2015_binary <-
 Bond2015_est <- bind_rows(Bond2015_continious, Bond2015_binary)
 Bond2015_est
 ```
+### **Bækkelund et al. [-@Bækkelund2022]**
+```{r Bækkelund et al. 2022}
+Bækkelund2022 <- tibble(
+  group = rep(c("Intervention", #Intervention group
+                "Control"),     #Control group
+              each = 1, 4),
+  
+  
+  outcome = rep(c("GAF-S",     # Global Assesment of Function - Split version
+                  "SCL-90 R"),  # Symptom Checklist 90 Revised
+                each = 2, 2), 
+  
+  
+  timing = rep(c("post", 
+                 "6m"), each = 4), 
+  
+  N = rep(c(
+    29, 30,
+    29, 30), 
+    each = 1, 2), 
+  
+  m_pre = rep(c(
+    41.7, 40.9,
+    1.8, 1.9),
+    each = 1,2), 
+  
+  
+  sd_pre = rep(c(
+    5.7, 8.2,
+    0.7, 0.9), 
+    each = 1,2), 
+  
+  m_post = c(
+    # 6 months
+    43.9, 44.2,
+    1.7, 1.9,
+    
+    # 36 months
+    48.4, 45.7,
+    1.7, 1.9),
+  
+  sd_post = c(
+    # 6 months
+    6.3, 8.7,
+    0.8, 0.9,
+    
+    # 36 months
+    6.3, 4.2,
+    0.9, 1.0)
+  
+)
 
+
+
+# Making the tibble into wideformat in order to estimate effect sizes
+Bækkelund2022_wide <-
+  Bækkelund2022 |> 
+  mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) 
+
+
+# Effect size calculating 
+Bækkelund2022_est <-           
+  Bækkelund2022_wide |>
+  
+  mutate(
+    analysis_plan = c(
+      "Global Assesment functioning (GAF)",
+      "Symptom Checklist 90 Revised (SCL-90 R)",
+            "Global Assesment functioning (GAF)",
+      "Symptom Checklist 90 Revised (SCL-90 R)"
+    )
+  ) |> 
+  
+  mutate(
+    ppcor = ppcor_imp,  
+    ppcor_calc_method = "Imputed",
+    
+    diff_t = m_post_t - m_pre_t, 
+    diff_c = m_post_c - m_pre_c,
+    mean_diff = diff_t - diff_c,
+    
+    
+    # SCL-90 R lower scores are beneficial why these is reverted
+    m_post = if_else(outcome != "GAF-S", (m_post_t - m_post_c)*-1,
+                     m_post_t - m_post_c),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    N_total = N_t + N_c,
+    df = N_total, # frihedsgrader svarer til den samlede stikprøvestørrelse
+    
+    d_post = m_post/sd_pool, # Cohens Post D - posttest baseret effektstørrelse
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df), # varians af effekstørrelsen
+    Wd_post = (1/N_t + 1/N_c), # Det store variansled 
+    
+    d_DD = (mean_diff/sd_pool), #Cohens d
+    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df), # skaber falsk korrelation, hvorfor vi beregner det store variansled
+    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), # det store variansled
+    
+    J = 1 - 3/(4*df-1), # her bruger vi J som er en korrigeringsfaktor som vi kan bruge til at beregne Hedges' g (fra d til g)
+    
+    g_post = J * (m_post/sd_pool),
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df),
+    Wg_post = (1/N_t + 1/N_c),
+    
+    
+    g_DD = J * (mean_diff/sd_pool), # her beregner vi Difference in difference effektstørrelse som er Mikkels foretrukne - baseline korrigeret effekstørrelse
+    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df), # variansen af den baseline adjusted effekstørrelse
+    Wg_DD = Wd_DD,
+    
+    .by = outcome,
+    
+    vary_id = paste(outcome, timing, sep = "/")
+    
+  )
+```
 
 ### **Cano-Vindel et al. [-@Cano-Vindel2022]**
 
@@ -4899,8 +5018,181 @@ Madigan2013_est <-
   ungroup()
 
 ```
+### **Michalak et al. [-@Mcichalak2015]**
+```{r Michalak et al. 2015}
+# With both pre- and post-test and beta-coefficients
 
-## **McCay et al. [-@McCay2014]**
+Michalak_2015 <- tibble(
+  outcome = rep(c(
+    "HAM-D",   # Hamilton Depression Rating Scale
+    "BDI"      # BDI
+  ), each = 3), 
+  
+  group = rep(c(
+    "MBCT", # mindfulness-based cognitive therapy
+    "CBASP", # cognitive behavioral analysis system of psychotherapy
+    "TAU" # Treatment as usual (control group)
+  ), times = 2), 
+  
+  N = rep(c(36, 35, 35), times = 2), 
+  
+  m_pre = c(
+    23.03, 24.71, 23.87,   # Hamilton Depression Rating Scale
+    31.31, 30.26, 29.76    # BDI
+  ),
+  
+  sd_pre = c(
+    6.27, 6.69, 6.33,
+    9.55, 7.52, 7.42
+  ),
+  
+  m_post = c(
+    17.86, 14.64, 21.16,     # Hamilton Depression Rating Scale
+    22.69, 22.28, 28.34      # BDI
+  ), 
+  
+  sd_post = c(
+    10.37, 8.85, 8.16,
+    12.11, 12.54, 10.27
+  )
+)
+
+Michalak_2015_MBCT_wide <- 
+  Michalak_2015 |> 
+  filter(!str_detect(group, "CBASP")) |> 
+  mutate(group = case_match(group, "MBCT" ~ "t", "TAU" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) |> 
+  mutate(
+    treatment = "MBCT"
+  ) |> 
+  relocate(treatment)
+
+Michalak_2015_CBASP_wide <- 
+  Michalak_2015 |> 
+  filter(!str_detect(group, "MBCT")) |> 
+  mutate(group = case_match(group, "CBASP" ~ "t", "TAU" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) |> 
+  mutate(
+    treatment = "CBASP"
+  ) |> 
+  relocate(treatment)
+
+Michalak_2015_est <- 
+  bind_rows(Michalak_2015_MBCT_wide, Michalak_2015_CBASP_wide) |> 
+  arrange(outcome) |> 
+  mutate(
+    analysis_plan = rep(c(
+      "Hamilton Depression Rating Scale (HAM-D)",
+      "Depression: Hamilton Depression Rating Scale (BDI)"
+    ), each = 1,2),
+    
+    N_total = N_t + N_c,
+    
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    
+    # HAM-D lower scores are beneficial why these is reverted
+    m_post = if_else(outcome != "PSP", (m_post_t - m_post_c)*-1,
+                     m_post_t - m_post_c),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = outcome
+  )
+
+
+pp_cor <- 0.65
+
+# Udregning af DID effektstørrelse
+Michalak2015_est1 <-
+  Michalak_2015_est |> 
+  mutate(
+    diff_t = m_post_t - m_pre_t,
+    diff_c = m_post_c - m_pre_c,
+    mean_diff = diff_t - diff_c,
+    sd_pool = sqrt( ((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_total-2)  ),
+    
+    df = N_total,
+    
+    J = 1 - 3/(4*df-1),
+    
+    # Formel 1
+    g_DD = J * (mean_diff/sd_pool),
+    
+    # Formel 2 - med imputeret pre-posttest korrelation baseret på test-retest reliability for HAM-D
+    vg_DD = (1/N_t + 1/N_c) * 2*(1-pp_cor) + g_DD^2/(2*df),
+    se_DD = sqrt(vg_DD)
+    
+  )
+
+
+Michalak2015_est2 <- 
+  tibble(
+    analysis_plan = rep(c(
+      "Short-Form Health Survey (SF-36)",
+      "Social Adaptation Self-Evaluation Scale (SASS)"
+    ), c(8,2)),
+      
+    outcome = c("SF-36","SF-36", "SF-36", "SF-36", "SF-36","SF-36", "SF-36", "SF-36",
+                "SASS", "SASS"),
+    subscale = rep(c("Vitality", "Social func", "Role", "Mental health", "overall"), each = 2,1),
+    treatment = rep(c("MBCT","CBASP"), each = 1,5),
+    N_t = rep(c(36,35), each = 1,5), 
+    N_c = 35, 
+    N_total = N_t + N_c, 
+    df = N_total,
+    beta = c(1.12, 1.32, 
+             0.27, 0.74,
+             0.52, 0.46,
+             0.63, 1.25,
+             2.43, 1.68),
+    se_b = c(0.90, 0.70,
+             0.43, 0.44,
+             0.26, 0.24,
+             0.95, 0.89,
+             1.01, 0.93),
+    t_val = beta/se_b,
+    d_paper = c(0.31,0.36, 
+                0.12, 0.34,
+                0.48, 0.42,
+                0.14, 0.28,
+                0.57, 0.40),
+    J = 1 - 3/(4*df-1),
+    g_paper = J * d_paper,
+    #vg_post = (1/N_t + 1/N_c) + g_paper^2/(2*df),
+    vg_paper = g_paper^2/t_val^2 + g_paper^2/(2*df),
+    seg_paper = sqrt(vg_paper)
+    
+  )
+
+# Kombiner de to tibbles
+Michalak2015_est_combined <- bind_rows(
+  Michalak2015_est1,
+  Michalak2015_est2
+)
+
+```
+
+### **McCay et al. [-@McCay2014]**
 ```{r}
 
 ```
@@ -8245,6 +8537,7 @@ group_based_dat_es <-
     Acarturk2022_est,
     Barbic2009_est,
     Bond2015_est,
+    Bækkelund2022_est,
     Cano_vindel2021_est,
     Craigie2009_est,
     Crawford2012_est,
@@ -8262,6 +8555,7 @@ group_based_dat_es <-
     Lim2020_est,
     lloyd_Evans2020_est,
     Madigan2013_est,
+    Michalak2015_est_combined,
     Morley2014_est,
     Morton2012_est, 
     Patterson2003_est,
