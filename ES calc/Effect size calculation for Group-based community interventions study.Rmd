@@ -6280,7 +6280,7 @@ Sacks2011_est <-
       outcome == "GSI_total" ~ "Global Severity Index (GSI)",
       str_detect(outcome, "SF-36") ~ "Short-Form Health Survey (SF-36)= Quality of life"),
 
-  study = "Sajatovic et al. 2009"
+  study = "Sacks et al. 2011"
 
 ) |> 
   
@@ -6742,71 +6742,80 @@ schafer2019 <- tibble(
 
 
 # Effect sizes can be seen in table 2, p. 9
-# mangler effektudregning ----
-params <- tibble(
-  filter_val1 = rep(c("Post", paste0(c(3, 6), "m")), 1)
-  
-)
+schafer2019_Relapse_wide <- 
+  schafer2019 |> 
+  filter(!str_detect(group, "Seeking")) |> 
+  mutate(group = case_match(group, "Relapse Prevention Training" ~ "t", "TAU" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) |> 
+  mutate(
+    treatment = "Relapse Prevention Training"
+  ) |> 
+  relocate(treatment)
 
-wide_schafer2019_func <- 
-  function(filter_val1){
-    
-    schafer2019 |> 
-      filter(timing == filter_val1) |> 
-      mutate(group = case_match(group, "Seeking Safety" ~ "t1", "Relapse Prevention Training" ~ "t2" , "TAU" ~ "c",)) |>
-      tidyr::pivot_wider(
-        names_from = group,
-        names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )   
-    
-  }
+schafer2019_Seeking_wide <- 
+  schafer2019 |> 
+  filter(!str_detect(group, "Relapse")) |> 
+  mutate(group = case_match(group, "Seeking Safety" ~ "t", "TAU" ~ "c")) |> 
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  ) |> 
+  mutate(
+    treatment = "Seeking Safety"
+  ) |> 
+  relocate(treatment)
 
-                          
+
+
 schafer2019_est <- 
-  pmap(params, wide_schafer2019_func) |>
-  list_rbind() |>
-  
+  bind_rows(schafer2019_Relapse_wide, schafer2019_Seeking_wide) |> 
+  arrange(outcome, timing) |> 
   mutate(
     analysis_plan = rep(
-      c(
-        "the PTSD Symptom Scale Interview (PSS-I)",
-        "PTSD severity was self-reported by participants using the PDS",
-        "the Addiction Severity Index-lite (ASI-lite)",
-        "the Addiction Severity Index-lite (ASI-lite)",
-        "the Addiction Severity Index-lite (ASI-lite)",
-        "Depression was assessed by the Beck Depression Inventory II (BDI-II)",
-        "the Difficulties in Emotion Regulation Scale (DERS)"
+      c(rep(c("the Addiction Severity Index-lite (ASI-lite)"), each = 6,1),
+        rep(c("the Addiction Severity Index-lite (ASI-lite)"), each = 6,1),
+        rep(c("Depression was assessed by the Beck Depression Inventory II (BDI-II)"), each = 6,1),
+        rep(c("the Difficulties in Emotion Regulation Scale (DERS)"), each = 6,1),
+        rep(c("the Addiction Severity Index-lite (ASI-lite)"), each = 6,1),
+        rep(c("PTSD severity was self-reported by participants using the PDS"), each = 6,1),
+        rep(c("the PTSD Symptom Scale Interview (PSS-I)"), each = 6,1)
+            
+             
         
-      ), each = 1,3),
+        
+      ), each = 1),
     
-      
-      study = "Schäfer et al. 2019") |> 
-      
-      rowwise() |> 
-      mutate(
-        N_total = N_t1 + N_t2 + N_c,
-        df_ind = N_total,
-        
-
-        #m_post = ((m_post_t - m_post_c) * -1), # For all scores: Lower is beneficial
-          
-        #sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
-        
-        #d_post = m_post/sd_pool, 
-        #vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
-        #Wd_post = (1/N_t + 1/N_c),
-        
-        #J = 1 - 3/(4*df_ind-1),
-        
-        #g_post = J * d_post,
-        #vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
-        #Wg_post = Wd_post,
-        
-        vary_id = paste0(outcome, "/", timing)
-      
-      ) |> 
-      ungroup()
+    
+    study = "Schäfer et al. 2019") |> 
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    
+    m_post = ((m_post_t - m_post_c) * -1), # For all scores: Lower is beneficial
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    vary_id = paste0(outcome, "/", timing)
+    
+  ) |> 
+  ungroup()
 ```
 
 ### **Rüsch et al. [-@Rüsch2019]**
