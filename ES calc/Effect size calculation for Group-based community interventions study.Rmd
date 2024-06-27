@@ -5090,9 +5090,9 @@ Michalak_2015_est <-
   arrange(outcome) |> 
   mutate(
     analysis_plan = rep(c(
-      "Hamilton Depression Rating Scale (HAM-D)",
-      "Depression: Hamilton Depression Rating Scale (BDI)"
-    ), each = 1,2),
+      "Depression: Hamilton Depression Rating Scale (BDI)",
+      "Hamilton Depression Rating Scale (HAM-D)"
+  ), each = 2,1),
     
     N_total = N_t + N_c,
     
@@ -5188,7 +5188,11 @@ Michalak2015_est2 <-
 Michalak2015_est_combined <- bind_rows(
   Michalak2015_est1,
   Michalak2015_est2
-)
+) |> 
+  mutate(
+    study = "Michalak et al. 2015",
+    vary_id = paste0(outcome, "/", treatment)
+  )
 
 ```
 
