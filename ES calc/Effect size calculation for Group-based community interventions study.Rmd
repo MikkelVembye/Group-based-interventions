@@ -3017,6 +3017,48 @@ Gatz2007_est <-
 
 ```
 
+### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
+```{r Gonzalez and Prihoda 2007}
+Gonzalez2007 <- 
+  tibble(
+    outcome = c("GAF", "CGI"),
+    Nt_start = 11, 
+    Nc_start = 11,
+    # Actual samples sizes
+    Nt = 8, # Three patients terminated the group early (p. 411)
+    Nc = 9, # Two of the control subjects were also lost two follow-up (p. 412)
+    d = c(0.20, 0.66),
+    p_val = c(
+      0.65, 
+      0.15 # Is reported as <0.05 and must be estimated from the corresponding F_val
+      ),
+    F_val = c(0.22, 2.34),
+    
+    p_val_est = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
+    
+    
+    
+  ); Gonzalez2007
+
+
+Gonzalez2007_est <- 
+  Gonzalez2007 |> 
+  mutate(
+    analysis_plan = c(
+      "The Global Assessment of Functioning scale",
+      "Clinical Global Impression Scale for Bipolar Disorder"
+    ),
+    N_tot = Nt + Nc,
+    df_ind = N_tot,
+    vd = (d^2/F_val + d^2/(2*N_tot) ),
+    
+    J = 1 - 3/(4*df_ind-1),
+    g = J * d,
+    vg = vd
+  
+  ) |> 
+  relocate(vd, .after = d); Gonzalez2007_est
+```
 
 
 ### **Gordon et al. [-@Gordon2018]**
@@ -8659,6 +8701,7 @@ group_based_dat_es <-
     Druss2018_est,
     Dyck2000_est,
     Gatz2007_est,
+    Gonzalez2007_est,
     Gordon2018_est,
     Hagen2005_est,
     Haslam2019_est,
