@@ -932,32 +932,33 @@ Bækkelund2022_est <-
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     N_total = N_t + N_c,
-    df = N_total, # frihedsgrader svarer til den samlede stikprøvestørrelse
+    df = N_total, 
     
-    d_post = m_post/sd_pool, # Cohens Post D - posttest baseret effektstørrelse
-    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df), # varians af effekstørrelsen
-    Wd_post = (1/N_t + 1/N_c), # Det store variansled 
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df), 
+    Wd_post = (1/N_t + 1/N_c), 
     
-    d_DD = (mean_diff/sd_pool), #Cohens d
-    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df), # skaber falsk korrelation, hvorfor vi beregner det store variansled
-    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), # det store variansled
+    d_DD = (mean_diff/sd_pool), 
+    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df), 
+    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), 
     
-    J = 1 - 3/(4*df-1), # her bruger vi J som er en korrigeringsfaktor som vi kan bruge til at beregne Hedges' g (fra d til g)
+    J = 1 - 3/(4*df-1), 
     
     g_post = J * (m_post/sd_pool),
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df),
     Wg_post = (1/N_t + 1/N_c),
     
     
-    g_DD = J * (mean_diff/sd_pool), # her beregner vi Difference in difference effektstørrelse som er Mikkels foretrukne - baseline korrigeret effekstørrelse
-    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df), # variansen af den baseline adjusted effekstørrelse
+    g_DD = J * (mean_diff/sd_pool), 
+    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df), 
     Wg_DD = Wd_DD,
     
     .by = outcome,
     
     vary_id = paste(outcome, timing, sep = "/")
     
-  )
+  ) |> 
+  ungroup()
 ```
 
 ### **Cano-Vindel et al. [-@Cano-Vindel2022]**
