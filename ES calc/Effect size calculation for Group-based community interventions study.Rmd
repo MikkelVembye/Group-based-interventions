@@ -3044,6 +3044,9 @@ Gonzalez2007 <-
 Gonzalez2007_est <- 
   Gonzalez2007 |> 
   mutate(
+    
+    study = "Gonzalez & Prihoda 2007",
+    
     analysis_plan = c(
       "The Global Assessment of Functioning scale",
       "Clinical Global Impression Scale for Bipolar Disorder"
@@ -3054,7 +3057,9 @@ Gonzalez2007_est <-
     
     J = 1 - 3/(4*df_ind-1),
     g = J * d,
-    vg = vd
+    vg = vd,
+    
+    vary_id = outcome
   
   ) |> 
   relocate(vd, .after = d); Gonzalez2007_est
