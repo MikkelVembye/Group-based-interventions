@@ -2334,21 +2334,21 @@ wide_druss2018_func <-
 Druss2018_est <- 
   pmap(params, wide_druss2018_func) |>
   list_rbind() |>
-# Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
+  # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
   mutate(
     p_val_f = rep(c(0.02, 0.046, 0.039), each = 1,2),
     df1 = 2,
     df2 = rep(c(704, 697, 697), each = 1,2), 
     F_val = rep(c(3.79, 3.09, 3.25), each = 1,2),
     analysis_plan = rep(
-    c("Patient activation measureMorisky scale Recovery assessment scale (RAS)", # RAS
-      "Short-Form Health Survey (SF-36)= Quality of life", # PCS & MCS
-      "Short-Form Health Survey (SF-36)= Quality of life" # PCS & MCS
-    ), each = 1,2),
+      c("Patient activation measureMorisky scale Recovery assessment scale (RAS)", # RAS
+        "Short-Form Health Survey (SF-36)= Quality of life", # PCS & MCS
+        "Short-Form Health Survey (SF-36)= Quality of life" # PCS & MCS
+      ), each = 1,2),
     
     study = "Druss et al. 2018"
     
- ) |> 
+  ) |> 
   rowwise() |> 
   mutate(
     N_total = N_t + N_c,
@@ -2367,13 +2367,79 @@ Druss2018_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
+    
+    
+    
+    m_diff_t = m_post_t - m_pre_t,
+    m_diff_c = m_post_c - m_pre_c,
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/F_val,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/F_val,
+    
+    
+  ) |>  
+  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+    
+    # Average cluster size in treatment group
+    # Harp intevention had six to ten partcipants 
+    
+    avg_cl_size = 8, 
+    avg_cl_type = "From study (p. 530)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
+    
   ) |> 
-  ungroup()
-
-Druss2018_est <- Druss2018_est |> 
+  ungroup() |> 
   mutate(vary_id = paste0(outcome, "/", timing)
-         )
-
+  )
 
 ```
 
@@ -2431,7 +2497,10 @@ Dyck2000_wide <-
 Dyck2000_est <-           
   Dyck2000_wide |>
   mutate(
-    analysis_plan = "The modified Scale for the Assessment of Negative Symptoms" 
+    analysis_plan = "The modified Scale for the Assessment of Negative Symptoms",
+    
+    F_val = 6.1,
+    df = 1.39
     )|> 
   rowwise() |> 
   mutate(
@@ -2453,13 +2522,75 @@ Dyck2000_est <-
     g_post = J * d_post,
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
+  
+  # The outcome MSANS reverted because lower score is beneficial
+    m_diff_t = (m_post_t - m_pre_t)*-1,
+    m_diff_c = (m_post_c - m_pre_c)*-1,
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/F_val,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/F_val
+  ) |> 
+  
+   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+    
+    # Average cluster size in treatment group
+    
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 516)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD)
+  
     
   ) |> 
-  ungroup()
-
-Dyck2000_est <- Dyck2000_est |> 
-   mutate(vary_id = paste0(outcome)
-      )
+  ungroup() |> 
+  mutate(vary_id = paste0(outcome)); Dyck2000_est
 
   
 
@@ -3601,7 +3732,23 @@ Hagen2005_est <-
         "Beck Anxiety Inventory (BAI) ",
         "Beck Depression Inventory (BDI)",
         "Inventory of Interpersonal Problems 64-Circumplex (IIP-64C)"
-      )
+      ),
+    
+    # ANCOVA results from table 3 (p. 39)
+    F_val = c(
+      8.46,
+      2.23,
+      5.51,
+      0.18
+    ),
+    
+    df1 = c(1),
+    df2= c(
+      28,
+      28,
+      27,
+      27
+    )
   
   ) |> 
   
@@ -3628,10 +3775,76 @@ Hagen2005_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    vary_id = outcome
+    # All outcomes are reverted because lower score is beneficial
+    m_diff_t = (m_post_t - m_pre_t)*-1,
+    m_diff_c = (m_post_c - m_pre_c)*-1,
     
-  ) |> 
-  ungroup()
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/F_val,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/F_val,
+    
+    
+    
+  ) |>
+   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+    
+    # Average cluster size in treatment group
+    # Harp intevention had six to ten partcipants 
+    
+    avg_cl_size = 8, 
+    avg_cl_type = "From study (p. 35)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD)
+    )|> 
+      
+  ungroup() |> 
+  mutate(vary_id = outcome); Hagen2005_est
 ```
 ### **Haslam et al. [-@Hilden2019]
 ```{r Haslam et al. 2019}
