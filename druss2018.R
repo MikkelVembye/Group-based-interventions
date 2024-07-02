@@ -1,5 +1,5 @@
 library(VIVECampbell)
-library(VIVECampbell)
+
 
 
 ICC_005 <- 0.05
@@ -153,22 +153,10 @@ Druss2018_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
     ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-    ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
-    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
     omega = 1 - 3/(4*df_adj-1),
-    
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     
     # Cluster-adjusting g_post
@@ -182,7 +170,7 @@ Druss2018_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
     ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -197,38 +185,10 @@ Druss2018_est <-
       F_val = F_val,
       q = n_covariates,
       add_name_to_vars = "_DD"
-    ),
-    
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-    ),
-    
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
     )
     
   ) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(vary_id = paste0(outcome, "/", timing)
+  )
 
