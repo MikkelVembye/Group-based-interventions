@@ -2328,7 +2328,9 @@ Druss2018_est <-
         "Short-Form Health Survey (SF-36)= Quality of life" # PCS & MCS
       ), each = 1,2),
     
-    study = "Druss et al. 2018"
+    study = "Druss et al. 2018",
+    
+    ppcor = ppcor_imp, # Imputed ppcor
     
   ) |> 
   mutate(
@@ -2353,12 +2355,12 @@ Druss2018_est <-
     m_diff_c = m_post_c - m_pre_c,
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/F_val,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/F_val,
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor,
     
     
   ) |>  
@@ -2401,20 +2403,20 @@ Druss2018_est <-
       vars = c(vgt_post, Wgt_post)
     ),
     
-    #gt_DD = omega * d_DD * gamma_sqrt,
-    #VIVECampbell::vgt_smd_1armcluster(
-    #  N_cl_grp = N_t, 
-    #  N_ind_grp = N_c, 
-    #  avg_grp_size = avg_cl_size, 
-    #  ICC = icc, 
-    #  g = gt_DD, 
-    #  model = "DiD",
-    #  cluster_adj = FALSE,
-    #  F_val = F_val,
-    #  q = n_covariates,
-    #  add_name_to_vars = "_DD",
-    #  vars = -var_term1_DD
-    #)
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
     
   ) |> 
   ungroup() |> 
