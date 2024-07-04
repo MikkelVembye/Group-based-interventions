@@ -3733,8 +3733,6 @@ Hagen2005_est <-
     )
   
   ) |> 
-  
-  rowwise() |> 
   mutate(
     study = "Hagen et al. 2005",
     
@@ -3772,6 +3770,7 @@ Hagen2005_est <-
     
     
   ) |>
+  rowwise() |> 
    mutate( # Attempt to make cluster corrected estimates. Has to be checked!
     
     # Average cluster size in treatment group
