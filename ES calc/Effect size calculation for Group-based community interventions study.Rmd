@@ -2331,6 +2331,7 @@ Druss2018_est <-
     study = "Druss et al. 2018",
     
     ppcor = ppcor_imp, # Imputed ppcor
+    ppcor_calc_method = "Imputed",
     
   ) |> 
   mutate(
@@ -3714,26 +3715,30 @@ Hagen2005_est <-
         "Beck Anxiety Inventory (BAI) ",
         "Beck Depression Inventory (BDI)",
         "Inventory of Interpersonal Problems 64-Circumplex (IIP-64C)"
-      ),
+      )
     
     # ANCOVA results from table 3 (p. 39)
-    F_val = c(
-      8.46,
-      2.23,
-      5.51,
-      0.18
-    ),
+  #  F_val = c(
+    #  8.46,
+  #    2.23,
+   #   5.51,
+  #    0.18
+  #  ),
     
-    df1 = c(1),
-    df2= c(
-      28,
-      28,
-      27,
-      27
-    )
+  #  df1 = c(1),
+  #  df2= c(
+  #    28,
+  #    28,
+  #    27,
+  #    27
+  #  )
   
   ) |> 
   mutate(
+    # Imputed ppcor
+    ppcor = ppcor_imp,
+    ppcor_calc_method = "Imputed",
+    
     study = "Hagen et al. 2005",
     
     
@@ -3760,12 +3765,12 @@ Hagen2005_est <-
     m_diff_c = (m_post_c - m_pre_c)*-1,
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/F_val,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/F_val,
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor,
     
     
     
@@ -3818,7 +3823,7 @@ Hagen2005_est <-
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      F_val = F_val,
+      prepost_cor = ppcor,
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD)
