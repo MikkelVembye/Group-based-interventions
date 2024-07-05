@@ -3910,7 +3910,7 @@ Hagen2005_est <-
   ungroup() |> 
   mutate(vary_id = outcome); Hagen2005_est
 ```
-### **Haslam et al. [-@Hilden2019]
+### **Haslam et al. [-@Haslam2019]
 ```{r Haslam et al. 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
 # means with standard errors for post-measurements.
@@ -4530,8 +4530,8 @@ izquierdo2021_est <-
 
 ### **Jacob et al. [-@Jacob2010]**
 ````{r Jacob et al. 2010}
-Jacob2010 <- tibble(group = as.factor(rep(c("Intervention group",
-    "Control group"), 
+Jacob2010 <- tibble(group = as.factor(rep(c("Intervention",
+    "Control"), 
     each = 1, 10)), 
   
   timing = rep(c("Post","6m"), each = 10,1), #den respektive opfølgning skal gentages 18 gange
@@ -4594,34 +4594,26 @@ Jacob2010 <- tibble(group = as.factor(rep(c("Intervention group",
     5.2, 5.7,
     14.5, 13.3)
   
-  )
+  )|> 
+arrange(outcome) |> 
+relocate(outcome, .after = group); Jacob2010
+
+# Making the druss2018 tibble wide in order to estimate the effect sizes and
+# further analysis. 
 
 # Turning data into wide format
-params <- tibble(
-  filter_val1 = rep(c("Post", paste0(c(6), "m")), 1)
-  
-)
+Jacob2010_wide <- 
+  Jacob2010 |> 
+  mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )   
 
 
 
-wide_Jacob2010_func <- 
-  function(filter_val1){
-    
-    Jacob2010 |> 
-      filter(timing == filter_val1) |> 
-      mutate(group = case_match(group, "Intervention group" ~ "t", "Control group" ~ "c")) |>
-      tidyr::pivot_wider(
-        names_from = group,
-        names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )   
-    
-  }
-
-# MANCOVA estimates can be obtained from the text on p. 382
-Jacob2010_est <- 
-  pmap(params, wide_Jacob2010_func) |>
-  list_rbind() |> 
+Jacob2010_est <- Jacob2010_wide |> 
   mutate(
     analysis_plan = rep(c(
       "the Rosenberg Self-Esteem Scale (RSES)",
@@ -4631,9 +4623,13 @@ Jacob2010_est <-
       "Beck Depression Inventory (BDI)"
     ), each = 1,2), 
     
-    study = c("Jacob et al. 2010")
+    study = c("Jacob et al. 2010"),
+    
+    # ppcor imputed
+    ppcor = ppcor_imp,
+    ppcor_calc_method = "Imputed"
+    
   ) |> 
-  rowwise() |> 
   mutate(
     
     N_total = N_t + N_c,
@@ -4657,11 +4653,83 @@ Jacob2010_est <-
     g_post = J * d_post,
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
+   
+   
+    # Reverting m_post for specific outcomes: BDI
+    m_diff_t = if_else(outcome %in% c("BDI"),
+                       (m_post_t - m_pre_t)*-1,
+                        m_post_t - m_pre_t),
+    m_diff_c = if_else(outcome %in% c("BDI"),
+                       (m_post_c - m_pre_c)*-1,
+                       m_post_c - m_pre_c),
     
-    vary_id = paste0(outcome, "/", timing)
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor
     
   ) |> 
-  ungroup()
+rowwise() |>
+  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+    
+    # Average cluster size in treatment group
+    # Group size was between 5 to 7 (p. 379)
+    
+    avg_cl_size = 6, 
+    avg_cl_type = "From study (p. 379)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
+    
+  ) |> 
+  ungroup() |> 
+  mutate(vary_id = paste0(outcome, "/", timing)
+  )
 
 
 ```
@@ -4677,7 +4745,7 @@ Kanie2019 <- tibble(
   
   timing = rep(c(
     #"3m", 
-    "6m"), 
+    "post"), 
                each = 10,1), # Den respektive opfølgning skal gentages 10 gange
   
   
@@ -4749,17 +4817,8 @@ Kanie2019 <- tibble(
 
 
 # Turning data into wide format
-params <- tibble(
-   filter_val1 = rep(c(paste0(c(
-     #3, 
-                                6), "m")), 1)
-)
 
-wide_Kanie2019_func <- 
-  function(filter_val1){
-    
-    Kanie2019 |> 
-      filter(timing == filter_val1) |> 
+Kanie2019_wide <- Kanie2019 |> 
       mutate(group = case_match(group, "SCIT group" ~ "t", "TAU group" ~ "c")) |>
       tidyr::pivot_wider(
         names_from = group,
@@ -4767,12 +4826,8 @@ wide_Kanie2019_func <-
         values_from = N:last_col()
       )   
     
-  }
 
-Kanie2019_est <- 
-  pmap(params, wide_Kanie2019_func) |>
-  list_rbind() |>
-  # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
+Kanie2019_est <- Kanie2019_wide |> 
   mutate(
     analysis_plan = rep(
       c(
@@ -4783,52 +4838,56 @@ Kanie2019_est <-
         "The Social Functioning Scale"
       ), each = 1,1),
     
-    df1 = c(
+   # df1 = c(
    #   rep(c(NA_real_), each = 5,1,
   #    ),
-      rep(c(2), each = 5,1)
-        ),
-    df2 = c(
+  #    rep(c(2), each = 5,1)
+  #      ),
+  #  df2 = c(
     #  rep(c(NA_real_), each = 5,1),
-      c(123,
-         124,
-         124,
-         124,
-         121)
-      ),
+    #  c(123,
+    #    124,
+    #    124,
+    #    124,
+    #    121)
+  #    ),
     
-    F_val = c(
+   # F_val = c(
     #  rep(c(NA_real_), each = 5,1),
-      c(1.74,  
-        0.57, 
-        0.10,
-        2.23, 
-        0.30)
-      ),
+    #  c(1.74,  
+    #    0.57, 
+    #    0.10,
+    #    2.23, 
+    #    0.30)
+    #  ),
     
-    p_val_F = c(
+  #  p_val_F = c(
   #    rep(c(NA_real_), each = 5,1),
-      c(
-        0.08,
-        0.57,
-        0.10,
-        0.11,
-        0.74
-      )
-    ),
+  #    c(
+  #      0.08,
+  #      0.57,
+  #      0.10,
+  #      0.11,
+  #      0.74
+  #    )
+  #  ),
     
     
-    d = c(
+  #  d = c(
   #    rep(c(NA_real_), each = 5,1),
-      c(0.33,
-         -0.05,
-        -0.04,
-         0.26,
-         -0.04)),
+  #    c(0.33,
+  #       -0.05,
+  #      -0.04,
+  #       0.26,
+  #       -0.04)),
     
-    study = "Kanie et al. 2019") |> 
+    study = "Kanie et al. 2019",
+    
+    # ppcor is imputed
+    ppcor = ppcor_imp,
+    ppcor_calc_method = "Imputed"
+  )|> 
   
-  rowwise() |> 
   mutate(
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -4850,10 +4909,85 @@ Kanie2019_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-   vary_id = paste0(outcome)
+    
+    # For PANSS: reverted
+    m_diff_t = if_else(outcome != "PANSS total",
+                       (m_post_t - m_pre_t)*-1,
+                        m_post_t - m_pre_t),
+    m_diff_c = if_else(outcome != "PANSS total",
+                       (m_post_c - m_pre_c)*-1,
+                       m_post_c - m_pre_c),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor
+
+  ) |> 
+  rowwise() |>
+  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+    
+    # Average cluster size in treatment group
+    # Group size was between 4 to 8 (p. 3)
+    
+    avg_cl_size = 6, 
+    avg_cl_type = "From study (p. 3)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
     
   ) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(
+        
+   vary_id = paste0(outcome)
+    
+  )
 
 
 ```
@@ -4948,8 +5082,6 @@ Lim2020_est <-
     eta_sqrt = c(0.080, 0.125, 0.002, 0.123, 0.041, 0.191), # unsure if this should be included
     
     ) |> 
-    
-    rowwise() |> 
       mutate(
         study = "Lim et al. 2020",
         
@@ -4973,9 +5105,89 @@ Lim2020_est <-
         vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
         Wg_post = Wd_post,
         
-        vary_id = outcome
         
-      ) |> 
+        m_diff_t = if_else(outcome != "Social Functioning (QLS)", 
+                           (m_post_t - m_pre_t) * -1,
+                           m_post_t - m_pre_t),
+        
+        m_diff_c = if_else(outcome != "Social Functioning (QLS)",
+                           (m_post_c - m_pre_c) * -1,
+                           m_post_c - m_pre_c),
+    
+        d_DD = (m_diff_t - m_diff_c)/sd_pool,
+        vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
+        Wd_DD = d_DD^2/F_val,
+    
+        g_DD = J * d_DD, 
+        vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
+        Wg_DD = g_DD^2/F_val,
+        
+        
+       #  icc values obtained from p. 2
+   
+    icc = rep(c(0.98, # ICC for QLS, repeated once
+                0.956), # ICC for PANSS, repeated five times
+              c(1, 5)),
+    
+    icc_type = "From study (p. 2)"
+        
+        
+      ) |>
+  rowwise() |> 
+  mutate(
+    
+    # Average cluster size in treatment group
+    # We don't know the average group size. Therefore, we impute this value
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+   
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
+    omega = 1 - 3/(4*df_adj-1),
+    
+  
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+       vars = c(vgt_post, Wgt_post)
+      ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+      ),
+    
+    
+    
+    vary_id = outcome
+  ) |> 
   ungroup()
 ```
 
@@ -5378,35 +5590,21 @@ Madigan2013 <- tibble(
     8.34, 11.5,
     3.4, 2.9)
   
-)
+) |> 
+  arrange(outcome) |> 
+relocate(outcome, .after = group); Madigan2013
 
 
 # Turning data into wide format
-params <- tibble(
-  filter_val1 = rep(c("Post", paste0(c(3, 12), "m")), 1)
-  
-)
-
-
-
-wide_Madigan2013_func <- 
-  function(filter_val1){
-    
-    Madigan2013 |> 
-      filter(timing == filter_val1) |> 
+Madigan2013_wide <- Madigan2013 |>  
       mutate(group = case_match(group, "GPI" ~ "t", "TAU" ~ "c")) |>
       tidyr::pivot_wider(
         names_from = group,
         names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )   
-    
-  }
+        values_from = N:last_col())
 
 # Multi level effect estimates can be obtained from table 3, p. 3
-Madigan2013_est <- 
-  pmap(params, wide_Madigan2013_func) |>
-  list_rbind() |> 
+Madigan2013_est <- Madigan2013_wide |> 
   mutate(
     analysis_plan = rep(c(
       "the Addiction Severity Index",
@@ -5417,9 +5615,10 @@ Madigan2013_est <-
       "WHO-Quality of Life assessment (WHOQOL, BREF)"
     ), each = 1,2), 
     
-    study = c("Madigan et al. 2013")
+    study = c("Madigan et al. 2013"),
+    
+    
   ) |> 
-  rowwise() |> 
   mutate(
     
     N_total = N_t + N_c,
