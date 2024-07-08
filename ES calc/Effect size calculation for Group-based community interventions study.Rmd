@@ -5617,6 +5617,9 @@ Madigan2013_est <- Madigan2013_wide |>
     
     study = c("Madigan et al. 2013"),
     
+    # ppcor imputed
+    ppcor = ppcor_imp,
+    ppcor_calc_method = "Imputed"
     
   ) |> 
   mutate(
@@ -5624,7 +5627,7 @@ Madigan2013_est <- Madigan2013_wide |>
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    # Reverting all outcomes
+  
    # Reverting m_post for specific outcomes
     m_post = if_else(outcome %in% c("ASI", 
                                     "Positive symptoms", 
@@ -5645,11 +5648,90 @@ Madigan2013_est <- Madigan2013_wide |>
     g_post = J * d_post,
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
+   
+   
+   # Reverting specific values
+   m_diff_t = if_else(outcome %in% c("ASI", 
+                                    "Positive symptoms", 
+                                    "Negative symptoms",
+                                    "Depressive symptoms"),
+                       (m_post_t - m_pre_t)*-1,
+                        m_post_t - m_pre_t),
+    m_diff_c = if_else(outcome %in% c("ASI", 
+                                    "Positive symptoms", 
+                                    "Negative symptoms",
+                                    "Depressive symptoms"),
+                       (m_post_c - m_pre_c)*-1,
+                       m_post_c - m_pre_c),
     
-    vary_id = paste0(outcome, "/", timing)
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor
+   
+    
+  
+    
+  ) |>
+  rowwise() |>
+  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+  
+    
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
     
   ) |> 
-  ungroup()
+  ungroup() |> 
+  mutate(vary_id = paste0(outcome, "/", timing)
+  )
 
 ```
 ### **Michalak et al. [-@Mcichalak2015]**
@@ -5884,7 +5966,7 @@ Morley2014 <- tibble(
     5.43, 4.3,
     5.72, 4.3,
     12.49, 9.58
-  ),
+  )
   
   ); Morley2014
 
@@ -5912,11 +5994,14 @@ Morley2014_est <-
         "Hospital Anxiety and Depression Scale",
         "Hospital Anxiety and Depression Scale",
         "Self-Efficacy Scale"
-      )
+      ),
+    
+    # ppcor imputed
+    ppcor = ppcor_imp,
+    ppcor_calc_method = "Imputed"
     
   ) |> 
-  
-  rowwise() |> 
+ 
   mutate(
     study = "Morley et al. 2014",
     
@@ -5940,10 +6025,86 @@ Morley2014_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    vary_id = outcome
+    
+    
+    # Reverting specific values
+   m_diff_t = if_else(outcome %in% c("BSS", 
+                                     "HADS_depression", 
+                                     "HADs_anxiety"),
+                       (m_post_t - m_pre_t)*-1,
+                        m_post_t - m_pre_t),
+    m_diff_c = if_else(outcome %in% c("BSS", 
+                                     "HADS_depression", 
+                                     "HADs_anxiety"),
+                       (m_post_c - m_pre_c)*-1,
+                       m_post_c - m_pre_c),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/ppcor,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/ppcor
     
   ) |> 
-  ungroup()
+  rowwise() |>
+  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+  
+    # Group sizes was between 6 to 8
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 132)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    )
+    
+  ) |> 
+  ungroup() |> 
+  mutate(
+    vary_id = outcome
+  )
 
 ```
 
@@ -6022,7 +6183,7 @@ Morton2012 <- tibble(
     17.64, 20.88
   #  19.11, 20.67,
   #  0.65, 0.56
-  )
+  ), 
   
 
 ); Morton2012
