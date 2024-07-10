@@ -4721,7 +4721,7 @@ Jacob2010_est <-
 
 ```
 
-### **Kanie et al. [-@Kanie2019]**
+### **Kanie et al. [-@Kanie2019] (Quality-checked)**
 ```{r Kanie et al. 2019}
 # Taken from table 4, p. 8
 Kanie2019 <- tibble(
