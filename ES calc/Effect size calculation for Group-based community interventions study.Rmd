@@ -2322,7 +2322,7 @@ Druss2010_est <-
 
 ```
 
-### **Druss et al. [-@Druss2018]**
+### **Druss et al. [-@Druss2018] (Double-check)**
 
 ```{r Druss2018}
 # Data from table 2 (p. 532), containing means and SD for health related quality of life 
@@ -2434,12 +2434,12 @@ Druss2018_est <-
     m_diff_c = m_post_c - m_pre_c,
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/ppcor,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) ,
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/ppcor,
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD,
     
     
   ) |>  
@@ -4141,7 +4141,7 @@ Hilden2021_est <-
   
 ```
 
-### ** Himle et al. [-@Himle2014]**
+### **Himle et al. [-@Himle2014]**
 ```{r Himle et al. 2014}
 # From table 2, p. 174
 Himle2014 <- tibble(
@@ -4528,13 +4528,13 @@ izquierdo2021_est <-
   ungroup()
 ```
 
-### **Jacob et al. [-@Jacob2010]**
+### **Jacob et al. [-@Jacob2010] (Quality-checked)**
 ````{r Jacob et al. 2010}
-Jacob2010 <- tibble(group = as.factor(rep(c("Intervention",
-    "Control"), 
-    each = 1, 10)), 
+Jacob2010 <- tibble(
   
-  timing = rep(c("Post","6m"), each = 10,1), #den respektive opfølgning skal gentages 18 gange
+  group = as.factor(rep(c("Intervention", "Control"), each = 1, 10)), 
+  
+  timing = rep(c("Post","6m"), each = 10,1),
   
   outcome = rep(c(
     "RSES",   
@@ -4594,7 +4594,7 @@ Jacob2010 <- tibble(group = as.factor(rep(c("Intervention",
     5.2, 5.7,
     14.5, 13.3)
   
-  )|> 
+  ) |> 
 arrange(outcome) |> 
 relocate(outcome, .after = group); Jacob2010
 
@@ -4612,35 +4612,23 @@ Jacob2010_wide <-
   )   
 
 
-
-Jacob2010_est <- Jacob2010_wide |> 
+Jacob2010_est <- 
+  Jacob2010_wide |> 
   mutate(
-    analysis_plan = rep(c(
-      "the Rosenberg Self-Esteem Scale (RSES)",
-      "the State Self-Esteem Scale (SSES)",
-      "the State Self-Esteem Scale (SSES)",
-      "the State Self-Esteem Scale (SSES)",
-      "Beck Depression Inventory (BDI)"
-    ), each = 1,2), 
+    analysis_plan = if_else(outcome == "BDI", "Depression", "Self-esteem"), 
     
     study = c("Jacob et al. 2010"),
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed"
-    
-  ) |> 
-  mutate(
+    ppcor_calc_method = "Imputed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
     
     # Reverting all outcomes
    # Reverting m_post for specific outcomes
-    m_post = if_else(outcome %in% c("BDI"),
-                     (m_post_t - m_post_c) * -1, 
-                     m_post_t - m_post_c),
-    
+    m_post = if_else(outcome == "BDI", (m_post_t - m_post_c) * -1, m_post_t - m_post_c),
     
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
@@ -4656,23 +4644,23 @@ Jacob2010_est <- Jacob2010_wide |>
    
    
     # Reverting m_post for specific outcomes: BDI
-    m_diff_t = if_else(outcome %in% c("BDI"),
+    m_diff_t = if_else(outcome == "BDI",
                        (m_post_t - m_pre_t)*-1,
                         m_post_t - m_pre_t),
-    m_diff_c = if_else(outcome %in% c("BDI"),
+    m_diff_c = if_else(outcome == "BDI",
                        (m_post_c - m_pre_c)*-1,
                        m_post_c - m_pre_c),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/ppcor,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c)  + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) ,
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/ppcor
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c)  + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD 
     
   ) |> 
-rowwise() |>
+  rowwise() |>
   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
     
     # Average cluster size in treatment group
@@ -4728,8 +4716,7 @@ rowwise() |>
     
   ) |> 
   ungroup() |> 
-  mutate(vary_id = paste0(outcome, "/", timing)
-  )
+  mutate(vary_id = paste0(outcome, "/", timing));  Jacob2010_est
 
 
 ```
@@ -4738,15 +4725,9 @@ rowwise() |>
 ```{r Kanie et al. 2019}
 # Taken from table 4, p. 8
 Kanie2019 <- tibble(
-  group = as.factor(rep(c(
-    "SCIT group", 
-    "TAU group"),
-    each = 1,5)), # 10 rækker af hver gruppe, fordi der er fem outcomes og to opfølgningsperioder
+  group = as.factor(rep(c("SCIT", "TAU"), each = 1,5)), 
   
-  timing = rep(c(
-    #"3m", 
-    "post"), 
-               each = 10,1), # Den respektive opfølgning skal gentages 10 gange
+  timing = "Post", 
   
   
   outcome = rep(c(
@@ -4755,35 +4736,27 @@ Kanie2019 <- tibble(
     "PANSS total", # Positive and Negative Syndrome Scale
     "GAF", # Global Assessment of Functioning
     "SFS" # Social Functioning Scale
-  ),  each = 2,1), # outcomes gentages to gange for hver opfølgningsperiode
+  ),  each = 2,1), 
   
+  N = rep(c(32, 29), 5), #MHV Check if you agree that it should be 29 participant in the control              
   
-  N = rep(c(32, 32), each = 1,5), # i hver gruppe er der 32 observationer
-                                  # som skal gentages 10 gange for hver opfølgning
-  
-  
-  
-  m_pre = rep(c(
+  m_pre = c(
     31.04, 32.83, # Social Cognition Screening Questionnaire
     -1.64, -1.33, # Brief Assessment of Cognition in Schizophrenia
     64.78, 63.78, # Positive and Negative Syndrome Scale
     51.59, 53.44, # Global Assessment of Functioning
-    116.06, 106.53) # Social Functioning Scale
-    , each = 1,1),
-  
-
-  sd_pre = rep(c(
+    116.06, 106.53 # Social Functioning Scale
+    ), 
+    
+  sd_pre = c(
     3.58, 3.47, 
     1.01, 1.42, 
     18.18, 18.98, 
     8.81, 9.49,
-    23.95, 23.48)
-    , each = 1,1), ## den gentager præ-værdierne ved næste opfølgning
-                   # så den sammenligner baseline data med 6 måneders opfølgning
-                  # så sørger vi for at der er lige mange kolonner
+    23.95, 23.47), 
   
   m_post = c(
-    # 3 months measurement - This is a midterm measurement 
+    # 3 months measurement - This is a midterm measurement/during-the-intervention measure 
   #  32.94, 33.45, 
   #  -1.37, -1.16, 
   #  61.34, 59.94, 
@@ -4796,10 +4769,11 @@ Kanie2019 <- tibble(
     -1.13, -0.77,
     60.03, 59.81,
     56.09, 55.59,
-    117.45, 108.91),
+    117.45, 108.91
+    ),
   
   sd_post = c(
-    # 3 months measurement
+    # 3 months measurement This is a midterm measurement/during-the-intervention measure
   #  3.2, 2.63, 
   #  1.09, 1.36,
   #  19.15, 18.02, 
@@ -4811,92 +4785,65 @@ Kanie2019 <- tibble(
     1.22, 1.35,
     18.68, 17.32,
     15.33, 14.5,
-    25.42, 26.6)
+    25.42, 26.6
+    )
   
-)
+); Kanie2019
 
 
 # Turning data into wide format
-
 Kanie2019_wide <- Kanie2019 |> 
-      mutate(group = case_match(group, "SCIT group" ~ "t", "TAU group" ~ "c")) |>
+      mutate(group = case_match(group, "SCIT" ~ "t", "TAU" ~ "c")) |>
       tidyr::pivot_wider(
         names_from = group,
         names_glue = "{.value}_{group}",
         values_from = N:last_col()
-      )   
+      ) |> 
+  mutate(
+    # Obtained from last column of Table 4 (p. 8)
+    # MHV: Check if these turn the right way in interpretation relative to how we convert them
+    es_paper = c(0.33, -0.05, -0.04, 0.26, -0.04),
+    es_paper_type = "DiD"
+  ); Kanie2019_wide
     
 
-Kanie2019_est <- Kanie2019_wide |> 
+Kanie2019_est <- 
+  Kanie2019_wide |> 
   mutate(
-    analysis_plan = rep(
-      c(
-        "Social Cognition Screening Questionnaire",
-        "The Brief Assessment of Cognition in Schizophrenia",
-        "Positive and Negative Syndrome Scale for Schizophrenia (PANSS)", 
-        "Global assessment of Functioning (Observer rated)", 
-        "The Social Functioning Scale"
-      ), each = 1,1),
-    
-   # df1 = c(
-   #   rep(c(NA_real_), each = 5,1,
-  #    ),
-  #    rep(c(2), each = 5,1)
-  #      ),
-  #  df2 = c(
-    #  rep(c(NA_real_), each = 5,1),
-    #  c(123,
-    #    124,
-    #    124,
-    #    124,
-    #    121)
-  #    ),
-    
-   # F_val = c(
-    #  rep(c(NA_real_), each = 5,1),
-    #  c(1.74,  
-    #    0.57, 
-    #    0.10,
-    #    2.23, 
-    #    0.30)
-    #  ),
-    
-  #  p_val_F = c(
-  #    rep(c(NA_real_), each = 5,1),
-  #    c(
-  #      0.08,
-  #      0.57,
-  #      0.10,
-  #      0.11,
-  #      0.74
-  #    )
-  #  ),
-    
-    
-  #  d = c(
-  #    rep(c(NA_real_), each = 5,1),
-  #    c(0.33,
-  #       -0.05,
-  #      -0.04,
-  #       0.26,
-  #       -0.04)),
     
     study = "Kanie et al. 2019",
     
+    analysis_plan = case_when(
+      str_detect(outcome, "SCSQ") ~ "Unused",
+      str_detect(outcome, "BACS") ~ "All mental health",
+      str_detect(outcome, "SFS|GAF") ~ "Social functioning",
+      str_detect(outcome, "PANSS") ~ "Symptoms of psychosis",
+      .default = NA_character_
+    ),
+    
+    #analysis_plan = rep(
+    #  c(
+    #    "Social Cognition Screening Questionnaire",
+    #    "The Brief Assessment of Cognition in Schizophrenia",
+    #    "Positive and Negative Syndrome Scale for Schizophrenia (PANSS)", 
+    #    "Global assessment of Functioning (Observer rated)", 
+    #    "The Social Functioning Scale"
+    #  ), each = 1,1),
+    
     # ppcor is imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed"
-  )|> 
-  
-  mutate(
+    ppcor_calc_method = "Imputed",
+    
     N_total = N_t + N_c,
     df_ind = N_total,
     
     
     # For PANSS: reverted
-    m_post = if_else(outcome != "PANSS total", 
-                     (m_post_t - m_post_c)*-1,
-                     m_post_t - m_post_c),
+    m_post = if_else(
+      outcome != "PANSS total", 
+      (m_post_t - m_post_c)*-1,
+      m_post_t - m_post_c
+    ),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
@@ -4911,24 +4858,28 @@ Kanie2019_est <- Kanie2019_wide |>
     
     
     # For PANSS: reverted
-    m_diff_t = if_else(outcome != "PANSS total",
-                       (m_post_t - m_pre_t)*-1,
-                        m_post_t - m_pre_t),
-    m_diff_c = if_else(outcome != "PANSS total",
-                       (m_post_c - m_pre_c)*-1,
-                       m_post_c - m_pre_c),
+    m_diff_t = if_else(
+      outcome != "PANSS total",
+      (m_post_t - m_pre_t)*-1,
+      m_post_t - m_pre_t
+    ),
+    m_diff_c = if_else(
+      outcome != "PANSS total",
+      (m_post_c - m_pre_c)*-1,
+      m_post_c - m_pre_c
+    ),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/ppcor + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/ppcor,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/ppcor + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/ppcor
-
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD
+    
   ) |> 
   rowwise() |>
-  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+  mutate(
     
     # Average cluster size in treatment group
     # Group size was between 4 to 8 (p. 3)
@@ -4987,8 +4938,7 @@ Kanie2019_est <- Kanie2019_wide |>
         
    vary_id = paste0(outcome)
     
-  )
-
+  ); Kanie2019_est
 
 ```
 
@@ -5471,7 +5421,7 @@ lloyd_Evans2020_est <-
 ```
 
 
-## **Madigan et al. [-@Madigan2013]**
+### **Madigan et al. [-@Madigan2013]**
 ```{r Madigan et al. 2013}
 # Table 2, p. 141
 Madigan2013 <- tibble(
@@ -8784,7 +8734,7 @@ Rüsch2019_est <- Rüsch2019_wide |>
       ungroup(); Rüsch2019_est
 ```
 
-### *Tjaden et al. [-@Tjaden2022]**
+### **Tjaden et al. [-@Tjaden2022]**
 ```{r Tjaden et al. 2021}
 Tjaden2021 <- tibble(
   group = rep(c("Ressource group + FACT", #Ressource group
