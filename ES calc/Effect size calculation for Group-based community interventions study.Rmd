@@ -331,12 +331,13 @@ Acarturk2022_es <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+    
+    #gamma_sqrt_icc005 = gamma_1armcluster(
+    #  N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+    #  ),
+    # gamma_sqrt_icc02 = gamma_1armcluster(
+    #  N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+    #  ),
     
     gt = g * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -351,35 +352,35 @@ Acarturk2022_es <-
       q = n_covariates
       ),
     
-    gt_icc005 = g * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_icc005",
-      vars = vgt_icc005:Wgt_icc005
-      ),
+   # gt_icc005 = g * gamma_sqrt_icc005,
+   #  vgt_smd_1armcluster(
+   #  N_cl_grp = N_t, 
+   #  N_ind_grp = N_c, 
+   #  avg_grp_size = avg_cl_size, 
+   #  ICC = ICC_005, 
+   #  g = gt_icc005, 
+   #  model = "DiD",
+   #  cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_icc005",
+  #    vars = vgt_icc005:Wgt_icc005
+  #    ),
     
-    gt_icc02 = g * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_icc02",
-      vars = vgt_icc02:Wgt_icc02
-      ),
+  #  gt_icc02 = g * gamma_sqrt_icc02,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = ICC_02, 
+  #    g = gt_icc02, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_icc02",
+  #    vars = vgt_icc02:Wgt_icc02
+  #    ),
     
     gt_alt = g_alt * gamma_sqrt,
     vgt_smd_1armcluster(
@@ -419,9 +420,9 @@ Acarturk2022_est <-
   mutate(
     vary_id = paste0(outcome, "/", timing),
     analysis_plan = case_when(
-      outcome == "HSCL-25" ~ "The Hopkins Symptoms Checklist (HSCL-25) ",
-      outcome == "PCL-5" ~ "PCL-5 consists of 20 items asking about the symptoms of traumatic stress",
-      outcome == "PSYCHLOPS" ~ "PSYCHOLOPS consists of four questions, three domains (problems, functions and well-being)",
+      outcome == "HSCL-25" ~ "Mental health outcomes",
+      outcome == "PCL-5" ~ "Mental health outcomes",
+      outcome == "PSYCHLOPS" ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_  # Fallback in case of unexpected outcomes
     )
   )
@@ -561,22 +562,22 @@ Barbic2009_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+   # gamma_sqrt_icc005 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+  #    ),
+  #  gamma_sqrt_icc02 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+  #  df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     
     # Cluster-adjusting g_post
@@ -607,35 +608,35 @@ Barbic2009_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+   #  vgt_smd_1armcluster(
+   #    N_cl_grp = N_t, 
+   #   N_ind_grp = N_c, 
+   #    avg_grp_size = avg_cl_size, 
+   #   ICC = ICC_005, 
+   #    g = gt_DD_icc005, 
+   #   model = "DiD",
+   #    cluster_adj = FALSE,
+   #    prepost_cor = ppcor,
+   #   q = n_covariates,
+   #    add_name_to_vars = "_DD_icc005",
+   #   vars = vgt_DD_icc005:Wgt_DD_icc005
+   #    ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+   # gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+   #  vgt_smd_1armcluster(
+   #   N_cl_grp = N_t, 
+   #    N_ind_grp = N_c, 
+   #    avg_grp_size = avg_cl_size, 
+   #    ICC = ICC_02, 
+   #   g = gt_DD_icc02, 
+   #    model = "DiD",
+   #    cluster_adj = FALSE,
+   #    prepost_cor = ppcor,
+   #   q = n_covariates,
+   #   add_name_to_vars = "_DD_icc02",
+   #    vars = vgt_DD_icc02:Wgt_DD_icc02
+   #    ),
     
     vary_id = outcome
     
@@ -713,22 +714,22 @@ Bond2015_continious <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+   # gamma_sqrt_icc005 = gamma_1armcluster(
+   #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+   #   ),
+   #  gamma_sqrt_icc02 = gamma_1armcluster(
+   #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+   #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+   #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+   #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+   #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -743,31 +744,31 @@ Bond2015_continious <-
       vars = vgt_post:adj_value_post
       ),
     
-    gt_post_icc005 = omega_icc005 * d_post * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_post_icc005, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_post_icc005",
-      vars = vgt_post_icc005:Wgt_post_icc005
-      ),
+   # gt_post_icc005 = omega_icc005 * d_post * gamma_sqrt_icc005,
+   #  vgt_smd_1armcluster(
+   #    N_cl_grp = N_t, 
+   #    N_ind_grp = N_c, 
+   #   avg_grp_size = avg_cl_size, 
+   #    ICC = ICC_005, 
+   #   g = gt_post_icc005, 
+   #    model = "posttest",
+   #    cluster_adj = FALSE,
+   #    add_name_to_vars = "_post_icc005",
+   #    vars = vgt_post_icc005:Wgt_post_icc005
+   #   ),
     
-    gt_post_icc02 = omega_icc02 * d_post * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_post_icc02, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_post_icc02",
-      vars = vgt_post_icc02:Wgt_post_icc02
-      ),
+    #gt_post_icc02 = omega_icc02 * d_post * gamma_sqrt_icc02,
+    #vgt_smd_1armcluster(
+    #  N_cl_grp = N_t, 
+    #  N_ind_grp = N_c, 
+    #  avg_grp_size = avg_cl_size, 
+    #  ICC = ICC_02, 
+    #  g = gt_post_icc02, 
+    #  model = "posttest",
+    #  cluster_adj = FALSE,
+    #  add_name_to_vars = "_post_icc02",
+    #  vars = vgt_post_icc02:Wgt_post_icc02
+    #  ),
     
     vary_id = outcome
     
@@ -945,6 +946,11 @@ Bækkelund2022_est <-
   mutate(
     
     study = "Bækkelund et al. 2022",
+    
+    analysis_plan = case_when(
+      str_detect(outcome, "GAF-S") ~ "Social functioning (degree of impairment)",
+      str_detect(outcome, "SCL-90 R") ~ "Mental health outcomes"),
+    
     main_es_method = "diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
@@ -1378,10 +1384,10 @@ Cano_vindel2021_est <-
   rename(ppcor = tr_reliability) |> 
   mutate(
     analysis_plan = case_when(
-      outcome == "GAD-7" ~ "using all/Anxiety",
-      outcome == "PHQ-9" ~ "using all/Depression",
-      outcome == "PHQ15" ~ "using all",
-      str_detect(outcome, "Funct") ~ "Social functioning",
+      outcome == "GAD-7" ~ "Mental health outcomes/Anxiety",
+      outcome == "PHQ-9" ~ "Mental health outcomes/Depression",
+      outcome == "PHQ15" ~ "Mental health outcomes",
+      str_detect(outcome, "Funct") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "QoL") ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
     )
@@ -1442,22 +1448,22 @@ Cano_vindel2021_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+ #   gamma_sqrt_icc005 = gamma_1armcluster(
+#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+#      ),
+#    gamma_sqrt_icc02 = gamma_1armcluster(
+#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+#      ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+ #   df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+#    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+#    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+#    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -1487,35 +1493,35 @@ Cano_vindel2021_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+ #   gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+#    vgt_smd_1armcluster(
+#      N_cl_grp = N_t, 
+#      N_ind_grp = N_c, 
+#      avg_grp_size = avg_cl_size, 
+#      ICC = ICC_005, 
+#      g = gt_DD_icc005, 
+#      model = "DiD",
+#      cluster_adj = FALSE,
+#      prepost_cor = ppcor,
+#      q = n_covariates,
+#      add_name_to_vars = "_DD_icc005",
+#      vars = vgt_DD_icc005:Wgt_DD_icc005
+#      ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+#    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+#    vgt_smd_1armcluster(
+#      N_cl_grp = N_t, 
+#      N_ind_grp = N_c, 
+#      avg_grp_size = avg_cl_size, 
+#      ICC = ICC_02, 
+#      g = gt_DD_icc02, 
+#      model = "DiD",
+#      cluster_adj = FALSE,
+#      prepost_cor = ppcor,
+#      q = n_covariates,
+#      add_name_to_vars = "_DD_icc02",
+#      vars = vgt_DD_icc02:Wgt_DD_icc02
+#      ),
     
     vary_id = paste(analysis, outcome, timing, sep = "/")
     
@@ -1645,7 +1651,7 @@ Craigie2009_est <-
   left_join(ppcors_Craigie2009, by = join_by(analysis, outcome)) |> 
   mutate(
   
-  analysis_plan = rep(c("using all/Depression", "using all/Anxiety", "Wellbeing and Quality of Life"), 2),  
+  analysis_plan = rep(c("Mental health outcomes/Depression", "Mental health outcomes/Anxiety", "Wellbeing and Quality of Life"), 2),  
   effect_size = "SMD",
   sd_used = "Pooled posttest SD",
     
@@ -1935,7 +1941,7 @@ Crawford2012_est <-
   arrange(outcome, timing) |> 
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "Positive") ~ "using all/Symptoms of psychosis",
+      str_detect(outcome, "Positive") ~ "Mental health outcomes/Symptoms of psychosis",
       str_detect(outcome, "function") ~ "Social functioning (degree of impairment)",
       outcome == "Wellbeing" ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
@@ -2012,23 +2018,23 @@ Crawford2012_est <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-    gamma_sqrt_icc005 = VIVECampbell::gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_005 
-      ),
+  #  gamma_sqrt_icc005 = VIVECampbell::gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_005 
+  #    ),
     
-    gamma_sqrt_icc02 = VIVECampbell::gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_02 
-      ),
+  #  gamma_sqrt_icc02 = VIVECampbell::gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_02 
+  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post =  omega * d_post * gamma_sqrt,
@@ -2058,35 +2064,35 @@ Crawford2012_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+  #  gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = icc_005, 
+  #    g = gt_DD_icc005, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_DD_icc005",
+  #    vars = vgt_DD_icc005:Wgt_DD_icc005
+  #    ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+  #  gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = icc_02, 
+  #    g = gt_DD_icc02, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_DD_icc02",
+  #    vars = vgt_DD_icc02:Wgt_DD_icc02
+  #    ),
     
     vary_id = paste(outcome, timing, treatment, sep = "/")
     
@@ -2173,7 +2179,7 @@ Druss2010_est <-
   ) |> 
   mutate(
     
-    analysis_plan ="Wellbeing and Quality of Life",
+    analysis_plan = "Wellbeing and Quality of Life",
     
     N_total = N_t + N_c,
     p_val_baseline_diff = c(
@@ -2240,22 +2246,22 @@ Druss2010_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+#    gamma_sqrt_icc005 = gamma_1armcluster(
+#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+#      ),
+#    gamma_sqrt_icc02 = gamma_1armcluster(
+#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+#      ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+#    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+#    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+#    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+#    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -2285,35 +2291,35 @@ Druss2010_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+#    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+#    vgt_smd_1armcluster(
+#      N_cl_grp = N_t, 
+#      N_ind_grp = N_c, 
+#      avg_grp_size = avg_cl_size, 
+#      ICC = ICC_005, 
+#      g = gt_DD_icc005, 
+#      model = "DiD",
+#      cluster_adj = FALSE,
+#      F_val = F_val,
+#      q = n_covariates,
+#      add_name_to_vars = "_DD_icc005",
+#      vars = vgt_DD_icc005:Wgt_DD_icc005
+#      ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+#    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+#    vgt_smd_1armcluster(
+#      N_cl_grp = N_t, 
+#      N_ind_grp = N_c, 
+#      avg_grp_size = avg_cl_size, 
+#      ICC = ICC_02, 
+#      g = gt_DD_icc02, 
+#      model = "DiD",
+#      cluster_adj = FALSE,
+#      F_val = F_val,
+#      q = n_covariates,
+#      add_name_to_vars = "_DD_icc02",
+#      vars = vgt_DD_icc02:Wgt_DD_icc02
+#      ),
     
     vary_id = outcome
     
@@ -2565,7 +2571,7 @@ Dyck2000_wide <-
 Dyck2000_est <-           
   Dyck2000_wide |>
   mutate(
-    analysis_plan = "Negative Symptoms/Mental health outcomes",
+    analysis_plan = "Mental health outcomes/Negative Symptoms",
     
     F_val = 6.1,
     df = 1.39
@@ -2998,11 +3004,11 @@ Timmermans2012_est <-
   select(-c(es_paper_c, es_paper_t)) |> 
   mutate(vary_id = paste0(outcome, "/", timing),
          analysis_plan = case_when(
-           outcome == "Empoverment"  ~  "The Dutch Empowerment Scale", 
-           outcome == "Hope"  ~ "The Herth Hope Index", 
-           outcome == "Quality"  ~ "The Manchester Short Assessment of Quality of Life", 
-           outcome == "Self-e"  ~ "The Mental Health Confidence Scale", 
-           outcome == "Loneliness"  ~ "The Loneliness Scale"
+           outcome == "Empoverment"  ~  "Hope, Empowerment & Self-efficacy", 
+           outcome == "Hope"  ~ "Hope, Empowerment & Self-efficacy", 
+           outcome == "Quality"  ~ "Wellbeing and Quality of Life", 
+           outcome == "Self-e"  ~ "Mental health outcomes", 
+           outcome == "Loneliness"  ~ "Loneliness"
          )
       )
 
@@ -3076,7 +3082,7 @@ Gatz2007_est <-
     
     analysis_plan = c(
       "Alcohol and drug abuse/misuse", "Alcohol and drug abuse/misuse",
-      "using all", "using all", "Hope, Empowerment & Self-efficacy"
+      "Mental health outcomes", "Mental health outcomes", "Hope, Empowerment & Self-efficacy"
     ),
     
     N_total = N_t + N_c,
@@ -3135,22 +3141,22 @@ Gatz2007_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+  #  gamma_sqrt_icc005 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+  #    ),
+  #  gamma_sqrt_icc02 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -3180,35 +3186,35 @@ Gatz2007_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+  #  vgt_smd_1armcluster(
+   #   N_cl_grp = N_t, 
+    #  N_ind_grp = N_c, 
+    #  avg_grp_size = avg_cl_size, 
+    #  ICC = ICC_005, 
+    #  g = gt_DD_icc005, 
+    #  model = "DiD",
+    #  cluster_adj = FALSE,
+    #  F_val = F_val,
+    #  q = n_covariates,
+    #  add_name_to_vars = "_DD_icc005",
+    #  vars = vgt_DD_icc005:Wgt_DD_icc005
+    #  ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+  #  gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = ICC_02, 
+  #    g = gt_DD_icc02, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    F_val = F_val,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_DD_icc02",
+  #    vars = vgt_DD_icc02:Wgt_DD_icc02
+  #    ),
     
     vary_id = outcome
     
@@ -3363,7 +3369,7 @@ Gordon2018_est <-
       ), 
     
     analysis_plan = case_when(
-      outcome == "DASS-21" ~ "using all",
+      outcome == "DASS-21" ~ "Mental health outcomes",
       str_detect(outcome, "SSPA|LSP") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "QLS") ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
@@ -3428,23 +3434,23 @@ Gordon2018_est <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
+   # gamma_sqrt_icc005 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+  #    ),
     
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
+  #  gamma_sqrt_icc02 = gamma_1armcluster(
+  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
+   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
     
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
+  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -3474,35 +3480,35 @@ Gordon2018_est <-
       add_name_to_vars = "_DD"
       ),
     
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
+   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = ICC_005, 
+  #    g = gt_DD_icc005, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_DD_icc005",
+  #    vars = vgt_DD_icc005:Wgt_DD_icc005
+  #    ),
     
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
-      ),
+   # gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
+  #  vgt_smd_1armcluster(
+  #    N_cl_grp = N_t, 
+  #    N_ind_grp = N_c, 
+  #    avg_grp_size = avg_cl_size, 
+  #    ICC = ICC_02, 
+  #    g = gt_DD_icc02, 
+  #    model = "DiD",
+  #    cluster_adj = FALSE,
+  #    prepost_cor = ppcor,
+  #    q = n_covariates,
+  #    add_name_to_vars = "_DD_icc02",
+  #    vars = vgt_DD_icc02:Wgt_DD_icc02
+  #    ),
     
     vary_id = outcome
     
@@ -3657,17 +3663,17 @@ Gutman2019_est <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
   
-  gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
+#  gamma_sqrt_icc005 = gamma_1armcluster(
+#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
+#      ),
   
-  gamma_sqrt_icc02 = gamma_1armcluster(
-    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-    ),
+#  gamma_sqrt_icc02 = gamma_1armcluster(
+#    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
+#    ),
  
   adj_fct = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
-  adj_fct_icc005 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
-  adj_fct_icc02 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
+#  adj_fct_icc005 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
+#  adj_fct_icc02 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
   
   # Accounting for the fact that this study is single sited/clustered
   gt_post = gamma_sqrt * g_post * sqrt(1-icc),
@@ -3682,15 +3688,19 @@ Gutman2019_est <-
   hg_reg = sqrt(2) * sign(gt_reg) * (log(abs(gt_reg) + sqrt(gt_reg^2 + a^2)) - log(a)),
   vhg_reg = 1/df_ind,
   
-  gt_reg_icc005 = gamma_sqrt_icc005 * g_reg * sqrt(1-ICC_005),
-  vgt_reg_icc005 = adj_fct_icc005 * vg_reg * (1-ICC_005),
-  Wgt_reg_icc005 = adj_fct_icc005 * Wg_reg * (1-ICC_005),
+ # gt_reg_icc005 = gamma_sqrt_icc005 * g_reg * sqrt(1-ICC_005),
+#  vgt_reg_icc005 = adj_fct_icc005 * vg_reg * (1-ICC_005),
+#  Wgt_reg_icc005 = adj_fct_icc005 * Wg_reg * (1-ICC_005),
   
-  gt_reg_icc02 = gamma_sqrt_icc02 * g_reg * sqrt(1-ICC_02),
-  vgt_reg_icc02 = adj_fct_icc02 * vg_reg * (1-ICC_02),
-  Wgt_reg_icc02 = adj_fct_icc02 * Wg_reg * (1-ICC_02),
+#  gt_reg_icc02 = gamma_sqrt_icc02 * g_reg * sqrt(1-ICC_02),
+#  vgt_reg_icc02 = adj_fct_icc02 * vg_reg * (1-ICC_02),
+#  Wgt_reg_icc02 = adj_fct_icc02 * Wg_reg * (1-ICC_02),
   
-  vary_id = outcome
+  vary_id = outcome,
+
+analysis_plan = case_when(
+      str_detect(outcome, "PSS") ~ "Mental health outcomes",
+      str_detect(outcome, "WHOQOL-BREF") ~ "Wellbeing and Quality of Life"),
     
   ) |> 
   select(-a); Gutman2019_est
@@ -3798,8 +3808,8 @@ Hagen2005_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "SCL-90") ~ "Mental health outcomes",
-      str_detect(outcome, "BAI") ~ "Anxiety/Mental health outcomes",
-      str_detect(outcome, "BDI") ~ "Depression/Mental health outcomes",
+      str_detect(outcome, "BAI") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "BDI") ~ "Mental health outcomes/Depression",
       str_detect(outcome, "IIP-64-C") ~ "Social functioning (degree of impairment)",
       .default = NA_character_
     ),
@@ -3992,7 +4002,7 @@ Haslam2019_est <- tibble(
   
   analysis_plan = case_when(
       str_detect(outcome, "Loneliness") ~ "Loneliness",
-      str_detect(outcome, "Depression") ~ "Depression/Mental health outcomes",
+      str_detect(outcome, "Depression") ~ "Mental health outcomes/Depression",
       str_detect(outcome, "Social Anxiety") ~ "Mental health outcomes",
       str_detect(outcome, "General practitioner vists|Multiple group memberships") ~ "Unused outcomes",
       .default = NA_character_
@@ -4122,7 +4132,7 @@ Hilden2021_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "BSL-23 total") ~ "Mental health outcomes",
-      str_detect(outcome, "Overall Anxiety Severity and Impairment scale") ~ "Anxiety/Mental health outcomes",
+      str_detect(outcome, "Overall Anxiety Severity and Impairment scale") ~ "Mental health outcomes/Anxiety",
       str_detect(outcome, "Patient Health Questionnaire 9 scale") ~ "Physical health",
       str_detect(outcome, "Alcohol Use Disorders Identification Test scale") ~ "Alcohol and drug abuse/misuse",
       str_detect(outcome, "Sheehan disability work or studylife|Sheehan disability social life|Sheehan disability family life") ~ "Social functioning (degree of impairment)",
@@ -4521,10 +4531,10 @@ izquierdo2021_est <-
   list_rbind() |> 
   mutate(
     analysis_plan = rep(
-      c("Coping with Stress Self-efficacy (CSSE)",
-        "Perceived changes in successful daily functioning (Areas of Change Index, ACI)",
-        "Satisfaction with changes in overall daily functioning (single-item self-report, SCI)",
-        "The expanded brief psychiatric rating scale" # Total score
+      c("Hope, Empowerment & Self-efficacy",
+        "Social functioning (degree of impairment)",
+        "Social functioning (degree of impairment)",
+        "Mental health outcomes" # Total score
       ), each = 1,3),
     
     study = "Izquierdo et al. 2021",
@@ -4988,7 +4998,7 @@ Lim2020 <- tibble(
                             ), each = 2,1 )
                       ),
   
-  N = rep(c(18, 21), 6), #MHV Check this
+  N = rep(c(18, 21), 6), 
   
   m_pre = c(46.15, 61.74, # Social Functioning (QLS) total
            18.22, 16.57,  # PANSS Negative
@@ -9805,7 +9815,7 @@ Wojtalik2019_est <- Wojtalik2019_wide |>
     
     g_post = J * d_post,
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
-    Wg_post = Wd_post
+    Wg_post = Wd_post, 
     
     
     
