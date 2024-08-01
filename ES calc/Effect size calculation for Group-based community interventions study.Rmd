@@ -7493,7 +7493,7 @@ Rosenblum2014 <- tibble(
    1.5, 3.0, 
    6.8, 8.0,
    8.3, 12.2,
-   3.5, 1.6
+   1.5, 1.6
 #   2.1, 1.0
  ),
 
@@ -7557,9 +7557,9 @@ Rosenblum2014_est <-
   list_rbind() |> 
   mutate(
     
-    p_val = c(0.03, 0.11, 0.07, 0.02, 0.45, 
-              0.84, 0.47, 0.07, 0.17, 0.73,
-              0.01, 0.10, 0.31, 0.06, 0.15),
+  #  p_val = c(0.03, 0.11, 0.07, 0.02, 0.45, 
+  #            0.84, 0.47, 0.07, 0.17, 0.73,
+  #            0.01, 0.10, 0.31, 0.06, 0.15),
     
 
     analysis_plan = case_when(
@@ -7568,7 +7568,11 @@ Rosenblum2014_est <-
       .default = NA_character_
     ),
     
-    study = "Rosenblum et al. 2014" 
+    study = "Rosenblum et al. 2014",
+    
+    # ppcor imputed
+    ppcor = ppcor_imp,
+    pp_cor_methods = "Imputed"
     
 ) |> 
   mutate(
@@ -7590,11 +7594,73 @@ Rosenblum2014_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
+    # all scores are reverted because lower scores is beneficial 
+    m_diff_t = (m_post_t - m_pre_t)*-1,
+    m_diff_c = (m_post_c - m_pre_c)*-1,
     
-    vary_id = paste0(sample, "/", outcome)
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
+    g_DD = J * d_DD, 
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD
     
   ) |> 
-  ungroup() 
+  rowwise() |> 
+  mutate(
+       # Group sizes are imputed
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    ),
+    
+    vary_id = paste0(sample, "/", outcome)
+  ) |> 
+  ungroup(); Rosenblum2014_est
 ```
 ### **Russinova et al. [-@Russinova2018]**
 ```{r Russinova et al. 2018}
@@ -7999,9 +8065,40 @@ Sacks2011 <- tibble(
     12.9, 6.6 # SF-36 physical health
   )
   
-  
 ); Sacks2011
 
+# To also calculate pooled data to get combined estimates for both high and low/medium propensity 
+calculate_pooled_estimates <- function(N, means, sds) {
+  weighted_mean <- sum(N * means) / sum(N)
+  sum_squared_differences <- sum(N * (means - weighted_mean)^2)
+  sum_variances <- sum((N - 1) * sds^2)
+  total_N <- sum(N)
+  pooled_sd <- sqrt((sum_variances + sum_squared_differences) / (total_N - 1))
+  return(pooled_sd)
+}
+
+
+# Calculate combined statistics
+Sacks2011_total <- Sacks2011 %>%
+  group_by(group, outcome) %>%
+  summarise(
+    sample = "total",
+    N_total = sum(N),
+    m_pre = weighted.mean(m_pre, N),
+    sd_pre = calculate_pooled_sd(N, m_pre, sd_pre),
+    m_post = weighted.mean(m_post, N),
+    sd_post = calculate_pooled_sd(N, m_post, sd_post),
+    .groups = 'drop'
+  ) |> 
+  rename(N = N_total) |> 
+  arrange(outcome, desc(group))
+
+
+
+Sacks2011 <- bind_rows(Sacks2011, Sacks2011_total)
+
+
+  
 # Turning data into wide format
 params <- tibble(
   filter_val1 = rep(unique(Sacks2011$sample)
@@ -8036,11 +8133,15 @@ Sacks2011_est <-
       str_detect(outcome, "SF-36") ~ "Wellbeing and Quality of Life"),
 
   study = "Sacks et al. 2011",
+  
+  
+  # ppcor imputed
+    ppcor = ppcor_imp,
+    pp_cor_methods = "Imputed"
 
 
 ) |> 
-  
-  rowwise() |> 
+  arrange(sample, outcome)|> 
   mutate(
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -8061,10 +8162,71 @@ Sacks2011_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    vary_id = paste0(outcome, "/", sample)
+    # For GSI and BDI lower scores are beneficial why these are reverted
+    m_diff_t = if_else(!outcome %in% c("BDI_total", "GSI_total"), m_post_t - m_pre_t, (m_post_t - m_pre_t)*-1),
+    m_diff_c = if_else(!outcome %in% c("BDI_total", "GSI_total"), m_post_c - m_pre_c,(m_post_c - m_pre_c)*-1),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
+    g_DD = J * d_DD, 
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD
     
   ) |> 
-  ungroup()
+  rowwise() |>
+  mutate(
+         # Group sizes are imputed
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+    ),
+         vary_id = paste0(outcome, "/", sample)) |> 
+  ungroup(); Sacks2011_est
 
 
 
@@ -9822,7 +9984,7 @@ Wojtalik2019_wide <- Wojtalik2019 |>
     names_from = group,
     names_glue = "{.value}_{group}",
     values_from = N:last_col()
-  )   
+  )
 
 Wojtalik2019_est <- Wojtalik2019_wide |> 
   mutate(
