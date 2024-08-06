@@ -5668,7 +5668,10 @@ lloyd_Evans2020_est <-
 ```
 
 
-### **Madigan et al. [-@Madigan2013]**
+### **Madigan et al. [-@Madigan2013] (Quality-checked)**
+
+We extracted data from Table 2 (p. 141)
+
 ```{r Madigan et al. 2013}
 # Table 2, p. 141
 Madigan2013 <- tibble(
@@ -5801,12 +5804,14 @@ Madigan2013_wide <- Madigan2013 |>
         values_from = N:last_col())
 
 # Multi level effect estimates can be obtained from table 3, p. 3
-Madigan2013_est <- Madigan2013_wide |> 
+Madigan2013_est <- 
+  Madigan2013_wide |> 
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "ASI") ~ "Alcohol and drug abuse/misuse",
       str_detect(outcome, "Depressive symptoms") ~ "Depression/Mental health outcomes",
-      str_detect(outcome, "Positive symptoms|Negative symptoms") ~ "Mental health outcomes",
+      str_detect(outcome, "Positive") ~ "Mental health outcomes",
+      str_detect(outcome, "Negative") ~ "Mental health outcomes/Negative symptoms",
       str_detect(outcome, "Global functioning") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "WHOQoL") ~ "Wellbeing and Quality of Life",
       .default = NA_character_
@@ -6113,7 +6118,8 @@ Michalak2015_est_combined <- bind_rows(
 
 ```
 
-### **Morley et al. [-@Morley2014]**
+### **Morley et al. [-@Morley2014] (Quality-checked)**
+Data from table 2 containing means and standard deviation on page 136
 ```{r Morley et al. 2014}
 # Data from table 2 containing means and standard deviation on page 136
 
@@ -6129,7 +6135,7 @@ Morley2014 <- tibble(
   )),
   
   N = rep(c(
-    122, 63
+    122, 63 # obtained from Table 1 (p. 135)
   ), each = 1,4),
   
 #   q = 6, # Controlling for Unemployment status, Suicide Ideation, recent cannabis use, 
@@ -6303,12 +6309,12 @@ Morley2014_est <-
   ungroup() |> 
   mutate(
     vary_id = outcome
-  )
+  ); Morley2014_est 
 
 ```
 
-### **Morton et al. [-@Morton2012]**
-
+### **Morton et al. [-@Morton2012] (Quality-checked)**
+Data is extracted from Table 3 containing means and standard deviation (p. 538)
 ```{r}
 # Data from table 3 containing means and standard deviation (p. 538)
 Morton2012 <- tibble(
@@ -6382,35 +6388,7 @@ Morton2012 <- tibble(
     17.64, 20.88
   #  19.11, 20.67,
   #  0.65, 0.56
-  ), 
- 
-#  t-values based on ANOVA and taken from text (pp. 357-359)
-# But gives presumably wrong estimates. Why i use imputed ppcor
-
-#  t_val = c( 
-#      -4.18, -0.57,
-   #   NA_character_, NA_character_,
-#      -1.74, 1.59,
-#      NA_character_, NA_character_,
-#      -3.88, 0.45,
-#      -3.38, 0.76
-#    ),
- 
- 
- 
-# r = ((sd_pre^2*t_val + sd_post^2*t_val) - 
-#        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_val),
-
-  
-#  z = 0.5 * log( (1+r)/(1-r) ),
-#  v = 1/(N-3),
-#  w = 1/v,
-
-
-# mean_z = sum(w*z)/sum(w),
-# ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1)
-  
-
+  )
 
 ); Morton2012
 
@@ -6426,23 +6404,7 @@ Morton2012_wide <-
   )
 
 
-
-Morton2012_est1 <- 
-  Morton2012_wide |>
-  mutate(
-    
-  #  mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
-  #  ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
-  #  pp_cor_methods = "Calculated from study results",
-    
-    #ppcor imputed for DASS: depression, and DASS: stress,
-  ppcor = ppcor_imp,
-  pp_cor_methods = "Imputed"
-    
-  )
-
-
-Morton2012_est2 <- tibble(
+Morton2012_wide2 <- tibble(
   outcome = c("DASS_stress", 
               "DASS_depression"),
   
@@ -6487,31 +6449,46 @@ Morton2012_est2 <- tibble(
   sd_post_c = c(
     9.93, 
     8.51
-  ),
-  
-  #ppcor imputed for DASS: depression, and DASS: stress,
-  ppcor = ppcor_imp,
-  pp_cor_methods = "Imputed"
+  )
   
 )
 
 
 
-Morton2012_est <- bind_rows(
-  Morton2012_est1,
-  Morton2012_est2
-) |> 
+Morton2012_est <- 
+  bind_rows(
+    Morton2012_wide,
+    Morton2012_wide2
+  ) |> 
   mutate(
     study = "Morton et al. 2012",
    
      analysis_plan = case_when(
-      str_detect(outcome, "BEST_composite|DASS_anxiety|DASS_stress|DASS_depression") ~ "Mental health outcomes",
+      str_detect(outcome, "BEST|DASS") ~ "Mental health outcomes",
       str_detect(outcome, "BHS") ~ "Hope, Empowerment & Self-efficacy",
-      str_detect(outcome, "DERS_total") ~ "Mental health outcomes/Unused outcomes",
+      str_detect(outcome, "DERS") ~ "Mental health outcomes/Unused outcomes",
       .default = NA_character_
     ),
     
+  # Entering test-retest reliability measure from text and 
+  # Pfohl, B., Blum, N., St. John, D., McCormick, B., Allen, J., & Black, D.W.
+  #   (2009). Reliability and validity of the Borderline Evaluation of
+  #   Severity over Time (BEST): A self-rated scale tomeasure severity and
+  #   change in persons with Borderline Personality Disorder. Journal of
+  #   Personality Disorders, 23, 281–293.  
+
+  ppcor = case_when(
+    str_detect(outcome, "BEST") ~ 0.62,
+    str_detect(outcome, "DASS") ~ 0.81,
+    str_detect(outcome, "BHS") ~ 0.69,
+    str_detect(outcome, "DERS") ~ 0.88,
+    .default = ppcor_imp
+    
+  ),
+  pp_cor_methods = "Obtained from test-retest reliability measures"
+    
   )
+
 
 
 
@@ -6608,6 +6585,7 @@ Morton2012_est <- Morton2012_est|>
 
 
 # Regression coefficients extracted from text (pp.537-539)
+# Not used for analysis!
 morton2012_es <- tibble(
   
   study = "morton2012",
@@ -10536,6 +10514,7 @@ Wuthrich2013_2021_est
 
 
 ```
+
 
 
 ## Amalgamation of data
