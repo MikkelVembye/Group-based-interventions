@@ -56,7 +56,6 @@ ppcor_imp <- 0.5
 R2_imp <- 0
 
 grp_size_imp <- 8
-
 ```
 
 
@@ -5792,7 +5791,7 @@ Madigan2013 <- tibble(
   
 ) |> 
   arrange(outcome) |> 
-relocate(outcome, .after = group); Madigan2013
+  relocate(outcome, .after = group); Madigan2013
 
 
 # Turning data into wide format
@@ -6666,107 +6665,105 @@ morton2012_es <- tibble(
 ); morton2012_es
 ```
 
-### **Patterson et al. [-@Patterson2003]**
+### **Patterson et al. [-@Patterson2003] (Quality-checked)**
+Data was extracted from Table 3 (p. 21)
 ```{r Patterson et al. 2003}
-# Data from table 3 (p.21)  containing means, standard deviation. It also contains
+# Data from Table 3 (p. 21)  containing means, standard deviation. It also contains
 # Time X Interaction coefficients with p-values (estimated with ANOVA) 
 
-
-Patterson2003 <- tibble(
-  group = as.factor(rep(c("FAST Intervention", 
-                          "Treatment-as-Usual"), 
-                        each = 1, 10)),
-  
-  timing = rep(c("3m", 
-                 "6m"), 
-               each = 10,1),
- 
-   outcome = as.factor(rep(c(
-#    "UPSA", 
-    "PANSS_Positive", 
-    "PANSS_Negative", 
-    "PANSS_General", 
-    "HAM_D", 
-    "QWB"), each = 2, 2)),
- 
-   N = 16,
-  
-  m_pre = rep(c(
-#    31.9, 41.5,   # UPSA
-    12.5, 13.0,   # PANSS Positive
-    16.9, 13.0,   # PANSS Negative
-    25.0, 21.9,   # PANSS General
-    7.8, 7.7,     # Ham-D
-    0.53, 0.55    # QWB
-  ), each = 1,2),
-  
-  sd_pre = rep(c(
-#    11.8, 8.3,    # UPSA
-    5.6, 4,       # PANSS Positive
-    6.6, 3.2,     # PANSS Negative
-    6.2, 3.7,     # PANSS General
-    6.1, 2.8,     # Ham-D
-    0.08, 0.08    # QWB
-  ), each = 1,2),
-  
-  
-  m_post = c(
-#    41.5, 40.3, # UPSA           3 months
-    13.0, 10.4, # PANSS Positive 3 months
-    13.0, 10.1, # PANSS Negative 3 months
-    21.9, 22.3, # PANSS General  3 months
-    7.7, 4.9,   # Ham-D          3 months
-    0.55, 0.49, # QWB            3 months
+Patterson2003 <- 
+  tibble(
+    group = as.factor(rep(c("FAST Intervention", 
+                            "Treatment-as-Usual"), 
+                          each = 1, 10)),
     
-#    42.7, 41.6,  # UPSA           6 months
-    12.13, 13.1, # PANSS Positive 6 months 
-    14.3, 12.4,  # PANSS Negative 6 months
-    23.9, 23.9,  # PANSS General  6 months
-    7.2, 7.9,    # Ham-D          6 months
-    0.51, 0.49   # QWB            6 months
-  
-  ),
-
-  sd_post = c(
-#    9.5, 7.1,     # UPSA           3 months
-    6.6, 6.3,     # PANSS Positive 3 months
-    5.1, 4,       # PANSS Negative 3 months
-    4.7, 4.9,     # PANSS General  3 months
-    5.2, 5.3,     # Ham-D          3 months
-    0.10, 0.07,   # QWB           3 months
+    timing = rep(c("3m", "6m"), each = 10,1),
+    
+    outcome = as.factor(rep(c(
+      #    "UPSA", 
+      "PANSS_Positive", 
+      "PANSS_Negative", 
+      "PANSS_General", 
+      "HAM_D", 
+      "QWB"), each = 2, 2)),
+    
+    N = 16,
+    
+    m_pre = rep(c(
+      #    31.9, 41.5,   # UPSA
+      12.5, 13.0,   # PANSS Positive
+      16.9, 13.0,   # PANSS Negative
+      25.0, 21.9,   # PANSS General
+      7.8, 7.7,     # Ham-D
+      0.53, 0.55    # QWB
+    ), each = 1,2),
+    
+    sd_pre = rep(c(
+      #    11.8, 8.3,    # UPSA
+      5.6, 4,       # PANSS Positive
+      6.6, 3.2,     # PANSS Negative
+      6.2, 3.7,     # PANSS General
+      6.1, 2.8,     # Ham-D
+      0.08, 0.08    # QWB
+    ), each = 1,2),
     
     
-   
-#    9.7, 9.7,     # UPSA           6 months
-    4.3, 5.9,     # PANSS Positive 6 months
-    6, 4.4,       # PANSS Negative 6 months
-    4.6, 4.4,     # PANSS General  6 months
-    4.9, 5,       # Ham-D          6 months
-    0.07, 0.07    # QWB            6 months
-   )
-) |> 
-  arrange(outcome, timing)
+    m_post = c(
+      #    41.5, 40.3, # UPSA           3 months
+      13.0, 10.4, # PANSS Positive 3 months
+      13.0, 10.1, # PANSS Negative 3 months
+      21.9, 22.3, # PANSS General  3 months
+      7.7, 4.9,   # Ham-D          3 months
+      0.55, 0.49, # QWB            3 months
+      
+      #    42.7, 41.6,  # UPSA           6 months
+      12.13, 13.1, # PANSS Positive 6 months 
+      14.3, 12.4,  # PANSS Negative 6 months
+      23.9, 23.9,  # PANSS General  6 months
+      7.2, 7.9,    # Ham-D          6 months
+      0.51, 0.49   # QWB            6 months
+      
+    ),
+    
+    sd_post = c(
+      #    9.5, 7.1,     # UPSA           3 months
+      6.6, 6.3,     # PANSS Positive 3 months
+      5.1, 4,       # PANSS Negative 3 months
+      4.7, 4.9,     # PANSS General  3 months
+      5.2, 5.3,     # Ham-D          3 months
+      0.10, 0.07,   # QWB           3 months
+      
+      
+      
+      #    9.7, 9.7,     # UPSA           6 months
+      4.3, 5.9,     # PANSS Positive 6 months
+      6, 4.4,       # PANSS Negative 6 months
+      4.6, 4.4,     # PANSS General  6 months
+      4.9, 5,       # Ham-D          6 months
+      0.07, 0.07    # QWB            6 months
+    )
+  ) |> 
+  arrange(outcome, timing) |> 
+  relocate(outcome)
 
 
 # Making the patterson2003 tibble wide in order to estimate the effect sizes and
 # further analysis. 
 
-    
-Patterson2003_wide  <- Patterson2003 |> 
-      mutate(group = case_match(group, "FAST Intervention" ~ "t", "Treatment-as-Usual" ~ "c")) |>
-      tidyr::pivot_wider(
-        names_from = group,
-        names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )   
-
-
+Patterson2003_wide  <- 
+  Patterson2003 |> 
+  mutate(group = case_match(group, "FAST Intervention" ~ "t", "Treatment-as-Usual" ~ "c")) |>
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )   
 
 Patterson2003_est <- 
   Patterson2003_wide |>
   # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
   mutate(
-     analysis_plan = case_when(
+    analysis_plan = case_when(
       str_detect(outcome, "PANSS_General|PANSS_Negative|PANSS_Positive") ~ "Mental health outcomes/Symptoms of psychosis",
       str_detect(outcome, "HAM_D") ~ "Mental health outcomes/Depression",
       str_detect(outcome, "QWB") ~ "Wellbeing and Quality of Life",
@@ -6774,7 +6771,7 @@ Patterson2003_est <-
     ),
     
     study = "Patterson et al. 2003",
-  
+    
     # ppcor imputed
     ppcor = ppcor_imp,
     pp_cor_methods = "Imputed"
@@ -6788,7 +6785,7 @@ Patterson2003_est <-
     
     # For PANSS and HAM-D lower scores are beneficial why these is reverted
     m_post = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                     "Mental health outcomes/Depression"), 
+                                          "Mental health outcomes/Depression"), 
                      (m_post_t - m_post_c)*-1,
                      m_post_t - m_post_c),
     
@@ -6804,15 +6801,15 @@ Patterson2003_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-  
+    
     
     #  reverting specific scores as lower score is beneficial
-   m_diff_t = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                     "Mental health outcomes/Depression"), 
-                      (m_post_t - m_pre_t)*-1,
-                      m_post_t - m_pre_t),
+    m_diff_t = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
+                                            "Mental health outcomes/Depression"), 
+                       (m_post_t - m_pre_t)*-1,
+                       m_post_t - m_pre_t),
     m_diff_c = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                     "Mental health outcomes/Depression"),
+                                            "Mental health outcomes/Depression"),
                        (m_post_c - m_pre_c)*-1,
                        m_post_c - m_pre_c),
     
@@ -6823,12 +6820,12 @@ Patterson2003_est <-
     g_DD = J * d_DD, 
     vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
     Wg_DD = Wd_DD
-   
+    
     
   ) |> 
-   rowwise() |>
+  rowwise() |>
   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
-  
+    
     # Group sizes are imputed
     avg_cl_size = grp_size_imp, 
     avg_cl_type = "Imputed",
@@ -6885,100 +6882,96 @@ Patterson2003_est <-
   ); Patterson2003_est
 ```
 
-### **Popolo et al. [-@Popolo2019]**
+### **Popolo et al. [-@Popolo2019] (Quality-checked)**
+Data was extracted from Table 2 (p. 351)
 ```{r Popolo et al. 2019}
-# Data from table 2 containing means and standard deviation + within effect size.
+# Data from Table 2 containing means and standard deviation + within effect size.
 # Table also contains "between group-group post treatment effect size at post-tratement"
 # with a coefficient and "Post hoc power" on page 351
 
-Popolo2019 <- tibble(
-  group = rep(c("Intervention", 
-                          "Control"), 
-                        each = 1,3),
-  
-  outcome = rep(c("CORE_OM",
-                            "DERS",
-                            "TAS"
-#                            "Metacognition_self",
-#                            "Metacognition_others",
-#                            "Metacognition_decentration",
-#                            "Metacognition_mastery"
-), each = 2,1),
-  
-  N = rep(c(10, 10), each = 3), 
-  
-  m_pre = c(
-    12.85, 15.24, # CORE-OM Total
-    95, 100.9, # DERS Total
-    54.2, 51.5 # TAS Total
-#    4.3, 4.1, # Metacognition Self
-#    2.1, 2.85, # Metacognition Others
-#    0.75, 1.15, # Metacognition Decentration 
-#    2.9, 3.3    # Metacognition Mastery
-  ),
-  
-  sd_pre = c(
-    4.6, 6.68,
-    16.19, 17.67,
-    11.52, 10.99
-#    1.32, 0.97,
-#    0.52, 1.31,
-#    0.75, 1.03,
-#    1.07, 0.67
-  ),
-  
-  m_post = c(
-    7.68, 11.78,
-    76.4, 97.11,
-    43.5, 52.63
-#    5.75, 3.35,
-#    2.9, 3.3,
-#    1.15, 0.7,
-#    4.18, 3.05
-  ),
-  
-  sd_post = c(
-    1.94, 4.59,
-    26.78, 29.12,
-    11.7, 12.59
-#    1.36, 1.27,
-#    1.07, 0.67,
-#    1.03, 0.48,
-#    1.35, 1.23
-  ), 
-  
-# Within-group effect size baseline – 3-month follow-up
-  within_group_d = c( 
-    1.14, 0.64,
-    0.74, 0.16,
-    1.11, 0.10
-#    1.73, 0.56,
-#    0.99, 0.32,
-#    0.59, 0.51,
-#    1.51, 0.20
-  ),
-
-# To calculated the pre-posttest correlation, we need the standard deviation of
-  # the mean differences (sd_diff). As can be seen from page 351. We can obtain
-  # sd_diff from the reported within-group effect sizes as follows
-  sd_diff = abs(m_post - m_pre)/within_group_d,
-
-
-# The group individual pre-posttest correlation can be obtained as follows.
-  # Note that we are not able to obtained correlations from d_rm = 0. This only 
-  # concerns SCL90 pre-posttest effect sizes for the control group. Hereto, 
-  # 
-  r = (sd_pre^2 + sd_post^2 - sd_diff^2)/(2*sd_pre*sd_post)
-
-) |> 
-  mutate(
-    # Here we assume that the pre-post correlation is equal among groups
-    r = if_else(is.na(r), mean(r, na.rm = TRUE), r), 
+Popolo2019 <- 
+  tibble(
+    group = rep(c("Intervention", 
+                  "Control"), 
+                each = 1,3),
     
-    #.by = c(outcome)
-
-  ) |> 
-  mutate(
+    outcome = rep(c("CORE_OM",
+                    "DERS",
+                    "TAS"
+                   #"Metacognition_self",
+                   #"Metacognition_others",
+                   #"Metacognition_decentration",
+                   #"Metacognition_mastery"
+    ), each = 2,1),
+    
+    
+    N = rep(c(8, 10), 3),
+    
+    N_start = 10, 
+    
+    m_pre = c(
+      12.85, 15.24, # CORE-OM Total
+      95, 100.9, # DERS Total
+      54.2, 51.5 # TAS Total
+      #    4.3, 4.1, # Metacognition Self
+      #    2.1, 2.85, # Metacognition Others
+      #    0.75, 1.15, # Metacognition Decentration 
+      #    2.9, 3.3    # Metacognition Mastery
+    ),
+    
+    sd_pre = c(
+      4.6, 6.68,
+      16.19, 17.67,
+      11.52, 10.99
+      #    1.32, 0.97,
+      #    0.52, 1.31,
+      #    0.75, 1.03,
+      #    1.07, 0.67
+    ),
+    
+    m_post = c(
+      7.68, 11.78,
+      76.4, 97.11,
+      43.5, 52.63
+      #    5.75, 3.35,
+      #    2.9, 3.3,
+      #    1.15, 0.7,
+      #    4.18, 3.05
+    ),
+    
+    sd_post = c(
+      1.94, 4.59,
+      26.78, 29.12,
+      11.7, 12.59
+      #    1.36, 1.27,
+      #    1.07, 0.67,
+      #    1.03, 0.48,
+      #    1.35, 1.23
+    ), 
+    
+    # Within-group effect size baseline – 3-month follow-up
+    within_group_d = c( 
+      1.14, 0.64,
+      0.74, 0.16,
+      1.11, 0.10
+      #    1.73, 0.56,
+      #    0.99, 0.32,
+      #    0.59, 0.51,
+      #    1.51, 0.20
+    ),
+    
+    # To calculated the pre-posttest correlation, we need the standard deviation of
+    # the mean differences (sd_diff). As can be seen from page 351. We can obtain
+    # sd_diff from the reported within-group effect sizes as follows
+    sd_diff = abs(m_post - m_pre)/within_group_d,
+    
+    
+    # The group individual pre-posttest correlation can be obtained as follows.
+    # Note that we are not able to obtained correlations from d_rm = 0. This only 
+    # concerns SCL90 pre-posttest effect sizes for the control group. Hereto, 
+    # 
+    r = (sd_pre^2 + sd_post^2 - sd_diff^2)/(2*sd_pre*sd_post),
+    
     # To estiamte the average pre-posttest correlation
     z = 0.5 * log( (1+r)/(1-r) ),
     v = 1/(N-3),
@@ -7103,138 +7096,140 @@ Popolo2019_est <-
     vary_id = outcome
     
   ) |> 
-  ungroup()
+  ungroup(); Popolo2019_est
 
 ```
 
-### **Rabenstein et al. [-@Rabenstein2015]**
+### **Rabenstein et al. [-@Rabenstein2015] (Quality-checked)**
+Data was extracted from Table 2 (p.6)
 ```{r Rabenstein et al. 2015}
-# Based on table 2, p. 6
-Rabenstein2015 <- tibble(
-  group = rep(c("Intervention", "Control"), each = 1, 3),
-  
-  outcome = rep(c(
-  #  "Somatization", 
-  #  "OCD", 
-  #  "Insecurity", 
-  #  "Depression",
-  #  "Anxiety",
-  #  "Aggressiveness",
-  #  "Phobic Anxiety",
-  #  "Paranoid Thinking",
-  #  "Psychoticism",
-    "GSI", 
-    "BDI", 
-    "WHO-QoL"
-  #  "Physical",
-  #  "Mental", 
-  #  "Social Relations", 
-  #  "Environment"
-  ), each = 2,1),
-  
-  
-  
-  N = rep(c(
-    153, 148
-  ), each = 1, 3),
-  
-  
-  N_start = rep(c(
-    170
-  )),
-  
-  m_pre = c(
-#    8.11, 8.08,
-#    9.85, 12.04,
-#    5.58, 7.23,
-#    9.22, 10.45,
-#    7.82, 9.91,
-#    4.08, 5.45,
-#    5.15, 6.43,
-#    5.83, 7.24,
-#    4.74, 5.76,
-    1.12, 1.48,
-    23.39, 25.04,
-    40.71, 42.87
-#    50.78, 50.35,
-#    38.52, 37.9,
-#    53.31, 47.49,
-#    61.68, 63
-  ),
-  
-  sd_pre = c(
-#    5.51, 5.79,
-#    5.45, 5.30,
-#    4.04, 3.67,
-#    6.08, 5.28,
-#    5.09, 5.20,
-#    3.61, 3.23,
-#    4.92, 4.83,
-#    4.35, 4.09,
-#    3.72, 3.87,
-    0.68, 0.66,
-    10.92, 9.83,
-    22.38, 21.37
-#    19.56, 15.96,
-#    19.55, 16.43,
-#    24.22, 23.85,
-#    18.62, 16.04
-  ),
-  
-  m_post = c(
-#    4.49, 7.15,
-#    7.02, 10.25,
-#    4.06, 6.63,
-#    5.68, 9.87,
-#    4.45, 8.59,
-#    2.74, 4.15,
-#    2.91, 5.59,
-#    4.82, 6.25,
-#    3.12, 4.93,
-    0.81, 1.30,
-    15.24, 22.08,
-    53.21, 46.1
-#    59.43, 52.07,
-#    48.45, 38.49,
-#    58.23, 50.27,
-#    65.83, 65.83
-  ),
-  
-  sd_post = c(
-#    4.46, 5.64,
-#    5.16, 5.63,
-#    3.53, 4.06,
-#    5.18, 5.63,
-#    4.36, 5.40,
-#    2.45, 3.18,
-#    3.67, 4.62,
-#    4.26, 4.51,
-#    3.25, 3.91,
-    0.60, 0.67,
-    10.78, 9.95,
-    22.83, 20.44
-#    21.37, 15.32,
-#    19.94, 17.32,
-#    23.77, 22.13,
-#    18.08, 17.12
-  ),
-
-t_val = c(
-  7.355,3.428,
-  8.377, 4.018,
-  -6.695, -1.865
-),
-
-r = ((sd_pre^2*t_val^2 + sd_post^2*t_val^2) - 
-        (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_val^2),
-
-
-z = 0.5 * log( (1+r)/(1-r) ),
+# Based on Table 2, p. 6
+Rabenstein2015 <- 
+  tibble(
+    group = rep(c("Intervention", "Control"), each = 1, 3),
+    
+    outcome = rep(c(
+      #  "Somatization", 
+      #  "OCD", 
+      #  "Insecurity", 
+      #  "Depression",
+      #  "Anxiety",
+      #  "Aggressiveness",
+      #  "Phobic Anxiety",
+      #  "Paranoid Thinking",
+      #  "Psychoticism",
+      "BSI (GSI)", 
+      "BDI", 
+      "WHOQOL"
+      #  "Physical",
+      #  "Mental", 
+      #  "Social Relations", 
+      #  "Environment"
+    ), each = 2,1),
+    
+    
+    
+    N = rep(c(
+      153, 148
+    ), each = 1, 3),
+    
+    
+    N_start = rep(c(
+      170
+    )),
+    
+    m_pre = c(
+      #    8.11, 8.08,
+      #    9.85, 12.04,
+      #    5.58, 7.23,
+      #    9.22, 10.45,
+      #    7.82, 9.91,
+      #    4.08, 5.45,
+      #    5.15, 6.43,
+      #    5.83, 7.24,
+      #    4.74, 5.76,
+      1.12, 1.48,
+      23.39, 25.04,
+      40.71, 42.87
+      #    50.78, 50.35,
+      #    38.52, 37.9,
+      #    53.31, 47.49,
+      #    61.68, 63
+    ),
+    
+    sd_pre = c(
+      #    5.51, 5.79,
+      #    5.45, 5.30,
+      #    4.04, 3.67,
+      #    6.08, 5.28,
+      #    5.09, 5.20,
+      #    3.61, 3.23,
+      #    4.92, 4.83,
+      #    4.35, 4.09,
+      #    3.72, 3.87,
+      0.68, 0.66,
+      10.92, 9.83,
+      22.38, 21.37
+      #    19.56, 15.96,
+      #    19.55, 16.43,
+      #    24.22, 23.85,
+      #    18.62, 16.04
+    ),
+    
+    m_post = c(
+      #    4.49, 7.15,
+      #    7.02, 10.25,
+      #    4.06, 6.63,
+      #    5.68, 9.87,
+      #    4.45, 8.59,
+      #    2.74, 4.15,
+      #    2.91, 5.59,
+      #    4.82, 6.25,
+      #    3.12, 4.93,
+      0.81, 1.30,
+      15.24, 22.08,
+      53.21, 46.1
+      #    59.43, 52.07,
+      #    48.45, 38.49,
+      #    58.23, 50.27,
+      #    65.83, 65.83
+    ),
+    
+    sd_post = c(
+      #    4.46, 5.64,
+      #    5.16, 5.63,
+      #    3.53, 4.06,
+      #    5.18, 5.63,
+      #    4.36, 5.40,
+      #    2.45, 3.18,
+      #    3.67, 4.62,
+      #    4.26, 4.51,
+      #    3.25, 3.91,
+      0.60, 0.67,
+      10.78, 9.95,
+      22.83, 20.44
+      #    21.37, 15.32,
+      #    19.94, 17.32,
+      #    23.77, 22.13,
+      #    18.08, 17.12
+    ),
+    
+    t_val = c(
+      7.355,3.428,
+      8.377, 4.018,
+      -6.695, -1.865
+    ),
+    
+    r = ((sd_pre^2*t_val^2 + sd_post^2*t_val^2) - 
+           (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_val^2),
+    
+    
+    z = 0.5 * log( (1+r)/(1-r) ),
     v = 1/(N-3),
     w = 1/v
-
-
-); Rabenstein2015
+    
+    
+  ); Rabenstein2015
 
 # Making it a wide format:
 
@@ -7266,22 +7261,22 @@ Rabenstein2015_est <-
     
     # There are also some effect sizes in the raw text on p. 7
     # the time X group effect: ANOVA
-   #  df1 = c(1), 
-   #  df2 = c(138, 187, 169),
-   #  F_val = c(25.584, 20.582, 13.252),
-   # p_val_F = c(0.001, 0.001, 0.001),
-   #  eta_sqrt = c(0.156, 0.002, 0.0073),
+    #  df1 = c(1), 
+    #  df2 = c(138, 187, 169),
+    #  F_val = c(25.584, 20.582, 13.252),
+    # p_val_F = c(0.001, 0.001, 0.001),
+    #  eta_sqrt = c(0.156, 0.002, 0.0073),
     
-   # t-test
-   # t_val = c(-4.468, -4.531,2.146),
-   # p_val_t = c(0.001, 0.001, 0.012),
-   #  d = c(0.76, 0.66, 0.55)
-   
+    # t-test
+    # t_val = c(-4.468, -4.531,2.146),
+    # p_val_t = c(0.001, 0.001, 0.012),
+    #  d = c(0.76, 0.66, 0.55)
+    
     main_es_method = "diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
-    pp_cor_methods = "Calculated from study results",
+    pp_cor_methods = "Calculated from study results, i.e., paired t-tests",
     
   ) |> 
   mutate(
@@ -7290,8 +7285,8 @@ Rabenstein2015_est <-
     
     # The outcome BSI and BDI are reverted because lower score is beneficial
     m_post = if_else(outcome %in% c("GSI","BDI"), 
-                    (m_post_c - m_post_t)*-1, # Revert the difference if BSI or BDI
-                    m_post_t - m_post_c),
+                     (m_post_c - m_post_t)*-1, # Revert the difference if BSI or BDI
+                     m_post_t - m_post_c),
     
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
@@ -7306,7 +7301,7 @@ Rabenstein2015_est <-
     Wg_post = Wd_post,
     
     
-   # The outcome BSI and BDI are reverted because lower score is beneficial  
+    # The outcome BSI and BDI are reverted because lower score is beneficial  
     m_diff_t = if_else(analysis_plan %in% c("GSI","BDI"),
                        (m_post_t - m_pre_t)*-1, m_post_t - m_pre_t),
     m_diff_c = if_else(analysis_plan %in% c("GSI","BDI"),
@@ -7367,7 +7362,8 @@ Rabenstein2015_est <-
       vars = -var_term1_DD
     ),
     
-    vary_id = outcome) |> 
+    vary_id = outcome
+  ) |> 
   ungroup(); Rabenstein2015_est
 ```
 
@@ -7924,6 +7920,319 @@ Russinova2018_est <- Russinova2018_wide |>
 
 ```
 
+### **Rüsch et al. [-@Rüsch2019] (Quality-checked)**
+Data was extracted from Table 1 (p. 35). NOTE: We suspect that the reported F values from ANCOVA for Job-search and Help-seeking at Time-3  (T3) are prone to error. Since they seem to be too small compared with the reported change score differences. Thus, we did not use these values for sampling variance estimation of the corresponding effect sizes. 
+```{r}
+# Data from Table 1 containing means and standard deviation on page 335
+# The table also contains partial η2 values, p-values and F-test
+
+Rüsch2019 <- 
+  tibble(
+    group = rep(c("Intervention", 
+                  "Control"), 
+                each = 1,12),
+    
+    timing = rep(c("6w", 
+                   "12w"), 
+                 each = 12,1),
+    
+    outcome = rep(c("Job_search", 
+                    "Help_seeking", 
+                    "SISR",
+                    "SSMIS_SF",
+                    "CES-D", 
+                    "BHS"  
+                    #  "Secrecy"
+    ), 
+    each = 2,2 ),
+    
+    N = c(rep(c(
+      18, 17), # 6 weeks 
+      times = 6), 
+      rep(c(
+        
+        20, 13), # 12 weeks
+        times = 6)),
+    
+    N_start = rep(c(
+      23, 19
+    ), each = 1,12),
+    
+    m_pre = rep(c(
+      3.1, 3.3, # Job-search self-efficacy (1–5)
+      3.4, 3.0,  # Help-seeking intentions (1–7)
+      15.3, 16.3, # Recovery (SISR: 4–24)
+      17.3, 17.3,  # Self-stigma (SSMIS-SF: 5–45)
+      39.2, 41.4, # Depressive symptoms (CES-D: 15–60)
+      14.9, 14.1 # Hopelessness (BHS: 4–24)
+      #    4.0, 3.7   # Link’s 5-item Secrecy Scale
+    ), each = 1,2),
+    
+    sd_pre = rep(c(
+      0.8, 0.8,
+      1, 1,
+      4.1, 4.2,
+      4.3, 8.1,
+      7.4, 7.2,
+      3.6, 4.5 
+      #    1.2, 1.6
+    ), each = 1,2),
+    
+    m_post = c(
+      # 3 Weeks
+      #  3.2, 3.2, 
+      #  3.6, 3,
+      #  16.1, 15.9, 
+      #  15.3, 16.9, 
+      #  35.2, 39.1,
+      #  13.8, 13.7,
+      #  3.8, 3.7
+      
+      # 6 weeks
+      3.4, 3.3, 
+      3.5, 3.2, 
+      17.8, 16.1, 
+      14.6, 19.1, 
+      31.5, 40.1, 
+      12.6, 14.2, 
+      #    3.5, 3.9,
+      
+      # 12 weeks 
+      3.2, 3.2,
+      3.3, 3.1,
+      17.3, 15.7,
+      15.4, 18.3,
+      32, 37.5,
+      12.3, 14.4
+      #    3.7, 4.4
+      
+    ),
+    
+    
+    sd_post = c(
+      # 3 weeks
+      # 0.7, 0.9, 
+      # 1, 0.9, 
+      # 4.2, 3.6, 
+      # 6.2, 8, 
+      # 8.8, 10.2, 
+      # 3.9, 4.6, 
+      # 1, 1.7
+      
+      # 6 weeks
+      0.8, 0.9,
+      1, 1, 
+      3.4, 4.4,
+      7.9, 8.7,
+      8.5, 10.1,
+      3.6, 5, 
+      #  1.3, 1.7,
+      
+      # 12 weeks
+      1, 0.9, 
+      0.6, 0.9,
+      3.5, 2.6,
+      7, 9.6,
+      7.6, 9.8,
+      4.2, 3
+      #  0.9, 1.4
+    )
+  ); Rüsch2019
+
+
+
+# Turning data into wide format
+
+Rüsch2019_wide <- Rüsch2019 |> 
+  mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )
+
+
+Rüsch2019_est <- 
+  Rüsch2019_wide |> 
+  mutate(
+    
+    analysis_plan = case_when(
+      str_detect(outcome, "CES-D") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "Job_search|Help_seeking|BHS|SISR") ~ "Hope, Empowerment & Self-efficacy",
+      str_detect(outcome, "SSMIS_SF") ~ "Self-esteem",
+      .default = NA_character_
+    ),
+    
+    # ANCOVA estimates taken from table 1, p. 335
+    F_val = c(
+      # 6 weeks
+      1.4, 0.2, 4.6, 10.8, 6.3, 3.4,
+      # 12 weeks
+      0.01, 0.04, 1.9, 1.5, 0.9, 2.4
+    ),
+    
+    #eta_sqrt = c(
+    # 6 weeks
+    # 0.04, 0.007, 0.13, 0.25, 0.17, 0.10,
+    
+    # 12 weeks
+    #  0.01, 0.01, 0.06, 0.05, 0.03, 0.07
+    #),
+    
+    #p_val_f = c(
+    # 6 weeks
+    # 0.24, 0.64, 0.039, 0.08, 0.17, 0.08,
+    
+    # 12 weeks
+    #  0.96, 0.85, 0.17, 0.23, 0.35, 0.14
+    
+    
+    
+    study = "Rüsch et al. 2019"
+  ) |> 
+  arrange(outcome, desc(timing)) |> 
+  rowwise() |> 
+  mutate(
+    N_total = N_t + N_c,
+    df_ind = N_total,
+    
+    ppcor = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      ppcor_imp,
+      NA_real_
+    ),
+    ppcor_calc_method = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      "Imputed - We did not trust the reported F values",
+      "F values from ANCOVA was used for variance estimation"
+    ),
+    
+    m_post = case_when(
+      outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_t - m_post_c), # Higher is beneficial
+      outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_t - m_post_c) * -1), # Lower is beneficial
+    
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c),
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    
+    # The outcome BSI and BDI are reverted because lower score is beneficial  
+    m_diff_t = case_when(
+      outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_t - m_pre_t), # Higher is beneficial
+      outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_t - m_pre_t)*-1 # Lower is beneficial
+    ), 
+    
+    m_diff_c = case_when(
+      outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_c - m_pre_c), # Higher is beneficial
+      outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_c - m_pre_c)*-1 # Lower is beneficial
+    ), 
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+      d_DD^2/F_val + d_DD^2/(2*df_ind)
+    ),
+    Wd_DD = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      2*(1-ppcor) * (1/N_t + 1/N_c),
+      d_DD^2/F_val
+    ),
+    
+    g_DD = J * d_DD, 
+    vg_DD = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+      g_DD^2/F_val + g_DD^2/(2*df_ind)
+    ),
+    Wg_DD = if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      2*(1-ppcor) * (1/N_t + 1/N_c),
+      g_DD^2/F_val
+    )
+  ) |> 
+  rowwise() |> 
+  mutate(
+    # Group sizes are imputed
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    
+    
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    
+    if_else(
+      timing == "12w" & str_detect(outcome, "Help|Job"),
+      VIVECampbell::vgt_smd_1armcluster(
+        N_cl_grp = N_t, 
+        N_ind_grp = N_c, 
+        avg_grp_size = avg_cl_size, 
+        ICC = icc, 
+        g = gt_DD, 
+        model = "DiD",
+        cluster_adj = FALSE,
+        prepost_cor = ppcor,
+        q = n_covariates,
+        add_name_to_vars = "_DD",
+        vars = -var_term1_DD
+      ),
+      VIVECampbell::vgt_smd_1armcluster(
+        N_cl_grp = N_t, 
+        N_ind_grp = N_c, 
+        avg_grp_size = avg_cl_size, 
+        ICC = icc, 
+        g = gt_DD, 
+        model = "DiD",
+        cluster_adj = FALSE,
+        F_val = F_val,
+        q = n_covariates,
+        add_name_to_vars = "_DD",
+        vars = -var_term1_DD
+      )
+    ),
+    vary_id = paste0(outcome, "/", timing)
+  ) |> 
+  ungroup(); Rüsch2019_est
+```
+
 ### **Sacks et al. [-@Sacks2011]**
 ```{r Sacks et al. 2011}
 # This study makes estimations based on two different analysis based on their
@@ -8216,9 +8525,10 @@ Sacks2011_est <-
 
 ```
 
-### **Sajatovic et al. [-@Sajatovic2009]**
+### **Sajatovic et al. [-@Sajatovic2009] (Quality-checked)**
+Data was extracted from Table 2 (p. 1186)
 ```{r Sajatovic et al. 2009}
-# Data from table 2 (p. 1186) provides mean and standard deviation. Table also 
+# Data from Table 2 (p. 1186) provides mean and standard deviation. Table also 
 # indcludes p-values indicating "Test of significance between the two groups 
 # using repeated-measures analysis with PROC MIXED " (Sajatovic et al. 2009: 1186)
 
@@ -8319,35 +8629,37 @@ Sajatovic2009  <- tibble(
 
 # Turning data into wide format
     
-Sajatovic2009_wide <- Sajatovic2009 |>
-      mutate(group = case_match(group, "Life Goals Program" ~ "t", "Treatment as usual" ~ "c")) |>
-      tidyr::pivot_wider(
-        names_from = group,
-        names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )
+Sajatovic2009_wide <- 
+  Sajatovic2009 |>
+  mutate(group = case_match(group, "Life Goals Program" ~ "t", "Treatment as usual" ~ "c")) |>
+  tidyr::pivot_wider(
+    names_from = group,
+    names_glue = "{.value}_{group}",
+    values_from = N:last_col()
+  )
 
 
 
-Sajatovic2009_est <- Sajatovic2009_wide |> 
+Sajatovic2009_est <- 
+  Sajatovic2009_wide |> 
   mutate(
     # P-values obtained from table 2, calculated with repeated-measures analysis with 
     # PROC MIXED in SAS (p. 1186) - 
     # p_val = rep(c(0.40, 0.22, 0.97), each = 1,3), # Made across time measurements 
-   
+    
     analysis_plan = rep(
-    c("Mental health outcomes/Depression", # HAM-D
-      "Mental health outcomes", # YMRS
-      "Social functioning (degree of impairment)" # GAS
-  ), each = 1,3),
-
-  study = "Sajatovic et al. 2009", 
-  
-  # ppcor imputed
-  ppcor = ppcor_imp,
-  pp_cor_methods = "Imputed"
-
-) |> 
+      c("Mental health outcomes/Depression", # HAM-D
+        "Mental health outcomes", # YMRS
+        "Social functioning (degree of impairment)" # GAS
+      ), each = 1,3),
+    
+    study = "Sajatovic et al. 2009", 
+    
+    # ppcor imputed
+    ppcor = ppcor_imp,
+    pp_cor_methods = "Imputed"
+    
+  ) |> 
   mutate(timing = factor(timing, levels = c("3m", "6m", "12m"))) |> 
   arrange(outcome, timing)|> 
   mutate(
@@ -8370,10 +8682,10 @@ Sajatovic2009_est <- Sajatovic2009_wide |>
     Wg_post = Wd_post,
     
     
-     # For YMRS and HAM-D lower scores are beneficial why these are reverted
-   m_diff_t = if_else(outcome != "GAS", 
-                      (m_post_t - m_pre_t)*-1,
-                      m_post_t - m_pre_t),
+    # For YMRS and HAM-D lower scores are beneficial why these are reverted
+    m_diff_t = if_else(outcome != "GAS", 
+                       (m_post_t - m_pre_t)*-1,
+                       m_post_t - m_pre_t),
     m_diff_c = if_else(outcome != "GAS",
                        (m_post_c - m_pre_c)*-1,
                        m_post_c - m_pre_c),
@@ -8385,11 +8697,11 @@ Sajatovic2009_est <- Sajatovic2009_wide |>
     g_DD = J * d_DD, 
     vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
     Wg_DD = Wd_DD
-   
+    
   ) |> 
   rowwise() |> 
   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
-  
+    
     # "Group size was generally six to eight members" (p. 1183)
     avg_cl_size = 7, 
     avg_cl_type = "From study (p. 1183)",
@@ -8442,72 +8754,77 @@ Sajatovic2009_est <- Sajatovic2009_wide |>
     vary_id = paste0(outcome, "/", timing)
     
   ) |> 
-
   ungroup(); Sajatovic2009_est
 ```
-### **Schrank et al. [-@Schrank2016]**
+### **Schrank et al. [-@Schrank2016] (Quality-checked)**
+Data was extracted from Tables 1, 2, and 3 in the same article 
 ```{r Schrank et al. 2016}
 # Based on table 1, 2 and 3 in the same article 
-Schrank2016 <- tibble(
-  group = rep(c("Intervention", "Control"), each = 1, 6),
-  
-  outcome = rep(c(
-    "WEMWBS", 
-    "MANSA", 
-   # "PPI", 
-    "BPRS",
- #   "SDHS",
-    "IHS",
-    "RSES", 
-    "RES"
-  ), each = 2,1),
-  
-  
-  N = rep(c(
-    41, 43
-  ), each = 1, 6),
-  
- m_pre = c(3.19, 3.00,
-  4.05, 4.14,
-  3.58, 3.44,
-#  30.70, 33.57,
-  2.29, 2.48,
-#  4.02, 3.72, 
-  2.24, 2.09,
-  2.74, 2.71),
- 
-sd_pre = c(
-  0.76, 0.89,
-  0.85, 1.01,
-#  0.73, 0.80,
-  8.81, 8.42,
-#  0.69, 0.76,
-  0.79, 0.85,
-  0.64, 0.66,
-  0.32, 0.32
-),
-
-m_post = c(
-  3.36,3.24,
-  4.42, 4.21,
- # 3.72, 3.48,
-  29.37, 33.23,
-#  2.13, 2.34,
-  4.11, 4.04,
-  2.37, 2.21,
-  2.8,2.73
-),
-
-se_post = c(
-  0.10, 0.10,
-  0.10, 0.10,
-#  0.07, 0.07,
-  0.96, 0.98,
-#  0.08, 0.09,
-  0.1, 0.1,
-  0.07, 0.07,
-  0.04,0.04) 
-) |> 
+Schrank2016 <- 
+  tibble(
+    group = rep(c("Intervention", "Control"), each = 1, 6),
+    
+    outcome = rep(c(
+      "WEMWBS", 
+      "MANSA", 
+      # "PPI", 
+      "BPRS",
+      #   "SDHS",
+      "IHS",
+      "RSES", 
+      "RES"
+    ), each = 2,1),
+    
+    
+    N = rep(c(
+      41, 43
+    ), each = 1, 6),
+    
+    N_start = 47,
+    
+    m_pre = c(
+      3.19, 3.00,
+      4.05, 4.14,
+      3.58, 3.44,
+      #  30.70, 33.57,
+      2.29, 2.48,
+      #  4.02, 3.72, 
+      2.24, 2.09,
+      2.74, 2.71
+      ),
+    
+    sd_pre = c(
+      0.76, 0.89,
+      0.85, 1.01,
+      #  0.73, 0.80,
+      8.81, 8.42,
+      #  0.69, 0.76,
+      0.79, 0.85,
+      0.64, 0.66,
+      0.32, 0.32
+    ),
+    
+    m_post = c(
+      3.36,3.24,
+      4.42, 4.21,
+      # 3.72, 3.48,
+      29.37, 33.23,
+      #  2.13, 2.34,
+      4.11, 4.04,
+      2.37, 2.21,
+      2.8,2.73
+    ),
+    
+    se_post = c(
+      0.10, 0.10,
+      0.10, 0.10,
+      #  0.07, 0.07,
+      0.96, 0.98,
+      #  0.08, 0.09,
+      0.1, 0.1,
+      0.07, 0.07,
+      0.04,0.04) 
+  ) |> 
   mutate(sd_post = se_post * sqrt(N)) # Calculating the standard deviation from the standard error
 
 
@@ -8529,9 +8846,9 @@ Schrank2016_est <-
   Schrank2016_wide |>
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "WEMWBS|MANSA") ~ "Alcohol and drug abuse/misuse",
+      str_detect(outcome, "WEMWBS|MANSA") ~ "Wellbeing and Quality of Life",
       str_detect(outcome, "BPRS") ~ "Mental health outcomes",
-      str_detect(outcome, "IHS|RSES|RES") ~ "Hope",
+      str_detect(outcome, "IHS|RSES|RES") ~ "Hope, Empowerment & Self-efficacy",
       .default = NA_character_
     ),
     
@@ -8539,9 +8856,9 @@ Schrank2016_est <-
     F_val = c(
       0.8,
       2.3,
-   #  5.9,
+      #  5.9,
       7.8,
-  #   3.0,
+      #   3.0,
       3.0,
       2.9,
       2.0
@@ -8553,20 +8870,22 @@ Schrank2016_est <-
     p_val_f = c(
       0.15,
       0.21,
- #    0.30,
+      #    0.30,
       0.42,
- #    0.29,
+      #    0.29,
       0.08,
       0.23,
       0.22
     )
     
-) |> 
+  ) |> 
   mutate(
     study = "Schrank et al. 2016",
     
     N_total = N_t + N_c,
     df_ind = N_total,
+    
+    ppcor_calc_method = "Not computable - F value used for variance estimation",
     
     # The outcome BPRS is reverted because lower score is beneficial
     m_post = if_else(outcome != "BPRS", 
@@ -8588,8 +8907,8 @@ Schrank2016_est <-
     
     # The outcome BPRS is reverted because lower score is beneficial
     m_diff_t = if_else(outcome != "BPRS", 
-                      m_post_t - m_pre_t,
-                      (m_post_t - m_pre_t)*-1),
+                       m_post_t - m_pre_t,
+                       (m_post_t - m_pre_t)*-1),
     m_diff_c = if_else(outcome != "BPRS",
                        m_post_c - m_pre_c,
                        (m_post_c - m_pre_c)*-1),
@@ -8597,7 +8916,7 @@ Schrank2016_est <-
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
     vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
     Wd_DD = d_DD^2/F_val,
-  
+    
     g_DD = J * d_DD, 
     vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
     Wg_DD = g_DD^2/F_val
@@ -8610,24 +8929,23 @@ Schrank2016_est <-
     avg_cl_size = 8, 
     avg_cl_type = "From study (p. 238)",
     
-   # Imputed icc value
+    # Imputed icc value
     icc = ICC_01,
     icc_type = "Imputed",
-  
+    
     
     n_covariates = 1,
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
-      ),
-   
+    ),
+    
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-  
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -8640,8 +8958,8 @@ Schrank2016_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-       vars = c(vgt_post, Wgt_post)
-      ),
+      vars = c(vgt_post, Wgt_post)
+    ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -8656,10 +8974,11 @@ Schrank2016_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-      ),
+    ),
     
-     vary_id = outcome) |> 
-    ungroup(); Schrank2016_est
+    vary_id = outcome
+  ) |> 
+  ungroup(); Schrank2016_est
 ```
 
 ### **Schäfer et al. [-@Schäfer]**
@@ -8907,276 +9226,6 @@ schafer2019_est <-
       vary_id = paste(outcome, timing, treatment, sep = "/")
   ) |> 
   ungroup()
-```
-
-### **Rüsch et al. [-@Rüsch2019]**
-```{r}
-# Data from table 1 containing means and standard deviation on page 335
-# The table also contains partial η2 values, p-values and F-test
-
-Rüsch2019 <- tibble(
-  group = rep(c("Intervention", 
-                          "Control"), 
-                        each = 1,12),
-  
-  timing = rep(c("6w", 
-                 "12w"), 
-               each = 12,1),
-
-  outcome = rep(c("Job_search", 
-                            "Help_seeking", 
-                            "SISR",
-                            "SSMIS_SF",
-                            "CES-D", 
-                            "BHS"  
-                          #  "Secrecy"
-                            ), 
-                          each = 2,2 ),
-  
-  N = c(rep(c(
-    18, 17), # 6 weeks 
-     times = 6), 
-        rep(c(
-    
-    20, 13), # 12 weeks
-    times = 6)),
-  
-  N_start = rep(c(
-    23, 19
-  ), each = 1,12),
-  
-  m_pre = rep(c(
-    3.1, 3.3, # Job-search self-efficacy (1–5)
-    3.4, 3.0,  # Help-seeking intentions (1–7)
-    15.3, 16.3, # Recovery (SISR: 4–24)
-    17.3, 17.3,  # Self-stigma (SSMIS-SF: 5–45)
-    39.2, 41.4, # Depressive symptoms (CES-D: 15–60)
-    14.9, 14.1 # Hopelessness (BHS: 4–24)
-#    4.0, 3.7   # Link’s 5-item Secrecy Scale
-  ), each = 1,2),
-  
-  sd_pre = rep(c(
-    0.8, 0.8,
-    1, 1,
-    4.1, 4.2,
-    4.3, 8.1,
-    7.4, 7.2,
-    3.6, 4.5 
-#    1.2, 1.6
-  ), each = 1,2),
-  
-  m_post = c(
-  # 3 Weeks
-  #  3.2, 3.2, 
-  #  3.6, 3,
-  #  16.1, 15.9, 
-  #  15.3, 16.9, 
-  #  35.2, 39.1,
-  #  13.8, 13.7,
-  #  3.8, 3.7
-    
-  # 6 weeks
-    3.4, 3.3, 
-    3.5, 3.2, 
-    17.8, 16.1, 
-    14.6, 19.1, 
-    31.5, 40.1, 
-    12.6, 14.2, 
-#    3.5, 3.9,
-    
-    # 12 weeks 
-    3.2, 3.2,
-    3.3, 3.1,
-    17.3, 15.7,
-    15.4, 18.3,
-    32, 37.5,
-    12.3, 14.4
-#    3.7, 4.4
-    
-  ),
-  
- 
-sd_post = c(
-  # 3 weeks
-  # 0.7, 0.9, 
-  # 1, 0.9, 
-  # 4.2, 3.6, 
-  # 6.2, 8, 
-  # 8.8, 10.2, 
-  # 3.9, 4.6, 
-  # 1, 1.7
-  
-  # 6 weeks
-  0.8, 0.9,
-  1, 1, 
-  3.4, 4.4,
-  7.9, 8.7,
-  8.5, 10.1,
-  3.6, 5, 
-#  1.3, 1.7,
-  
-  # 12 weeks
-  1, 0.9, 
-  0.6, 0.9,
-  3.5, 2.6,
-  7, 9.6,
-  7.6, 9.8,
-  4.2, 3
-#  0.9, 1.4
- )
-); Rüsch2019
-
-
-
-# Turning data into wide format
-
-Rüsch2019_wide <- Rüsch2019 |> 
-      mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
-      tidyr::pivot_wider(
-        names_from = group,
-        names_glue = "{.value}_{group}",
-        values_from = N:last_col()
-      )
-
-
-Rüsch2019_est <- Rüsch2019_wide |> 
-  mutate(
-    
-    analysis_plan = case_when(
-      str_detect(outcome, "CES-D") ~ "Mental health outcomes/Depression",
-      str_detect(outcome, "Job_search|Help_seeking|BHS|SISR") ~ "Hope, Empowerment & Self-efficacy",
-      str_detect(outcome, "SSMIS_SF") ~ "Self-esteem",
-      .default = NA_character_
-    ),
-    
-    # ANCOVA estimates taken from table 1, p. 335
-    F_val = c(
-      # 6 weeks
-      1.4, 0.2, 4.6, 10.8, 6.3, 3.4,
-      # 12 weeks
-      0.01, 0.04, 1.9, 1.5, 0.9, 2.4
-    ),
-    
-    #eta_sqrt = c(
-      # 6 weeks
-     # 0.04, 0.007, 0.13, 0.25, 0.17, 0.10,
-      
-      # 12 weeks
-    #  0.01, 0.01, 0.06, 0.05, 0.03, 0.07
-    #),
-    
-    #p_val_f = c(
-      # 6 weeks
-     # 0.24, 0.64, 0.039, 0.08, 0.17, 0.08,
-      
-      # 12 weeks
-    #  0.96, 0.85, 0.17, 0.23, 0.35, 0.14
-      
-    
-      
-      study = "Rüsch et al. 2019") |> 
-  
-  arrange(outcome, desc(timing)) |> 
-      
-      rowwise() |> 
-      mutate(
-        N_total = N_t + N_c,
-        df_ind = N_total,
-        
-
-        m_post = case_when(
-          outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_t - m_post_c), # Higher is beneficial
-          outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_t - m_post_c) * -1), # Lower is beneficial
-          
-        sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
-        
-        d_post = m_post/sd_pool, 
-        vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
-        Wd_post = (1/N_t + 1/N_c),
-        
-        J = 1 - 3/(4*df_ind-1),
-        
-        g_post = J * d_post,
-        vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
-        Wg_post = Wd_post,
-        
-        
-        # The outcome BSI and BDI are reverted because lower score is beneficial  
-        m_diff_t = case_when(
-          outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_t - m_pre_t), # Higher is beneficial
-          outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_t - m_pre_t)*-1), # Lower is beneficial
-          
-      
-        m_diff_c = case_when(
-          outcome %in% c("Job_search", "Help_seeking", "SISR") ~ (m_post_c - m_pre_c), # Higher is beneficial
-          outcome %in% c("SSMIS_SF", "CES-D", "BHS") ~ (m_post_c - m_pre_c)*-1), # Lower is beneficial
-    
-        d_DD = (m_diff_t - m_diff_c)/sd_pool,
-        vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-        Wd_DD = d_DD^2/F_val,
-    
-        g_DD = J * d_DD, 
-        vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-        Wg_DD = g_DD^2/F_val,
-
-       
-      
-      ) |> 
-  rowwise() |> 
-  
-  mutate(
-      # Group sizes are imputed
-    avg_cl_size = grp_size_imp, 
-    avg_cl_type = "Imputed",
-    
-    # Imputed icc value
-    icc = ICC_01,
-    icc_type = "Imputed",
-    
-    n_covariates = 1,
-    
-    # Find info about the function via ?VIVECampbell::gamma_1armcluster
-    gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
-    ),
-    
-    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
-    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
-    omega = 1 - 3/(4*df_adj-1),
-    
-    
-    # Cluster-adjusting g_post
-    gt_post = omega * d_post * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_post, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_post",
-      vars = c(vgt_post, Wgt_post)
-    ),
-    
-    gt_DD = omega * d_DD * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_DD, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD",
-      vars = -var_term1_DD
-    ),
-    
-     vary_id = paste0(outcome, "/", timing)
-  ) |> 
-  ungroup(); Rüsch2019_est
 ```
 
 ### **Tjaden et al. [-@Tjaden2022]**
