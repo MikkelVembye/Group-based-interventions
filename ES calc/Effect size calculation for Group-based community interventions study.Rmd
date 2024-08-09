@@ -56,6 +56,9 @@ ppcor_imp <- 0.5
 R2_imp <- 0
 
 grp_size_imp <- 8
+
+# For data construction
+dat <- tibble()
 ```
 
 
@@ -857,6 +860,7 @@ Bækkelund2022 <- tibble(
     29, 30), 
     each = 1, 2), 
 
+  N_start = N,
   
   m_pre = rep(c(
     41.7, 40.9,
@@ -887,6 +891,7 @@ Bækkelund2022 <- tibble(
     6.3, 4.2,
     0.9, 1.0),
   
+  #_rm = repeated measure
   d_rm = c(
     0.4, 0.4, 
     0.1, .0,
@@ -935,14 +940,15 @@ Bækkelund2022_wide <-
   ) 
 
 
-icc_imp <- 0.1
-
 # Effect size calculating 
 Bækkelund2022_est <-           
   Bækkelund2022_wide |>
   mutate(
     
     study = "Bækkelund et al. 2022",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
     
     analysis_plan = case_when(
       str_detect(outcome, "GAF-S") ~ "Social functioning (degree of impairment)",
@@ -951,15 +957,15 @@ Bækkelund2022_est <-
     main_es_method = "diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
-    pp_cor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
-    pp_cor_methods = "Calculated from study results",
+    ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
+    ppcor_method = "Calculated from study results",
     
-    diff_t = m_post_t - m_pre_t, 
-    diff_c = m_post_c - m_pre_c,
+    m_diff_t = m_post_t - m_pre_t, 
+    m_diff_c = m_post_c - m_pre_c,
     #MHV DID scorerne skal også omvendes lige som post scorer :) 
     # SCL-90 R lower scores are beneficial why these is reverted
-    mean_diff = if_else(outcome != "GAF-S", (diff_t - diff_c)*-1,
-                        diff_t - diff_c),
+    mean_diff = if_else(outcome != "GAF-S", (m_diff_t - m_diff_c)*-1,
+                        m_diff_t - m_diff_c),
     
     
     # SCL-90 R lower scores are beneficial why these is reverted
@@ -975,8 +981,8 @@ Bækkelund2022_est <-
     Wd_post = (1/N_t + 1/N_c), # Det store variansled 
     
     d_DD = (mean_diff/sd_pool), #Cohens d
-    vd_DD = (1/N_t + 1/N_c) * 2*(1-pp_cor) + d_DD^2/(2*df_ind), # skaber falsk korrelation, hvorfor vi beregner det store variansled
-    Wd_DD = (1/N_t + 1/N_c) * 2*(1-pp_cor), # det store variansled
+    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df_ind), # skaber falsk korrelation, hvorfor vi beregner det store variansled
+    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), # det store variansled
     
     J = 1 - 3/(4*df_ind-1), # her bruger vi J som er en korrigeringsfaktor som vi kan bruge til at beregne Hedges' g (fra d til g)
     
@@ -985,7 +991,7 @@ Bækkelund2022_est <-
     Wg_post = (1/N_t + 1/N_c),
   
     g_DD = J * (mean_diff/sd_pool), # her beregner vi Difference in difference effektstørrelse som er Mikkels foretrukne - baseline korrigeret effekstørrelse
-    vg_DD = (1/N_t + 1/N_c) * 2*(1-pp_cor) + g_DD^2/(2*df_ind), # variansen af den baseline adjusted effekstørrelse
+    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df_ind), # variansen af den baseline adjusted effekstørrelse
     Wg_DD = Wd_DD,
     
     .by = outcome
@@ -995,25 +1001,27 @@ Bækkelund2022_est <-
   mutate(
     
     # "each group was led by two therapists and had nine participants." (p. 4)
-    n_group = 9,
-    n_method = "Obtained from article (p. 4)",
+    avg_cl_size = 9,
+    avg_cl_type = "Obtained from article (p. 4)",
     
     # Laver variabel med den imputere ICC værdi
-    icc = icc_imp,
+    icc = ICC_01,
     icc_type = "Imputed",
     
+    n_covariates = 1, 
+    
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = n_group, ICC = icc, sqrt = TRUE
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc, sqrt = TRUE
     ),
     
-    h = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = n_group),
-    omega = 1 - 3/(4*h-1),
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
     
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
-      avg_grp_size = n_group,
+      avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt_post, 
       model = "posttest",
@@ -1025,12 +1033,12 @@ Bækkelund2022_est <-
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
-      avg_grp_size = n_group,
+      avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      prepost_cor = pp_cor,
+      prepost_cor = ppcor,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
     ),
@@ -1041,6 +1049,14 @@ Bækkelund2022_est <-
   arrange(outcome, desc(timing)); Bækkelund2022_est
 
 ```
+
+```{r, echo=FALSE}
+# Adding Bækkelund to data
+dat <- 
+  dat |> 
+  bind_rows(Bækkelund2022_est)
+```
+
 
 ### **Cano-Vindel et al. [-@Cano-Vindel2022]**
 
@@ -1808,7 +1824,7 @@ Crawford2012 <-
     
     outcome = rep(
       c(
-        "Global assessment of functioning", "Positive and negative syndrome scale",
+        "Global assessment of functioning (GAF)", "Positive and negative syndrome scale",
         # "Positive symptoms score", "Negative symptoms score", "General symptoms score", 
         "Social functioning", "Wellbeing" 
         # "Satisfaction with care", "Morisky score"
@@ -1952,10 +1968,10 @@ Crawford2012_est <-
     sd_used = "Pooled posttest SD",
     
     study = "Crawford et al. 2012",
-    main_es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor_imp,  
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     m_post = if_else(!str_detect(outcome, "Positive"), m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
@@ -2000,9 +2016,6 @@ Crawford2012_est <-
       TRUE ~ NA_real_
     ),
     
-    icc_005 = if_else(icc == 0.1, ICC_005, icc),
-    icc_02 = if_else(icc == 0.1, ICC_02, icc),
-    
     icc_type = case_when(
       str_detect(outcome, "Global|Positive") ~ "From study (p. 3)",
       str_detect(outcome, "Social|Wellbeing") ~ "Imputed",
@@ -2016,24 +2029,12 @@ Crawford2012_est <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-  #  gamma_sqrt_icc005 = VIVECampbell::gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_005 
-  #    ),
-    
-  #  gamma_sqrt_icc02 = VIVECampbell::gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc_02 
-  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
-    
+ 
     # Cluster-adjusting g_post
     gt_post =  omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -2059,40 +2060,14 @@ Crawford2012_est <-
       cluster_adj = FALSE,
       prepost_cor = ppcor,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
+  
     
-  #  gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = icc_005, 
-  #    g = gt_DD_icc005, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_DD_icc005",
-  #    vars = vgt_DD_icc005:Wgt_DD_icc005
-  #    ),
-    
-  #  gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = icc_02, 
-  #    g = gt_DD_icc02, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_DD_icc02",
-  #    vars = vgt_DD_icc02:Wgt_DD_icc02
-  #    ),
-    
-    vary_id = paste(outcome, timing, treatment, sep = "/")
+    vary_id = paste(outcome, timing, treatment, sep = "/"),
+  
+    timing = as.character(timing)
     
   ) |> 
   ungroup() |> 
@@ -2108,6 +2083,12 @@ rm(Crawford2012_act_wide, Crawford2012_art_wide)
 
 ```
 
+```{r, echo=FALSE}
+# Adding Crawford to data
+dat <- 
+  dat |> 
+  bind_rows(Crawford2012_est)
+```
 
 ### **Druss et al. [-@Druss2010]**
 #### (RCT - no usuable treatment of clustering)
@@ -4933,6 +4914,8 @@ Kanie2019 <- tibble(
   
   N = rep(c(32, 29), 5), #MHV Check if you agree that it should be 29 participant in the control              
   
+  N_start = 36,
+  
   m_pre = c(
     31.04, 32.83, # Social Cognition Screening Questionnaire
     -1.64, -1.33, # Brief Assessment of Cognition in Schizophrenia
@@ -5006,6 +4989,11 @@ Kanie2019_est <-
     
     study = "Kanie et al. 2019",
     
+    effect_size = "SMD",
+    sd_used = "Posttest",
+    
+    main_es_method = "DiD",
+    
     analysis_plan = case_when(
       str_detect(outcome, "SCSQ") ~ "Unused",
       str_detect(outcome, "BACS") ~ "Mental health outcomes",
@@ -5016,7 +5004,7 @@ Kanie2019_est <-
 
     # ppcor is imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -5126,6 +5114,13 @@ Kanie2019_est <-
 
 ```
 
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Kanie2019_est)
+
+```
 
 ### **Lim et al. [-@Lim2020]**
 ```{r Lim et al. 2020}
@@ -5684,8 +5679,8 @@ Madigan2013 <- tibble(
                   "Positive symptoms",
                   "Negative symptoms",
                   "Depressive symptoms",
-                  "Global functioning",
-                  "WHOQoL"), 
+                  "Global functioning (GAF)",
+                  "WHOQOL"), 
                 each = 2,2),
   
   timing = rep(c("3m", "12m"), each = 12),
@@ -5811,17 +5806,21 @@ Madigan2013_est <-
       str_detect(outcome, "Depressive symptoms") ~ "Depression/Mental health outcomes",
       str_detect(outcome, "Positive") ~ "Mental health outcomes",
       str_detect(outcome, "Negative") ~ "Mental health outcomes/Negative symptoms",
-      str_detect(outcome, "Global functioning") ~ "Social functioning (degree of impairment)",
-      str_detect(outcome, "WHOQoL") ~ "Wellbeing and Quality of Life",
+      str_detect(outcome, "Global") ~ "Social functioning (degree of impairment)",
+      str_detect(outcome, "WHOQOL") ~ "Wellbeing and Quality of Life",
       .default = NA_character_
     ),
     
     
     study = c("Madigan et al. 2013"),
     
+    effect_size = "SMD",
+    sd_used = "Posttest SD",
+    main_es_method = "DiD",
+    
     # ppcor imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed"
+    ppcor_method = "Imputed"
     
   ) |> 
   mutate(
@@ -5934,6 +5933,14 @@ Madigan2013_est <-
   ); Madigan2013_est
 
 ```
+
+```{r, echo=FALSE}
+dat <-
+  dat |> 
+  bind_rows(Madigan2013_est)
+
+```
+
 ### **Michalak et al. [-@Mcichalak2015]**
 ```{r Michalak et al. 2015}
 # With both pre- and post-test and beta-coefficients
@@ -8657,7 +8664,7 @@ Sajatovic2009_est <-
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    pp_cor_methods = "Imputed"
+    ppcor_method = "Imputed"
     
   ) |> 
   mutate(timing = factor(timing, levels = c("3m", "6m", "12m"))) |> 
@@ -9331,7 +9338,7 @@ Tjaden2021_est <- Tjaden2021_wide |>
       .default = NA_character_
     ),
     
-  # Effect sizes are acoress different time    
+  # Effect sizes are acorss different time    
   #  d = c(
   #    rep(c(NA_real_), each = 4,1),
   #    c(0.54,
@@ -9339,10 +9346,16 @@ Tjaden2021_est <- Tjaden2021_wide |>
   #      0.07,
   #       0.30)),
     
-    study = "Tjaden et al. 2021",
+  study = "Tjaden et al. 2021",
+  
+  effect_size = "SMD",
+  sd_used = "Posttest SD",
+  main_es_method = "DiD",
+  
+  
   # ppcor imputed
   ppcor = ppcor_imp, 
-  pp_cor_method = "Imputed"
+  ppcor_method = "Imputed"
   
   )|> 
   mutate(
@@ -9437,6 +9450,15 @@ Tjaden2021_est <- Tjaden2021_wide |>
 
 
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Tjaden2021_est)
+
+```
+
 
 ### **Valiente et al. [-@Valiente2022]**
 ```{r Valiente et al. 2022}

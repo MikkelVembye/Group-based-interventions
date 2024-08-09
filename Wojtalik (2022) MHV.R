@@ -168,7 +168,8 @@ Wojtalik2019_wide <- Wojtalik2019 |>
   ) |> 
   mutate(
     t_val = c(0.8, 0.43, 1.60, 0.60),
-    d_paper = c(0.23, 0.11, 0.51, 0.18)
+    es_paper = c(0.23, 0.11, 0.51, 0.18),
+    es_paper_type = "Unknown - presumable based on EMM"
   
   ); Wojtalik2019_wide
 
@@ -182,7 +183,7 @@ Wojtalik2019_est <-
     study = "Wojtalik et al. 2019", 
     
     # ppcor imputed
-    pp_cor_method = "Not computable - t values used"
+    ppcor_method = "Not computable - t values used"
     
   ) |> 
   mutate(
