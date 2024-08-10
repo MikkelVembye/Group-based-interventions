@@ -55,3 +55,28 @@ sigma2_B <- (MSB0 - sigma2_WA)/n0_star
 sigma2_TA <- ((n0_star-1)/n0_star) * sigma2_WA + (MSB0/n0_star)
 sd_population_GAF <- sqrt(((n0_star-1)/n0_star) * sigma2_WA) + sqrt(MSB0/n0_star)
 sd_population_GAF_alt = sqrt(sigma2_WA) + sqrt(sigma2_B)
+
+# dplyr version (pre-test sd and means)
+
+res <- 
+  dat_restricted |>
+  mutate(
+    sd_pool_pre = sqrt(((N_t-1)*sd_pre_t^2 + (N_c-1)*sd_pre_c^2)/(N_t + N_c - 2)),  
+  ) |> 
+  summarise(
+    N = sum(N_total),
+    N_0 = sum(N_c),
+    J = n_distinct(study),
+    sigma2_WA = sum((N_total-2)*sd_pool_pre^2)/(N-2*J),
+    m_pre_mean_c = mean(m_pre_c),
+    SSB0 = sum(N_c*(m_pre_c - m_pre_mean_c)^2),
+    MSB0 = SSB0/(J-1),
+    n0_star = N_0 - (sum(N_c^2/N_0)/J-1),
+    
+    #Equation 12
+    sigma2_B = (MSB0 - sigma2_WA)/n0_star,
+    sigma2_TA = ((n0_star-1)/n0_star) * sigma2_WA + (MSB0/n0_star),
+    sd_population_GAF = sqrt(((n0_star-1)/n0_star) * sigma2_WA) + sqrt(MSB0/n0_star),
+    sd_population_GAF_alt = sqrt(sigma2_WA) + sqrt(sigma2_B)
+  )
+
