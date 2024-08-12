@@ -1060,6 +1060,12 @@ Bækkelund2022_est <-
       NA_real_
       ),
     
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
     vary_id = paste(outcome, timing, sep = "/")
     
   ) |> 
@@ -2091,6 +2097,12 @@ Crawford2012_est <-
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
       GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
       NA_real_
       ),
     
@@ -5272,6 +5284,12 @@ Kanie2019_est <-
       NA_real_
       ),
     
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
     vary_id = paste0(outcome)
   ) |> 
   ungroup(); Kanie2019_est
@@ -6101,6 +6119,12 @@ Madigan2013_est <-
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
       GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
       NA_real_
       ),
     
@@ -9631,6 +9655,12 @@ Tjaden2021_est <- Tjaden2021_wide |>
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
       GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
       NA_real_
       ),
     
