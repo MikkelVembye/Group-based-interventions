@@ -57,9 +57,13 @@ R2_imp <- 0
 
 grp_size_imp <- 8
 
+# Loading data used to calculate population-based effect size estimates
+GAF_pop_res <- readRDS("ES calc/GAF_res.rds")
+
 # For data construction
 dat <- tibble()
 ```
+
 
 
 ## **Studies in meta-analysis**
@@ -1042,6 +1046,19 @@ Bækkelund2022_est <-
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
     ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
     
     vary_id = paste(outcome, timing, sep = "/")
     
@@ -2063,21 +2080,26 @@ Crawford2012_est <-
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
       ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      NA_real_
+      ),
   
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
     
     vary_id = paste(outcome, timing, treatment, sep = "/"),
   
     timing = as.character(timing)
     
   ) |> 
-  ungroup() |> 
-  mutate(
-    # Calculating covariance using eq 19.19 from Gleser & Olkin (2009)
-    covar_outcome_timing_treatment = 1/N_c[1] + prod(gt_DD)/(2*(sum(N_t) + N_c[1])),
-    
-    .by = c(outcome, timing)
-    
-  ); Crawford2012_est
+  ungroup(); Crawford2012_est
 
 rm(Crawford2012_act_wide, Crawford2012_art_wide)
 
@@ -5102,15 +5124,24 @@ Kanie2019_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-    )
+    ),
     
+    gt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    vary_id = paste0(outcome)
   ) |> 
-  ungroup() |> 
-  mutate(
-        
-   vary_id = paste0(outcome)
-    
-  ); Kanie2019_est
+  ungroup(); Kanie2019_est
 
 ```
 
@@ -5925,12 +5956,25 @@ Madigan2013_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-    )
+    ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    vary_id = paste0(outcome, "/", timing)
     
   ) |> 
-  ungroup() |> 
-  mutate(vary_id = paste0(outcome, "/", timing)
-  ); Madigan2013_est
+  ungroup(); Madigan2013_est
 
 ```
 
@@ -9444,8 +9488,22 @@ Tjaden2021_est <- Tjaden2021_wide |>
       add_name_to_vars = "_DD",
       vars = -var_term1_DD),
     
-   vary_id = paste0(outcome, "/", timing)) |> 
-  ungroup(); Tjaden2021_est
+    gt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+   vary_id = paste0(outcome, "/", timing)
+   ) |> 
+   ungroup(); Tjaden2021_est
 
 
 
@@ -10657,6 +10715,80 @@ test_dat <- covariates |>
 select(test_dat, varifier, vary_id)
 
 ```
+
+
+
+
+## Using extant to estimate population standard deviations
+```{r}
+# Function contain ANOVA estimation techniques from Fitzgerald & Tipton 2024
+population_SMD <- 
+  function(data){
+  
+  data |> 
+  summarise(
+    N = sum(N_total),
+    N_0 = sum(N_c),
+    J = n_distinct(study),
+    sigma2_WA = sum((N_total-2)*sd_pool^2)/(N-2*J),
+    m_post_mean_c = mean(m_post_c),
+    SSB0 = sum(N_c*(m_post_c - m_post_mean_c)^2),
+    MSB0 = SSB0/(J-1),
+    n0_star = N_0 - (sum(N_c^2/N_0)/J-1),
+    
+    #Equation 12
+    sigma2_B = (MSB0 - sigma2_WA)/n0_star,
+    sigma2_TA = ((n0_star-1)/n0_star) * sigma2_WA + (MSB0/n0_star),
+    sd_population_GAF = sqrt(sigma2_TA),
+    n_star = (N_0 - sum(N_c^2/N_0))/(J-1),
+    c1 = (n_star-1)*sigma2_WA/(n_star*(N-2*J)),
+    c2 = (sigma2_WA + n_star * sigma2_B)/(n_star*(J-1)),
+    v1 = N_0-2*J,
+    v2 = J-1,
+    # Eq. 29
+    df_pop = (c1*v1 + c2*v2)^2/(c1^2*v1 + c2^2+v2),
+    WaboveT = sigma2_WA/sigma2_TA
+    
+  )
+    
+}
+
+```
+
+GAF population measures
+
+```{r}
+
+GAF_dat <- 
+  dat |> 
+  filter(str_detect(outcome, "GAF|Global")) |> 
+  relocate(study) 
+
+GAF_dat_restricted <- 
+  GAF_dat |> 
+  group_by(study) |> 
+  filter(row_number() == 1) |> 
+  ungroup()
+
+ggplot(data.frame(x = c(0, 100)), aes(x)) + 
+  mapply(function(mean, sd, col) {
+    stat_function(fun = dnorm, args = list(mean = mean, sd = sd), linetype = "dashed", color = col)
+  }, 
+  # enter means, standard deviations and colors here
+  mean = GAF_dat_restricted$m_post_c, 
+  sd = GAF_dat_restricted$sd_post_c,
+  col = "black"
+  ) + 
+  theme_bw() +
+  labs(x = "GAF score", y = "Density")
+  
+GAF_res <- population_SMD(GAF_dat_restricted)
+GAF_res
+
+saveRDS(GAF_res, "ES calc/GAF_res.rds")
+
+```
+
 
 
 
