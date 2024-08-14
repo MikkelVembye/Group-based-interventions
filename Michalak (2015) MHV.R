@@ -153,6 +153,12 @@ ppcor <- ppcor_imp <- 0.5
 Michalak_2015_est <- 
   Michalak_2015_dat |> 
   mutate(
+    study = "Michalak et al. 2015",
+    vary_id = paste0(outcome, "/", treatment),
+    
+    ppcor = ppcor_imp,
+    ppcor_method = "Imputed",
+    
     df_ind = N_total,
     m_post = if_else(is.na(es_paper), (m_post_t - m_post_c)*-1, NA_real_),
     sd_pool = if_else(
@@ -163,7 +169,7 @@ Michalak_2015_est <-
     
     d_post = m_post/sd_pool,
     vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
-    Wd_post = (1/N_t + 1/N_c),
+    Wd_post = if_else(is.na(es_paper), (1/N_t + 1/N_c), NA_real_),
     
     J =  1 - 3/(4*df_ind-1),
     
@@ -173,105 +179,43 @@ Michalak_2015_est <-
     
     # DiD (DD) effect sizes for HAM-D og BDI
     
-    # Reg adjusted effect sizes for SF-36 and SASS outcomes
-    
-  )
-
-
-Michalak_2015_est <- 
-  Michalak_2015_wide |> 
-  arrange(outcome) |> 
-  mutate(
-    analysis_plan = rep(c(
-      "Mental health outcomes/Depression",
-      "Mental health outcomes/Depression"
-    ), each = 2,1),
-    
-    N_total = N_t + N_c,
-    
-    N_total = N_t + N_c,
-    df_ind = N_total,
     
     
-    # HAM-D lower scores are beneficial why these is reverted
-    m_post = if_else(outcome != "PSP", (m_post_t - m_post_c)*-1,
-                     m_post_t - m_post_c),
-    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
-    
-    d_post = m_post/sd_pool, 
-    
-    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
-    Wd_post = (1/N_t + 1/N_c),
-    
-    J = 1 - 3/(4*df_ind-1),
-    
-    g_post = J * d_post,
-    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
-    Wg_post = Wd_post,
-    
-    vary_id = outcome
-  )
-
-
-ppcor <- ppcor_imp <- 0.5
-
-# Udregning af DID effektstørrelse
-Michalak2015_est1 <-
-  Michalak_2015_est |> 
-  mutate(
-    diff_t = m_post_t - m_pre_t,
-    diff_c = m_post_c - m_pre_c,
-    mean_diff = diff_t - diff_c,
-    sd_pool = sqrt( ((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_total-2)  ),
-    
-    df = N_total,
-    
-    J = 1 - 3/(4*df-1),
-    
-    # Formel 1
-    g_DD = J * (mean_diff/sd_pool),
-    
-    # Formel 2 - med imputeret pre-posttest korrelation baseret på test-retest reliability for HAM-D
-    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df),
-    se_DD = sqrt(vg_DD)
-    
-  )
-
-
-
-
-# Kombiner de to tibbles
-Michalak2015_est_combined <- bind_rows(
-  Michalak2015_est1,
-  Michalak2015_est2
-) |> 
-  mutate(
-    study = "Michalak et al. 2015",
-    vary_id = paste0(outcome, "/", treatment),
-
-
     #cluster bias adjustment
     
     # For HAM-D lower scores is beneficial, hence these are reverted
-    m_diff_t = if_else(outcome != "PSP",
-                       (m_post_t - m_pre_t) * -1,
-                       m_post_t - m_pre_t),
+    m_diff_t = if_else(
+      str_detect(outcome, "HAM|BDI"),
+      (m_post_t - m_pre_t) * -1,
+      m_post_t - m_pre_t
+    ),
     
-    m_diff_c = if_else(outcome != "PSP",
-                       (m_post_c - m_pre_c) * -1,
-                       m_post_c - m_pre_c), 
+    m_diff_c = if_else(
+      str_detect(outcome, "HAM|BDI"),
+      (m_post_c - m_pre_c) * -1,
+      m_post_c - m_pre_c
+    ), 
     
     d_DD = (m_diff_t - m_diff_c) / sd_pool,
     vd_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + d_DD^2 / (2 * df_ind),
-    Wd_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c),
+    Wd_DD = if_else(is.na(es_paper), 2 * (1 - ppcor) * (1 / N_t + 1 / N_c), NA_real_),
     
     g_DD = J * d_DD, 
     vg_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + g_DD^2 / (2 * df_ind),
-    Wg_DD = Wd_DD
-) |> 
-  rowwise() |>
-  mutate(
+    Wg_DD = Wd_DD,
     
+    # Reg adjusted effect sizes for SF-36 and SASS outcomes
+    d_reg = beta/sd_pool,
+    vd_reg = d_reg^2 * (1/t_val^2 + 1/(2*df_ind)),
+    Wd_reg = d_reg^2 * 1/t_val^2,
+    
+    g_reg = J * d_reg,
+    vg_reg = g_reg^2 * (1/t_val^2 + 1/(2*df_ind)),
+    Wg_reg = Wd_reg
+    
+  ) |> 
+  rowwise() |> 
+  mutate(
     # Average cluster size in treatment group
     avg_cl_size = 6, 
     avg_cl_type = "From study (p. 177)",
@@ -280,7 +224,7 @@ Michalak2015_est_combined <- bind_rows(
     icc = ICC_01,
     icc_type = "Imputed",
     
-    n_covariates = 1,
+    n_covariates = 1,# Baseline scores only
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
@@ -292,7 +236,7 @@ Michalak2015_est_combined <- bind_rows(
     omega = 1 - 3 / (4 * df_adj - 1),
     
     # Cluster-adjusting g_post
-    gt_post = omega * d_post * gamma_sqrt,
+    gt_post = if_else(is.na(es_paper), omega * d_post * gamma_sqrt, NA_real_),
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
@@ -318,89 +262,25 @@ Michalak2015_est_combined <- bind_rows(
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -c("var_term1_DD")
-    )
-  ) |> 
-  ungroup() |> 
-  mutate(
-    vary_id = outcome
-  )
-
-Michalak2015_est
-
-
-# cluster bias adjustment
-
-Michalak2015_est_combined <- Michalak2015_est_combined |> 
-  rowwise() |>
-  mutate(
-    # For HAM-D lower scores is beneficial, hence these are reverted
-    m_diff_t = if_else(outcome != "PSP",
-                       (m_post_t - m_pre_t) * -1,
-                       m_post_t - m_pre_t),
-    
-    m_diff_c = if_else(outcome != "PSP",
-                       (m_post_c - m_pre_c) * -1,
-                       m_post_c - m_pre_c), 
-    
-    d_DD = (m_diff_t - m_diff_c) / sd_pool,
-    vd_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + d_DD^2 / (2 * df_ind),
-    Wd_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c),
-    
-    g_DD = J * d_DD, 
-    vg_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + g_DD^2 / (2 * df_ind),
-    Wg_DD = Wd_DD,
-    
-    # Average cluster size in treatment group
-    avg_cl_size = 6, 
-    avg_cl_type = "From study (p. 960)",
-    
-    # Imputed icc value
-    icc = ICC_01,
-    icc_type = "Imputed",
-    
-    n_covariates = 1,
-    
-    # Find info about the function via ?VIVECampbell::gamma_1armcluster
-    gamma_sqrt = VIVECampbell::gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
     ),
     
-    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
-    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
-    omega = 1 - 3 / (4 * df_adj - 1),
-    
-    # Cluster-adjusting g_post
-    gt_post = omega * d_post * gamma_sqrt,
+    gt_reg = omega * d_reg * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
-      g = gt_post, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_post",
-      vars = c("vgt_post", "Wgt_post")
-    ),
-    
-    gt_DD = omega * d_DD * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_DD, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      prepost_cor = ppcor,
+      g = gt_reg, 
+      model = "reg_coef",
+      cluster_adj = TRUE,
+      t_val = t_val,
       q = n_covariates,
-      add_name_to_vars = "_DD",
-      vars = -c("var_term1_DD")
-    )
+      add_name_to_vars = "_reg",
+      vars = -c("var_term1_reg")
+    ),
+    
+    across(c(Wgt_post, Wgt_DD:adj_value_DD), ~ if_else(!str_detect(outcome, "HAM|BDI"), NA, .x)),
+    across(c(Wgt_reg:adj_value_reg), ~ if_else(str_detect(outcome, "HAM|BDI"), NA, .x))
+    
   ) |> 
-  ungroup() |> 
-  mutate(
-    vary_id = outcome
-  )
-
-Michalak2015_est_combined
+  ungroup(); Michalak_2015_est

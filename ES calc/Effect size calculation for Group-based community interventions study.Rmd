@@ -64,8 +64,6 @@ GAF_pop_res <- readRDS("ES calc/GAF_res.rds")
 dat <- tibble()
 ```
 
-
-
 ## **Studies in meta-analysis**
 
 ### **Acarturk et al. [-@Acarturk2022] (Change var names)**
@@ -2808,19 +2806,29 @@ Timmermans2012 <-
       ),
     
     ci_l_b_adj = c(
-      .022, -.05, .026, -.025,
-      NA, -.030, .026, -.025,
-      -.11, -.016, -.071, 0.020,
-      .059, -.062, .027, .006,
-      -.60, -1.14, -1.05, -1.02
+      .022, -.05,  #Empowerment Treatment T1, Empowerment Control T1 
+      .026, -.025, #Empowerment Treatment T2, Empowerment Control T2
+      NA, -.030, 
+      .026, -.025,
+      -.11, -.016, 
+      -.071, 0.020,
+      .059, -.062, 
+      .027, .006,
+      -.60, -1.14, 
+      -1.05, -1.02
     ),
     
     ci_u_b_adj = c(
-      .22, .092, .23, .12,
-      NA, .11, .23, .12, 
-      .23, .24, .29, .28,
-      .40, .19, .39, .27,
-      .74, -.16, .37, .042
+      .22, .092, #Empowerment Treatment T1, Empowerment Control T1 
+      .23, .12, #Empowerment Treatment T2, Empowerment Control T2 
+      NA, .11, 
+      .23, .12, 
+      .23, .24, 
+      .29, .28,
+      .40, .19, 
+      .39, .27,
+      .74, -.16, 
+      .37, .042
     ),
     
     tval_b_adj = qt(pval_b_adj/2, df = N-2, lower.tail = FALSE),
