@@ -10882,7 +10882,7 @@ select(test_dat, varifier, vary_id)
 
 
 
-## Using extant to estimate population standard deviations
+## Using extant data to estimate population standard deviations
 ```{r}
 # Function contain ANOVA estimation techniques from Fitzgerald & Tipton 2024
 population_SMD <- 
