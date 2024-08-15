@@ -9977,7 +9977,7 @@ Volpe_2015 <- tibble(
   ),
   
   sd_pre =c(
-    15.14, 17.75,
+    15.48, 17.75,
     4.58, 4.35,
     16.19, 18.23,
     0.93, 0.94
@@ -9987,7 +9987,7 @@ Volpe_2015 <- tibble(
     36.21, 41.2,
     4.7, 5.66,
     49.95, 47.25,
-    1.25, 2.12
+    1.25, 2.13
   ), 
   
   sd_post = c(
@@ -10173,7 +10173,7 @@ Wojtalik2019 <- tibble(
     # ITT
     #    34.4, 38,  # Baseline Cognition composite 
     49.5, 51.0,# Baseline Social adjustment composite
-    40.1, 50.4, # Baseline Symptoms composite
+    50.2, 50.4, # Baseline Symptoms composite
     
     
     # Completers
