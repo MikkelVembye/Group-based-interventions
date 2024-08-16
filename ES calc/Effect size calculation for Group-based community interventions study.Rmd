@@ -1075,7 +1075,8 @@ Bækkelund2022_est <-
 # Adding Bækkelund to data
 dat <- 
   dat |> 
-  bind_rows(Bækkelund2022_est)
+  bind_rows(Bækkelund2022_est) |> 
+  relocate(study)
 ```
 
 
@@ -1586,10 +1587,12 @@ Craigie2009 <- tibble(
     "Individual",
     "Group"), each = 1, 6), 
   
-  N = c(rep(c(116, 240), each = 1,3),
-        rep(c(77, 157), each = 1,3)
+  N = c(rep(c(116, 240), 3),
+        rep(c(77, 157), 3)
         
   ),
+  
+  N_start = rep(c(116, 240), 6),
   
   # pre-treatment means 
   m_pre = c( 
@@ -1655,7 +1658,8 @@ Craigie2009 <- tibble(
     
   # For pooling of correlation coefficients 
   z = 0.5 * log( (1+r)/(1-r) ),
-  v = 1/(N-3)
+  v = 1/(N-3),
+  w = 1/v
   
 ) 
 ```
@@ -1666,9 +1670,9 @@ Effect size calculation
 ppcors_Craigie2009 <- 
   Craigie2009 |> 
   summarise(
-    M = sum(v*z)/sum(v),
-    ppcor = (exp(2*M)-1)/(exp(2*M)+1),
-    ppcor_calc_method = "From study (t^2 = F)",
+    mean_z = sum(w*z)/sum(w),
+    ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
+    ppcor_method = "F_values used, but calcuable from study",
     .by = c(analysis, outcome)
   )
 
@@ -1691,12 +1695,9 @@ Craigie2009_est <-
   sd_used = "Pooled posttest SD",
     
   study = "Craigie & Nathan 2009",
-  main_es_calc_method = "Raw diff-in-diffs",
+  main_es_method = "Raw diff-in-diffs",
   
-  ppcor_calc_method = "Not relevant",
-  
-  R2 = NA_real_,
-  R2_calc_method = "Not relevant",
+  #ppcor_calc_method = "Not relevant - F_values used",
   
   F_val = c(
     5.96, 9.84, 0.17, # (entered from p. 307 left side bottom)
@@ -1751,22 +1752,11 @@ Craigie2009_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    gamma_sqrt_icc005 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-      ),
-    gamma_sqrt_icc02 = gamma_1armcluster(
-      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-      ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -1793,37 +1783,8 @@ Craigie2009_est <-
       cluster_adj = FALSE,
       F_val = F_val,
       q = n_covariates,
-      add_name_to_vars = "_DD"
-      ),
-    
-    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_005, 
-      g = gt_DD_icc005, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc005",
-      vars = vgt_DD_icc005:Wgt_DD_icc005
-      ),
-    
-    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = ICC_02, 
-      g = gt_DD_icc02, 
-      model = "DiD",
-      cluster_adj = FALSE,
-      F_val = F_val,
-      q = n_covariates,
-      add_name_to_vars = "_DD_icc02",
-      vars = vgt_DD_icc02:Wgt_DD_icc02
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
     vary_id = paste0(analysis, "/", outcome)
@@ -1832,6 +1793,12 @@ Craigie2009_est <-
   ungroup(); Craigie2009_est
 
 
+```
+
+```{r, echo = FALSE}
+dat <- 
+  dat |> 
+  bind_rows(Craigie2009_est)
 ```
 
 
@@ -9691,7 +9658,7 @@ dat <-
 
 ### **Valiente et al. [-@Valiente2022]**
 ```{r Valiente et al. 2022}
-# Data from table 3 and table (p. 4)  containing means, standard deviation. It also contains
+# Data from Table 3 and Table  4 (p. 4)  containing means, standard deviation. It also contains
 # difference Morris' d and p
 
 Valiente2022  <- tibble(
@@ -9775,7 +9742,6 @@ Valiente2022  <- tibble(
     0.82, 0.83
     
   ),
-  
   
   
   m_post = c(
