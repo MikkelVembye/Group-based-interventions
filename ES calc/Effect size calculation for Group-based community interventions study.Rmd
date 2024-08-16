@@ -34,7 +34,7 @@ This document contains effect size calculation for the Campbell systematic revie
 ### R package used for effect size calculation
 
 ```{r}
-#devtools::install_github("MikkelVembye/VIVECampbell")
+# devtools::install_github("MikkelVembye/VIVECampbell")
 
 library(tidyverse)
 #library(dplyr)
@@ -335,13 +335,7 @@ Acarturk2022_es <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-    
-    #gamma_sqrt_icc005 = gamma_1armcluster(
-    #  N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-    #  ),
-    # gamma_sqrt_icc02 = gamma_1armcluster(
-    #  N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-    #  ),
+
     
     gt = g * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -356,35 +350,6 @@ Acarturk2022_es <-
       q = n_covariates
       ),
     
-   # gt_icc005 = g * gamma_sqrt_icc005,
-   #  vgt_smd_1armcluster(
-   #  N_cl_grp = N_t, 
-   #  N_ind_grp = N_c, 
-   #  avg_grp_size = avg_cl_size, 
-   #  ICC = ICC_005, 
-   #  g = gt_icc005, 
-   #  model = "DiD",
-   #  cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_icc005",
-  #    vars = vgt_icc005:Wgt_icc005
-  #    ),
-    
-  #  gt_icc02 = g * gamma_sqrt_icc02,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = ICC_02, 
-  #    g = gt_icc02, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_icc02",
-  #    vars = vgt_icc02:Wgt_icc02
-  #    ),
     
     gt_alt = g_alt * gamma_sqrt,
     vgt_smd_1armcluster(
@@ -441,11 +406,13 @@ Acarturk2022_est
 
 Entering data from Table 3 (p. 495).
 
-```{r}
+```{r Barbic et al. 2009}
 Barbic2009 <- tibble(
   outcome = rep(c("Hope Index", "Empowerment Scale", "Quality of Life", "Recovery Assessment"), each = 2),
   group = rep(c("Recovery Workbook", "Control"), dplyr::n_distinct(outcome)),
   N = rep(c(16, 17), dplyr::n_distinct(outcome)),
+  
+  N_start = rep(c(16,17), 4),
   
   m_pre = c(
     37.13, 36.00, 
@@ -512,13 +479,13 @@ Barbic2009_est <-
     sd_used = "Pooled posttest SD",
     
     study = "Barbic et al. 2009",
-    main_es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor_imp,  
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
-    R2 = NA_real_,
-    R2_calc_method = "Not relevant",
+  #  R2 = NA_real_,
+  #  R2_calc_method = "Not relevant",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -564,22 +531,10 @@ Barbic2009_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-   # gamma_sqrt_icc005 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-  #    ),
-  #  gamma_sqrt_icc02 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
-    
-  #  df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
     
     
     # Cluster-adjusting g_post
@@ -593,7 +548,7 @@ Barbic2009_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
       ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -607,38 +562,10 @@ Barbic2009_est <-
       cluster_adj = FALSE,
       prepost_cor = ppcor,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
-   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-   #  vgt_smd_1armcluster(
-   #    N_cl_grp = N_t, 
-   #   N_ind_grp = N_c, 
-   #    avg_grp_size = avg_cl_size, 
-   #   ICC = ICC_005, 
-   #    g = gt_DD_icc005, 
-   #   model = "DiD",
-   #    cluster_adj = FALSE,
-   #    prepost_cor = ppcor,
-   #   q = n_covariates,
-   #    add_name_to_vars = "_DD_icc005",
-   #   vars = vgt_DD_icc005:Wgt_DD_icc005
-   #    ),
-    
-   # gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-   #  vgt_smd_1armcluster(
-   #   N_cl_grp = N_t, 
-   #    N_ind_grp = N_c, 
-   #    avg_grp_size = avg_cl_size, 
-   #    ICC = ICC_02, 
-   #   g = gt_DD_icc02, 
-   #    model = "DiD",
-   #    cluster_adj = FALSE,
-   #    prepost_cor = ppcor,
-   #   q = n_covariates,
-   #   add_name_to_vars = "_DD_icc02",
-   #    vars = vgt_DD_icc02:Wgt_DD_icc02
-   #    ),
     
     vary_id = outcome
     
@@ -647,9 +574,15 @@ Barbic2009_est <-
   ungroup() |> 
   relocate(N_total, .after = N_c); Barbic2009_est
 
-
 ```
 
+```{r, echo=FALSE}
+# Adding Barbic to data
+dat <- 
+  dat |> 
+  bind_rows(Barbic2009_est) |> 
+  relocate(study)
+```
 
 ### **Bond et al. [-@Bond2015]**
 #### (RCT - no treatment of clustering)
@@ -716,22 +649,11 @@ Bond2015_continious <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-   # gamma_sqrt_icc005 = gamma_1armcluster(
-   #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-   #   ),
-   #  gamma_sqrt_icc02 = gamma_1armcluster(
-   #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-   #    ),
+   
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
-    omega = 1 - 3/(4*df_adj-1),
-    
-   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-   #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-   #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-   #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+  
     
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -746,31 +668,7 @@ Bond2015_continious <-
       vars = vgt_post:adj_value_post
       ),
     
-   # gt_post_icc005 = omega_icc005 * d_post * gamma_sqrt_icc005,
-   #  vgt_smd_1armcluster(
-   #    N_cl_grp = N_t, 
-   #    N_ind_grp = N_c, 
-   #   avg_grp_size = avg_cl_size, 
-   #    ICC = ICC_005, 
-   #   g = gt_post_icc005, 
-   #    model = "posttest",
-   #    cluster_adj = FALSE,
-   #    add_name_to_vars = "_post_icc005",
-   #    vars = vgt_post_icc005:Wgt_post_icc005
-   #   ),
-    
-    #gt_post_icc02 = omega_icc02 * d_post * gamma_sqrt_icc02,
-    #vgt_smd_1armcluster(
-    #  N_cl_grp = N_t, 
-    #  N_ind_grp = N_c, 
-    #  avg_grp_size = avg_cl_size, 
-    #  ICC = ICC_02, 
-    #  g = gt_post_icc02, 
-    #  model = "posttest",
-    #  cluster_adj = FALSE,
-    #  add_name_to_vars = "_post_icc02",
-    #  vars = vgt_post_icc02:Wgt_post_icc02
-    #  ),
+  
     
     vary_id = outcome
     
@@ -855,7 +753,7 @@ Bækkelund2022 <- tibble(
                 each = 2, 2), 
   
   
-  timing = rep(c("6m", "36m"), each = 4), 
+  timing = rep(c("post", "6m"), each = 4), 
   
   N = rep(c(
     29, 30, 
@@ -1066,8 +964,7 @@ Bækkelund2022_est <-
     
     vary_id = paste(outcome, timing, sep = "/")
     
-  ) |> 
-  arrange(outcome, desc(timing)); Bækkelund2022_est
+  ); Bækkelund2022_est
 
 ```
 
@@ -1102,6 +999,8 @@ Cano_vindel2021 <- tibble(
               204, 229,# per-protocol 6 months
               180, 208), 1,80) # per-protocol 12 months
   ),
+  
+  N_start = rep(c(534,527), each = 80),
   
   m_pre = c(
     rep(c(12.1, 12.5), each = 1,4),  # ITT GAD-7 Anxiety Baseline)
@@ -1435,9 +1334,9 @@ Cano_vindel2021_est <-
     sd_used = "Pooled posttest SD",
     
     study = "Cano-Vindel et al. 2021",
-    main_es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
-    ppcor_calc_method = "Based on test-retest reliability estimates",
+    ppcor_method = "Based on test-retest reliability estimates",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -1483,23 +1382,13 @@ Cano_vindel2021_est <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
- #   gamma_sqrt_icc005 = gamma_1armcluster(
-#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-#      ),
-#    gamma_sqrt_icc02 = gamma_1armcluster(
-#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-#      ),
+
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
- #   df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-#    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-#    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-#    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
-    
+
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -1511,7 +1400,7 @@ Cano_vindel2021_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
       ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -1525,38 +1414,10 @@ Cano_vindel2021_est <-
       cluster_adj = FALSE,
       prepost_cor = ppcor,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
- #   gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-#    vgt_smd_1armcluster(
-#      N_cl_grp = N_t, 
-#      N_ind_grp = N_c, 
-#      avg_grp_size = avg_cl_size, 
-#      ICC = ICC_005, 
-#      g = gt_DD_icc005, 
-#      model = "DiD",
-#      cluster_adj = FALSE,
-#      prepost_cor = ppcor,
-#      q = n_covariates,
-#      add_name_to_vars = "_DD_icc005",
-#      vars = vgt_DD_icc005:Wgt_DD_icc005
-#      ),
-    
-#    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-#    vgt_smd_1armcluster(
-#      N_cl_grp = N_t, 
-#      N_ind_grp = N_c, 
-#      avg_grp_size = avg_cl_size, 
-#      ICC = ICC_02, 
-#      g = gt_DD_icc02, 
-#      model = "DiD",
-#      cluster_adj = FALSE,
-#      prepost_cor = ppcor,
-#      q = n_covariates,
-#      add_name_to_vars = "_DD_icc02",
-#      vars = vgt_DD_icc02:Wgt_DD_icc02
-#      ),
     
     vary_id = paste(analysis, outcome, timing, sep = "/")
     
@@ -1566,6 +1427,13 @@ Cano_vindel2021_est <-
 
 ```
 
+```{r, echo=FALSE}
+# Adding Cano-vindel to data
+dat <- 
+  dat |> 
+  bind_rows(Cano_vindel2021_est) |> 
+  relocate(study)
+```
 
 ### **Craigie & Nathan [-@Craigie2009]**
 #### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
@@ -2113,6 +1981,10 @@ Druss2010 <- tibble(
     41,39
   ), 2),
   
+  N_start = rep(c(
+    41,39
+  ), 2),
+  
   m_pre = c(
     #48.3, 47.6, # patient activation
     #150, 154, # Physical_activity
@@ -2160,15 +2032,17 @@ Druss2010_est <-
     analysis_plan = "Wellbeing and Quality of Life",
     
     N_total = N_t + N_c,
-    p_val_baseline_diff = c(
+    
+    #p_val_baseline_diff = c(
       #0.96, 0.88, 0.78, # unused outcomes
-      0.98, 0.80), # From Table 2 (p. 268)
-    p_val_post_diff = c(
+   #   0.98, 0.80), # From Table 2 (p. 268)
+    #p_val_post_diff = c(
       #0.01,0.14, 0.25, 
-      0.27, 0.95
-      ), # From Table 2 (p. 268)
-    t_val_baseline_diff = qt(p_val_baseline_diff/2, df = N_total - 2, lower.tail = FALSE),
-    t_val_post_diff = qt(p_val_post_diff/2, df = N_total - 2, lower.tail = FALSE),
+    #  0.27, 0.95
+   #   ), # From Table 2 (p. 268)
+    #t_val_baseline_diff = qt(p_val_baseline_diff/2, df = N_total - 2, lower.tail = FALSE),
+    #t_val_post_diff = qt(p_val_post_diff/2, df = N_total - 2, lower.tail = FALSE),
+    
     p_val_f = c(
       #0.03, 0.4, 0.22, 
       0.41, 0.96
@@ -2179,7 +2053,9 @@ Druss2010_est <-
     sd_used = "Pooled posttest SD",
     
     study = "Druss et al. 2010",
-    main_es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
+   
+   
     
     df_ind = N_total,
     
@@ -2218,28 +2094,21 @@ Druss2010_est <-
     icc = ICC_01,
     icc_type = "Imputed",
     
+    ppcor_method = "F value used",
+    
     n_covariates = 1,
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-#    gamma_sqrt_icc005 = gamma_1armcluster(
-#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-#      ),
-#    gamma_sqrt_icc02 = gamma_1armcluster(
-#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-#      ),
+
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
     
-#    df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-#    omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-#    df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-#    omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -2252,7 +2121,7 @@ Druss2010_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
       ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -2266,38 +2135,10 @@ Druss2010_est <-
       cluster_adj = FALSE,
       F_val = F_val,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
-#    gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-#    vgt_smd_1armcluster(
-#      N_cl_grp = N_t, 
-#      N_ind_grp = N_c, 
-#      avg_grp_size = avg_cl_size, 
-#      ICC = ICC_005, 
-#      g = gt_DD_icc005, 
-#      model = "DiD",
-#      cluster_adj = FALSE,
-#      F_val = F_val,
-#      q = n_covariates,
-#      add_name_to_vars = "_DD_icc005",
-#      vars = vgt_DD_icc005:Wgt_DD_icc005
-#      ),
-    
-#    gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-#    vgt_smd_1armcluster(
-#      N_cl_grp = N_t, 
-#      N_ind_grp = N_c, 
-#      avg_grp_size = avg_cl_size, 
-#      ICC = ICC_02, 
-#      g = gt_DD_icc02, 
-#      model = "DiD",
-#      cluster_adj = FALSE,
-#      F_val = F_val,
-#      q = n_covariates,
-#      add_name_to_vars = "_DD_icc02",
-#      vars = vgt_DD_icc02:Wgt_DD_icc02
-#      ),
     
     vary_id = outcome
     
@@ -2306,7 +2147,17 @@ Druss2010_est <-
 
 ```
 
+```{r, echo=FALSE}
+# Adding Druss 2010 to data
+dat <- 
+  dat |> 
+  bind_rows(Druss2010_est) |> 
+  relocate(study)
+```
+
 ### **Druss et al. [-@Druss2018] (Double-check)**
+
+Data from table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and table 3 (p. 533), containing means and SD for RAS
 
 ```{r Druss2018}
 # Data from table 2 (p. 532), containing means and SD for health related quality of life 
@@ -2327,6 +2178,8 @@ Druss2018 <- tibble(
                         each= 2,2)),
   
   N = rep(c(198, 202), each = 1,6),
+  
+  N_start = rep(c(198, 202), each = 1,6),
  
  
  m_pre = rep(c(
@@ -2363,7 +2216,7 @@ Druss2018 <- tibble(
     12.28, 11.82  # MCS 6 months
   )
 ) |> 
-arrange(outcome) |> 
+#arrange(outcome) |> 
 relocate(outcome, .after = group); Druss2018
 
 # Making the druss2018 tibble wide in order to estimate the effect sizes and
@@ -2392,7 +2245,7 @@ Druss2018_est <-
     study = "Druss et al. 2018",
     
     ppcor = ppcor_imp, # Imputed ppcor
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
   ) |> 
   mutate(
@@ -2483,19 +2336,29 @@ Druss2018_est <-
   ) |> 
   ungroup() |> 
   mutate(vary_id = paste0(outcome, "/", timing)
-  )
+  ); Druss2018_est
 
 ```
 
-### **Dyck et al. [-@Dyck2000]**
-```{r Dyck et al. 2000}
-# Data from table 2 (p. 516) containing means and standard deviation
+```{r, echo=FALSE}
+# Adding Druss 2018 to data
+dat <- 
+  dat |> 
+  bind_rows(Druss2018_est) |> 
+  relocate(study)
+```
 
+### **Dyck et al. [-@Dyck2000]**
+
+Data from table 2 (p. 516) containing means and standard deviation
+```{r Dyck et al. 2000}
 Dyck2000 <- tibble(
   group = as.factor(c("Multiple-family group", 
                           "Standard care")),
   outcome = "MSANS", #The modified Scale for the Assessment of Negative Symptoms
   N = 21,
+  
+  N_start = 21,
   
   m_pre = c(
     7.9, 8.7
@@ -2544,7 +2407,7 @@ Dyck2000_est <-
     analysis_plan = "Mental health outcomes/Negative Symptoms",
     
     F_val = 6.1,
-    df = 1.39
+  #  df = 1.39
     )|> 
   mutate(
     study = "Dyck et al. 2000",
@@ -2591,6 +2454,8 @@ Dyck2000_est <-
   icc = ICC_01,
   icc_type = "Imputed",
   
+  ppcor_method = "F value used",
+  
   n_covariates = 1,
   
   # Find info about the function via ?VIVECampbell::gamma_1armcluster
@@ -2635,9 +2500,14 @@ Dyck2000_est <-
 ) |> 
 ungroup() |> 
 mutate(vary_id = outcome); Dyck2000_est
+```
 
-  
-
+```{r, echo=FALSE}
+# Adding Dyck to data
+dat <- 
+  dat |> 
+  bind_rows(Dyck2000_est) |> 
+  relocate(study)
 ```
 
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Change var names)**
@@ -3006,12 +2876,12 @@ Timmermans2012_est <-
 
 Entering data from Table 2 (p. 872)   
 
-```{r}
-
+```{r Gatz et al. 2007}
 Gatz2007 <- tibble(
   outcome = rep(c("ASI alcohol", "ASI drug", "GSI", "PSS", "Coping skills"), each = 2),
   group = rep(c("Intervention", "Comparison"), dplyr::n_distinct(outcome)),
   N = c(136, 177, 135, 176, 136, 177, 136, 177, 134, 173),
+  N_start = rep(c(187, 215), each = 5),
   
   m_pre = c(
     .18, .27, 
@@ -3072,10 +2942,7 @@ Gatz2007_est <-
     sd_used = "Pooled posttest SD",
     
     study = "Gatz et al. 2012",
-    main_es_calc_method = "Raw diff-in-diffs",
-    
-    ppcor = NA_real_,  
-    ppcor_calc_method = "F value used",
+    main_es_method = "Raw diff-in-diffs",
     
     m_post = m_post_t - m_post_c,
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
@@ -3115,29 +2982,19 @@ Gatz2007_est <-
     icc = ICC_01,
     icc_type = "Imputed",
     
+    ppcor_method = "F value used",
+    
     n_covariates = 1,
     
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-  #  gamma_sqrt_icc005 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-  #    ),
-  #  gamma_sqrt_icc02 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
-    
-   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
-    
+
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -3149,7 +3006,7 @@ Gatz2007_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
       ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -3163,44 +3020,23 @@ Gatz2007_est <-
       cluster_adj = FALSE,
       F_val = F_val,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
-    
-   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-  #  vgt_smd_1armcluster(
-   #   N_cl_grp = N_t, 
-    #  N_ind_grp = N_c, 
-    #  avg_grp_size = avg_cl_size, 
-    #  ICC = ICC_005, 
-    #  g = gt_DD_icc005, 
-    #  model = "DiD",
-    #  cluster_adj = FALSE,
-    #  F_val = F_val,
-    #  q = n_covariates,
-    #  add_name_to_vars = "_DD_icc005",
-    #  vars = vgt_DD_icc005:Wgt_DD_icc005
-    #  ),
-    
-  #  gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = ICC_02, 
-  #    g = gt_DD_icc02, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    F_val = F_val,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_DD_icc02",
-  #    vars = vgt_DD_icc02:Wgt_DD_icc02
-  #    ),
     
     vary_id = outcome
     
   ) |> 
   ungroup(); Gatz2007_est
 
+```
+
+```{r, echo=FALSE}
+# Adding Gatz to data
+dat <- 
+  dat |> 
+  bind_rows(Gatz2007_est) |> 
+  relocate(study)
 ```
 
 ### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
@@ -3221,10 +3057,8 @@ Gonzalez2007 <-
     F_val = c(0.22, 2.34),
     
     p_val_est = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
-    
-    
-    
-  ); Gonzalez2007
+
+      ); Gonzalez2007
 
 
 Gonzalez2007_est <- 
@@ -3237,7 +3071,7 @@ Gonzalez2007_est <-
       "Social functioning (degree of impairment)",
       "Mental health outcomes"
     ),
-    N_tot = Nt + Nc,
+    N_total = Nt + Nc,
     df_ind = N_tot,
     vd = (d^2/F_val + d^2/(2*N_tot) ),
     
@@ -3276,6 +3110,7 @@ Gordon2018 <- tibble(
   group = rep(c("SCIT", "Control"), each = 1, n_distinct(outcome)),
 
   N = rep(c(21, 15), each = 1, n_distinct(outcome)),
+  N_start = rep(c(21, 15), each = 1,4),
  
  m_pre = c(
    50.24, 45.73, # QLS total
@@ -3355,15 +3190,15 @@ Gordon2018_est <-
       TRUE ~ NA_character_
     ),
     
-    main_effect_size = "SMD",
+    effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Gordon et al. 2018",
-    main_es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     
     ppcor = ppcor_imp,  
-    ppcor_calc_method = "Imputed - F-vals seemed flawed",
+    ppcor_method = "Imputed - F-vals seemed flawed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -3414,23 +3249,11 @@ Gordon2018_est <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-   # gamma_sqrt_icc005 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-  #    ),
-    
-  #  gamma_sqrt_icc02 = gamma_1armcluster(
-  #    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-  #    ),
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
     omega = 1 - 3/(4*df_adj-1),
-    
-   # df_adj_icc005 = df_h_1armcluster(N_total = N_total, ICC = ICC_005, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc005 = 1 - 3/(4*df_adj_icc005-1),
-    
-  #  df_adj_icc02 = df_h_1armcluster(N_total = N_total, ICC = ICC_02, N_grp = N_t, avg_grp_size = grp_size_imp),
-  #  omega_icc02 = 1 - 3/(4*df_adj_icc02-1),
+
     
     # Cluster-adjusting g_post
     gt_post = omega * d_post * gamma_sqrt,
@@ -3443,7 +3266,7 @@ Gordon2018_est <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:Wgt_post
+      vars = c(vgt_post, Wgt_post)
       ),
     
     gt_DD = omega * d_DD * gamma_sqrt,
@@ -3457,38 +3280,9 @@ Gordon2018_est <-
       cluster_adj = FALSE,
       prepost_cor = ppcor,
       q = n_covariates,
-      add_name_to_vars = "_DD"
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
-    
-   # gt_DD_icc005 = omega_icc005 * d_DD * gamma_sqrt_icc005,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = ICC_005, 
-  #    g = gt_DD_icc005, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_DD_icc005",
-  #    vars = vgt_DD_icc005:Wgt_DD_icc005
-  #    ),
-    
-   # gt_DD_icc02 = omega_icc02 * d_DD * gamma_sqrt_icc02,
-  #  vgt_smd_1armcluster(
-  #    N_cl_grp = N_t, 
-  #    N_ind_grp = N_c, 
-  #    avg_grp_size = avg_cl_size, 
-  #    ICC = ICC_02, 
-  #    g = gt_DD_icc02, 
-  #    model = "DiD",
-  #    cluster_adj = FALSE,
-  #    prepost_cor = ppcor,
-  #    q = n_covariates,
-  #    add_name_to_vars = "_DD_icc02",
-  #    vars = vgt_DD_icc02:Wgt_DD_icc02
-  #    ),
     
     vary_id = outcome
     
@@ -3497,7 +3291,13 @@ Gordon2018_est <-
 
 ```
 
-
+```{r, echo=FALSE}
+# Adding Gordon to data
+dat <- 
+  dat |> 
+  bind_rows(Gordon2018_est) |> 
+  relocate(study)
+```
 
 
 ### **Gutman et al. [-@Gutman2019]**
@@ -3642,18 +3442,8 @@ Gutman2019_est <-
   gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-  
-#  gamma_sqrt_icc005 = gamma_1armcluster(
-#      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005
-#      ),
-  
-#  gamma_sqrt_icc02 = gamma_1armcluster(
-#    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02
-#    ),
  
   adj_fct = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
-#  adj_fct_icc005 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_005),
-#  adj_fct_icc02 = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = ICC_02),
   
   # Accounting for the fact that this study is single sited/clustered
   gt_post = gamma_sqrt * g_post * sqrt(1-icc),
@@ -3668,13 +3458,6 @@ Gutman2019_est <-
   hg_reg = sqrt(2) * sign(gt_reg) * (log(abs(gt_reg) + sqrt(gt_reg^2 + a^2)) - log(a)),
   vhg_reg = 1/df_ind,
   
- # gt_reg_icc005 = gamma_sqrt_icc005 * g_reg * sqrt(1-ICC_005),
-#  vgt_reg_icc005 = adj_fct_icc005 * vg_reg * (1-ICC_005),
-#  Wgt_reg_icc005 = adj_fct_icc005 * Wg_reg * (1-ICC_005),
-  
-#  gt_reg_icc02 = gamma_sqrt_icc02 * g_reg * sqrt(1-ICC_02),
-#  vgt_reg_icc02 = adj_fct_icc02 * vg_reg * (1-ICC_02),
-#  Wgt_reg_icc02 = adj_fct_icc02 * Wg_reg * (1-ICC_02),
   
   vary_id = outcome,
 
@@ -3723,6 +3506,9 @@ Hagen2005 <- tibble(
      # 16, 15, 
      # 16, 14
    ),
+ 
+ N_start = rep(c(17,15), each = 1,4),
+ 
  m_pre = c(
      1.19, 1.15,
      20.29, 22.60,
@@ -3814,7 +3600,7 @@ Hagen2005_est <-
   mutate(
     # Imputed ppcor
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     study = "Hagen et al. 2005",
     
@@ -3907,6 +3693,15 @@ Hagen2005_est <-
   ungroup() |> 
   mutate(vary_id = outcome); Hagen2005_est
 ```
+
+```{r, echo=FALSE}
+# Adding Hagen to data
+dat <- 
+  dat |> 
+  bind_rows(Hagen2005_est) |> 
+  relocate(study)
+```
+
 ### **Haslam et al. [-@Haslam2019]
 ```{r Haslam et al. 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
@@ -4113,7 +3908,7 @@ Hilden2021_est <-
     
     # ppcor is imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -4221,6 +4016,14 @@ Hilden2021_est
   
 ```
 
+```{r, echo=FALSE}
+# Adding Hilden to data
+dat <- 
+  dat |> 
+  bind_rows(Hilden2021_est) |> 
+  relocate(study)
+```
+
 ### **Himle et al. [-@Himle2014]**
 ```{r Himle et al. 2014}
 # From table 2, p. 174
@@ -4228,9 +4031,9 @@ Himle2014 <-
   tibble(
     group = as.factor(rep(c("Intervention group",
                             "Control group"),
-                          each = 1, 12)), # 18 rækker af hver gruppe fordi der er 9 outcomes of to opfølgningsperioder
+                          each = 1, 12)), 
     
-    timing = rep(c("Post","3m"), each = 12,1), #den respektive opfølgning skal gentages 18 gange
+    timing = rep(c("Post","3m"), each = 12,1), 
     
     
     outcome = rep(c(
@@ -4243,10 +4046,9 @@ Himle2014 <-
       "Sheehan disability scale"
       #  "Social phobia symptom severity", 
       #  "Clinician global impressions - symptom severity" 
-    ), each = 2, 2), # Outcomes gentages to gange for hver opfølgningsperiode
+    ), each = 2, 2), 
     
-    N = 29, #i hver gruppe er der 29 observationer
-    # som skal gentages 18 gange for hver opfølgning
+    N = 29,
     
     N_start = 29,
     
@@ -4301,7 +4103,7 @@ Himle2014 <-
       #  3.21, 4.21
     ),
     
-    ## Standard deviation-values ##
+    ## Standard deviation-values 
     sd_post = c(
       # Post SD values
       29.02, 36.67, 
@@ -4364,7 +4166,7 @@ Himle2014_est <-
     
     # ppcor is imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -4455,6 +4257,14 @@ Himle2014_est <-
   )
 
 Himle2014_est
+```
+
+```{r, echo=FALSE}
+# Adding Himle to data
+dat <- 
+  dat |> 
+  bind_rows(Himle2014_est) |> 
+  relocate(study)
 ```
 
 ### **Izquierdo et al. [-@Izquierdo2021]**
@@ -4684,7 +4494,8 @@ Jacob2010 <- tibble(
     "BDI"), each = 2, 2), 
   
 
-  N = rep(c(19, 24), each = 1,10), 
+  N = rep(c(19, 24), each = 1,10),
+  N_start = rep(c(19, 24), each = 1,10),
 
   m_pre = rep(c(
     13.3, 13.3, # Social Cognition Screening Questionnaire
@@ -4735,7 +4546,6 @@ Jacob2010 <- tibble(
     14.5, 13.3)
   
   ) |> 
-arrange(outcome) |> 
 relocate(outcome, .after = group); Jacob2010
 
 # Making the druss2018 tibble wide in order to estimate the effect sizes and
@@ -4765,7 +4575,7 @@ Jacob2010_est <-
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -4861,10 +4671,19 @@ Jacob2010_est <-
   ) |> 
   ungroup() |> 
   mutate(vary_id = paste0(outcome, "/", timing));  Jacob2010_est
-
-
 ```
+
+```{r, echo=FALSE}
+# Adding Jacob to data
+dat <- 
+  dat |> 
+  bind_rows(Jacob2010_est) |> 
+  relocate(study)
+```
+
 ### **James et al. [-@James2004]**
+
+
 ```{r James et al. 2004}
 James2004 <- tibble(
   group = rep(c("Treatment", "Control"), each = 1,5),
@@ -4944,6 +4763,7 @@ James2004_est <- James2004_wide |>
       7.364, 0.865, 16.221, 1.352, 2.205
     ),
     
+    ppcor_method = "F-values are used",
     
      N_total = N_t + N_c,
     df_ind = N_total,
@@ -5036,6 +4856,15 @@ rowwise() |>
   ungroup(); James2004_est
 
 ```
+
+```{r, echo=FALSE}
+# Adding James to data
+dat <- 
+  dat |> 
+  bind_rows(James2004_est) |> 
+  relocate(study)
+```
+
 
 ### **Kanie et al. [-@Kanie2019] (Quality-checked)**
 ```{r Kanie et al. 2019}
@@ -5299,7 +5128,9 @@ Lim2020 <- tibble(
                             ), each = 2,1 )
                       ),
   
-  N = rep(c(18, 21), 6), 
+  N = rep(c(18, 21), 6),
+  N_start = rep(c(21, 24), 6),
+  
   
   m_pre = c(46.15, 61.74, # Social Functioning (QLS) total
            18.22, 16.57,  # PANSS Negative
@@ -5368,7 +5199,7 @@ Lim2020_est <-
     
     # ppcor is imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed",
+    ppcor_method = "Imputed",
     
     # F-Values - based on ANOVA - from table 2 (p.5)
     #F_val = c(3.116, 5.157, 0.085, 5.055, 1.528, 8.487),
@@ -5463,14 +5294,22 @@ Lim2020_est <-
       vars = -var_term1_DD
       ),
     
-    
-    
     vary_id = outcome
   ) |> 
   ungroup(); Lim2020_est
 ```
 
+```{r, echo=FALSE}
+# Adding Lim to data
+dat <- 
+  dat |> 
+  bind_rows(Lim2020_est) |> 
+  relocate(study)
+```
+
 ### **Lloyd-Evans et al. [-@Lloyd-Evans2020]**
+
+From table 2 on page 9
 ```{r Lloyd-Evans et al. 2020}
 # Dataextraction from Lloyd-Evans (2020)
 # Attempt from Jakob
@@ -5721,7 +5560,7 @@ lloyd_Evans2020_est <-
     
     # ppcor is imputed
      ppcor = ppcor_imp,
-     pp_cor_methods = "Imputed"
+     ppcor_method = "Imputed"
   ) |> 
   mutate(
     
@@ -5818,6 +5657,13 @@ lloyd_Evans2020_est <-
 
 ```
 
+```{r, echo=FALSE}
+# Adding Lloyed-Evans to data
+dat_test <- 
+  dat |> 
+  bind_rows(lloyd_Evans2020_est) |> 
+  relocate(study)
+```
 
 ### **Madigan et al. [-@Madigan2013] (Quality-checked)**
 
