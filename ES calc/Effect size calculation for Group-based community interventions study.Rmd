@@ -5659,7 +5659,7 @@ lloyd_Evans2020_est <-
 
 ```{r, echo=FALSE}
 # Adding Lloyed-Evans to data
-dat_test <- 
+dat <- 
   dat |> 
   bind_rows(lloyd_Evans2020_est) |> 
   relocate(study)
@@ -5787,9 +5787,7 @@ Madigan2013 <- tibble(
     8.34, 11.5,
     3.4, 2.9)
   
-) |> 
-  arrange(outcome) |> 
-  relocate(outcome, .after = group); Madigan2013
+); Madigan2013
 
 
 # Turning data into wide format
@@ -6141,6 +6139,15 @@ Michalak2015_est_combined <- bind_rows(
 
 ```
 
+### Has to be checked by MVH (adds 11 new colomns)
+```{r, echo=FALSE} 
+# Adding Michalak to data
+dat_test <- 
+  dat |> 
+  bind_rows(Michalak2015_est_combined) |> 
+  relocate(study)
+```
+
 ### **McCay et al. [-@McCay2014]**
 ```{r}
 
@@ -6163,6 +6170,11 @@ Morley2014 <- tibble(
   )),
   
   N = rep(c(
+    122, 63 # obtained from Table 1 (p. 135)
+  ), each = 1,4),
+  
+  
+   N_start = rep(c(
     122, 63 # obtained from Table 1 (p. 135)
   ), each = 1,4),
   
@@ -6231,7 +6243,7 @@ Morley2014_est <-
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    ppcor_calc_method = "Imputed"
+    ppcor_method = "Imputed"
     
   ) |> 
  
@@ -6339,6 +6351,14 @@ Morley2014_est <-
     vary_id = outcome
   ); Morley2014_est 
 
+```
+
+```{r, echo=FALSE}
+# Adding Morley to data
+dat <- 
+  dat |> 
+  bind_rows(Morley2014_est) |> 
+  relocate(study)
 ```
 
 ### **Morton et al. [-@Morton2012] (Quality-checked)**
@@ -6718,6 +6738,8 @@ Patterson2003 <-
     
     N = 16,
     
+    N_start = 16,
+    
     m_pre = rep(c(
       #    31.9, 41.5,   # UPSA
       12.5, 13.0,   # PANSS Positive
@@ -6771,9 +6793,7 @@ Patterson2003 <-
       4.9, 5,       # Ham-D          6 months
       0.07, 0.07    # QWB            6 months
     )
-  ) |> 
-  arrange(outcome, timing) |> 
-  relocate(outcome)
+  ) 
 
 
 # Making the patterson2003 tibble wide in order to estimate the effect sizes and
@@ -6803,7 +6823,7 @@ Patterson2003_est <-
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    pp_cor_methods = "Imputed"
+    ppcor_method = "Imputed"
     
   ) |> 
   
@@ -6909,6 +6929,14 @@ Patterson2003_est <-
   mutate(
     vary_id = paste0(outcome, "/", timing)
   ); Patterson2003_est
+```
+
+```{r, echo=FALSE}
+# Adding Patterson to data
+dat_test <- 
+  dat |> 
+  bind_rows(Patterson2003_est) |> 
+  relocate(study)
 ```
 
 ### **Popolo et al. [-@Popolo2019] (Quality-checked)**
@@ -7040,7 +7068,7 @@ Popolo2019_est <-
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
-    pp_cor_methods = "Calculated from study results",
+    ppcor_method = "Calculated from study results",
     
     )|> 
   
@@ -7127,6 +7155,14 @@ Popolo2019_est <-
   ) |> 
   ungroup(); Popolo2019_est
 
+```
+
+```{r, echo=FALSE}
+# Adding Popolo to data
+dat_test <- 
+  dat |> 
+  bind_rows(Popolo2019_est) |> 
+  relocate(study)
 ```
 
 ### **Rabenstein et al. [-@Rabenstein2015] (Quality-checked)**
@@ -10621,9 +10657,9 @@ Crawford2012_est <- Crawford2012_est |>
 
 group_based_dat_es <- 
   bind_rows(
-    Timmermans2012_est,
-    Wuthrich2013_2021_est,
-    Acarturk2022_est,
+    # Timmermans2012_est,
+    # Wuthrich2013_2021_est,
+   Acarturk2022_est,
     Barbic2009_est,
     Bond2015_est,
     Bækkelund2022_est,
