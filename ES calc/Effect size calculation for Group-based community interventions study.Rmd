@@ -9120,9 +9120,9 @@ schafer2019 <- tibble(
   
   timing = rep(c("Post", "3m", "6m"), each = 21),
   
-  N = rep(c(111, 115, 117), each = 1, 21),
-  
   N_start = rep(c(111, 115, 117), each = 1, 21),
+
+  N = rep(c(111, 115, 117), each = 1, 21),
   
   m_pre = rep(c(
     25.4, 27.5, 28.9,
