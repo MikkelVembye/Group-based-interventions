@@ -8648,6 +8648,11 @@ Sajatovic2009  <- tibble(
   
   timing = rep(c("3m", "6m", "12m"), each = 6),
   
+    N_start = rep(c(
+    83, 80,
+    84, 80,
+    83, 78
+  ), each = 1, 3),
   
   N = c(
         # 3 months
@@ -8666,11 +8671,6 @@ Sajatovic2009  <- tibble(
         40, 39
         ),
   
-  N_start = rep(c(
-    83, 80,
-    84, 80,
-    83, 78
-  ), each = 1, 3),
   
   
   m_pre = rep(c(
