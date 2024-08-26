@@ -8886,12 +8886,11 @@ Schrank2016 <-
       "RES"
     ), each = 2,1),
     
+    N_start = 47,
     
     N = rep(c(
       43, 41
     ), each = 1, 6),
-    
-    N_start = 47,
     
     m_pre = c(
       3.19, 3.00,
@@ -9372,6 +9371,13 @@ Tjaden2021 <- tibble(
   
   timing = rep(c("9m", "18m"), each = 8), 
   
+   N_start = rep(c(
+    80, 78,
+    80, 78,
+    80, 78,
+    80, 78), 
+  each = 1, 2),
+  
   N = c(
     # 9 months
     70, 67,
@@ -9385,12 +9391,6 @@ Tjaden2021 <- tibble(
     63, 58,
     63, 58),
   
- N_start = rep(c(
-    80, 78,
-    80, 78,
-    80, 78,
-    80, 78), 
-  each = 1, 2),
    
   m_pre = rep(c(
     3.32, 3.34,
@@ -9634,11 +9634,11 @@ Valiente2022  <- tibble(
   ), 
   each = 2,1),
   
-  N = rep(c(52,61),
-          each = 1,16),
-  
+    
   N_start = rep(c(71, 70), n_distinct(outcome)),
   
+  N = rep(c(52,61),
+          each = 1,16),
   
   m_pre = c(
     
@@ -9881,11 +9881,10 @@ Volpe_2015 <- tibble(
     "Control group"
   ), each = 1, 4), 
   
-  
-  N = rep(c(21,20), each = 1, 4), 
-  
   N_start = rep(c(25)),
-  
+
+  N = rep(c(21,20), each = 1, 4), 
+
   m_pre = c(
     49.95, 51.2, # Brief Psychiatric Rating Scale
     9.74, 9.9,   # Patient Health Questionnaire
@@ -10086,12 +10085,12 @@ Wojtalik2019 <- tibble(
     "Symptoms composite"), 
     each = 2,2)),
   
+   N_start = rep(c(
+    58, 44), each = 1,4),
+ 
   N = c(rep(c(58, 44), each = 1,2),
         rep(c(26, 23),each = 1,2)),
   
-  N_start = rep(c(
-    58, 44
-  ), each = 1,4),
   
   emm_pre = c(
     # ITT
