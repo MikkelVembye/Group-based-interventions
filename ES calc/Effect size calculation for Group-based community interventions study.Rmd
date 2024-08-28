@@ -60,8 +60,6 @@ grp_size_imp <- 8
 # Loading data used to calculate population-based effect size estimates
 GAF_pop_res <- readRDS("ES calc/GAF_res.rds")
 
-# For data construction
-dat <- tibble()
 ```
 
 ## **Studies in meta-analysis**
@@ -229,9 +227,10 @@ Acarturk2022_wide <-
   ) |> 
   mutate(
     es_paper = es_paper_t,
+    es_paper_type = "d effect size from a mixed-model analysis",
     pval_paper = pval_paper_t
   ) |> 
-  select(-c(es_paper_t:pval_paper_c))
+  select(-c(es_paper_t:pval_paper_c)) 
 
 
 ```
@@ -250,57 +249,52 @@ Acarturk2022_es <-
   mutate(
     ppcor = rep(Acarturk_text_res$ppcor, each = 2)
   ) |> 
-  
   summarise(
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Acarturk et al. 2022",
-    es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor[1],  
-    ppcor_calc_method = "Calculated from study",
-    
-    R2 = NA,
-    R2_calc_method = "Not relevant",
+    ppcor_method = "Calculated from study",
     
     N_t = N[1],
     N_c = N[2],
     
     N_total = N_t + N_c, 
     
+    N_start_t = N_t,
+    N_start_c = N_c,
+    
     df_ind = N_total,
     
     n_covariates = 1,
     
-    d_paper = es_paper[1],
+    es_paper = es_paper[1],
     pval_paper = pval_paper[1],
     tval_paper = qnorm(pval_paper/2, lower.tail = FALSE),
-    se_d_paper = d_paper/tval_paper,
-    se_d_paper = if_else(se_d_paper == 0, sqrt(sum(1/N)) * eta_acarturk_sqrt, se_d_paper),
-    vd_paper = se_d_paper^2,
+    se_es_paper = es_paper/tval_paper,
+    se_es_paper = if_else(se_es_paper == 0, sqrt(sum(1/N)) * eta_acarturk_sqrt, se_es_paper),
+    var_es_paper = se_es_paper^2,
     
     sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_total-2) ),
     m_diff_post = (m_post[1] - m_post[2]) * -1,
     
     # Difference in differences measures
-    diff_t = (m_post[1] - m_pre[1]) * -1,  
-    diff_c = (m_post[2] - m_pre[2]) * -1,
+    m_diff_t = (m_post[1] - m_pre[1]) * -1,  
+    m_diff_c = (m_post[2] - m_pre[2]) * -1,
     
-    DD = diff_t - diff_c,
+    DD = m_diff_t - m_diff_c,
     
     d_post = m_diff_post/sd_pool, 
     vd_post = sum(1/N) + d_post^2/(2*df_ind),
     Wd_post = sum(1/N),
     
-    d = DD/sd_pool,
-    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
-    Wd = 2*(1-ppcor) * sum(1/N),
-    
-    d_alt = d_paper,
-    vd_alt = vd_paper,
-    Wd_alt = vd_paper,
+    d_DD = DD/sd_pool,
+    vd_DD = 2*(1-ppcor) * sum(1/N) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
@@ -308,13 +302,9 @@ Acarturk2022_es <-
     vg_post = sum(1/N) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    g = J * d, 
-    vg = 2*(1-ppcor) * sum(1/N) + g^2/(2*df_ind), 
-    Wg = Wd,
-    
-    g_alt = J * d_alt,
-    vg_alt = vd_alt,
-    Wg_alt = vd_alt,
+    g_DD = J * d_DD, 
+    vg_DD = 2*(1-ppcor) * sum(1/N) + g_DD^2/(2*df_ind), 
+    Wg_DD = Wd_DD,
     
     .by = c(outcome, timing) 
     
@@ -335,49 +325,39 @@ Acarturk2022_es <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-
     
-    gt = g * gamma_sqrt,
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
-      g = gt, 
+      g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
       prepost_cor = ppcor,
-      q = n_covariates
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
     
-    gt_alt = g_alt * gamma_sqrt,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_alt, 
-      model = "posttest",
-      cluster_adj = TRUE,
-      q = n_covariates,
-      add_name_to_vars = "_alt",
-      vars = vgt_alt:Wgt_alt
-      ), 
-    
-    gt_alt_type = "Posttest reported in paper",
 
-    gt_posttest = g_post * gamma_sqrt,
+    gt_post = g_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
       avg_grp_size = avg_cl_size,
       ICC = icc, 
-      g = gt_posttest, 
+      g = gt_post, 
       model = "posttest",
       cluster_adj = FALSE,
-      add_name_to_vars = "_posttest",
-      vars = vgt_posttest:Wgt_posttest
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
     )
     
 ) |> 
@@ -399,6 +379,11 @@ Acarturk2022_est <-
 Acarturk2022_est
 
 ```
+
+```{r, echo = FALSE}
+dat <- Acarturk2022_est
+```
+
 
 
 ### **Barbic et al. [-@Barbic2009]**
@@ -578,7 +563,7 @@ Barbic2009_est <-
 
 ```{r, echo=FALSE}
 # Adding Barbic to data
-dat <- 
+dat_test <- 
   dat |> 
   bind_rows(Barbic2009_est) |> 
   relocate(study)
