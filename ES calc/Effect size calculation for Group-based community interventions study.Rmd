@@ -3033,7 +3033,7 @@ dat <-
 ```{r Gonzalez and Prihoda 2007}
 Gonzalez2007_est <- 
   tibble(
-    tudy = "Gonzalez & Prihoda 2007",
+    study = "Gonzalez & Prihoda 2007",
     
     analysis_plan = c(
       "Social functioning (degree of impairment)",
@@ -3042,6 +3042,9 @@ Gonzalez2007_est <-
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD (assumed)",
+    
+    main_es_method = "Repeated-measure ANOVA with emm",
+    ppcor_method = "F value used",
     
     outcome = c("GAF", "CGI"),
     N_start_t = 11, 
@@ -3123,9 +3126,19 @@ Gonzalez2007_est <-
       F_val = F_val,
       add_name_to_vars = "_adj",
       vars = -var_term1_adj
-    )
+    ),
+    
+    vary_id = outcome
     
   ); Gonzalez2007_est
+```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Gonzalez2007_est)
+
 ```
 
 
