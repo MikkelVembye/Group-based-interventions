@@ -381,7 +381,9 @@ Acarturk2022_est
 ```
 
 ```{r, echo = FALSE}
-dat <- Acarturk2022_est
+dat <- 
+  Acarturk2022_est |> 
+  rename(m_post = m_diff_post, mean_diff = DD)
 ```
 
 
@@ -563,7 +565,7 @@ Barbic2009_est <-
 
 ```{r, echo=FALSE}
 # Adding Barbic to data
-dat_test <- 
+dat <- 
   dat |> 
   bind_rows(Barbic2009_est) |> 
   relocate(study)
@@ -572,16 +574,20 @@ dat_test <-
 ### **Bond et al. [-@Bond2015]**
 #### (RCT - no treatment of clustering)
 
-Entering data from Table 3 and 4 (p. 1032). Recovery Assessnebt Scale Scores are retrieved from the text on page 1032. 
-In out analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work category.  We code the control group as the our treatment group because the control is the group-based treatment, we are main concerned about
+Entering data from Table 3 and 4 (p. 1032). Recovery Assessment Scale Scores are retrieved from the text on page 1032 reported under Table 3. In our analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work categories. We coded the control group as the treatment group because the control is the group-based treatment, which is of our main concern.
 ```{r}
 # _t = Work choice
 
 Bond2015_continious <- 
   tibble(
     outcome = c("Recovery Assessment Scale", "Days hospitalized"),
+    
     N_t = 43,
     N_c = c(42, 41),
+    
+    N_start_t = 44,
+    N_start_c = 43,
+    
     m_post_t = c(4.14, 4.93),
     sd_post_t = c(0.49, 7.59),
     m_post_c = c(4.14, 10.44), 
@@ -589,14 +595,13 @@ Bond2015_continious <-
     
     analysis_plan = c("Mental health outcomes/Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
     
-    main_effect_size = "SMD",
+    effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Bond et al. 2015",
-    main_es_calc_method = "Posttest means",
+    main_es_method = "Posttest es",
     
-    ppcor_calc_method = "Not relevant",
-    R2_calc_method = "Not relevant",
+    ppcor_method = "Posttest only",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -634,11 +639,11 @@ Bond2015_continious <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-   
+    n_covariates = 0,
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
-  
+    omega = 1 - 3/(4*df_adj-1),
     
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -650,9 +655,8 @@ Bond2015_continious <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:adj_value_post
+      vars = -c(var_term1_post, n_covariates_post)
       ),
-    
   
     
     vary_id = outcome
@@ -664,6 +668,9 @@ Bond2015_binary <-
     outcome = c("Employment", "Risk of Psychiatric Hospitalization"),
     N_t = c(43, 42), # See note a in Table for sample size of Table 4 (i.e., 42, 40, respectively)
     N_c = c(42, 40),
+    N_start_t = 44, 
+    N_start_c = 43,
+    
     A = c(13, 12), 
     B = c(30, 31),  
     C = c(20, 11),
@@ -671,14 +678,13 @@ Bond2015_binary <-
     
     analysis_plan = c("Employment", "Psychiatric hospitalization"),
     
-    main_effect_size = "OR",
+    effect_size = "OR",
     sd_used = "Not relevant",
     
     study = "Bond et al. 2015",
-    main_es_calc_method = "Raw events",
+    main_es_method = "Raw events",
     
-    ppcor_calc_method = "Not relevant",
-    R2_calc_method = "Not relevant",
+    n_covariates = 0,
     
     N_total = N_t + N_c,
     
@@ -698,24 +704,10 @@ Bond2015_binary <-
     icc = ICC_01,
     icc_type = "Imputed",
     
-    # OR calculation and cluster bias adjustment
+    # OR calculation and cluster bias adjustment as recommended by Cochrane
     VIVECampbell::OR_calc(
       A = A, B = B, C = C, D = D, 
       ICC = icc, avg_cl_size = avg_cl_size, n_cluster_arms = 1
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.05
-    OR_calc(
-      A = A, B = B, C = C, D = D, 
-      ICC = ICC_005, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc005", vars = DE_icc005:vln_OR_C_icc005
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.2
-    OR_calc(
-      A = A, B = B, C = C, D = D, 
-      ICC = ICC_02, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc02", vars = DE_icc02:vln_OR_C_icc02
     ),
     
     vary_id = outcome
@@ -725,6 +717,16 @@ Bond2015_binary <-
 Bond2015_est <- bind_rows(Bond2015_continious, Bond2015_binary)
 Bond2015_est
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Bond2015_est)
+
+```
+
+
 ### **Bækkelund et al. [-@Bækkelund2022]**
 ```{r Bækkelund et al. 2022}
 Bækkelund2022 <- tibble(
@@ -1416,8 +1418,7 @@ Cano_vindel2021_est <-
 # Adding Cano-vindel to data
 dat <- 
   dat |> 
-  bind_rows(Cano_vindel2021_est) |> 
-  relocate(study)
+  bind_rows(Cano_vindel2021_est) 
 ```
 
 ### **Craigie & Nathan [-@Craigie2009]**
@@ -2018,16 +2019,6 @@ Druss2010_est <-
     
     N_total = N_t + N_c,
     
-    #p_val_baseline_diff = c(
-      #0.96, 0.88, 0.78, # unused outcomes
-   #   0.98, 0.80), # From Table 2 (p. 268)
-    #p_val_post_diff = c(
-      #0.01,0.14, 0.25, 
-    #  0.27, 0.95
-   #   ), # From Table 2 (p. 268)
-    #t_val_baseline_diff = qt(p_val_baseline_diff/2, df = N_total - 2, lower.tail = FALSE),
-    #t_val_post_diff = qt(p_val_post_diff/2, df = N_total - 2, lower.tail = FALSE),
-    
     p_val_f = c(
       #0.03, 0.4, 0.22, 
       0.41, 0.96
@@ -2142,7 +2133,7 @@ dat <-
 
 ### **Druss et al. [-@Druss2018] (Double-check)**
 
-Data from table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and table 3 (p. 533), containing means and SD for RAS
+Data from Table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and Table 3 (p. 533), containing means and SD for RAS
 
 ```{r Druss2018}
 # Data from table 2 (p. 532), containing means and SD for health related quality of life 
@@ -2228,6 +2219,11 @@ Druss2018_est <-
     ),
     
     study = "Druss et al. 2018",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor_imp, # Imputed ppcor
     ppcor_method = "Imputed",
@@ -2329,8 +2325,7 @@ Druss2018_est <-
 # Adding Druss 2018 to data
 dat <- 
   dat |> 
-  bind_rows(Druss2018_est) |> 
-  relocate(study)
+  bind_rows(Druss2018_est) 
 ```
 
 ### **Dyck et al. [-@Dyck2000]**
@@ -2392,10 +2387,13 @@ Dyck2000_est <-
     analysis_plan = "Mental health outcomes/Negative Symptoms",
     
     F_val = 6.1,
-  #  df = 1.39
-    )|> 
-  mutate(
+  
     study = "Dyck et al. 2000",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -2491,8 +2489,7 @@ mutate(vary_id = outcome); Dyck2000_est
 # Adding Dyck to data
 dat <- 
   dat |> 
-  bind_rows(Dyck2000_est) |> 
-  relocate(study)
+  bind_rows(Dyck2000_est) 
 ```
 
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Change var names)**
@@ -2524,7 +2521,7 @@ Timmermans_sample_size_dat <-
 ); Timmermans_sample_size_dat
 ```
 
-Missingness analysis
+Missingness analysis (used to conduct risk of bias assessement)
 
 ```{r}
 Timmermans_missingness <- 
@@ -2703,13 +2700,11 @@ Timmermans2012_es <-
     sd_used = "Pooled posttest SD",
     
     study = "Timmermans et al. 2012",
-    es_calc_method = "Pretest adj. means",
+    main_es_method = "Pretest adj. means from repeated-measure ANOVA",
     
     ppcor = .76,  
-    ppcor_calc_method = "From study (p. 57)",
+    ppcor_method = "From study (p. 57)",
     
-    R2 = NA,
-    R2_calc_method = "Not relevant - calculated from SE(b)",
     
     N_t = N[1],
     N_c = N[2],
@@ -2724,15 +2719,16 @@ Timmermans2012_es <-
     m_diff_post = m_post[1] - m_post[2],
     
     # Pretest adjusted means
-    b_adj = b_adj[1] - b_adj[2],
+    mean_b_adj = b_adj[1] - b_adj[2],
     
     # Difference in differences measures
-    diff_t = m_post[1] - m_pre[1],  
-    diff_c = m_post[2] - m_pre[2],
+    m_diff_t = m_post[1] - m_pre[1],  
+    m_diff_c = m_post[2] - m_pre[2],
     
-    DD = diff_t - diff_c,
+    DD = m_diff_t - m_diff_c,
     
-    d_paper = es_paper[1],
+    es_paper = es_paper[1],
+    es_paper_type = "Cohens d",
     
     # Converting Loneliness measure since "Possible scores range from 0 to 11, 
     # with higher scores indicating more loneliness." (p. 58)
@@ -2740,15 +2736,14 @@ Timmermans2012_es <-
     vd_post = sum(1/N) + d_post^2/(2*df_ind),
     Wd_post = sum(1/N),
     
-    d = if_else(unique(outcome) == "Loneliness", b_adj/sd_pool * -1, b_adj/sd_pool),
-    vd = sum((se_b_adj/sd_pool)^2) + d^2/(2*df_ind),
-    #vd_test = sum(1/N) + d^2/(2*df_ind),
-    Wd = sum((se_b_adj/sd_pool)^2),
-    #Wd_test = sum(1/N),
+    d_adj = if_else(unique(outcome) == "Loneliness", mean_b_adj/sd_pool * -1, mean_b_adj/sd_pool),
+    vd_adj = sum((se_b_adj/sd_pool)^2) + d_adj^2/(2*df_ind),
+    Wd_adj = sum((se_b_adj/sd_pool)^2),
     
-    d_alt = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
-    vd_alt = 2*(1-ppcor) * sum(1/N) + d_alt^2/(2*df_ind),
-    Wd_alt = 2*(1-ppcor) * sum(1/N),
+    
+    d_DD = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
+    vd_DD = 2*(1-ppcor) * sum(1/N) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
@@ -2756,13 +2751,13 @@ Timmermans2012_es <-
     vg_post = sum(1/N) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    g = J * d, 
-    vg = sum((se_b_adj/sd_pool)^2) + g^2/(2*df_ind), 
-    Wg = Wd,
+    g_adj = J * d_adj, 
+    vg_adj = sum((se_b_adj/sd_pool)^2) + g_adj^2/(2*df_ind), 
+    Wg_adj = Wd_adj,
     
-    g_alt = J * d_alt,
-    vg_alt = 2*(1-ppcor) * sum(1/N) + g_alt^2/(2*df_ind),
-    Wg_alt = Wd_alt,
+    g_DD = J * d_DD,
+    vg_DD = 2*(1-ppcor) * sum(1/N) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD,
     
     
     .by = c(outcome, timing) 
@@ -2781,53 +2776,61 @@ Timmermans2012_es <-
     icc = 0.06,
     icc_type = "From study (p. 56)",
     
+    n_covariates = 1,
+  
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
-      ),
-    
-    gt = g * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = icc, 
-      g = gt, 
-      model = "std_reg_coef",
-      cluster_adj = TRUE,
-      SE_std = sqrt(Wg)
     ),
     
-    gt_alt = g_alt * gamma_sqrt,
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
       avg_grp_size = avg_cl_size,
       ICC = icc, 
-      g = gt_alt, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
+    ),
+    
+    gt_adj = omega * d_adj * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_adj, 
+      model = "std_reg_coef",
+      cluster_adj = TRUE,
+      SE_std = sqrt(Wg_adj),
+      add_name_to_vars = "_adj",
+      vars = -var_term1_adj
+    ),
+    
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
       prepost_cor = ppcor,
-      add_name_to_vars = "_alt",
-      vars = vgt_alt:Wgt_alt
-    ),
-    
-    gt_alt_type = "DiD from raw means",
-    
-    gt_posttest = g_post * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = icc, 
-      g = gt_posttest, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_posttest",
-      vars = vgt_posttest:Wgt_posttest
-    )
-
-    
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+      )
     
   ) |> 
   ungroup()
@@ -2836,7 +2839,7 @@ Timmermans2012_es <-
 
 Timmermans2012_est <- 
   left_join(Timmermans2012_wide, Timmermans2012_es) |> 
-  select(-c(es_paper_c, es_paper_t)) |> 
+  select(-c(es_paper_c, es_paper_t), -contains(c("ci_", "val_b"))) |> 
   mutate(vary_id = paste0(outcome, "/", timing),
          analysis_plan = case_when(
            outcome == "Empoverment"  ~  "Hope, Empowerment & Self-efficacy", 
@@ -2845,14 +2848,17 @@ Timmermans2012_est <-
            outcome == "Self-e"  ~ "Mental health outcomes", 
            outcome == "Loneliness"  ~ "Loneliness"
          )
-      )
+      ) |> 
+  rename(m_post = m_diff_post, mean_diff = DD)
 
-#clubSandwich::impute_covariance_matrix(
-#  vi = Timmermans2012_est$vgt,
-#  cluster = Timmermans2012_est$study,
-#  r = Timmermans2012_est$ppcor,
-#  smooth_vi = FALSE
-#)
+
+```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Timmermans2012_est)
 
 ```
 
@@ -6935,7 +6941,7 @@ dat <-
   relocate(study)
 ```
 
-### **Popolo et al. [-@Popolo2019] (Quality-checked)**
+### **Popolo et al. [-@Popolo2019] (Quality-checked) Hast to be checked by MVH: this adds these variable => within_group_d**
 Data was extracted from Table 2 (p. 351)
 ```{r Popolo et al. 2019}
 # Data from Table 2 containing means and standard deviation + within effect size.
@@ -7153,7 +7159,7 @@ Popolo2019_est <-
 
 ```
 
-### Hast to be checked by MVH: this adds these variable => within_group_d
+
 ```{r, echo=FALSE}
 # Adding Popolo to data
 dat_test <- 
