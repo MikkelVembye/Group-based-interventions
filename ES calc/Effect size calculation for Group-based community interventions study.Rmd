@@ -3031,8 +3031,18 @@ dat <-
 
 ### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
 ```{r Gonzalez and Prihoda 2007}
-Gonzalez2007 <- 
+Gonzalez2007_est <- 
   tibble(
+    tudy = "Gonzalez & Prihoda 2007",
+    
+    analysis_plan = c(
+      "Social functioning (degree of impairment)",
+      "All mental health outcomes"
+    ),
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD (assumed)",
+    
     outcome = c("GAF", "CGI"),
     N_start_t = 11, 
     N_start_c = 11,
@@ -3051,45 +3061,71 @@ Gonzalez2007 <-
     se_emm_t = c(4.11, 0.37),
     se_emm_c = c(4.11, 0.37),
     
-    b_emm_adj = (b_emm_t - b_emm_c),
+    mean_b_emm = if_else(outcome == "GAF", (b_emm_t - b_emm_c), (b_emm_t - b_emm_c) * -1),
     
-    sd_total = abs(b_emm_adj)/es_paper,
+    sd_total = abs(mean_b_emm)/es_paper,
     # Using E.14 from WWC Handbook (ver. 5). We imputed the covariate-adjusted mean difference to obtain this esti
-    sd_pool = sqrt( ((N_total-1)/(N_total-2)) * sd_total^2 - ((N_t*N_c)/(N_total*(N_total-2))) * b_emm_adj^2),
+    sd_pool = sqrt( ((N_total-1)/(N_total-2)) * sd_total^2 - ((N_t*N_c)/(N_total*(N_total-2))) * mean_b_emm^2),
     
     pval_paper = c(
       0.65, 
       0.15 # Is reported as <0.05 and must be estimated from the corresponding F_val
       ),
-    F_val = c(0.22, 2.34)
+    F_val = c(0.22, 2.34),
     
     #pval_test = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
 
-      ); Gonzalez2007
-
-
-  Gonzalez2007_est <- 
-  Gonzalez2007 |> 
-  mutate(
+    df_ind = N_total,
     
-    study = "Gonzalez & Prihoda 2007",
-    
-    analysis_plan = c(
-      "Social functioning (degree of impairment)",
-      "Mental health outcomes"
-    ),
-    N_total = Nt + Nc,
-    df_ind = N_tot,
-    vd = (d^2/F_val + d^2/(2*N_tot) ),
+    d_adj = es_paper,
+    vd_adj = d_adj^2/F_val + d_adj^2/(2*N_total),
+    Wd_adj = d_adj^2/F_val,
     
     J = 1 - 3/(4*df_ind-1),
-    g = J * d,
-    vg = vd,
     
-    vary_id = outcome
+    g_adj = J * d_adj,
+    vg_adj = g_adj^2/F_val + g_adj^2/(2*N_total),
+    Wg_adj = g_adj^2/F_val
   
   ) |> 
-  relocate(vd, .after = d); Gonzalez2007_est
+  rowwise() |> 
+  mutate(
+    
+    # Average cluster size in treatment group
+    # he group, with 7 to 11 active members
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 408)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+  
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    gt_adj = omega * d_adj * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_adj, 
+      model = "emmeans",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      add_name_to_vars = "_adj",
+      vars = -var_term1_adj
+    )
+    
+  ); Gonzalez2007_est
 ```
 
 

@@ -91,9 +91,9 @@ McCay2014_est <-
       avg_grp_size = avg_cl_size,
       ICC = icc, 
       g = gt_adj, 
-      model = "std_reg_coef",
-      cluster_adj = TRUE,
-      SE_std = sqrt(Wg_adj),
+      model = "ANCOVA",
+      cluster_adj = FALSE,
+      R2 = ppcor,
       add_name_to_vars = "_adj",
       vars = -var_term1_adj
     ),
