@@ -3026,8 +3026,7 @@ Gatz2007_est <-
 # Adding Gatz to data
 dat <- 
   dat |> 
-  bind_rows(Gatz2007_est) |> 
-  relocate(study)
+  bind_rows(Gatz2007_est) 
 ```
 
 ### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
@@ -3035,24 +3034,41 @@ dat <-
 Gonzalez2007 <- 
   tibble(
     outcome = c("GAF", "CGI"),
-    Nt_start = 11, 
-    Nc_start = 11,
+    N_start_t = 11, 
+    N_start_c = 11,
     # Actual samples sizes
-    Nt = 8, # Three patients terminated the group early (p. 411)
-    Nc = 9, # Two of the control subjects were also lost two follow-up (p. 412)
-    d = c(0.20, 0.66),
-    p_val = c(
+    N_t = 8, # Three patients terminated the group early (p. 411)
+    N_c = 9, # Two of the control subjects were also lost two follow-up (p. 412)
+    
+    N_total = N_t + N_c,
+    
+    es_paper = c(0.20, 0.66),
+    es_paper_type = "Cohen d (assumed)",
+    
+    b_emm_t = c(72.20, 1.75),
+    b_emm_c = c(69.30, 2.61),
+    
+    se_emm_t = c(4.11, 0.37),
+    se_emm_c = c(4.11, 0.37),
+    
+    b_emm_adj = (b_emm_t - b_emm_c),
+    
+    sd_total = abs(b_emm_adj)/es_paper,
+    # Using E.14 from WWC Handbook (ver. 5). We imputed the covariate-adjusted mean difference to obtain this esti
+    sd_pool = sqrt( ((N_total-1)/(N_total-2)) * sd_total^2 - ((N_t*N_c)/(N_total*(N_total-2))) * b_emm_adj^2),
+    
+    pval_paper = c(
       0.65, 
       0.15 # Is reported as <0.05 and must be estimated from the corresponding F_val
       ),
-    F_val = c(0.22, 2.34),
+    F_val = c(0.22, 2.34)
     
-    p_val_est = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
+    #pval_test = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
 
       ); Gonzalez2007
 
 
-Gonzalez2007_est <- 
+  Gonzalez2007_est <- 
   Gonzalez2007 |> 
   mutate(
     
