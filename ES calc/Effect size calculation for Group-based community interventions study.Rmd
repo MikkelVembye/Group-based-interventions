@@ -42,6 +42,7 @@ library(readxl)
 library(writexl)
 library(purrr)
 library(VIVECampbell)
+library(metafor)
 
 ```
 
@@ -60,8 +61,6 @@ grp_size_imp <- 8
 # Loading data used to calculate population-based effect size estimates
 GAF_pop_res <- readRDS("ES calc/GAF_res.rds")
 
-# For data construction
-dat <- tibble()
 ```
 
 ## **Studies in meta-analysis**
@@ -229,9 +228,10 @@ Acarturk2022_wide <-
   ) |> 
   mutate(
     es_paper = es_paper_t,
+    es_paper_type = "d effect size from a mixed-model analysis",
     pval_paper = pval_paper_t
   ) |> 
-  select(-c(es_paper_t:pval_paper_c))
+  select(-c(es_paper_t:pval_paper_c)) 
 
 
 ```
@@ -250,57 +250,52 @@ Acarturk2022_es <-
   mutate(
     ppcor = rep(Acarturk_text_res$ppcor, each = 2)
   ) |> 
-  
   summarise(
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Acarturk et al. 2022",
-    es_calc_method = "Raw diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor[1],  
-    ppcor_calc_method = "Calculated from study",
-    
-    R2 = NA,
-    R2_calc_method = "Not relevant",
+    ppcor_method = "Calculated from study",
     
     N_t = N[1],
     N_c = N[2],
     
     N_total = N_t + N_c, 
     
+    N_start_t = N_t,
+    N_start_c = N_c,
+    
     df_ind = N_total,
     
     n_covariates = 1,
     
-    d_paper = es_paper[1],
+    es_paper = es_paper[1],
     pval_paper = pval_paper[1],
     tval_paper = qnorm(pval_paper/2, lower.tail = FALSE),
-    se_d_paper = d_paper/tval_paper,
-    se_d_paper = if_else(se_d_paper == 0, sqrt(sum(1/N)) * eta_acarturk_sqrt, se_d_paper),
-    vd_paper = se_d_paper^2,
+    se_es_paper = es_paper/tval_paper,
+    se_es_paper = if_else(se_es_paper == 0, sqrt(sum(1/N)) * eta_acarturk_sqrt, se_es_paper),
+    var_es_paper = se_es_paper^2,
     
     sd_pool = sqrt( sum((N-1)*sd_post^2)/ (N_total-2) ),
     m_diff_post = (m_post[1] - m_post[2]) * -1,
     
     # Difference in differences measures
-    diff_t = (m_post[1] - m_pre[1]) * -1,  
-    diff_c = (m_post[2] - m_pre[2]) * -1,
+    m_diff_t = (m_post[1] - m_pre[1]) * -1,  
+    m_diff_c = (m_post[2] - m_pre[2]) * -1,
     
-    DD = diff_t - diff_c,
+    DD = m_diff_t - m_diff_c,
     
     d_post = m_diff_post/sd_pool, 
     vd_post = sum(1/N) + d_post^2/(2*df_ind),
     Wd_post = sum(1/N),
     
-    d = DD/sd_pool,
-    vd = 2*(1-ppcor) * sum(1/N) + d^2/(2*df_ind),
-    Wd = 2*(1-ppcor) * sum(1/N),
-    
-    d_alt = d_paper,
-    vd_alt = vd_paper,
-    Wd_alt = vd_paper,
+    d_DD = DD/sd_pool,
+    vd_DD = 2*(1-ppcor) * sum(1/N) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
@@ -308,13 +303,9 @@ Acarturk2022_es <-
     vg_post = sum(1/N) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    g = J * d, 
-    vg = 2*(1-ppcor) * sum(1/N) + g^2/(2*df_ind), 
-    Wg = Wd,
-    
-    g_alt = J * d_alt,
-    vg_alt = vd_alt,
-    Wg_alt = vd_alt,
+    g_DD = J * d_DD, 
+    vg_DD = 2*(1-ppcor) * sum(1/N) + g_DD^2/(2*df_ind), 
+    Wg_DD = Wd_DD,
     
     .by = c(outcome, timing) 
     
@@ -335,49 +326,39 @@ Acarturk2022_es <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-
     
-    gt = g * gamma_sqrt,
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
-      g = gt, 
+      g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
       prepost_cor = ppcor,
-      q = n_covariates
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
       ),
     
     
-    gt_alt = g_alt * gamma_sqrt,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_alt, 
-      model = "posttest",
-      cluster_adj = TRUE,
-      q = n_covariates,
-      add_name_to_vars = "_alt",
-      vars = vgt_alt:Wgt_alt
-      ), 
-    
-    gt_alt_type = "Posttest reported in paper",
 
-    gt_posttest = g_post * gamma_sqrt,
+    gt_post = g_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
       avg_grp_size = avg_cl_size,
       ICC = icc, 
-      g = gt_posttest, 
+      g = gt_post, 
       model = "posttest",
       cluster_adj = FALSE,
-      add_name_to_vars = "_posttest",
-      vars = vgt_posttest:Wgt_posttest
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
     )
     
 ) |> 
@@ -399,6 +380,13 @@ Acarturk2022_est <-
 Acarturk2022_est
 
 ```
+
+```{r, echo = FALSE}
+dat <- 
+  Acarturk2022_est |> 
+  rename(m_post = m_diff_post, mean_diff = DD)
+```
+
 
 
 ### **Barbic et al. [-@Barbic2009]**
@@ -587,16 +575,20 @@ dat <-
 ### **Bond et al. [-@Bond2015]**
 #### (RCT - no treatment of clustering)
 
-Entering data from Table 3 and 4 (p. 1032). Recovery Assessnebt Scale Scores are retrieved from the text on page 1032. 
-In out analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work category.  We code the control group as the our treatment group because the control is the group-based treatment, we are main concerned about
+Entering data from Table 3 and 4 (p. 1032). Recovery Assessment Scale Scores are retrieved from the text on page 1032 reported under Table 3. In our analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work categories. We coded the control group as the treatment group because the control is the group-based treatment, which is of our main concern.
 ```{r}
 # _t = Work choice
 
 Bond2015_continious <- 
   tibble(
     outcome = c("Recovery Assessment Scale", "Days hospitalized"),
+    
     N_t = 43,
     N_c = c(42, 41),
+    
+    N_start_t = 44,
+    N_start_c = 43,
+    
     m_post_t = c(4.14, 4.93),
     sd_post_t = c(0.49, 7.59),
     m_post_c = c(4.14, 10.44), 
@@ -604,14 +596,13 @@ Bond2015_continious <-
     
     analysis_plan = c("Mental health outcomes/Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
     
-    main_effect_size = "SMD",
+    effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Bond et al. 2015",
-    main_es_calc_method = "Posttest means",
+    main_es_method = "Posttest es",
     
-    ppcor_calc_method = "Not relevant",
-    R2_calc_method = "Not relevant",
+    ppcor_method = "Posttest only",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -649,11 +640,11 @@ Bond2015_continious <-
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
     
-   
+    n_covariates = 0,
     
     # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
     df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
-  
+    omega = 1 - 3/(4*df_adj-1),
     
     gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
@@ -665,9 +656,8 @@ Bond2015_continious <-
       model = "posttest",
       cluster_adj = FALSE,
       add_name_to_vars = "_post",
-      vars = vgt_post:adj_value_post
+      vars = -c(var_term1_post, n_covariates_post)
       ),
-    
   
     
     vary_id = outcome
@@ -679,6 +669,9 @@ Bond2015_binary <-
     outcome = c("Employment", "Risk of Psychiatric Hospitalization"),
     N_t = c(43, 42), # See note a in Table for sample size of Table 4 (i.e., 42, 40, respectively)
     N_c = c(42, 40),
+    N_start_t = 44, 
+    N_start_c = 43,
+    
     A = c(13, 12), 
     B = c(30, 31),  
     C = c(20, 11),
@@ -686,14 +679,13 @@ Bond2015_binary <-
     
     analysis_plan = c("Employment", "Psychiatric hospitalization"),
     
-    main_effect_size = "OR",
+    effect_size = "OR",
     sd_used = "Not relevant",
     
     study = "Bond et al. 2015",
-    main_es_calc_method = "Raw events",
+    main_es_method = "Raw events",
     
-    ppcor_calc_method = "Not relevant",
-    R2_calc_method = "Not relevant",
+    n_covariates = 0,
     
     N_total = N_t + N_c,
     
@@ -713,24 +705,10 @@ Bond2015_binary <-
     icc = ICC_01,
     icc_type = "Imputed",
     
-    # OR calculation and cluster bias adjustment
+    # OR calculation and cluster bias adjustment as recommended by Cochrane
     VIVECampbell::OR_calc(
       A = A, B = B, C = C, D = D, 
       ICC = icc, avg_cl_size = avg_cl_size, n_cluster_arms = 1
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.05
-    OR_calc(
-      A = A, B = B, C = C, D = D, 
-      ICC = ICC_005, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc005", vars = DE_icc005:vln_OR_C_icc005
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.2
-    OR_calc(
-      A = A, B = B, C = C, D = D, 
-      ICC = ICC_02, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc02", vars = DE_icc02:vln_OR_C_icc02
     ),
     
     vary_id = outcome
@@ -740,6 +718,16 @@ Bond2015_binary <-
 Bond2015_est <- bind_rows(Bond2015_continious, Bond2015_binary)
 Bond2015_est
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Bond2015_est)
+
+```
+
+
 ### **Bækkelund et al. [-@Bækkelund2022]**
 ```{r Bækkelund et al. 2022}
 Bækkelund2022 <- tibble(
@@ -1090,8 +1078,8 @@ Cano_vindel2021 <- tibble(
     
     17.7, 19.2, # ITT Psychological post-treatment
     18.1, 18.9, # ITT Psychological 3 months
-    18.5, 18.9, # ITT Psychological 6 months
-    18.7, 19.9, # ITT Psychological 12 months
+    18.5, 19.1, # ITT Psychological 6 months
+    18.7, 20.8, # ITT Psychological 12 months
     
     9.4, 9.8, # ITT Social post-treatment
     9.5, 9.7, # ITT Social 3 months
@@ -1108,10 +1096,10 @@ Cano_vindel2021 <- tibble(
     8.8, 6.2, # Per-protocol GAD-7 Anxiety  6 months
     8.7, 5.8, # Per-protocol GAD-7 Anxiety 12 months 
     
-    11.7, 9.9,  # Per-protocol PHQ9 Depression post-treatment
+    11.5, 7.0,  # Per-protocol PHQ9 Depression post-treatment
     10.3, 7.8, # Per protocol PHQ9 Depression 3 months
     10.0, 7.3,  # Per-protocol PHQ9 Depression 6 months
-    10.7, 9.4, # Per-protocol PHQ9 Depression 12 months
+    9.7, 7.1, # Per-protocol PHQ9 Depression 12 months
     
     12.1, 9.1, # Per-protocol PHQ-15 post treatment
     11.7, 9.5, # Per protocol PHQ-15 3 months
@@ -1172,7 +1160,7 @@ Cano_vindel2021 <- tibble(
     5.3, 5.6, # ITT PHQ-15 standard deviation 6 months
     5.6, 5.6, # ITT PHQ-15 standard deviation 12 months
     
-    3.1, 3.2, # ITT working life standard deviation post-treatment
+    3.1, 3.0, # ITT working life standard deviation post-treatment
     3.0, 3.0, # ITT working life standard deviation 3 months
     3.0, 2.9, # ITT working life standard deviation 6 months
     3.3, 3.2, # ITT working life standard deviation 12 months
@@ -1192,12 +1180,12 @@ Cano_vindel2021 <- tibble(
     4.5, 4.4, # ITT Physical standard deviation 6 months
     5.1, 5.3, # ITT Physical standard deviation 12 months
     
-    3.9, 4.9, # ITT Psychological standard deviation post-treatment
+    3.9, 4.0, # ITT Psychological standard deviation post-treatment
     3.9, 4.2, # ITT Psychological standard deviation 3 months
     3.8, 3.9, # ITT Psychological standard deviation 6 months
     4.4, 4.6, # ITT Psychological standard deviation 12 months
     
-    3.1, 3.1, # ITT Social standard deviation post-treatment
+    3.1, 3.3, # ITT Social standard deviation post-treatment
     2.3, 2.3, # ITT Social standard deviation 3 months
     2.5, 2.2, # ITT Social standard deviation 6 months
     2.2, 2.6, # ITT Social standard deviation 12 months
@@ -1235,7 +1223,7 @@ Cano_vindel2021 <- tibble(
     3.1, 3.1, # Per-protocol Family life standard deviation post-treatment
     3.1, 3.0, # Per-protocol Family life standard deviation 3 months
     3.1, 2.7, # Per-protocol Family life standard deviation 6 months
-    .3, 2.8,  # Per-protocol Family life standard deviation 12 months
+    3.3, 2.8,  # Per-protocol Family life standard deviation 12 months
     
     4.6, 4.7, # Per-protocol Physical standard deviation post-treatment
     4.8, 4.9, # Per-protocol Physical standard deviation 3 months
@@ -1255,7 +1243,7 @@ Cano_vindel2021 <- tibble(
     4.7, 4.8, # Per-protocol Environment standard deviation post-treatment
     4.8, 5.2, # Per-protocol Environment standard deviation 3 months
     4.8, 5.0, # Per-protocol Environment standard deviation 6 months
-    5.0, 4.6) # Per-protocol Environment standard deviation 12 months
+    5.0, 5.3) # Per-protocol Environment standard deviation 12 months
   
 )
 ```
@@ -1431,8 +1419,7 @@ Cano_vindel2021_est <-
 # Adding Cano-vindel to data
 dat <- 
   dat |> 
-  bind_rows(Cano_vindel2021_est) |> 
-  relocate(study)
+  bind_rows(Cano_vindel2021_est) 
 ```
 
 ### **Craigie & Nathan [-@Craigie2009]**
@@ -2033,16 +2020,6 @@ Druss2010_est <-
     
     N_total = N_t + N_c,
     
-    #p_val_baseline_diff = c(
-      #0.96, 0.88, 0.78, # unused outcomes
-   #   0.98, 0.80), # From Table 2 (p. 268)
-    #p_val_post_diff = c(
-      #0.01,0.14, 0.25, 
-    #  0.27, 0.95
-   #   ), # From Table 2 (p. 268)
-    #t_val_baseline_diff = qt(p_val_baseline_diff/2, df = N_total - 2, lower.tail = FALSE),
-    #t_val_post_diff = qt(p_val_post_diff/2, df = N_total - 2, lower.tail = FALSE),
-    
     p_val_f = c(
       #0.03, 0.4, 0.22, 
       0.41, 0.96
@@ -2157,7 +2134,7 @@ dat <-
 
 ### **Druss et al. [-@Druss2018] (Double-check)**
 
-Data from table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and table 3 (p. 533), containing means and SD for RAS
+Data from Table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and Table 3 (p. 533), containing means and SD for RAS
 
 ```{r Druss2018}
 # Data from table 2 (p. 532), containing means and SD for health related quality of life 
@@ -2243,6 +2220,11 @@ Druss2018_est <-
     ),
     
     study = "Druss et al. 2018",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = ppcor_imp, # Imputed ppcor
     ppcor_method = "Imputed",
@@ -2344,8 +2326,7 @@ Druss2018_est <-
 # Adding Druss 2018 to data
 dat <- 
   dat |> 
-  bind_rows(Druss2018_est) |> 
-  relocate(study)
+  bind_rows(Druss2018_est) 
 ```
 
 ### **Dyck et al. [-@Dyck2000]**
@@ -2407,10 +2388,13 @@ Dyck2000_est <-
     analysis_plan = "Mental health outcomes/Negative Symptoms",
     
     F_val = 6.1,
-  #  df = 1.39
-    )|> 
-  mutate(
+  
     study = "Dyck et al. 2000",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -2506,8 +2490,7 @@ mutate(vary_id = outcome); Dyck2000_est
 # Adding Dyck to data
 dat <- 
   dat |> 
-  bind_rows(Dyck2000_est) |> 
-  relocate(study)
+  bind_rows(Dyck2000_est) 
 ```
 
 ### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Change var names)**
@@ -2539,7 +2522,7 @@ Timmermans_sample_size_dat <-
 ); Timmermans_sample_size_dat
 ```
 
-Missingness analysis
+Missingness analysis (used to conduct risk of bias assessement)
 
 ```{r}
 Timmermans_missingness <- 
@@ -2718,13 +2701,11 @@ Timmermans2012_es <-
     sd_used = "Pooled posttest SD",
     
     study = "Timmermans et al. 2012",
-    es_calc_method = "Pretest adj. means",
+    main_es_method = "Pretest adj. means from repeated-measure ANOVA",
     
     ppcor = .76,  
-    ppcor_calc_method = "From study (p. 57)",
+    ppcor_method = "From study (p. 57)",
     
-    R2 = NA,
-    R2_calc_method = "Not relevant - calculated from SE(b)",
     
     N_t = N[1],
     N_c = N[2],
@@ -2739,15 +2720,16 @@ Timmermans2012_es <-
     m_diff_post = m_post[1] - m_post[2],
     
     # Pretest adjusted means
-    b_adj = b_adj[1] - b_adj[2],
+    mean_b_adj = b_adj[1] - b_adj[2],
     
     # Difference in differences measures
-    diff_t = m_post[1] - m_pre[1],  
-    diff_c = m_post[2] - m_pre[2],
+    m_diff_t = m_post[1] - m_pre[1],  
+    m_diff_c = m_post[2] - m_pre[2],
     
-    DD = diff_t - diff_c,
+    DD = m_diff_t - m_diff_c,
     
-    d_paper = es_paper[1],
+    es_paper = es_paper[1],
+    es_paper_type = "Cohens d",
     
     # Converting Loneliness measure since "Possible scores range from 0 to 11, 
     # with higher scores indicating more loneliness." (p. 58)
@@ -2755,15 +2737,14 @@ Timmermans2012_es <-
     vd_post = sum(1/N) + d_post^2/(2*df_ind),
     Wd_post = sum(1/N),
     
-    d = if_else(unique(outcome) == "Loneliness", b_adj/sd_pool * -1, b_adj/sd_pool),
-    vd = sum((se_b_adj/sd_pool)^2) + d^2/(2*df_ind),
-    #vd_test = sum(1/N) + d^2/(2*df_ind),
-    Wd = sum((se_b_adj/sd_pool)^2),
-    #Wd_test = sum(1/N),
+    d_adj = if_else(unique(outcome) == "Loneliness", mean_b_adj/sd_pool * -1, mean_b_adj/sd_pool),
+    vd_adj = sum((se_b_adj/sd_pool)^2) + d_adj^2/(2*df_ind),
+    Wd_adj = sum((se_b_adj/sd_pool)^2),
     
-    d_alt = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
-    vd_alt = 2*(1-ppcor) * sum(1/N) + d_alt^2/(2*df_ind),
-    Wd_alt = 2*(1-ppcor) * sum(1/N),
+    
+    d_DD = if_else(unique(outcome) == "Loneliness", DD/sd_pool * -1, DD/sd_pool),
+    vd_DD = 2*(1-ppcor) * sum(1/N) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * sum(1/N),
     
     J = 1 - 3/(4*df_ind-1),
     
@@ -2771,13 +2752,13 @@ Timmermans2012_es <-
     vg_post = sum(1/N) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    g = J * d, 
-    vg = sum((se_b_adj/sd_pool)^2) + g^2/(2*df_ind), 
-    Wg = Wd,
+    g_adj = J * d_adj, 
+    vg_adj = sum((se_b_adj/sd_pool)^2) + g_adj^2/(2*df_ind), 
+    Wg_adj = Wd_adj,
     
-    g_alt = J * d_alt,
-    vg_alt = 2*(1-ppcor) * sum(1/N) + g_alt^2/(2*df_ind),
-    Wg_alt = Wd_alt,
+    g_DD = J * d_DD,
+    vg_DD = 2*(1-ppcor) * sum(1/N) + g_DD^2/(2*df_ind),
+    Wg_DD = Wd_DD,
     
     
     .by = c(outcome, timing) 
@@ -2796,53 +2777,61 @@ Timmermans2012_es <-
     icc = 0.06,
     icc_type = "From study (p. 56)",
     
+    n_covariates = 1,
+  
     # Find info about the function via ?VIVECampbell::gamma_1armcluster
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
-      ),
-    
-    gt = g * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = icc, 
-      g = gt, 
-      model = "std_reg_coef",
-      cluster_adj = TRUE,
-      SE_std = sqrt(Wg)
     ),
     
-    gt_alt = g_alt * gamma_sqrt,
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t,
       N_ind_grp = N_c,
       avg_grp_size = avg_cl_size,
       ICC = icc, 
-      g = gt_alt, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
+    ),
+    
+    gt_adj = omega * d_adj * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_adj, 
+      model = "std_reg_coef",
+      cluster_adj = TRUE,
+      SE_std = sqrt(Wg_adj),
+      add_name_to_vars = "_adj",
+      vars = -var_term1_adj
+    ),
+    
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
       prepost_cor = ppcor,
-      add_name_to_vars = "_alt",
-      vars = vgt_alt:Wgt_alt
-    ),
-    
-    gt_alt_type = "DiD from raw means",
-    
-    gt_posttest = g_post * gamma_sqrt,
-    VIVECampbell::vgt_smd_1armcluster(
-      N_cl_grp = N_t,
-      N_ind_grp = N_c,
-      avg_grp_size = avg_cl_size,
-      ICC = icc, 
-      g = gt_posttest, 
-      model = "posttest",
-      cluster_adj = FALSE,
-      add_name_to_vars = "_posttest",
-      vars = vgt_posttest:Wgt_posttest
-    )
-
-    
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+      )
     
   ) |> 
   ungroup()
@@ -2851,7 +2840,7 @@ Timmermans2012_es <-
 
 Timmermans2012_est <- 
   left_join(Timmermans2012_wide, Timmermans2012_es) |> 
-  select(-c(es_paper_c, es_paper_t)) |> 
+  select(-c(es_paper_c, es_paper_t), -contains(c("ci_", "val_b"))) |> 
   mutate(vary_id = paste0(outcome, "/", timing),
          analysis_plan = case_when(
            outcome == "Empoverment"  ~  "Hope, Empowerment & Self-efficacy", 
@@ -2860,14 +2849,17 @@ Timmermans2012_est <-
            outcome == "Self-e"  ~ "Mental health outcomes", 
            outcome == "Loneliness"  ~ "Loneliness"
          )
-      )
+      ) |> 
+  rename(m_post = m_diff_post, mean_diff = DD)
 
-#clubSandwich::impute_covariance_matrix(
-#  vi = Timmermans2012_est$vgt,
-#  cluster = Timmermans2012_est$study,
-#  r = Timmermans2012_est$ppcor,
-#  smooth_vi = FALSE
-#)
+
+```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Timmermans2012_est)
 
 ```
 
@@ -3035,54 +3027,119 @@ Gatz2007_est <-
 # Adding Gatz to data
 dat <- 
   dat |> 
-  bind_rows(Gatz2007_est) |> 
-  relocate(study)
+  bind_rows(Gatz2007_est) 
 ```
 
 ### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
 ```{r Gonzalez and Prihoda 2007}
-Gonzalez2007 <- 
+Gonzalez2007_est <- 
   tibble(
+    study = "Gonzalez & Prihoda 2007",
+    
+    analysis_plan = c(
+      "Social functioning (degree of impairment)",
+      "All mental health outcomes"
+    ),
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD (assumed)",
+    
+    main_es_method = "Repeated-measure ANOVA with emm",
+    ppcor_method = "F value used",
+    
     outcome = c("GAF", "CGI"),
-    Nt_start = 11, 
-    Nc_start = 11,
+    N_start_t = 11, 
+    N_start_c = 11,
     # Actual samples sizes
-    Nt = 8, # Three patients terminated the group early (p. 411)
-    Nc = 9, # Two of the control subjects were also lost two follow-up (p. 412)
-    d = c(0.20, 0.66),
-    p_val = c(
+    N_t = 8, # Three patients terminated the group early (p. 411)
+    N_c = 9, # Two of the control subjects were also lost two follow-up (p. 412)
+    
+    N_total = N_t + N_c,
+    
+    es_paper = c(0.20, 0.66),
+    es_paper_type = "Cohen d (assumed)",
+    
+    b_emm_post_t = c(72.20, 1.75),
+    b_emm_post_c = c(69.30, 2.61),
+    
+    se_emm_post_t = c(4.11, 0.37),
+    se_emm_post_c = c(4.11, 0.37),
+    
+    mean_b_emm = if_else(outcome == "GAF", (b_emm_post_t - b_emm_post_c), (b_emm_post_t - b_emm_post_c) * -1),
+    
+    sd_total = abs(mean_b_emm)/es_paper,
+    # Using E.14 from WWC Handbook (ver. 5). We imputed the covariate-adjusted mean difference to obtain this esti
+    sd_pool = sqrt( ((N_total-1)/(N_total-2)) * sd_total^2 - ((N_t*N_c)/(N_total*(N_total-2))) * mean_b_emm^2),
+    
+    pval_paper = c(
       0.65, 
       0.15 # Is reported as <0.05 and must be estimated from the corresponding F_val
       ),
     F_val = c(0.22, 2.34),
     
-    p_val_est = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
+    #pval_test = pf(F_val, df1 = 1, df2 = 11, lower.tail = FALSE)
 
-      ); Gonzalez2007
-
-
-Gonzalez2007_est <- 
-  Gonzalez2007 |> 
-  mutate(
+    df_ind = N_total,
     
-    study = "Gonzalez & Prihoda 2007",
-    
-    analysis_plan = c(
-      "Social functioning (degree of impairment)",
-      "Mental health outcomes"
-    ),
-    N_total = Nt + Nc,
-    df_ind = N_tot,
-    vd = (d^2/F_val + d^2/(2*N_tot) ),
+    d_adj = es_paper,
+    vd_adj = d_adj^2/F_val + d_adj^2/(2*N_total),
+    Wd_adj = d_adj^2/F_val,
     
     J = 1 - 3/(4*df_ind-1),
-    g = J * d,
-    vg = vd,
     
-    vary_id = outcome
+    g_adj = J * d_adj,
+    vg_adj = g_adj^2/F_val + g_adj^2/(2*N_total),
+    Wg_adj = g_adj^2/F_val
   
   ) |> 
-  relocate(vd, .after = d); Gonzalez2007_est
+  rowwise() |> 
+  mutate(
+    
+    # Average cluster size in treatment group
+    # he group, with 7 to 11 active members
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 408)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+  
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    gt_adj = omega * d_adj * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_adj, 
+      model = "emmeans",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      add_name_to_vars = "_adj",
+      vars = -var_term1_adj
+    ),
+    
+    vary_id = outcome
+    
+  ); Gonzalez2007_est
+```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Gonzalez2007_est)
+
 ```
 
 
@@ -3107,10 +3164,10 @@ Gordon2018 <- tibble(
    ), 
    each = 2)),
   
-  group = rep(c("SCIT", "Control"), each = 1, n_distinct(outcome)),
+  group = rep(c("SCIT", "Control"), n_distinct(outcome)),
 
-  N = rep(c(21, 15), each = 1, n_distinct(outcome)),
-  N_start = rep(c(21, 15), each = 1,4),
+  N = rep(c(21, 15), n_distinct(outcome)),
+  N_start = rep(c(21, 15), 4),
  
  m_pre = c(
    50.24, 45.73, # QLS total
@@ -3295,8 +3352,7 @@ Gordon2018_est <-
 # Adding Gordon to data
 dat <- 
   dat |> 
-  bind_rows(Gordon2018_est) |> 
-  relocate(study)
+  bind_rows(Gordon2018_est)
 ```
 
 
@@ -3312,11 +3368,13 @@ Gutman2019_raw <-
     
     group = rep(c("t", "c"), each = 10, 2),
     
+    N = 10,
+    
     pre_test = c(
       25, 37, 34, 33, 19, 25, 36, 34, 32, 35, # PSS intervention
       25, 30, 31, 34, 26, 21, 32, 34, 27, 35, # PSS Control
       121, 114, 84, 89, 82, 83, 86, 70, 119, 93, # WHOQOL intervention
-      97, 113, 98, 93, 86, 93, 98, 57, 01, 101 # WHOQOL control
+      97, 113, 98, 93, 86, 93, 98, 57, 91, 101 # WHOQOL control
     ),
     
     post_test = c(
@@ -3363,6 +3421,8 @@ Gutman2019 <-
   ) |> 
   mutate(
     N_total = N_t + N_c,
+    N_start_t = 21, # p. 120
+    N_start_c = 15,
     df_ind = N_total
   )
 
@@ -3370,8 +3430,8 @@ Gutman2019_cor <-
   Gutman2019_raw |> 
   summarise(
     
-    ppcor = cor(pre_test, post_test),
-    ppcor_calc_method = "From study - raw data",
+    ppcor = cor(pre_test, post_test, method = "pearson"),
+    ppcor_method = "From study - raw data",
     
     .by = outcome
   )
@@ -3396,12 +3456,14 @@ Gutman2019_est <-
   left_join(Gutman2019, by = join_by(outcome)) |> 
   mutate(
     
-    analysis_plan = c("Fill-in"),  
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     
     study = "Gutman et al. 2019",
-    main_es_calc_method = "Standardized regression",
+    main_es_method = "Standardized regression from reported raw data",
+    
+    ppcor = Gutman2019_cor$ppcor,
+    ppcor_method = Gutman2019_cor$ppcor_method,
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -3431,7 +3493,10 @@ Gutman2019_est <-
   g_reg = J * d_reg, 
   vg_reg = var_term1_reg + g_reg^2/(2*df_ind),
   Wg_reg = var_term1_reg,
-    
+  
+  ) |>
+  rowwise() |> 
+  mutate(
   avg_cl_size = 10, # Assuming one cluster of 10 only 
   avg_cl_type = "From study",
     
@@ -3439,37 +3504,79 @@ Gutman2019_est <-
   icc = ICC_01,
   icc_type = "Imputed",
   
+  n_covariates = 1, 
+  
   gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
  
-  adj_fct = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
+  # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+  df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
+  omega = 1 - 3/(4*df_adj-1),
+    
+  gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c(vgt_post, Wgt_post)
+      ),
   
-  # Accounting for the fact that this study is single sited/clustered
-  gt_post = gamma_sqrt * g_post * sqrt(1-icc),
-  vgt_post = adj_fct * vg_post * (1-icc),
-  Wgt_post = adj_fct * Wg_post * (1-icc),
+  gt_reg = omega * d_reg * gamma_sqrt,
+  VIVECampbell::vgt_smd_1armcluster(
+    N_cl_grp = N_t,
+    N_ind_grp = N_c,
+    avg_grp_size = avg_cl_size,
+    ICC = icc, 
+    g = gt_reg, 
+    model = "std_reg_coef",
+    cluster_adj = FALSE,
+    SE_std = var_term1_reg,
+    add_name_to_vars = "_reg"
+  ),
   
-  gt_reg = gamma_sqrt * g_reg * sqrt(1-icc),
-  vgt_reg = adj_fct * vg_reg * (1-icc),
-  Wgt_reg = adj_fct * Wg_reg * (1-icc),
   
-  a = sqrt(2*Wgt_reg*df_ind),
-  hg_reg = sqrt(2) * sign(gt_reg) * (log(abs(gt_reg) + sqrt(gt_reg^2 + a^2)) - log(a)),
-  vhg_reg = 1/df_ind,
+  #adj_fct = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
+  #
+  ## Accounting for the fact that this study is single sited/clustered
+  #gt_post = gamma_sqrt * g_post * sqrt(1-icc),
+  #vgt_post = adj_fct * vg_post * (1-icc),
+  #Wgt_post = adj_fct * Wg_post * (1-icc),
+  #
+  #gt_reg = gamma_sqrt * g_reg * sqrt(1-icc),
+  #vgt_reg = adj_fct * vg_reg * (1-icc),
+  #Wgt_reg = adj_fct * Wg_reg * (1-icc),
+  #
+  #a = sqrt(2*Wgt_reg*df_ind),
+  #hg_reg = sqrt(2) * sign(gt_reg) * (log(abs(gt_reg) + sqrt(gt_reg^2 + a^2)) - log(a)),
+  #vhg_reg = 1/df_ind,
   
   
   vary_id = outcome,
 
-analysis_plan = case_when(
+  analysis_plan = case_when(
       str_detect(outcome, "PSS") ~ "Mental health outcomes",
-      str_detect(outcome, "WHOQOL-BREF") ~ "Wellbeing and Quality of Life"),
+      str_detect(outcome, "WHO") ~ "Wellbeing and Quality of Life"),
     
   ) |> 
-  select(-a); Gutman2019_est
+  select(-var_term1_reg); Gutman2019_est
 
 
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Gutman2019_est)
+
+```
+
 
 ### **Hagen et al. [-@Hagen2005]**
 
@@ -3604,13 +3711,16 @@ Hagen2005_est <-
     
     study = "Hagen et al. 2005",
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SDs",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     N_total = N_t + N_c,
     df_ind = N_total,
     
     # For all measures lower scores are beneficial why these are reverted
     m_post = (m_post_t - m_post_c)*-1, 
-    
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     d_post = m_post/sd_pool, 
@@ -3698,14 +3808,15 @@ Hagen2005_est <-
 # Adding Hagen to data
 dat <- 
   dat |> 
-  bind_rows(Hagen2005_est) |> 
-  relocate(study)
+  bind_rows(Hagen2005_est) 
 ```
 
 ### **Haslam et al. [-@Haslam2019]
 ```{r Haslam et al. 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
 # means with standard errors for post-measurements.
+
+#NOT USED
 Haslam2019 <- tibble(
   group = rep(c("Group 4 health",
                 "TAU"), each = 1,5
@@ -3753,12 +3864,21 @@ Haslam2019 <- tibble(
     0.27, 0.31,
     0.10, 0.11
   )
+
 ); Haslam2019
 
 
 # coefficients extracted from table 2, p. 794 
-
+# USED FOR META-ANALYSIS
 Haslam2019_est <- tibble(
+  
+  study = "Haslem 2019",
+  
+  effect_size = "SMD",
+  sd_used = "Pooled pre-test SD - only SDs reported",
+  
+  main_es_method = "Mixed-effects/multi-level model reg coef",
+  
   outcome = c(
    "Loneliness",
    "Depression",
@@ -3775,44 +3895,102 @@ Haslam2019_est <- tibble(
       .default = NA_character_
     ),
   
-  N_t = 66, 
-  N_c = 54, 
+  N_start_t = 66,
+  N_start_c = 54,
+    
+  N_t = N_start_t, 
+  N_c = N_start_c, 
   N_total = N_t + N_c, 
-  df = N_total,
+
+  df_ind = N_total,
   
   # I have taken the beta values for the Time X Condition
-beta = c(
-  -0.743,
-  -0.334,
-  -0.525,
-  -0.752,
-   0.523
-),
-
-se_b = c(
-  0.218,
-  0.206,
-  0.169,
-  0.255, 
-  0.197
-),
-
-t_val = beta/se_b,
-
-p_val = c(
-  0.001,
-  0.108,
-  0.003,
-  0.004,
-  0.009
- ),
-
-J = 1 - 3/(4*df-1),
-
-vary_id = outcome
+  b_reg = c(
+    -0.743,
+    -0.334,
+    -0.525,
+    -0.752,
+     0.523
+  ),
   
-)
+  se_b_reg = c(
+    0.218,
+    0.206,
+    0.169,
+    0.255, 
+    0.197
+  ),
+  
+  sd_pre_t = c(3.11, 9.96, 1.11, 1.65, 0.86),
+  sd_pre_c = c(2.78, 9.40, 1.05, 0.97, 0.84),
+  
+  sd_pool = sqrt(((N_t-1)*sd_pre_t^2 + (N_c-1)*sd_pre_c^2)/(N_t + N_c - 2)),
+  
+  d_reg = b_reg/sd_pool,
+  vd_reg = (se_b_reg/sd_pool)^2 + d_reg^2/(2*N_total),
+  Wd_reg = (se_b_reg/sd_pool)^2,
+  
+  J = 1 - 3/(4*df_ind-1),
+  
+  g_reg = J * d_reg, 
+  vg_reg = (se_b_reg/sd_pool)^2 + g_reg^2/(2*N_total),
+  Wg_reg = (se_b_reg/sd_pool)^2,
+  
+  # icc (group-level) from study
+  icc = c(.054, .084, .034, .081, .056),
+  icc_type = "From study (Table 2, p. 794)",
+  
+ ) |> 
+  rowwise() |> 
+  mutate(
+
+  #"In the present study, the program was administered in groups comprising between five and nine participants" (p. 792)
+  avg_cl_size = 5, 
+  avg_cl_type = "From study (p. 792)",
+  
+  
+  n_covariates = 1,
+
+  # Find info about the function via ?VIVECampbell::gamma_1armcluster
+  gamma_sqrt = VIVECampbell::gamma_1armcluster(
+    N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+  ),
+  
+  # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+  df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+  omega = 1 - 3/(4*df_adj-1),
+  
+  
+  gt_reg = omega * d_reg * gamma_sqrt,
+  VIVECampbell::vgt_smd_1armcluster(
+    N_cl_grp = N_t,
+    N_ind_grp = N_c,
+    avg_grp_size = avg_cl_size,
+    ICC = icc, 
+    g = gt_reg, 
+    model = "reg_coef",
+    cluster_adj = TRUE,
+    SE = se_b_reg,
+    SD = sd_pool,
+    add_name_to_vars = "_reg",
+    vars = -var_term1_reg
+  ),
+  
+  vary_id = outcome
+  ) |> 
+  ungroup(); Haslam2019_est 
+
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Haslam2019_est)
+
+```
+
+
 ### **Hilden et al. [-@Hilden2021]
 ```{r Hilden et al. 2021}
 # Table 2, p. 181
@@ -3895,16 +4073,19 @@ Hilden2021_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "BSL-23 total") ~ "Mental health outcomes",
-      str_detect(outcome, "Overall Anxiety Severity and Impairment scale") ~ "Mental health outcomes/Anxiety",
-      str_detect(outcome, "Patient Health Questionnaire 9 scale") ~ "Physical health",
-      str_detect(outcome, "Alcohol Use Disorders Identification Test scale") ~ "Alcohol and drug abuse/misuse",
-      str_detect(outcome, "Sheehan disability work or studylife|Sheehan disability social life|Sheehan disability family life") ~ "Social functioning (degree of impairment)",
+      str_detect(outcome, "Overall Anxiety") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "Patient Health") ~ "Physical health",
+      str_detect(outcome, "Alcohol Use Disorders") ~ "Alcohol and drug abuse/misuse",
+      str_detect(outcome, "Sheehan disability") ~ "Social functioning (degree of impairment)",
       TRUE ~ NA_character_
     ),
     
-    study = "Hilden et al. 2021"
-  ) |> 
-  mutate(
+    study = "Hilden et al. 2021",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SDs",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor is imputed
     ppcor = ppcor_imp,
@@ -4020,8 +4201,7 @@ Hilden2021_est
 # Adding Hilden to data
 dat <- 
   dat |> 
-  bind_rows(Hilden2021_est) |> 
-  relocate(study)
+  bind_rows(Hilden2021_est) 
 ```
 
 ### **Himle et al. [-@Himle2014]**
@@ -4164,6 +4344,11 @@ Himle2014_est <-
   ) |> 
   mutate(
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SDs",
+    
+    main_es_method = "Raw diff-in-diffs",
+    
     # ppcor is imputed
     ppcor = ppcor_imp,
     ppcor_method = "Imputed",
@@ -4263,13 +4448,12 @@ Himle2014_est
 # Adding Himle to data
 dat <- 
   dat |> 
-  bind_rows(Himle2014_est) |> 
-  relocate(study)
+  bind_rows(Himle2014_est) 
 ```
 
-### **Izquierdo et al. [-@Izquierdo2021]**
+### **Izquierdo et al. [-@Izquierdo2021] (Excluded because flawed result reproted. See calculations below)**
 ```{r Izquierdo et al. 2021}
-# Rows 1-10 is data from table 3, p. 10 and rows 11-22 is from table 4 p. 13. 
+# Rows 1-10 is data from Table 3, p. 10 and rows 11-22 is from Table 4 p. 13. 
 
 izquierdo2021 <- tibble(
   group = as.factor(rep(c("Intervention", 
@@ -4314,7 +4498,7 @@ izquierdo2021 <- tibble(
     77.57, 65.43 # Total_score
     ), each = 1,3),
   
-  sd_pre = rep(c(
+  sd_pre_reported = rep(c(
     # 2.44, 3.36,
     # 2.19, 1.38,
     2.44, 4.34,
@@ -4327,6 +4511,8 @@ izquierdo2021 <- tibble(
     # 2.67, 1.90,
     18.30, 10.85), 
     each = 1,3),
+  
+  sd_pre = sd_pre_reported *sqrt(7),
   
   m_post = c(
     
@@ -4372,7 +4558,7 @@ izquierdo2021 <- tibble(
     
   ),
   
-  sd_post = c(
+  sd_post_reported = c(
   
   # post measurement
   #  1.86, 3.15,
@@ -4412,7 +4598,9 @@ izquierdo2021 <- tibble(
   #  2.29, 3.57,
   #  1.00, 1.29,
   1.81, 9.68
-  )
+  ),
+  
+  sd_post = sd_post_reported * sqrt(7)
   
 
 ); izquierdo2021
@@ -4461,6 +4649,7 @@ izquierdo2021_est <-
     m_post = if_else(outcome == "Total_score", (m_post_t - m_post_c) * -1, m_post_t - m_post_c), 
     
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    #sd_pool = sqrt(((N_t-1)*sd_post_reported_t^2 + (N_c-1)*sd_post_reported_c^2)/(N_t + N_c - 2)),
     
     d_post = m_post/sd_pool, 
     vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
@@ -4573,6 +4762,11 @@ Jacob2010_est <-
     
     study = c("Jacob et al. 2010"),
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SDs",
+    
+    main_es_method = "Raw diff-in-diffs",
+    
     # ppcor imputed
     ppcor = ppcor_imp,
     ppcor_method = "Imputed",
@@ -4677,8 +4871,7 @@ Jacob2010_est <-
 # Adding Jacob to data
 dat <- 
   dat |> 
-  bind_rows(Jacob2010_est) |> 
-  relocate(study)
+  bind_rows(Jacob2010_est) 
 ```
 
 ### **James et al. [-@James2004]**
@@ -4751,6 +4944,11 @@ James2004_est <- James2004_wide |>
   mutate(
     
     study = "James et al. 2004",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SDs",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     analysis_plan = case_when(
       str_detect(outcome, "BPRS|BSI-Global") ~ "Mental health outcomes",
@@ -4861,10 +5059,9 @@ rowwise() |>
 # Adding James to data
 dat <- 
   dat |> 
-  bind_rows(James2004_est) |> 
-  relocate(study)
-```
+  bind_rows(James2004_est)
 
+```
 
 ### **Kanie et al. [-@Kanie2019] (Quality-checked)**
 ```{r Kanie et al. 2019}
@@ -4961,9 +5158,9 @@ Kanie2019_est <-
     study = "Kanie et al. 2019",
     
     effect_size = "SMD",
-    sd_used = "Posttest",
+    sd_used = "Pooled posttest SD",
     
-    main_es_method = "DiD",
+    main_es_method = "Raw diff-in-diffs",
     
     analysis_plan = case_when(
       str_detect(outcome, "SCSQ") ~ "Unused",
@@ -5190,6 +5387,11 @@ Lim2020_est <-
     
     study = "Lim et al. 2020",
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
+    
     analysis_plan = case_when(
       str_detect(outcome, "QLS") ~ "Wellbeing and Quality of Life",
       str_detect(outcome, "Negative") ~ "Mental health outcomes/Symptoms of psychosis/negative symptoms",
@@ -5303,13 +5505,12 @@ Lim2020_est <-
 # Adding Lim to data
 dat <- 
   dat |> 
-  bind_rows(Lim2020_est) |> 
-  relocate(study)
+  bind_rows(Lim2020_est) 
 ```
 
 ### **Lloyd-Evans et al. [-@Lloyd-Evans2020]**
 
-From table 2 on page 9
+From Table 2 on page 9
 ```{r Lloyd-Evans et al. 2020}
 # Dataextraction from Lloyd-Evans (2020)
 # Attempt from Jakob
@@ -5317,7 +5518,7 @@ From table 2 on page 9
 # Loading the relevant package 
 library(estmeansd)
 
-# From table 2 on page 9
+# From Table 2 on page 9
 
 # Creating a tibble containing data with IQR, and later i will estimate the mean 
 # and SD from this information using bc.mean.sd (Box-Cox method) 
@@ -5354,7 +5555,7 @@ lloyd_Evans2020_IQR <- tibble(
   N_start = rep(c(30,10),
           each = 1,5),
   
-  firstq_pre = c(
+  q1_pre = c(
     10, 9,   #  Loneliness: De Jong-Gierveld (DJG) Loneliness Scale
     # 5, 4,
     # 5, 5,    # DJG: Emotional Loneliness subscale score
@@ -5386,7 +5587,7 @@ lloyd_Evans2020_IQR <- tibble(
    # 0, 0
   ),
   
-  thirdq_pre = c(
+  q3_pre = c(
     11, 11,
    # 5, 5,
    # 6, 6,
@@ -5405,7 +5606,7 @@ lloyd_Evans2020_IQR <- tibble(
   N = rep(c(25,10), # TOT N
                each = 1,5),
   
-  firstq_post = c(
+  q1_post = c(
     8, 7,
     # 4, 4,
     # 4, 4,
@@ -5438,7 +5639,7 @@ lloyd_Evans2020_IQR <- tibble(
     
   ),
   
-  thirdq_post = c(
+  q3_post = c(
     11, 11,
     # 5, 5, 
     # 6, 6,
@@ -5455,28 +5656,35 @@ lloyd_Evans2020_IQR <- tibble(
   )
 ) |> 
   rowwise() |> 
-  mutate (pre = list(bc.mean.sd(
-    q1.val = firstq_pre,
+  mutate (
+    
+  pre = list(bc.mean.sd(
+    q1.val = q1_pre,
     med.val = median_pre,
-    q3.val = thirdq_pre,
+    q3.val = q3_pre,
     n = N_start,
     avoid.mc = T
-  )[c("est.mean", "est.sd")])) |> 
-  unnest_wider(pre, names_sep = "_") |> 
-  rowwise() |> 
-  mutate(post = list(bc.mean.sd(
-    q1.val = firstq_post,
+  )[c("est.mean", "est.sd")]),
+  
+  post = list(bc.mean.sd(
+    q1.val = q1_post,
     med.val = median_post,
-    q3.val = thirdq_post,
+    q3.val = q3_post,
     n = N,
     avoid.mc = T
-  )[c("est.mean", "est.sd")]))|> 
-  unnest_wider(post, names_sep = "_") |> 
+  )[c("est.mean", "est.sd")])
+  
+  ) |> 
+  unnest_wider(c(pre, post), names_sep = "_") |> 
   rename(
+    
     m_pre = pre_est.mean,
     sd_pre = pre_est.sd,
     m_post = post_est.mean,
-    sd_post =  post_est.sd); lloyd_Evans2020_IQR
+    sd_post =  post_est.sd
+  
+  ) |> 
+  suppressWarnings(); lloyd_Evans2020_IQR
 
 
 
@@ -5527,9 +5735,8 @@ lloyd_Evans2020_means <- tibble(
 
 
 # Combing the obejct so i have the all the data from table 2 in one obejct
-lloyd_Evans2020 <- lloyd_Evans2020_IQR|> 
-  full_join(lloyd_Evans2020_means) |> 
-  select(group, outcome, N, m_pre, sd_pre, m_post, sd_post, N_start); lloyd_Evans2020
+lloyd_Evans2020 <- lloyd_Evans2020_IQR |> 
+  full_join(lloyd_Evans2020_means); lloyd_Evans2020
 
 
 # Turning dataset into wide format
@@ -5541,7 +5748,7 @@ lloyd_Evans2020_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   )
 
 # Effect size calculating 
@@ -5557,6 +5764,11 @@ lloyd_Evans2020_est <-
       .default = NA_character_
     ),
     study = "Lloyd Evans et al. 2020",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor is imputed
      ppcor = ppcor_imp,
@@ -5654,15 +5866,13 @@ lloyd_Evans2020_est <-
   )) |> 
   ungroup(); lloyd_Evans2020_est
 
-
 ```
 
 ```{r, echo=FALSE}
 # Adding Lloyed-Evans to data
 dat <- 
   dat |> 
-  bind_rows(lloyd_Evans2020_est) |> 
-  relocate(study)
+  bind_rows(lloyd_Evans2020_est)
 ```
 
 ### **Madigan et al. [-@Madigan2013] (Quality-checked)**
@@ -5816,8 +6026,9 @@ Madigan2013_est <-
     study = c("Madigan et al. 2013"),
     
     effect_size = "SMD",
-    sd_used = "Posttest SD",
-    main_es_method = "DiD",
+    sd_used = "Pooled posttest SD",
+    
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -5961,10 +6172,111 @@ dat <-
 
 ```
 
-### **Michalak et al. [-@Mcichalak2015]**
-```{r Michalak et al. 2015}
-# With both pre- and post-test and beta-coefficients
+### **McCay et al. 2014 [INSERT REFERENCE]**
+Results are extracted from Table 3 (p. 6) and Table 4 (p. 7). Sample size data is retrieved from Table 1 (p. 6) 
 
+```{r}
+McCay2014_est <-
+  tibble(
+    
+    study = "McCay",
+    
+    effect_size = "SMD",
+    sd_used = "Unknown - d was calculated from ANOVA F-val",
+    
+    outcome = c("MES", "QLS", "MHS"),
+    
+    N_t = 29,
+    N_c = 18,
+    
+    N_total = N_t + N_c,
+    
+    N_start_t = 41, # See text on page 3
+    N_start_c = 26,
+    
+    df_ind = N_total,
+    n_covariates = 1,
+    
+    m_pre_t = c(85.99, 61.90, 137.05),
+    sd_pre_t = c(19.38, 17.08, 28.83),
+    
+    m_post_t = c(77.64, 72.76, 143.52),
+    sd_post_t = c(20.28, 15.03, 26.17),
+    
+    tval_paired_t = c(4.12, -6.59, -2.13),
+    
+    ppcor = ((sd_pre_t^2*tval_paired_t ^2 + sd_post_t^2*tval_paired_t^2) - 
+           (m_post_t-m_pre_t)^2 * N_t)/ (2 * sd_pre_t*sd_post_t*tval_paired_t^2),
+    
+    ppcor_method = "Calcualted from treatment group scores only",
+    
+    F_val = c(6.5, 11.67, 6.15),
+    main_es_method = "Repeated ANOVA (group x time)",
+    
+    d_adj = sqrt((F_val * N_total)/(N_t*N_c)) * sqrt(1-ppcor^2),
+    vd_adj = (1/N_t + 1/N_c) * (1-ppcor^2) + d_adj^2/(2*N_total),
+    Wd_adj = (1/N_t + 1/N_c) * (1-ppcor^2),
+    
+    J = 1 - 3/(4*df_ind-1),
+    g_adj = J * d_adj,
+    vg_adj = (1/N_t + 1/N_c) * (1-ppcor^2) + g_adj^2/(2*N_total),
+    Wg_adj = (1/N_t + 1/N_c) * (1-ppcor^2)
+    
+    
+  ) |> 
+  rowwise() |> 
+  mutate(
+    
+    # Average cluster size in treatment group
+    # "was 7.0±2.1 (range of three to 12)" (p. 57)
+    avg_cl_size = grp_size_imp, 
+    avg_cl_type = "Imputed",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    gt_adj = omega * d_adj * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t,
+      N_ind_grp = N_c,
+      avg_grp_size = avg_cl_size,
+      ICC = icc, 
+      g = gt_adj, 
+      model = "ANCOVA",
+      cluster_adj = FALSE,
+      R2 = ppcor,
+      add_name_to_vars = "_adj",
+      vars = -var_term1_adj
+    )
+    
+  ) |> 
+  ungroup(); McCay2014_est 
+
+```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(McCay2014_est)
+
+```
+
+
+### **Michalak et al. [-@Michalak2015]**
+```{r Michalak et al. 2015}
 Michalak_2015 <- tibble(
   outcome = rep(c(
     "HAM-D",   # Hamilton Depression Rating Scale
@@ -5978,6 +6290,7 @@ Michalak_2015 <- tibble(
   ), times = 2), 
   
   N = rep(c(36, 35, 35), times = 2), 
+  N_start = N,
   
   m_pre = c(
     23.03, 24.71, 23.87,   # Hamilton Depression Rating Scale
@@ -6000,158 +6313,237 @@ Michalak_2015 <- tibble(
   )
 )
 
-Michalak_2015_MBCT_wide <- 
-  Michalak_2015 |> 
-  filter(!str_detect(group, "CBASP")) |> 
-  mutate(group = case_match(group, "MBCT" ~ "t", "TAU" ~ "c")) |> 
-  tidyr::pivot_wider(
-    names_from = group,
-    names_glue = "{.value}_{group}",
-    values_from = N:last_col()
-  ) |> 
-  mutate(
-    treatment = "MBCT"
-  ) |> 
-  relocate(treatment)
 
-Michalak_2015_CBASP_wide <- 
-  Michalak_2015 |> 
-  filter(!str_detect(group, "MBCT")) |> 
-  mutate(group = case_match(group, "CBASP" ~ "t", "TAU" ~ "c")) |> 
-  tidyr::pivot_wider(
-    names_from = group,
-    names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+Michalak2015_wide_DD <- 
+  map(c("MBCT", "CBASP"), \(x)
+      Michalak_2015 |> 
+      filter(group %in% c(x, "TAU")) |> 
+      mutate(group = case_match(group, x ~ "t", "TAU" ~ "c")) |> 
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+      ) |> 
+        mutate(
+          treatment = x,
+          N_total = N_t + N_c
+        ) |> 
+        relocate(treatment)
   ) |> 
+  list_rbind() |> 
   mutate(
-    treatment = "CBASP"
-  ) |> 
-  relocate(treatment)
-
-Michalak_2015_est <- 
-  bind_rows(Michalak_2015_MBCT_wide, Michalak_2015_CBASP_wide) |> 
-  arrange(outcome) |> 
-  mutate(
-    analysis_plan = rep(c(
-      "Mental health outcomes/Depression",
-      "Mental health outcomes/Depression"
-  ), each = 2,1),
-    
-    N_total = N_t + N_c,
-    
-    N_total = N_t + N_c,
-    df_ind = N_total,
-    
-    
-    # HAM-D lower scores are beneficial why these is reverted
-    m_post = if_else(outcome != "PSP", (m_post_t - m_post_c)*-1,
-                     m_post_t - m_post_c),
-    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
-    
-    d_post = m_post/sd_pool, 
-    
-    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
-    Wd_post = (1/N_t + 1/N_c),
-    
-    J = 1 - 3/(4*df_ind-1),
-    
-    g_post = J * d_post,
-    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
-    Wg_post = Wd_post,
-    
-    vary_id = outcome
+  
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
+    analysis_plan = "Mental health outcomes/Depression"
+  
   )
 
 
-pp_cor <- 0.65
-
-# Udregning af DID effektstørrelse
-Michalak2015_est1 <-
-  Michalak_2015_est |> 
-  mutate(
-    diff_t = m_post_t - m_pre_t,
-    diff_c = m_post_c - m_pre_c,
-    mean_diff = diff_t - diff_c,
-    sd_pool = sqrt( ((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_total-2)  ),
-    
-    df = N_total,
-    
-    J = 1 - 3/(4*df-1),
-    
-    # Formel 1
-    g_DD = J * (mean_diff/sd_pool),
-    
-    # Formel 2 - med imputeret pre-posttest korrelation baseret på test-retest reliability for HAM-D
-    vg_DD = (1/N_t + 1/N_c) * 2*(1-pp_cor) + g_DD^2/(2*df),
-    se_DD = sqrt(vg_DD)
-    
-  )
-
-
-Michalak2015_est2 <- 
+Michalak2015_wide_from_paper <- 
   tibble(
+    
+    effect_size = "SMD",
+    sd_used = "Unknown - extracted from report effect sizes",
+    main_es_method = "Covariate-adjusted es from multi-level regression",
+    
     analysis_plan = rep(c(
       "Wellbeing and Quality of Life",
       "Social functioning (degree of impairment)"
     ), c(8,2)),
-      
-    outcome = c("SF-36","SF-36", "SF-36", "SF-36", "SF-36","SF-36", "SF-36", "SF-36",
-                "SASS", "SASS"),
-    subscale = rep(c("Vitality", "Social func", "Role", "Mental health", "overall"), each = 2,1),
+    
+    
+    outcome = paste0(
+      rep(c("SF-36", "SASS"), c(8,2)), "/", 
+      rep(c("Vitality", "Social func", "Role", "Mental health", "overall"), each = 2)
+    ),
+    
     treatment = rep(c("MBCT","CBASP"), each = 1,5),
     N_t = rep(c(36,35), each = 1,5), 
     N_c = 35, 
     N_total = N_t + N_c, 
-    df = N_total,
-    beta = c(1.12, 1.32, 
+    
+    N_start_t = N_t,
+    N_start_c = N_c,
+    
+    b_reg = c(1.12, 1.32, 
              0.27, 0.74,
              0.52, 0.46,
              0.63, 1.25,
              2.43, 1.68),
-    se_b = c(0.90, 0.70,
+    se_b_reg = c(0.90, 0.70,
              0.43, 0.44,
              0.26, 0.24,
              0.95, 0.89,
              1.01, 0.93),
-    t_val = beta/se_b,
-    d_paper = c(0.31,0.36, 
-                0.12, 0.34,
-                0.48, 0.42,
-                0.14, 0.28,
-                0.57, 0.40),
-    J = 1 - 3/(4*df-1),
-    g_paper = J * d_paper,
-    #vg_post = (1/N_t + 1/N_c) + g_paper^2/(2*df),
-    vg_paper = g_paper^2/t_val^2 + g_paper^2/(2*df),
-    seg_paper = sqrt(vg_paper)
+    
+    t_val = b_reg/se_b_reg,
+    
+    es_paper = c(0.31,0.36, 
+                 0.12, 0.34,
+                 0.48, 0.42,
+                 0.14, 0.28,
+                 0.57, 0.40),
+    
+    es_paper_type = "Covariate-adjusted ES (d) from a multi-level model",
+    
+    sd_total = b_reg/es_paper
     
   )
 
-# Kombiner de to tibbles
-Michalak2015_est_combined <- bind_rows(
-  Michalak2015_est1,
-  Michalak2015_est2
-) |> 
+
+Michalak_2015_dat <- 
+  bind_rows(Michalak2015_wide_DD, Michalak2015_wide_from_paper)
+
+ppcor <- ppcor_imp <- 0.5
+
+Michalak_2015_est <- 
+  Michalak_2015_dat |> 
   mutate(
     study = "Michalak et al. 2015",
-    vary_id = paste0(outcome, "/", treatment)
-  )
+    vary_id = paste0(outcome, "/", treatment),
+    
+    ppcor = ppcor_imp,
+    ppcor_method = "Imputed",
+    
+    df_ind = N_total,
+    m_post = if_else(is.na(es_paper), (m_post_t - m_post_c)*-1, NA_real_),
+    sd_pool = if_else(
+      is.na(es_paper),
+      sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),
+      sqrt( ((N_total-1)/(N_total-2))*sd_total^2 - ((N_t*N_c)/(N_total * (N_total-2)))*b_reg^2 )
+    ),
+    
+    d_post = m_post/sd_pool,
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = if_else(is.na(es_paper), (1/N_t + 1/N_c), NA_real_),
+    
+    J =  1 - 3/(4*df_ind-1),
+    
+    g_post =  J * (m_post/sd_pool),
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    # DiD (DD) effect sizes for HAM-D og BDI
+    
+    
+    
+    #cluster bias adjustment
+    
+    # For HAM-D lower scores is beneficial, hence these are reverted
+    m_diff_t = if_else(
+      str_detect(outcome, "HAM|BDI"),
+      (m_post_t - m_pre_t) * -1,
+      m_post_t - m_pre_t
+    ),
+    
+    m_diff_c = if_else(
+      str_detect(outcome, "HAM|BDI"),
+      (m_post_c - m_pre_c) * -1,
+      m_post_c - m_pre_c
+    ), 
+    
+    d_DD = (m_diff_t - m_diff_c) / sd_pool,
+    vd_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + d_DD^2 / (2 * df_ind),
+    Wd_DD = if_else(is.na(es_paper), 2 * (1 - ppcor) * (1 / N_t + 1 / N_c), NA_real_),
+    
+    g_DD = J * d_DD, 
+    vg_DD = 2 * (1 - ppcor) * (1 / N_t + 1 / N_c) + g_DD^2 / (2 * df_ind),
+    Wg_DD = Wd_DD,
+    
+    # Reg adjusted effect sizes for SF-36 and SASS outcomes
+    d_reg = b_reg/sd_pool,
+    vd_reg = d_reg^2 * (1/t_val^2 + 1/(2*df_ind)),
+    Wd_reg = d_reg^2 * (1/t_val^2),
+    
+    g_reg = J * d_reg,
+    vg_reg = g_reg^2 * (1/t_val^2 + 1/(2*df_ind)),
+    Wg_reg = Wd_reg
+    
+  ) |> 
+  rowwise() |> 
+  mutate(
+    # Average cluster size in treatment group
+    avg_cl_size = 6, 
+    avg_cl_type = "From study (p. 177)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,# Baseline scores only
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+    ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size),
+    omega = 1 - 3 / (4 * df_adj - 1),
+    
+    # Cluster-adjusting g_post
+    gt_post = if_else(is.na(es_paper), omega * d_post * gamma_sqrt, NA_real_),
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = c("vgt_post", "Wgt_post")
+    ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      prepost_cor = ppcor,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -c("var_term1_DD")
+    ),
+    
+    gt_reg = omega * d_reg * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_reg, 
+      model = "reg_coef",
+      cluster_adj = TRUE,
+      t_val = t_val,
+      q = n_covariates,
+      add_name_to_vars = "_reg",
+      vars = -c("var_term1_reg")
+    ),
+    
+    across(c(Wgt_post, Wgt_DD:adj_value_DD), ~ if_else(!str_detect(outcome, "HAM|BDI"), NA, .x)),
+    across(c(Wgt_reg:adj_value_reg), ~ if_else(str_detect(outcome, "HAM|BDI"), NA, .x))
+    
+  ) |> 
+  ungroup(); Michalak_2015_est
+
 
 ```
 
-### Has to be checked by MVH (adds 11 new colomns)
+
 ```{r, echo=FALSE} 
 # Adding Michalak to data
-dat_test <- 
+dat<- 
   dat |> 
-  bind_rows(Michalak2015_est_combined) |> 
-  relocate(study)
+  bind_rows(Michalak_2015_est) 
 ```
 
-### **McCay et al. [-@McCay2014]**
-```{r}
-
-```
 
 ### **Morley et al. [-@Morley2014] (Quality-checked)**
 Data from table 2 containing means and standard deviation on page 136
@@ -6240,14 +6632,16 @@ Morley2014_est <-
       .default = NA_character_
     ),
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
+    
     
     # ppcor imputed
     ppcor = ppcor_imp,
-    ppcor_method = "Imputed"
+    ppcor_method = "Imputed",
     
-  ) |> 
  
-  mutate(
     study = "Morley et al. 2014",
     
     N_total = N_t + N_c,
@@ -6357,8 +6751,7 @@ Morley2014_est <-
 # Adding Morley to data
 dat <- 
   dat |> 
-  bind_rows(Morley2014_est) |> 
-  relocate(study)
+  bind_rows(Morley2014_est)
 ```
 
 ### **Morton et al. [-@Morton2012] (Quality-checked)**
@@ -6466,7 +6859,7 @@ Morton2012_wide2 <- tibble(
   
   m_pre_c = c(
     30.3, 
-    31.52
+    33.70
   ), 
   
   sd_pre_t = c(
@@ -6518,6 +6911,10 @@ Morton2012_est <-
       .default = NA_character_
     ),
     
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
+    
   # Entering test-retest reliability measure from text and 
   # Pfohl, B., Blum, N., St. John, D., McCormick, B., Allen, J., & Black, D.W.
   #   (2009). Reliability and validity of the Borderline Evaluation of
@@ -6540,8 +6937,11 @@ Morton2012_est <-
 
 
 
-Morton2012_est <- Morton2012_est|> 
+Morton2012_est <- 
+  Morton2012_est|> 
   mutate(
+    N_start_t = N_t,
+    N_start_c = N_c,
     N_total = N_t + N_c,
     df_ind = N_total,
     
@@ -6711,15 +7111,14 @@ morton2012_es <- tibble(
 #        0.89, 0.30, 1.20)
 )
   
-); morton2012_es
+)
 ```
 
 ```{r, echo=FALSE}
 # Adding Mortonto data
 dat <- 
   dat |> 
-  bind_rows(Morton2012_est) |> 
-  relocate(study)
+  bind_rows(Morton2012_est) 
 ```
 
 ### **Patterson et al. [-@Patterson2003] (Quality-checked)**
@@ -6750,16 +7149,16 @@ Patterson2003 <-
     
     m_pre = rep(c(
       #    31.9, 41.5,   # UPSA
-      12.5, 13.0,   # PANSS Positive
-      16.9, 13.0,   # PANSS Negative
-      25.0, 21.9,   # PANSS General
-      7.8, 7.7,     # Ham-D
-      0.53, 0.55    # QWB
+      12.5, 10.4,   # PANSS Positive
+      16.9, 10.1,   # PANSS Negative
+      25.0, 22.3,   # PANSS General
+      7.8, 4.6,     # Ham-D
+      0.53, 0.49    # QWB
     ), each = 1,2),
     
     sd_pre = rep(c(
       #    11.8, 8.3,    # UPSA
-      5.6, 4,       # PANSS Positive
+      5.6, 4.0,       # PANSS Positive
       6.6, 3.2,     # PANSS Negative
       6.2, 3.7,     # PANSS General
       6.1, 2.8,     # Ham-D
@@ -6769,11 +7168,11 @@ Patterson2003 <-
     
     m_post = c(
       #    41.5, 40.3, # UPSA           3 months
-      13.0, 10.4, # PANSS Positive 3 months
-      13.0, 10.1, # PANSS Negative 3 months
-      21.9, 22.3, # PANSS General  3 months
-      7.7, 4.9,   # Ham-D          3 months
-      0.55, 0.49, # QWB            3 months
+      13.0, 14.0, # PANSS Positive 3 months
+      13.0, 10.9, # PANSS Negative 3 months
+      21.9, 21.5, # PANSS General  3 months
+      7.7, 8.0,   # Ham-D          3 months
+      0.55, 0.5, # QWB            3 months
       
       #    42.7, 41.6,  # UPSA           6 months
       12.13, 13.1, # PANSS Positive 6 months 
@@ -6787,7 +7186,7 @@ Patterson2003 <-
     sd_post = c(
       #    9.5, 7.1,     # UPSA           3 months
       6.6, 6.3,     # PANSS Positive 3 months
-      5.1, 4,       # PANSS Negative 3 months
+      5.1, 4.0,       # PANSS Negative 3 months
       4.7, 4.9,     # PANSS General  3 months
       5.2, 5.3,     # Ham-D          3 months
       0.10, 0.07,   # QWB           3 months
@@ -6798,7 +7197,7 @@ Patterson2003 <-
       4.3, 5.9,     # PANSS Positive 6 months
       6, 4.4,       # PANSS Negative 6 months
       4.6, 4.4,     # PANSS General  6 months
-      4.9, 5,       # Ham-D          6 months
+      4.9, 5.0,       # Ham-D          6 months
       0.07, 0.07    # QWB            6 months
     )
   ) 
@@ -6828,6 +7227,10 @@ Patterson2003_est <-
     ),
     
     study = "Patterson et al. 2003",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -6943,11 +7346,10 @@ Patterson2003_est <-
 # Adding Patterson to data
 dat <- 
   dat |> 
-  bind_rows(Patterson2003_est) |> 
-  relocate(study)
+  bind_rows(Patterson2003_est) 
 ```
 
-### **Popolo et al. [-@Popolo2019] (Quality-checked)**
+### **Popolo et al. [-@Popolo2019] (Quality-checked) Hast to be checked by MVH: this adds these variable => within_group_d**
 Data was extracted from Table 2 (p. 351)
 ```{r Popolo et al. 2019}
 # Data from Table 2 containing means and standard deviation + within effect size.
@@ -7006,7 +7408,7 @@ Popolo2019 <-
     
     sd_post = c(
       1.94, 4.59,
-      26.78, 29.12,
+      26.78, 29.17,
       11.7, 12.59
       #    1.36, 1.27,
       #    1.07, 0.67,
@@ -7065,14 +7467,11 @@ Popolo2019_est <-
         "Mental health outcomes/Unused outcomes", 
         "Mental health outcomes"),
     
-    # Between-group post-treatment effect size at post-treatment from table 2, p. 351
-    # d = c(1.16, 0.73, 0.75), 
-    # post_hoc_power = c(0.8, 0.47, 0.49)
-    
     study = "Popolo et al. 2019",
     
-    
-    main_es_method = "diff-in-diffs",
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
@@ -7161,17 +7560,21 @@ Popolo2019_est <-
     vary_id = outcome
     
   ) |> 
-  ungroup(); Popolo2019_est
+  ungroup() |> 
+  rename(
+    d_rm_t = within_group_d_t,
+    d_rm_c = within_group_d_c
+    
+  ); Popolo2019_est
 
 ```
 
-### Hast to be checked by MVH: this adds these variable => within_group_d
+
 ```{r, echo=FALSE}
 # Adding Popolo to data
-dat_test <- 
+dat <- 
   dat |> 
-  bind_rows(Popolo2019_est) |> 
-  relocate(study)
+  bind_rows(Popolo2019_est)
 ```
 
 ### **Rabenstein et al. [-@Rabenstein2015] (Quality-checked)**
@@ -7222,7 +7625,7 @@ Rabenstein2015 <-
       #    5.15, 6.43,
       #    5.83, 7.24,
       #    4.74, 5.76,
-      1.12, 1.48,
+      1.23, 1.48,
       23.39, 25.04,
       40.71, 42.87
       #    50.78, 50.35,
@@ -7288,14 +7691,14 @@ Rabenstein2015 <-
       #    18.08, 17.12
     ),
     
-    t_val = c(
+    tval_paired = c(
       7.355,3.428,
       8.377, 4.018,
       -6.695, -1.865
     ),
     
-    r = ((sd_pre^2*t_val^2 + sd_post^2*t_val^2) - 
-           (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*t_val^2),
+    r = ((sd_pre^2*tval_paired^2 + sd_post^2*tval_paired^2) - 
+           (m_post-m_pre)^2 * N)/ (2 * sd_pre*sd_post*tval_paired^2),
     
     
     z = 0.5 * log( (1+r)/(1-r) ),
@@ -7328,9 +7731,9 @@ Rabenstein2015_est <-
         "Mental health outcomes/Depression",
         "Wellbeing and Quality of Life"),
     
-    
-    
-    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+   
     study = "Rabenstein et al. 2015",
     
     # There are also some effect sizes in the raw text on p. 7
@@ -7346,7 +7749,7 @@ Rabenstein2015_est <-
     # p_val_t = c(0.001, 0.001, 0.012),
     #  d = c(0.76, 0.66, 0.55)
     
-    main_es_method = "diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
@@ -7445,8 +7848,7 @@ Rabenstein2015_est <-
 # Adding Rebaenstein to data
 dat <- 
   dat |> 
-  bind_rows(Rabenstein2015_est) |> 
-  relocate(study)
+  bind_rows(Rabenstein2015_est) 
 ```
 
 
@@ -7623,12 +8025,17 @@ Rosenblum2014_est <-
     
 
     analysis_plan = case_when(
-      str_detect(outcome, "Days any alcohol past 30|Days heavy alcohol past 30|Days any drugs past 30|Days any drugs or alcohol past 30") ~ "Alcohol and drug abuse/misuse",
+      str_detect(outcome, "Days") ~ "Alcohol and drug abuse/misuse",
       str_detect(outcome, "Medication Adherence") ~ "Unused outcomes",
       .default = NA_character_
     ),
     
     study = "Rosenblum et al. 2014",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
+    
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -7727,8 +8134,7 @@ Rosenblum2014_est <-
 # Adding Rosenblum to data
 dat <- 
   dat |> 
-  bind_rows(Rosenblum2014_est) |> 
-  relocate(study)
+  bind_rows(Rosenblum2014_est)
 ```
 
 ### **Russinova et al. [-@Russinova2018]**
@@ -7903,11 +8309,15 @@ Russinova2018_est <- Russinova2018_wide |>
     study = "Russinova et al. 2018",
     
     analysis_plan = case_when(
-      str_detect(outcome, "Empowerment scale|Work Hope Scale|Work motivation") ~ "Hope, Empowerment & Self-efficacy",
+      str_detect(outcome, "Empowerment|Work Hope|Work motivation") ~ "Hope, Empowerment & Self-efficacy",
       str_detect(outcome, "ISMI Scale") ~ "Self-esteem",
       str_detect(outcome, "Vocational identity") ~ "Employment",
       .default = NA_character_
     ),
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -8011,8 +8421,7 @@ Russinova2018_est <- Russinova2018_wide |>
 # Adding Russinova to data
 dat <- 
   dat |> 
-  bind_rows(Russinova2018_est) |> 
-  relocate(study)
+  bind_rows(Russinova2018_est) 
 ```
 
 ### **Rüsch et al. [-@Rüsch2019] (Quality-checked)**
@@ -8027,8 +8436,8 @@ Rüsch2019 <-
                   "Control"), 
                 each = 1,12),
     
-    timing = rep(c("6w", 
-                   "12w"), 
+    timing = rep(c("12w", 
+                   "6 months"), 
                  each = 12,1),
     
     outcome = rep(c("Job_search", 
@@ -8046,7 +8455,7 @@ Rüsch2019 <-
       times = 6), 
       rep(c(
         
-        20, 13), # 12 weeks
+        20, 13), # 12 months
         times = 6)),
     
     N_start = rep(c(
@@ -8083,7 +8492,7 @@ Rüsch2019 <-
       #  13.8, 13.7,
       #  3.8, 3.7
       
-      # 6 weeks
+      # 12 weeks
       3.4, 3.3, 
       3.5, 3.2, 
       17.8, 16.1, 
@@ -8092,7 +8501,7 @@ Rüsch2019 <-
       12.6, 14.2, 
       #    3.5, 3.9,
       
-      # 12 weeks 
+      # 6 months 
       3.2, 3.2,
       3.3, 3.1,
       17.3, 15.7,
@@ -8114,7 +8523,7 @@ Rüsch2019 <-
       # 3.9, 4.6, 
       # 1, 1.7
       
-      # 6 weeks
+      # 12 weeks
       0.8, 0.9,
       1, 1, 
       3.4, 4.4,
@@ -8123,7 +8532,7 @@ Rüsch2019 <-
       3.6, 5, 
       #  1.3, 1.7,
       
-      # 12 weeks
+      # 6 months
       1, 0.9, 
       0.6, 0.9,
       3.5, 2.6,
@@ -8160,25 +8569,25 @@ Rüsch2019_est <-
     
     # ANCOVA estimates taken from table 1, p. 335
     F_val = c(
-      # 6 weeks
-      1.4, 0.2, 4.6, 10.8, 6.3, 3.4,
       # 12 weeks
+      1.4, 0.2, 4.6, 10.8, 6.3, 3.4,
+      # 6 months
       0.01, 0.04, 1.9, 1.5, 0.9, 2.4
     ),
     
     #eta_sqrt = c(
-    # 6 weeks
+    # 12 weeks
     # 0.04, 0.007, 0.13, 0.25, 0.17, 0.10,
     
-    # 12 weeks
+    # 6 months
     #  0.01, 0.01, 0.06, 0.05, 0.03, 0.07
     #),
     
     #p_val_f = c(
-    # 6 weeks
+    # 12 weeks
     # 0.24, 0.64, 0.039, 0.08, 0.17, 0.08,
     
-    # 12 weeks
+    # 6 months
     #  0.96, 0.85, 0.17, 0.23, 0.35, 0.14
     
     
@@ -8190,6 +8599,10 @@ Rüsch2019_est <-
   mutate(
     N_total = N_t + N_c,
     df_ind = N_total,
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     ppcor = if_else(
       timing == "12w" & str_detect(outcome, "Help|Job"),
@@ -8332,8 +8745,7 @@ Rüsch2019_est <-
 # Adding Rüsch to data
 dat <- 
   dat |> 
-  bind_rows(Rüsch2019_est) |> 
-  relocate(study)
+  bind_rows(Rüsch2019_est) 
 ```
 
 ### **Sacks et al. [-@Sacks2011]**
@@ -8369,7 +8781,7 @@ Sacks2011 <- tibble(
   
   
   
-  N = rep(c(23,10), 
+  N = rep(c(42,34), 
           each = 10,1),
   
   m_pre = c(# Low/medium propensity 
@@ -8462,64 +8874,59 @@ Sacks2011 <- tibble(
   
 ); Sacks2011
 
-# To also calculate pooled data to get combined estimates for both high and low/medium propensity 
-calculate_pooled_estimates <- function(N, means, sds) {
-  weighted_mean <- sum(N * means) / sum(N)
-  sum_squared_differences <- sum(N * (means - weighted_mean)^2)
-  sum_variances <- sum((N - 1) * sds^2)
-  total_N <- sum(N)
-  pooled_sd <- sqrt((sum_variances + sum_squared_differences) / (total_N - 1))
-  return(pooled_sd)
-}
+# Aggregate pretest measure
 
-
-# Calculate combined statistics
-Sacks2011_total <- Sacks2011 %>%
-  group_by(group, outcome) %>%
-  summarise(
-    sample = "total",
-    N_total = sum(N),
-    m_pre = weighted.mean(m_pre, N),
-    sd_pre = calculate_pooled_sd(N, m_pre, sd_pre),
-    m_post = weighted.mean(m_post, N),
-    sd_post = calculate_pooled_sd(N, m_post, sd_post),
-    .groups = 'drop'
-  ) |> 
-  rename(N = N_total) |> 
-  arrange(outcome, desc(group))
-
-
-
-Sacks2011 <- bind_rows(Sacks2011, Sacks2011_total)
-
-
-  
-# Turning data into wide format
-params <- tibble(
-  filter_val1 = rep(unique(Sacks2011$sample)
-                    , each = 1
-                    )
-)
-
-wide_sacks2011_func <- 
-  function(filter_val1){
-    
-    Sacks2011 |> 
-      filter(sample == filter_val1) |> 
-      mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
+Sacks2011_prescores <- 
+  Sacks2011 |> 
+  select(-c(m_post:sd_post)) |> 
+  mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
       tidyr::pivot_wider(
         names_from = group,
         names_glue = "{.value}_{group}",
         values_from = N:last_col()
-      )   
-    
-  }
+  ) |>
+  metafor::escalc(
+    measure = "SMD", 
+    m1i=m_pre_t, m2i=m_pre_c, 
+    sd1i=sd_pre_t, sd2i=sd_pre_c, 
+    n1i = N_t, n2i = N_c, 
+    data = _
+  ) 
 
+Sack_pre_pooled <- 
+  metafor::aggregate.escalc(Sacks2011_prescores, cluster = outcome, struct = "ID", addk = TRUE) |> 
+  select(-c(yi:vi)) |> 
+  mutate(sample = "low/medium propensity and high propensity sample")
+
+# Aggregate posttest measure
+
+Sacks2011_postscores <- 
+  Sacks2011 |> 
+  select(-c(m_pre:sd_pre)) |> 
+  mutate(group = case_match(group, "Intervention" ~ "t", "Control" ~ "c")) |>
+      tidyr::pivot_wider(
+        names_from = group,
+        names_glue = "{.value}_{group}",
+        values_from = N:last_col()
+  ) |>
+  metafor::escalc(
+    measure = "SMD", 
+    m1i=m_post_t, m2i=m_post_c, 
+    sd1i=sd_post_t, sd2i=sd_post_c, 
+    n1i = N_t, n2i = N_c, 
+    data = _
+  ) 
+
+Sack_post_pooled <- 
+  metafor::aggregate.escalc(Sacks2011_postscores, cluster = outcome, struct = "ID", addk = TRUE) |> 
+  select(-c(yi:vi)) |> 
+  mutate(sample = "low/medium propensity and high propensity sample")
+
+Sack2011_pooled <- left_join(Sack_pre_pooled, Sack_post_pooled, by = join_by(outcome, sample, N_t, N_c, ki))
 
 
 Sacks2011_est <- 
-  pmap(params, wide_sacks2011_func) |>
-  list_rbind() |> 
+  Sack2011_pooled |> 
   mutate(
 
    analysis_plan = case_when(
@@ -8527,17 +8934,22 @@ Sacks2011_est <-
       outcome == "GSI_total" ~ "Mental health outcomes",
       str_detect(outcome, "SF-36") ~ "Wellbeing and Quality of Life"),
 
-  study = "Sacks et al. 2011",
+   study = "Sacks et al. 2011",
   
+   effect_size = "SMD",
+   sd_used = "Pooled posttest SD",
+   main_es_method = "Raw diff-in-diffs",
   
-  # ppcor imputed
-    ppcor = ppcor_imp,
-    ppcor_methods = "Imputed"
+   # ppcor imputed
+   ppcor = ppcor_imp,
+   ppcor_method = "Imputed"
 
 
 ) |> 
   arrange(sample, outcome)|> 
   mutate(
+    N_start_t = N_t,
+    N_start_c = N_c,
     N_total = N_t + N_c,
     df_ind = N_total,
     
@@ -8621,12 +9033,22 @@ Sacks2011_est <-
       vars = -var_term1_DD
     ),
          vary_id = paste0(outcome, "/", sample)) |> 
+  
   ungroup(); Sacks2011_est
 
 
 
 
 ```
+
+```{r, echo=FALSE}
+
+dat <- 
+  dat |> 
+  bind_rows(Sacks2011_est)
+
+```
+
 
 ### **Sajatovic et al. [-@Sajatovic2009] (Quality-checked)**
 Data was extracted from Table 2 (p. 1186)
@@ -8648,6 +9070,11 @@ Sajatovic2009  <- tibble(
   
   timing = rep(c("3m", "6m", "12m"), each = 6),
   
+    N_start = rep(c(
+    83, 80,
+    84, 80,
+    83, 78
+  ), each = 1, 3),
   
   N = c(
         # 3 months
@@ -8666,11 +9093,6 @@ Sajatovic2009  <- tibble(
         40, 39
         ),
   
-  N_start = rep(c(
-    83, 80,
-    84, 80,
-    83, 78
-  ), each = 1, 3),
   
   
   m_pre = rep(c(
@@ -8738,7 +9160,7 @@ Sajatovic2009_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   )
 
 
@@ -8754,9 +9176,13 @@ Sajatovic2009_est <-
       c("Mental health outcomes/Depression", # HAM-D
         "Mental health outcomes", # YMRS
         "Social functioning (degree of impairment)" # GAS
-      ), each = 1,3),
+      ), 3),
     
     study = "Sajatovic et al. 2009", 
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -8864,8 +9290,7 @@ Sajatovic2009_est <-
 # Adding Sajatovic to data
 dat <- 
   dat |> 
-  bind_rows(Sajatovic2009_est) |> 
-  relocate(study)
+  bind_rows(Sajatovic2009_est)
 ```
 ### **Schrank et al. [-@Schrank2016] (Quality-checked)**
 Data was extracted from Tables 1, 2, and 3 in the same article 
@@ -8886,20 +9311,19 @@ Schrank2016 <-
       "RES"
     ), each = 2,1),
     
+    N_start = 47,
     
     N = rep(c(
-      41, 43
+      43, 41
     ), each = 1, 6),
-    
-    N_start = 47,
     
     m_pre = c(
       3.19, 3.00,
       4.05, 4.14,
-      3.58, 3.44,
-      #  30.70, 33.57,
-      2.29, 2.48,
-      #  4.02, 3.72, 
+      #3.58, 3.44,
+      30.70, 33.57,
+      #2.29, 2.48,
+      4.02, 3.72, 
       2.24, 2.09,
       2.74, 2.71
       ),
@@ -8948,7 +9372,7 @@ Schrank2016_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   )
 
 
@@ -8992,6 +9416,10 @@ Schrank2016_est <-
   ) |> 
   mutate(
     study = "Schrank et al. 2016",
+    
+   effect_size = "SMD",
+   sd_used = "Pooled posttest SD",
+   main_es_method = "Raw diff-in-diffs",
     
     N_total = N_t + N_c,
     df_ind = N_total,
@@ -9096,8 +9524,7 @@ Schrank2016_est <-
 # Adding Schrank to data
 dat <- 
   dat |> 
-  bind_rows(Schrank2016_est) |> 
-  relocate(study)
+  bind_rows(Schrank2016_est) 
 ```
 ### **Schäfer et al. [-@Schäfer]**
 ```{r Schäfer et al. 2019}
@@ -9120,9 +9547,9 @@ schafer2019 <- tibble(
   
   timing = rep(c("Post", "3m", "6m"), each = 21),
   
-  N = rep(c(111, 115, 117), each = 1, 21),
-  
   N_start = rep(c(111, 115, 117), each = 1, 21),
+
+  N = rep(c(111, 115, 117), each = 1, 21),
   
   m_pre = rep(c(
     25.4, 27.5, 28.9,
@@ -9131,7 +9558,7 @@ schafer2019 <- tibble(
     .28, .33, .32,
     .09, .1, 09,
     25.3, 29.4, 28.6,
-    100.5, 110.7, 11.9),
+    100.5, 110.7, 111.9),
     each = 1,3), # fordi der er tre opfølgningsperioder
   
   sd_pre = rep(c(
@@ -9215,7 +9642,7 @@ schafer2019_Relapse_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   ) |> 
   mutate(
     treatment = "Relapse Prevention Training"
@@ -9229,7 +9656,7 @@ schafer2019_Seeking_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   ) |> 
   mutate(
     treatment = "Seeking Safety"
@@ -9243,7 +9670,7 @@ schafer2019_est <-
   arrange(outcome, timing) |> 
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "ASI alcohol severity|ASI drug severity|Drug and alcohol free days") ~ "Alcohol and drug abuse/misuse",
+      str_detect(outcome, "ASI|Drug and alcohol free days") ~ "Alcohol and drug abuse/misuse",
       str_detect(outcome, "BDI-II") ~ "Mental health outcomes/Depression",
       str_detect(outcome, "DERS") ~ "Unused outcomes",
       str_detect(outcome, "PDS|PSS-I") ~ "Mental health outcomes",
@@ -9251,6 +9678,10 @@ schafer2019_est <-
     ),
     
     study = "Schäfer et al. 2019",
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
     
     # ppcor is imputed
     ppcor = ppcor_imp,
@@ -9351,8 +9782,7 @@ schafer2019_est <-
 # Adding Schäfer to data
 dat <- 
   dat |> 
-  bind_rows(schafer2019_est) |> 
-  relocate(study)
+  bind_rows(schafer2019_est)
 ```
 
 ### **Tjaden et al. [-@Tjaden2022]**
@@ -9372,6 +9802,13 @@ Tjaden2021 <- tibble(
   
   timing = rep(c("9m", "18m"), each = 8), 
   
+   N_start = rep(c(
+    80, 78,
+    80, 78,
+    80, 78,
+    80, 78), 
+  each = 1, 2),
+  
   N = c(
     # 9 months
     70, 67,
@@ -9385,12 +9822,6 @@ Tjaden2021 <- tibble(
     63, 58,
     63, 58),
   
- N_start = rep(c(
-    80, 78,
-    80, 78,
-    80, 78,
-    80, 78), 
-  each = 1, 2),
    
   m_pre = rep(c(
     3.32, 3.34,
@@ -9443,7 +9874,7 @@ Tjaden2021_wide <- Tjaden2021 |>
       tidyr::pivot_wider(
         names_from = group,
         names_glue = "{.value}_{group}",
-        values_from = N:last_col()
+        values_from = N_start:last_col()
       ) #|> 
  # arrange(outcome, desc(timing))
 
@@ -9469,8 +9900,8 @@ Tjaden2021_est <- Tjaden2021_wide |>
   study = "Tjaden et al. 2021",
   
   effect_size = "SMD",
-  sd_used = "Posttest SD",
-  main_es_method = "DiD",
+  sd_used = "Pooled posttest SD",
+  main_es_method = "Raw diff-in-diffs",
   
   
   # ppcor imputed
@@ -9634,11 +10065,11 @@ Valiente2022  <- tibble(
   ), 
   each = 2,1),
   
-  N = rep(c(52,61),
-          each = 1,16),
-  
+    
   N_start = rep(c(71, 70), n_distinct(outcome)),
   
+  N = rep(c(52,61),
+          each = 1,16),
   
   m_pre = c(
     
@@ -9743,7 +10174,7 @@ Valiente2022_wide <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   )
 
 # Effect sizes: Estimating G and D (pre-post test) (Not finished yest)
@@ -9757,6 +10188,10 @@ Valiente2022_est <-
     ), c(6,1,9)),
     
     study = "Valiente et al. 2022",
+    
+  effect_size = "SMD",
+   sd_used = "Pooled posttest SD",
+   main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
     ppcor = ppcor_imp, 
@@ -9861,8 +10296,7 @@ Valiente2022_est <-
 # Adding Valiente to data
 dat <- 
   dat |> 
-  bind_rows(Valiente2022_est) |> 
-  relocate(study)
+  bind_rows(Valiente2022_est) 
 ```
 ### **Volpe et al. [-@Volpe2015]**
 ```{r Volpe et al. 2015}
@@ -9881,11 +10315,10 @@ Volpe_2015 <- tibble(
     "Control group"
   ), each = 1, 4), 
   
-  
-  N = rep(c(21,20), each = 1, 4), 
-  
   N_start = rep(c(25)),
-  
+
+  N = rep(c(21,20), each = 1, 4), 
+
   m_pre = c(
     49.95, 51.2, # Brief Psychiatric Rating Scale
     9.74, 9.9,   # Patient Health Questionnaire
@@ -9924,7 +10357,7 @@ Volpe2015_est <-
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from = N_start:last_col()
   ) |> 
   mutate(
     analysis_plan = case_when(
@@ -9934,6 +10367,10 @@ Volpe2015_est <-
     
     
     study = "Volpe et al. 2015",
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    main_es_method = "Raw diff-in-diffs",
+    
     
     # ppcor imputed
     ppcor = ppcor_imp, 
@@ -10060,8 +10497,7 @@ Volpe2015_est <-
 # Adding Volpe to data
 dat <- 
   dat |> 
-  bind_rows(Volpe2015_est) |> 
-  relocate(study)
+  bind_rows(Volpe2015_est)
 ```
 
 ### **Wojtalik et al. [-@Wojtalik2022]**
@@ -10086,14 +10522,14 @@ Wojtalik2019 <- tibble(
     "Symptoms composite"), 
     each = 2,2)),
   
+   N_start = rep(c(
+    58, 44), each = 1,4),
+ 
   N = c(rep(c(58, 44), each = 1,2),
         rep(c(26, 23),each = 1,2)),
   
-  N_start = rep(c(
-    58, 44
-  ), each = 1,4),
   
-  emm_pre = c(
+  b_emm_pre = c(
     # ITT
     #    34.4, 38,  # Baseline Cognition composite 
     49.5, 51.0,# Baseline Social adjustment composite
@@ -10126,7 +10562,7 @@ Wojtalik2019 <- tibble(
   #), each = 1,1)
   ),
   
-  se_pre = rep(c(
+  se_emm_pre = rep(c(
     # ITT
     #    1.5, 1.7,  # Baseline Cognition composite 
     1.3, 1.4,  # Baseline Social adjustment composite
@@ -10139,7 +10575,7 @@ Wojtalik2019 <- tibble(
     
   ), each = 1,1),
   
-  emm_post = c(
+  b_emm_post = c(
     # ITT
     #    38.4, 37.1, # 9 months Cognition composite
     #    54.1, 56.8, # 9 months Social adjustment composite
@@ -10160,7 +10596,7 @@ Wojtalik2019 <- tibble(
     
   ),
   
-  se_post = c(
+  se_emm_post = c(
     # ITT
     #    1.6, 1.9, # 9 months Cognition composite
     #    1.4, 1.7, # 9 months Social adjustment composite
@@ -10195,11 +10631,12 @@ Wojtalik2019_wide <- Wojtalik2019 |>
   tidyr::pivot_wider(
     names_from = group,
     names_glue = "{.value}_{group}",
-    values_from = N:last_col()
+    values_from =  N_start:last_col()
   ) |> 
   mutate(
     t_val = c(0.8, 0.43, 1.60, 0.60),
-    d_paper = c(0.23, 0.11, 0.51, 0.18)
+    es_paper = c(0.23, 0.11, 0.51, 0.18),
+    es_paper_type = "Glass' delta (assumed)"
   
   ); Wojtalik2019_wide
 
@@ -10212,6 +10649,10 @@ Wojtalik2019_est <-
     
     study = "Wojtalik et al. 2019", 
     
+    effect_size = "SMD",
+    sd_used = "Pooled pretest SD - Posttest SD not reported",
+    main_es_method = "Raw diff-in-diffs",
+    
     # ppcor imputed
     ppcor_method = "Not computable - t values used"
     
@@ -10220,10 +10661,10 @@ Wojtalik2019_est <-
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    m_diff = emm_post_t - emm_post_c,
+    mean_diff = b_emm_post_t - b_emm_post_c,
     sd_pool = sqrt(((N_t-1)*sd_pre_t^2 + (N_c-1)*sd_pre_c^2)/(N_t + N_c - 2)),
       
-    d_adj = m_diff/sd_pool,
+    d_adj = mean_diff/sd_pool,
     vd_adj = d_adj^2/t_val^2 + d_adj^2/(2*df_ind),
     Wd_adj = d_adj^2/t_val^2,
     
@@ -10273,11 +10714,9 @@ Wojtalik2019_est <-
 ### Should be cheked by MVH: adds a lot of new variables
 ```{r, echo=FALSE}
 # Adding Wojtalik to data
-
-dat_test <- 
+dat <- 
   dat |> 
-  bind_rows(Wojtalik2019_est) |> 
-  relocate(study)
+  bind_rows(Wojtalik2019_est) 
 ```
 
 ### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021] (Change var names)**
