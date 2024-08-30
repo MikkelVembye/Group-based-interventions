@@ -96,7 +96,7 @@ McCay2014_est <-
       R2 = ppcor,
       add_name_to_vars = "_adj",
       vars = -var_term1_adj
-    ),
+    )
     
   ) |> 
   ungroup(); McCay2014_est 
