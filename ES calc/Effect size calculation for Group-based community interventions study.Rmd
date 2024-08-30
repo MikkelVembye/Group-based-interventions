@@ -10822,7 +10822,7 @@ Wuthrich2013_2021_smd <-
     
     N = rep(c(27, 35), n_distinct(outcome)), # From Table 2, 2013, p. 783
     
-    emm_pre = c(
+    b_emm_pre = c(
       
       6.33, 5.81,    # ADIS primary disorder severity (from Table 3, 2013, p. 784)
       5.2, 4.58,     # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
@@ -10835,7 +10835,7 @@ Wuthrich2013_2021_smd <-
       
     ),
     
-    emm_post = c(
+    b_emm_post = c(
       
       3.46, 5.15,   # ADIS primary disorder severity (from Table 3, 2013, p. 784)
       2.68, 4.01,   # ADIS mean anxiety disorder severity (from Table 2, 2021, p. 445)
@@ -10845,6 +10845,19 @@ Wuthrich2013_2021_smd <-
       5.84, 8.33,   # Geriatric Anxiety Inventory (from Table 3, 2013, p. 784)
       46.54, 47.24, # Penn State Worry Questionnaire (from Table 3, 2013, p. 784)
       47.79, 43.56  # Short Form-12 (Mental) (from Table 3, 2013, p. 784)
+      
+    ),
+    
+    se_emm_post = c(
+      
+      0.29, 0.24,
+      0.307, .227,
+      .319, .260,
+      1.44, 1.23,
+      0.169, 0.194,
+      1.20, 1.04,
+      2.80, 2.41,
+      2.26, 1.97
       
     ),
     
@@ -10870,12 +10883,12 @@ Wuthrich2013_2021_smd
 
 Wuthrich2013_2021_wide <- 
   Wuthrich2013_2021_smd |>
-  select(-q) |> 
   mutate(group = case_match(group, "CBT" ~ "t", "Waitlist" ~ "c")) |> 
   pivot_wider(
     names_from = group,
     values_from = N_start:sd_pre
-  )
+  ) |> 
+  rename(n_covariates = q)
 
 #Wuthrich2013_2021_wide
 ```
@@ -10885,64 +10898,40 @@ Calculating effect sizes and conducting a small number of clusters correction, a
 ```{r Wuthrich20132021SMDcalc}
 
 Wuthrich2013_2021_es_smd <- 
-  Wuthrich2013_2021_smd |> 
-  summarise(
+  Wuthrich2013_2021_wide |> 
+  mutate(
     
     effect_size = "SMD",
     sd_used = "Pooled pretest SD",
     
     study = "Wuthrich et al.",
-    es_calc_method = "DiD emmeans",
+    main_es_method = "Posttest emmeans",
     
-    ppcor = NA,  
-    ppcor_calc_method = "Not relevant",
     
     R2 = R2_imp,
-    R2_calc_method = "Imputed",
+    R2_method = "Imputed",
     
-    N_t = N[1],
-    N_c = N[2],
-    N_total = sum(N),
+    N_total = N_t + N_c,
     
     df_ind = N_total,
     
-    n_covariates = q[1],
-    
-    b_adj_emm = emm_post[1] - emm_post[2],
-    
     # Reverting outcomes so all outcomes has the same direction
-    b_adj_emm = if_else(unique(outcome) != "SF12", b_adj_emm * -1, b_adj_emm),
+    b_emm = if_else(unique(outcome) != "SF12", (b_emm_post_t - b_emm_post_c) * -1, b_emm_post_t - b_emm_post_c),
+    sd_pool = sqrt(((N_t-1)*sd_pre_t^2 + (N_c-1)*sd_pre_c^2)/(N_t + N_c - 2)), 
     
-    dif_t_emm = emm_post[1] - emm_pre[1],
-    dif_c_emm = emm_post[2] - emm_pre[2],
-    
-    
-    DD_emm = dif_t_emm - dif_c_emm,
-    # Reverting outcomes so all outcomes has the same direction
-    DD_emm = if_else(unique(outcome) != "SF12", DD_emm * -1, DD_emm),
-    sd_pool = sqrt(sum((N - 1) * sd_pre^2) / (N_total-2)),
-    
-    d = DD_emm/sd_pool,
-    vd = sum(1/N) + d^2/(2*df_ind),
-    Wd = sum(1/N),
-    
-    d_alt = b_adj_emm/sd_pool,
-    vd_alt = sum(1/N) + d_alt^2/(2*df_ind),
-    Wd_alt = sum(1/N),
+    d_adj = b_emm/sd_pool,
+    vd_adj = (1/N_t + 1/N_c) * (1-R2) + d_adj^2/(2*df_ind),
+    Wd_adj = (1/N_t + 1/N_c) * (1-R2),
     
     J = 1 - 3/(4*df_ind-1),
     
-    g = J * d,
-    vg = sum(1/N) + g^2/(2*df_ind),
-    Wg = Wd,
-    
-    g_alt = J * d_alt,
-    vg_alt = sum(1/N) + g_alt^2/(2*df_ind),
-    Wg_alt = sum(1/N),
-    
-    .by = outcome
+    g_adj= J * d_adj,
+    vg_adj = (1/N_t + 1/N_c) * (1-R2) + g_adj^2/(2*df_ind),
+    Wg_adj = (1/N_t + 1/N_c) * (1-R2),
+
     
   ) |> 
+  rowwise() |> 
   mutate(
     
     # Average cluster size in treatment group
@@ -10958,53 +10947,29 @@ Wuthrich2013_2021_es_smd <-
     gamma_sqrt = VIVECampbell::gamma_1armcluster(
       N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
       ),
-
     
-    gt = g * gamma_sqrt,
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = avg_cl_size), 
+    omega = 1 - 3 / (4 * df_adj - 1), 
+    
+    gt_adj = omega * d_adj * gamma_sqrt, 
     VIVECampbell::vgt_smd_1armcluster(
       N_cl_grp = N_t, 
       N_ind_grp = N_c, 
       avg_grp_size = avg_cl_size, 
       ICC = icc, 
-      g = gt, 
-      model = "emmeans",
-      cluster_adj = TRUE,
-      R2 = R2,
-      q = n_covariates
-      ),
-    
-   
-    
-    gt_alt = g_alt * gamma_sqrt,
-    vgt_smd_1armcluster(
-      N_cl_grp = N_t, 
-      N_ind_grp = N_c, 
-      avg_grp_size = avg_cl_size, 
-      ICC = icc, 
-      g = gt_alt, 
-      model = "emmeans",
-      cluster_adj = TRUE,
-      R2 = R2,
-      q = n_covariates,
-      add_name_to_vars = "_alt",
-      vars = vgt_alt:Wgt_alt
-      ), 
-    
-    gt_alt_type = "Posttest emmeans",
-    
-    .by = outcome
-    
-  )
+      g = gt_adj, 
+      model = "emmeans", 
+      cluster_adj = FALSE, 
+      R2 = R2, 
+      q = n_covariates, 
+      add_name_to_vars = "_adj", 
+      vars = -c("var_term1_adj")
+      )
+  
+  ) |> 
+  ungroup()
 
-# Wuthrich2013_2021_es_smd
 
-Wuthrich2013_2021_smd_est <- 
-  left_join(Wuthrich2013_2021_wide, Wuthrich2013_2021_es_smd) |> 
-  relocate(study, .before = outcome)
-
-Wuthrich2013_2021_smd_est
-
-#rm(Wuthrich2013_2021_wide, Wuthrich2013_2021_es_smd)
 
 ```
 
@@ -11019,7 +10984,7 @@ Wuthrich2013_OR_dat <-
     study = "Wuthrich et al.",
     outcome = "Recovery rates",
     effect_size = "OR",
-    es_calc_method = "Proportions",
+    main_es_method = "Proportions",
     
     N_start_t = 27,
     N_start_c = 35,
@@ -11042,22 +11007,7 @@ Wuthrich2013_OR_dat <-
     VIVECampbell::OR_calc(
       p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
       ICC = icc, avg_cl_size = avg_cl_size, n_cluster_arms = 1
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.05
-    OR_calc(
-      p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
-      ICC = ICC_005, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc005", vars = DE_icc005:vln_OR_C_icc005
-    ),
-    
-    # Calculating the sampling variance of the odds ratio based on ICC = 0.2
-    OR_calc(
-      p1 = p_t, p2 = p_c, n1 = N_t, n2 = N_c, 
-      ICC = ICC_02, avg_cl_size = avg_cl_size, n_cluster_arms = 1,
-      add_name_to_vars = "_icc02", vars = DE_icc02:vln_OR_C_icc02
     )
-    
     
   )
 
@@ -11066,7 +11016,7 @@ Wuthrich2013_OR_dat
 
 # Amalgamating the SMD and OR results
 Wuthrich2013_2021_est <- 
-  bind_rows(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat) |> 
+  bind_rows(Wuthrich2013_2021_es_smd, Wuthrich2013_OR_dat) |> 
   mutate(
     vary_id = outcome,
     analysis_plan = case_when(
@@ -11094,10 +11044,10 @@ Wuthrich2013_2021_est
 ```{r, echo=FALSE}
 # Adding Wuthrich to data
 
-dat_test <- 
+dat <- 
   dat |> 
-  bind_rows(Wuthrich2013_2021_smd_est) |> 
-  relocate(study)
+  bind_rows(Wuthrich2013_2021_est)
+
 ```
 
 ## Amalgamation of data
