@@ -11049,7 +11049,6 @@ dat <-
   bind_rows(Wuthrich2013_2021_est)
 
 ```
-
 ## Amalgamation of data
 
 Amalgamating effect size data
