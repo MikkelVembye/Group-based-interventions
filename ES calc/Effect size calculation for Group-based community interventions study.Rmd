@@ -6179,7 +6179,7 @@ Results are extracted from Table 3 (p. 6) and Table 4 (p. 7). Sample size data i
 McCay2014_est <-
   tibble(
     
-    study = "McCay",
+    study = "McCay 2007/2014",
     
     effect_size = "SMD",
     sd_used = "Unknown - d was calculated from ANOVA F-val",
@@ -10711,7 +10711,6 @@ Wojtalik2019_est <-
   ungroup(); Wojtalik2019_est
 ```
 
-### Should be cheked by MVH: adds a lot of new variables
 ```{r, echo=FALSE}
 # Adding Wojtalik to data
 dat <- 
@@ -11040,7 +11039,7 @@ Wuthrich2013_2021_est
 
 
 ```
-### Should be cheked by MVH: adds a lot of new variables
+
 ```{r, echo=FALSE}
 # Adding Wuthrich to data
 
