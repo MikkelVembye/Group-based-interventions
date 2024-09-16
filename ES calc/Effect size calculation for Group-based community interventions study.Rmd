@@ -6189,7 +6189,7 @@ McCay2006_est <-
     outcome = c("MES", "QLS total", "PANSS Negative", "PANSS total"),
     analysis_plan = c(
       "Self-esteem ", "Wellbeing and Quality of Life", 
-      "Negative symptoms", "all mental health outcomes/Symptoms of psychosis"
+      "Negative symptoms", "Mental health outcomes/Symptoms of psychosis"
       ),
     
     
@@ -6385,6 +6385,11 @@ McCay2014_est <-
     
     F_val = c(6.5, 11.67, 6.15),
     main_es_method = "Repeated ANOVA (group x time)",
+    
+    analysis_plan = c(
+      "Self-esteem", "Wellbeing and Quality of Life", 
+      "Hope, Empowerment & Self-efficacy"
+      ),
     
     d_adj = sqrt((F_val * N_total)/(N_t*N_c)) * sqrt(1-ppcor^2),
     vd_adj = (1/N_t + 1/N_c) * (1-ppcor^2) + d_adj^2/(2*N_total),
