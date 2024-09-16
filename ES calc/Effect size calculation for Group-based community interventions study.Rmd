@@ -10124,9 +10124,9 @@ Somers2017_est <-
     ),
     
     analysis_plan = c(
-      "social functioningen",
-      "social functioningen",
-      "all mental health outcomes",
+      "Social functioning",
+      "social functioning",
+      "Mental health outcomes",
       "Alcohol and drug abuse/misuse",
       "Wellbeing and Quality of Life"
     ),
