@@ -9608,7 +9608,7 @@ Saloheimo2016_est <-
 ```
 
 ```{r, echo=FALSE}
-dat_t <- 
+dat <- 
   dat |> 
   bind_rows(Saloheimo2016_est)
 ```
@@ -10280,7 +10280,7 @@ Somers2017_est <-
 
 ```{r, echo= FALSE}
 
-dat_t <- # Not included in the covariaters sheet
+dat <- # Not included in the covariaters sheet
   dat |> 
   bind_rows(Somers2017_est)
 
