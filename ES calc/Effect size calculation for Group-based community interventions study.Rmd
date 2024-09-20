@@ -9552,8 +9552,8 @@ Saloheimo2016_est <-
   mutate( # Attempt to make cluster corrected estimates. Has to be checked!
     
     # "Therapists act as coaches for groups of 4-6 patients" (p. 3)
-    avg_cl_size = 4, 
-    avg_cl_type = "From study (p. 3)",
+    avg_cl_size = 3.47, 
+    avg_cl_type = "From study (p. 4)",
     
     # Imputed icc value
     icc = ICC_01,
