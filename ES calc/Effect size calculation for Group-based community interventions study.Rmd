@@ -59,7 +59,7 @@ R2_imp <- 0
 grp_size_imp <- 8
 
 # Loading data used to calculate population-based effect size estimates
-GAF_pop_res <- readRDS("ES calc/GAF_res.rds")
+GAF_pop_res <- readRDS("GAF_res.rds")
 
 ```
 
@@ -394,7 +394,7 @@ dat <-
 
 Entering data from Table 3 (p. 495).
 
-```{r Barbic et al. 2009}
+```{r Barbic et al 2009}
 Barbic2009 <- tibble(
   outcome = rep(c("Hope Index", "Empowerment Scale", "Quality of Life", "Recovery Assessment"), each = 2),
   group = rep(c("Recovery Workbook", "Control"), dplyr::n_distinct(outcome)),
@@ -729,7 +729,7 @@ dat <-
 
 
 ### **Bækkelund et al. [-@Bækkelund2022]**
-```{r Bækkelund et al. 2022}
+```{r Bækkelund et al 2022}
 Bækkelund2022 <- tibble(
   group = rep(c("Intervention", #Intervention group
                 "Control"),     #Control group
@@ -2332,7 +2332,7 @@ dat <-
 ### **Dyck et al. [-@Dyck2000]**
 
 Data from table 2 (p. 516) containing means and standard deviation
-```{r Dyck et al. 2000}
+```{r Dyck et al 2000}
 Dyck2000 <- tibble(
   group = as.factor(c("Multiple-family group", 
                           "Standard care")),
@@ -2868,7 +2868,7 @@ dat <-
 
 Entering data from Table 2 (p. 872)   
 
-```{r Gatz et al. 2007}
+```{r Gatz et al 2007}
 Gatz2007 <- tibble(
   outcome = rep(c("ASI alcohol", "ASI drug", "GSI", "PSS", "Coping skills"), each = 2),
   group = rep(c("Intervention", "Comparison"), dplyr::n_distinct(outcome)),
@@ -3580,7 +3580,7 @@ dat <-
 
 ### **Hagen et al. [-@Hagen2005]**
 
-```{r Hagen et al. 2018}
+```{r Hagen et al 2018}
 # Data from table 2, p. 39 
 Hagen2005 <- tibble(
   
@@ -3812,7 +3812,7 @@ dat <-
 ```
 
 ### **Haslam et al. [-@Haslam2019]
-```{r Haslam et al. 2019}
+```{r Haslam et al 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
 # means with standard errors for post-measurements.
 
@@ -3992,7 +3992,7 @@ dat <-
 
 
 ### **Hilden et al. [-@Hilden2021]
-```{r Hilden et al. 2021}
+```{r Hilden et al 2021}
 # Table 2, p. 181
 Hilden2021 <- tibble(
   outcome = rep(c(
@@ -4205,7 +4205,7 @@ dat <-
 ```
 
 ### **Himle et al. [-@Himle2014]**
-```{r Himle et al. 2014}
+```{r Himle et al 2014}
 # From table 2, p. 174
 Himle2014 <- 
   tibble(
@@ -4452,7 +4452,7 @@ dat <-
 ```
 
 ### **Izquierdo et al. [-@Izquierdo2021] (Excluded because flawed result reproted. See calculations below)**
-```{r Izquierdo et al. 2021}
+```{r Izquierdo et al 2021}
 # Rows 1-10 is data from Table 3, p. 10 and rows 11-22 is from Table 4 p. 13. 
 
 izquierdo2021 <- tibble(
@@ -4668,7 +4668,7 @@ izquierdo2021_est <-
 ```
 
 ### **Jacob et al. [-@Jacob2010] (Quality-checked)**
-````{r Jacob et al. 2010}
+```{r Jacob et al 2010}
 Jacob2010 <- tibble(
   
   group = as.factor(rep(c("Intervention", "Control"), each = 1, 10)), 
@@ -4877,7 +4877,7 @@ dat <-
 ### **James et al. [-@James2004]**
 
 
-```{r James et al. 2004}
+```{r James et al 2004}
 James2004 <- tibble(
   group = rep(c("Treatment", "Control"), each = 1,5),
  
@@ -5064,7 +5064,7 @@ dat <-
 ```
 
 ### **Kanie et al. [-@Kanie2019] (Quality-checked)**
-```{r Kanie et al. 2019}
+```{r Kanie et al 2019}
 # Taken from table 4, p. 8
 Kanie2019 <- tibble(
   group = as.factor(rep(c("SCIT", "TAU"), each = 1,5)), 
@@ -5306,7 +5306,7 @@ dat <-
 ```
 
 ### **Lim et al. [-@Lim2020]**
-```{r Lim et al. 2020}
+```{r Lim et al 2020}
 # Data from table 2 (p.5)  containing means, standard deviation and ANOVA estimations
 # with F-values and η2. Table 3 (p.6) has the same values but with ANCOVAS (i.e. indcludes covariates)
 
@@ -5511,7 +5511,7 @@ dat <-
 ### **Lloyd-Evans et al. [-@Lloyd-Evans2020]**
 
 From Table 2 on page 9
-```{r Lloyd-Evans et al. 2020}
+```{r Lloyd-Evans et al 2020}
 # Dataextraction from Lloyd-Evans (2020)
 # Attempt from Jakob
 
@@ -5879,7 +5879,7 @@ dat <-
 
 We extracted data from Table 2 (p. 141)
 
-```{r Madigan et al. 2013}
+```{r Madigan et al 2013}
 # Table 2, p. 141
 Madigan2013 <- tibble(
   group = rep(c("GPI",
@@ -6455,7 +6455,7 @@ dat <-
 
 
 ### **Michalak et al. [-@Michalak2015]**
-```{r Michalak et al. 2015}
+```{r Michalak et al 2015}
 Michalak_2015 <- tibble(
   outcome = rep(c(
     "HAM-D",   # Hamilton Depression Rating Scale
@@ -6726,7 +6726,7 @@ dat <-
 
 ### **Morley et al. [-@Morley2014] (Quality-checked)**
 Data from table 2 containing means and standard deviation on page 136
-```{r Morley et al. 2014}
+```{r Morley et al 2014}
 # Data from table 2 containing means and standard deviation on page 136
 
 Morley2014 <- tibble(
@@ -7302,7 +7302,7 @@ dat <-
 
 ### **Patterson et al. [-@Patterson2003] (Quality-checked)**
 Data was extracted from Table 3 (p. 21)
-```{r Patterson et al. 2003}
+```{r Patterson et al 2003}
 # Data from Table 3 (p. 21)  containing means, standard deviation. It also contains
 # Time X Interaction coefficients with p-values (estimated with ANOVA) 
 
@@ -7530,7 +7530,7 @@ dat <-
 
 ### **Popolo et al. [-@Popolo2019] (Quality-checked) Hast to be checked by MVH: this adds these variable => within_group_d**
 Data was extracted from Table 2 (p. 351)
-```{r Popolo et al. 2019}
+```{r Popolo et al 2019}
 # Data from Table 2 containing means and standard deviation + within effect size.
 # Table also contains "between group-group post treatment effect size at post-tratement"
 # with a coefficient and "Post hoc power" on page 351
@@ -7758,7 +7758,7 @@ dat <-
 
 ### **Rabenstein et al. [-@Rabenstein2015] (Quality-checked)**
 Data was extracted from Table 2 (p.6)
-```{r Rabenstein et al. 2015}
+```{r Rabenstein et al 2015}
 # Based on Table 2, p. 6
 Rabenstein2015 <- 
   tibble(
@@ -8032,7 +8032,7 @@ dat <-
 
 
 ### **Rosenblum et al. [-@Rosenblum2014]**
-```{r Rosenblum et al. 2014}
+```{r Rosenblum et al 2014}
 # Extracting data from table 3 p. 85 
 
 Rosenblum2014 <- tibble(
@@ -8317,7 +8317,7 @@ dat <-
 ```
 
 ### **Russinova et al. [-@Russinova2018]**
-```{r Russinova et al. 2018}
+```{r Russinova et al 2018}
 # Taken from table 
 Russinova2018 <- tibble(
   group = rep(c("VEP", "Control group"),
@@ -8928,7 +8928,7 @@ dat <-
 ```
 
 ### **Sacks et al. [-@Sacks2011]**
-```{r Sacks et al. 2011}
+```{r Sacks et al 2011}
 # This study makes estimations based on two different analysis based on their
 # propensity scores (what i read as the level of control) - i will keep them
 # in the same tibble - "sample" indicates different propensity category. 
@@ -9231,7 +9231,7 @@ dat <-
 
 ### **Sajatovic et al. [-@Sajatovic2009] (Quality-checked)**
 Data was extracted from Table 2 (p. 1186)
-```{r Sajatovic et al. 2009}
+```{r Sajatovic et al 2009}
 # Data from Table 2 (p. 1186) provides mean and standard deviation. Table also 
 # indcludes p-values indicating "Test of significance between the two groups 
 # using repeated-measures analysis with PROC MIXED " (Sajatovic et al. 2009: 1186)
@@ -9616,7 +9616,7 @@ dat_t <-
 
 ### **Schrank et al. [-@Schrank2016] (Quality-checked)**
 Data was extracted from Tables 1, 2, and 3 in the same article 
-```{r Schrank et al. 2016}
+```{r Schrank et al 2016}
 # Based on table 1, 2 and 3 in the same article 
 Schrank2016 <- 
   tibble(
@@ -9849,7 +9849,7 @@ dat <-
   bind_rows(Schrank2016_est) 
 ```
 ### **Schäfer et al. [-@Schäfer]**
-```{r Schäfer et al. 2019}
+```{r Schäfer et al 2019}
 
 # Taken from table 2, p. 9 
 schafer2019 <- tibble(
@@ -10288,7 +10288,7 @@ dat_t <- # Not included in the covariaters sheet
 
 
 ### **Tjaden et al. [-@Tjaden2022]**
-```{r Tjaden et al. 2021}
+```{r Tjaden et al 2021}
 Tjaden2021 <- tibble(
   group = rep(c("Ressource group + FACT", #Ressource group
                 "FACT"),                  #Control group
@@ -10534,7 +10534,7 @@ dat <-
 
 
 ### **Valiente et al. [-@Valiente2022]**
-```{r Valiente et al. 2022}
+```{r Valiente et al 2022}
 # Data from Table 3 and Table  4 (p. 4)  containing means, standard deviation. It also contains
 # difference Morris' d and p
 
@@ -10801,7 +10801,7 @@ dat <-
   bind_rows(Valiente2022_est) 
 ```
 ### **Volpe et al. [-@Volpe2015]**
-```{r Volpe et al. 2015}
+```{r Volpe et al 2015}
 Volpe_2015 <- tibble(
   # Taken from table 2, p. 19
   outcome = rep(c(
@@ -11551,40 +11551,7 @@ dat <-
   bind_rows(Wuthrich2013_2021_est)
 
 ```
-## Amalgamation of data
-
-Amalgamating effect size data
-
-```{r, include=FALSE, eval=FALSE}
-
-#select_across_df <- function(dataframes = list(), list_labels){
-#  
-#  map_dfr(dataframes, ~ select(., !!!list_labels))
-#  
-#}
-#
-## Extend variables
-#var_label <- c(
-#  "study", "es_method", "ppcor", "ppcor_type", "Nt", "Nc", "N_tot",
-#  "df_ind", "d",  "vd", "Wd", "g", "vg", "Wg", # Continue here more variables are needed
-#  "vary_id"
-#)
-#
-#es_dat <- 
-#  select_across_df(
-#    list(
-#      Timmermans2012_est
-#    ),
-#    
-#    var_label
-#
-#); es_dat
-
-
-
-```
-
-Amalgating covariates and effect size data
+## Amalgating covariates and effect size data
 ```{r dataamalgamation, eval=FALSE}
 # REMEMBER TO REMOVE EMPOWERMENT OUTCOME FROM BARBIC2009
 
@@ -11684,10 +11651,8 @@ select(test_dat, varifier, vary_id)
 ```
 
 
-
-
 ## Using extant data to estimate population standard deviations
-```{r}
+```{r, eval=FALSE}
 # Function contain ANOVA estimation techniques from Fitzgerald & Tipton 2024
 population_SMD <- 
   function(data){
@@ -11724,7 +11689,7 @@ population_SMD <-
 
 GAF population measures
 
-```{r}
+```{r, eval=FALSE}
 
 GAF_dat <- 
   dat |> 
@@ -11752,7 +11717,7 @@ ggplot(data.frame(x = c(0, 100)), aes(x)) +
 GAF_res <- population_SMD(GAF_dat_restricted)
 GAF_res
 
-saveRDS(GAF_res, "ES calc/GAF_res.rds")
+#saveRDS(GAF_res, "ES calc/GAF_res.rds")
 
 ```
 
