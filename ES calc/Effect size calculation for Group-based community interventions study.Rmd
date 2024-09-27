@@ -59,7 +59,7 @@ R2_imp <- 0
 grp_size_imp <- 8
 
 # Loading data used to calculate population-based effect size estimates
-GAF_pop_res <- readRDS("GAF_res.rds")
+ GAF_pop_res <- readRDS("GAF_res.rds")
 
 ```
 
@@ -370,8 +370,8 @@ Acarturk2022_est <-
   mutate(
     vary_id = paste0(outcome, "/", timing),
     analysis_plan = case_when(
-      outcome == "HSCL-25" ~ "Mental health outcomes",
-      outcome == "PCL-5" ~ "Mental health outcomes",
+      outcome == "HSCL-25" ~ "All mental health outcomes",
+      outcome == "PCL-5" ~ "All mental health outcomes",
       outcome == "PSYCHLOPS" ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_  # Fallback in case of unexpected outcomes
     )
@@ -455,7 +455,7 @@ Barbic2009_est <-
   mutate(
     analysis_plan = rep(
       c("Hope, Empowerment & Self-efficacy", "Wellbeing and Quality of Life", 
-        "Mental health outcomes/Hope, Empowerment & Self-efficacy"), 
+        "All mental health outcomes/Hope, Empowerment & Self-efficacy"), 
       c(2, 1, 1))
   ) |> 
   rowwise() |> 
@@ -594,7 +594,7 @@ Bond2015_continious <-
     m_post_c = c(4.14, 10.44), 
     sd_post_c = c(0.57, 23.07),
     
-    analysis_plan = c("Mental health outcomes/Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
+    analysis_plan = c("All mental health outcomes/Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
@@ -840,7 +840,7 @@ Bækkelund2022_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "GAF-S") ~ "Social functioning (degree of impairment)",
-      str_detect(outcome, "SCL-90 R") ~ "Mental health outcomes"),
+      str_detect(outcome, "SCL-90 R") ~ "All mental health outcomes"),
     
     main_es_method = "diff-in-diffs",
     
@@ -1306,9 +1306,9 @@ Cano_vindel2021_est <-
   rename(ppcor = tr_reliability) |> 
   mutate(
     analysis_plan = case_when(
-      outcome == "GAD-7" ~ "Mental health outcomes/Anxiety",
-      outcome == "PHQ-9" ~ "Mental health outcomes/Depression",
-      outcome == "PHQ15" ~ "Mental health outcomes",
+      outcome == "GAD-7" ~ "All mental health outcomes/Anxiety",
+      outcome == "PHQ-9" ~ "All mental health outcomes/Depression",
+      outcome == "PHQ15" ~ "All mental health outcomes",
       str_detect(outcome, "Funct") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "QoL") ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
@@ -1544,7 +1544,7 @@ Craigie2009_est <-
   left_join(ppcors_Craigie2009, by = join_by(analysis, outcome)) |> 
   mutate(
   
-  analysis_plan = rep(c("Mental health outcomes/Depression", "Mental health outcomes/Anxiety", 
+  analysis_plan = rep(c("All mental health outcomes/Depression", "All mental health outcomes/Anxiety", 
                         "Wellbeing and Quality of Life"), 2),  
   effect_size = "SMD",
   sd_used = "Pooled posttest SD",
@@ -1798,7 +1798,7 @@ Crawford2012_est <-
   arrange(outcome, timing) |> 
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "Positive") ~ "Mental health outcomes/Symptoms of psychosis",
+      str_detect(outcome, "Positive") ~ "All mental health outcomes/Symptoms of psychosis",
       str_detect(outcome, "function") ~ "Social functioning (degree of impairment)",
       outcome == "Wellbeing" ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
@@ -2385,7 +2385,7 @@ Dyck2000_wide <-
 Dyck2000_est <-           
   Dyck2000_wide |>
   mutate(
-    analysis_plan = "Mental health outcomes/Negative Symptoms",
+    analysis_plan = "All mental health outcomes/Negative Symptoms",
     
     F_val = 6.1,
   
@@ -2846,7 +2846,7 @@ Timmermans2012_est <-
            outcome == "Empoverment"  ~  "Hope, Empowerment & Self-efficacy", 
            outcome == "Hope"  ~ "Hope, Empowerment & Self-efficacy", 
            outcome == "Quality"  ~ "Wellbeing and Quality of Life", 
-           outcome == "Self-e"  ~ "Mental health outcomes", 
+           outcome == "Self-e"  ~ "All mental health outcomes", 
            outcome == "Loneliness"  ~ "Loneliness"
          )
       ) |> 
@@ -2924,7 +2924,7 @@ Gatz2007_est <-
     
     analysis_plan = c(
       "Alcohol and drug abuse/misuse", "Alcohol and drug abuse/misuse",
-      "Mental health outcomes", "Mental health outcomes", "Hope, Empowerment & Self-efficacy"
+      "All mental health outcomes", "All mental health outcomes", "Hope, Empowerment & Self-efficacy"
     ),
     
     N_total = N_t + N_c,
@@ -3038,7 +3038,7 @@ Gonzalez2007_est <-
     
     analysis_plan = c(
       "Social functioning (degree of impairment)",
-      "All mental health outcomes"
+      "All mental health outcomes health outcomes"
     ),
     
     effect_size = "SMD",
@@ -3241,7 +3241,7 @@ Gordon2018_est <-
       ), 
     
     analysis_plan = case_when(
-      outcome == "DASS-21" ~ "Mental health outcomes",
+      outcome == "DASS-21" ~ "All mental health outcomes",
       str_detect(outcome, "SSPA|LSP") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "QLS") ~ "Wellbeing and Quality of Life",
       TRUE ~ NA_character_
@@ -3560,7 +3560,7 @@ Gutman2019_est <-
   vary_id = outcome,
 
   analysis_plan = case_when(
-      str_detect(outcome, "PSS") ~ "Mental health outcomes",
+      str_detect(outcome, "PSS") ~ "All mental health outcomes",
       str_detect(outcome, "WHO") ~ "Wellbeing and Quality of Life"),
     
   ) |> 
@@ -3680,9 +3680,9 @@ Hagen2005_est <-
   mutate(
     
     analysis_plan = case_when(
-      str_detect(outcome, "SCL-90") ~ "Mental health outcomes",
-      str_detect(outcome, "BAI") ~ "Mental health outcomes/Anxiety",
-      str_detect(outcome, "BDI") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "SCL-90") ~ "All mental health outcomes",
+      str_detect(outcome, "BAI") ~ "All mental health outcomes/Anxiety",
+      str_detect(outcome, "BDI") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "IIP-64-C") ~ "Social functioning (degree of impairment)",
       .default = NA_character_
     ),
@@ -3889,8 +3889,8 @@ Haslam2019_est <- tibble(
   
   analysis_plan = case_when(
       str_detect(outcome, "Loneliness") ~ "Loneliness",
-      str_detect(outcome, "Depression") ~ "Mental health outcomes/Depression",
-      str_detect(outcome, "Social Anxiety") ~ "Mental health outcomes",
+      str_detect(outcome, "Depression") ~ "All mental health outcomes/Depression",
+      str_detect(outcome, "Social Anxiety") ~ "All mental health outcomes",
       str_detect(outcome, "General practitioner vists|Multiple group memberships") ~ "Unused outcomes",
       .default = NA_character_
     ),
@@ -4072,8 +4072,8 @@ Hilden2021_est <-
   Hilden2021_wide |>
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "BSL-23 total") ~ "Mental health outcomes",
-      str_detect(outcome, "Overall Anxiety") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "BSL-23 total") ~ "All mental health outcomes",
+      str_detect(outcome, "Overall Anxiety") ~ "All mental health outcomes/Anxiety",
       str_detect(outcome, "Patient Health") ~ "Physical health",
       str_detect(outcome, "Alcohol Use Disorders") ~ "Alcohol and drug abuse/misuse",
       str_detect(outcome, "Sheehan disability") ~ "Social functioning (degree of impairment)",
@@ -4332,8 +4332,8 @@ Himle2014_est <-
     # ), each = 2),  # assuming there are two rows per each analysis_plan, adjust if necessary
     
     analysis_plan = case_when(
-      str_detect(outcome, "LSAS|Mini|Brief") ~ "Mental health outcomes",
-      str_detect(outcome, "Beck") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "LSAS|Mini|Brief") ~ "All mental health outcomes",
+      str_detect(outcome, "Beck") ~ "All mental health outcomes/Anxiety",
       str_detect(outcome, "Sheehan") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "PHQ9") ~ "Physical health",
       TRUE ~ NA_character_
@@ -4637,7 +4637,7 @@ izquierdo2021_est <-
       c("Hope, Empowerment & Self-efficacy",
         "Social functioning (degree of impairment)",
         "Social functioning (degree of impairment)",
-        "Mental health outcomes" # Total score
+        "All mental health outcomes" # Total score
       ), each = 1,3),
     
     study = "Izquierdo et al. 2021",
@@ -4755,7 +4755,7 @@ Jacob2010_est <-
   Jacob2010_wide |> 
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "BDI") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "BDI") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "RSES|SSES") ~ "Self-esteem",
       .default = NA_character_
     ),
@@ -4951,7 +4951,7 @@ James2004_est <- James2004_wide |>
     main_es_method = "Raw diff-in-diffs",
     
     analysis_plan = case_when(
-      str_detect(outcome, "BPRS|BSI-Global") ~ "Mental health outcomes",
+      str_detect(outcome, "BPRS|BSI-Global") ~ "All mental health outcomes",
       str_detect(outcome, "DAST|AUDIT|SDS") ~ "Alcohol and drug abuse/misuse",
       .default = NA_character_
     ),
@@ -5164,7 +5164,7 @@ Kanie2019_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "SCSQ") ~ "Unused",
-      str_detect(outcome, "BACS") ~ "Mental health outcomes",
+      str_detect(outcome, "BACS") ~ "All mental health outcomes",
       str_detect(outcome, "SFS|GAF") ~ "Social functioning",
       str_detect(outcome, "PANSS") ~ "Symptoms of psychosis",
       .default = NA_character_
@@ -5394,9 +5394,9 @@ Lim2020_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "QLS") ~ "Wellbeing and Quality of Life",
-      str_detect(outcome, "Negative") ~ "Mental health outcomes/Symptoms of psychosis/negative symptoms",
+      str_detect(outcome, "Negative") ~ "All mental health outcomes/Symptoms of psychosis/negative symptoms",
       
-      .default = "All mental health/Symptoms of psychosis"
+      .default = "All mental health outcomes health/Symptoms of psychosis"
     ),
     
     # ppcor is imputed
@@ -5756,8 +5756,8 @@ lloyd_Evans2020_est <-
   lloyd_Evans2020_wide |>
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "PHQ-9") ~ "Mental health outcomes/Depression",
-      str_detect(outcome, "GAD-7") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "PHQ-9") ~ "All mental health outcomes/Depression",
+      str_detect(outcome, "GAD-7") ~ "All mental health outcomes/Anxiety",
       str_detect(outcome, "DJG-total") ~ "Loneliness",
       str_detect(outcome, "WEMWBS") ~ "Wellbeing and Quality of Life",
       str_detect(outcome, "LSNS6|RGUK") ~ "Unused outcomes",
@@ -6014,9 +6014,9 @@ Madigan2013_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "ASI") ~ "Alcohol and drug abuse/misuse",
-      str_detect(outcome, "Depressive symptoms") ~ "Depression/Mental health outcomes",
-      str_detect(outcome, "Positive") ~ "Mental health outcomes",
-      str_detect(outcome, "Negative") ~ "Mental health outcomes/Negative symptoms",
+      str_detect(outcome, "Depressive symptoms") ~ "Depression/All mental health outcomes",
+      str_detect(outcome, "Positive") ~ "All mental health outcomes",
+      str_detect(outcome, "Negative") ~ "All mental health outcomes/Negative symptoms",
       str_detect(outcome, "Global") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "WHOQOL") ~ "Wellbeing and Quality of Life",
       .default = NA_character_
@@ -6189,7 +6189,7 @@ McCay2006_est <-
     outcome = c("MES", "QLS total", "PANSS Negative", "PANSS total"),
     analysis_plan = c(
       "Self-esteem ", "Wellbeing and Quality of Life", 
-      "Negative symptoms", "Mental health outcomes/Symptoms of psychosis"
+      "Negative symptoms", "All mental health outcomes/Symptoms of psychosis"
       ),
     
     
@@ -6515,7 +6515,7 @@ Michalak2015_wide_DD <-
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
     main_es_method = "Raw diff-in-diffs",
-    analysis_plan = "Mental health outcomes/Depression"
+    analysis_plan = "All mental health outcomes/Depression"
   
   )
 
@@ -6804,9 +6804,9 @@ Morley2014_est <-
   mutate(
     
      analysis_plan = case_when(
-      str_detect(outcome, "BSS") ~ "Mental health outcomes",
-      str_detect(outcome, "HADS_depression") ~ "Mental health outcomes/Depression",
-      str_detect(outcome, "HADS_anxiety") ~ "Mental health outcomes/Anxiety",
+      str_detect(outcome, "BSS") ~ "All mental health outcomes",
+      str_detect(outcome, "HADS_depression") ~ "All mental health outcomes/Depression",
+      str_detect(outcome, "HADS_anxiety") ~ "All mental health outcomes/Anxiety",
       str_detect(outcome, "SES") ~ "Hope, Empowerment & Self-efficacy",
       .default = NA_character_
     ),
@@ -7084,9 +7084,9 @@ Morton2012_est <-
     study = "Morton et al. 2012",
    
      analysis_plan = case_when(
-      str_detect(outcome, "BEST|DASS") ~ "Mental health outcomes",
+      str_detect(outcome, "BEST|DASS") ~ "All mental health outcomes",
       str_detect(outcome, "BHS") ~ "Hope, Empowerment & Self-efficacy",
-      str_detect(outcome, "DERS") ~ "Mental health outcomes/Unused outcomes",
+      str_detect(outcome, "DERS") ~ "All mental health outcomes/Unused outcomes",
       .default = NA_character_
     ),
     
@@ -7399,8 +7399,8 @@ Patterson2003_est <-
   # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "PANSS_General|PANSS_Negative|PANSS_Positive") ~ "Mental health outcomes/Symptoms of psychosis",
-      str_detect(outcome, "HAM_D") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "PANSS_General|PANSS_Negative|PANSS_Positive") ~ "All mental health outcomes/Symptoms of psychosis",
+      str_detect(outcome, "HAM_D") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "QWB") ~ "Wellbeing and Quality of Life",
       .default = NA_character_
     ),
@@ -7423,8 +7423,8 @@ Patterson2003_est <-
     
     
     # For PANSS and HAM-D lower scores are beneficial why these is reverted
-    m_post = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                          "Mental health outcomes/Depression"), 
+    m_post = if_else(analysis_plan %in% c("All mental health outcomes/Symptoms of psychosis",
+                                          "All mental health outcomes/Depression"), 
                      (m_post_t - m_post_c)*-1,
                      m_post_t - m_post_c),
     
@@ -7443,12 +7443,12 @@ Patterson2003_est <-
     
     
     #  reverting specific scores as lower score is beneficial
-    m_diff_t = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                            "Mental health outcomes/Depression"), 
+    m_diff_t = if_else(analysis_plan %in% c("All mental health outcomes/Symptoms of psychosis",
+                                            "All mental health outcomes/Depression"), 
                        (m_post_t - m_pre_t)*-1,
                        m_post_t - m_pre_t),
-    m_diff_c = if_else(analysis_plan %in% c("Mental health outcomes/Symptoms of psychosis",
-                                            "Mental health outcomes/Depression"),
+    m_diff_c = if_else(analysis_plan %in% c("All mental health outcomes/Symptoms of psychosis",
+                                            "All mental health outcomes/Depression"),
                        (m_post_c - m_pre_c)*-1,
                        m_post_c - m_pre_c),
     
@@ -7642,9 +7642,9 @@ Popolo2019_est <-
   mutate(
     
     analysis_plan =
-      c("Mental health outcomes", 
-        "Mental health outcomes/Unused outcomes", 
-        "Mental health outcomes"),
+      c("All mental health outcomes", 
+        "All mental health outcomes/Unused outcomes", 
+        "All mental health outcomes"),
     
     study = "Popolo et al. 2019",
     
@@ -7906,8 +7906,8 @@ Rabenstein2015_est <-
   Rabenstein2015_wide |>
   mutate(
     analysis_plan =
-      c("Mental health outcomes", 
-        "Mental health outcomes/Depression",
+      c("All mental health outcomes", 
+        "All mental health outcomes/Depression",
         "Wellbeing and Quality of Life"),
     
     effect_size = "SMD",
@@ -8740,7 +8740,7 @@ Rüsch2019_est <-
   mutate(
     
     analysis_plan = case_when(
-      str_detect(outcome, "CES-D") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "CES-D") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "Job_search|Help_seeking|BHS|SISR") ~ "Hope, Empowerment & Self-efficacy",
       str_detect(outcome, "SSMIS_SF") ~ "Self-esteem",
       .default = NA_character_
@@ -9109,8 +9109,8 @@ Sacks2011_est <-
   mutate(
 
    analysis_plan = case_when(
-     outcome == "BDI_total" ~ "Mental health outcomes/Depression",
-      outcome == "GSI_total" ~ "Mental health outcomes",
+     outcome == "BDI_total" ~ "All mental health outcomes/Depression",
+      outcome == "GSI_total" ~ "All mental health outcomes",
       str_detect(outcome, "SF-36") ~ "Wellbeing and Quality of Life"),
 
    study = "Sacks et al. 2011",
@@ -9352,8 +9352,8 @@ Sajatovic2009_est <-
     # p_val = rep(c(0.40, 0.22, 0.97), each = 1,3), # Made across time measurements 
     
     analysis_plan = rep(
-      c("Mental health outcomes/Depression", # HAM-D
-        "Mental health outcomes", # YMRS
+      c("All mental health outcomes/Depression", # HAM-D
+        "All mental health outcomes", # YMRS
         "Social functioning (degree of impairment)" # GAS
       ), 3),
     
@@ -9512,7 +9512,7 @@ Saloheimo2016_est <-
   ) |> 
   mutate(
     
-    analysis_plan = "Mental health outcomes/Depression",
+    analysis_plan = "All mental health outcomes/Depression",
     
     # ppcor imputed
     ppcor = ppcor_imp,
@@ -9608,7 +9608,7 @@ Saloheimo2016_est <-
 ```
 
 ```{r, echo=FALSE}
-dat_t <- 
+dat <- 
   dat |> 
   bind_rows(Saloheimo2016_est)
 ```
@@ -9704,7 +9704,7 @@ Schrank2016_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "WEMWBS|MANSA") ~ "Wellbeing and Quality of Life",
-      str_detect(outcome, "BPRS") ~ "Mental health outcomes",
+      str_detect(outcome, "BPRS") ~ "All mental health outcomes",
       str_detect(outcome, "IHS|RSES|RES") ~ "Hope, Empowerment & Self-efficacy",
       .default = NA_character_
     ),
@@ -9993,9 +9993,9 @@ schafer2019_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "ASI|Drug and alcohol free days") ~ "Alcohol and drug abuse/misuse",
-      str_detect(outcome, "BDI-II") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "BDI-II") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "DERS") ~ "Unused outcomes",
-      str_detect(outcome, "PDS|PSS-I") ~ "Mental health outcomes",
+      str_detect(outcome, "PDS|PSS-I") ~ "All mental health outcomes",
       .default = NA_character_
     ),
     
@@ -10126,7 +10126,7 @@ Somers2017_est <-
     analysis_plan = c(
       "Social functioning",
       "social functioning",
-      "Mental health outcomes",
+      "All mental health outcomes",
       "Alcohol and drug abuse/misuse",
       "Wellbeing and Quality of Life"
     ),
@@ -10280,7 +10280,7 @@ Somers2017_est <-
 
 ```{r, echo= FALSE}
 
-dat_t <- # Not included in the covariaters sheet
+dat <- # Not included in the covariaters sheet
   dat |> 
   bind_rows(Somers2017_est)
 
@@ -10384,7 +10384,7 @@ Tjaden2021_est <- Tjaden2021_wide |>
   # Based on the degrees of freedom value reported in Druss et al. 2018 table 2 and 3
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "BSI") ~ "Mental health outcomes",
+      str_detect(outcome, "BSI") ~ "All mental health outcomes",
       str_detect(outcome, "GAF") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "MANSA") ~ "Wellbeing and Quality of Life",
       str_detect(outcome, "NEL") ~ "Hope, Empowerment & Self-efficacy",
@@ -10686,7 +10686,7 @@ Valiente2022_est <-
     analysis_plan = rep(c(
       "Wellbeing and Quality of Life",
       "Wellbeing and Quality of Life",
-      "Mental health outcomes"
+      "All mental health outcomes"
     ), c(6,1,9)),
     
     study = "Valiente et al. 2022",
@@ -10707,7 +10707,7 @@ Valiente2022_est <-
     df_ind = N_total,
     
     # The outcome SCL-90-R reverted because lower score is beneficial
-    m_post = if_else(analysis_plan != "Mental health outcomes", m_post_t - m_post_c,
+    m_post = if_else(analysis_plan != "All mental health outcomes", m_post_t - m_post_c,
                      (m_post_t - m_post_c) * -1),
     
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
@@ -10724,8 +10724,8 @@ Valiente2022_est <-
     
     
     # For BSI: Lower is beneficial
-    m_diff_t = if_else(analysis_plan != "Mental health outcomes", m_post_t - m_post_c, (m_post_t - m_pre_t)*-1),
-    m_diff_c = if_else(analysis_plan != "Mental health outcomes", m_post_c - m_pre_c, (m_post_c - m_pre_c)*-1),
+    m_diff_t = if_else(analysis_plan != "All mental health outcomes", m_post_t - m_post_c, (m_post_t - m_pre_t)*-1),
+    m_diff_c = if_else(analysis_plan != "All mental health outcomes", m_post_c - m_pre_c, (m_post_c - m_pre_c)*-1),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
     vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
@@ -10863,8 +10863,8 @@ Volpe2015_est <-
   ) |> 
   mutate(
     analysis_plan = case_when(
-      str_detect(outcome, "BPRS") ~ "Mental health outcomes",
-      str_detect(outcome, "PHQ-9") ~ "Mental health outcomes/Depression",
+      str_detect(outcome, "BPRS") ~ "All mental health outcomes",
+      str_detect(outcome, "PHQ-9") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "PSP|DAS-II") ~ "Social functioning (degree of impairment)"),
     
     
@@ -11147,7 +11147,7 @@ Wojtalik2019_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "Social adjustment composite") ~ "Social functioning (degree of impairment)",
-      str_detect(outcome, "Symptoms composite") ~ "Mental health outcomes"),
+      str_detect(outcome, "Symptoms composite") ~ "All mental health outcomes"),
     
     study = "Wojtalik et al. 2019", 
     
@@ -11721,8 +11721,90 @@ GAF_res
 
 ```
 
+# Descriptive plots
 
+## Timeline
+```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
+# Figure 1: Number of included studies in the meta-analysis by year
+timeline_plot <- 
+  group_based_dat %>% 
+  group_by(authors) %>% 
+  summarise(year = unique(year)) %>% 
+  ggplot(aes(x = year)) + 
+  geom_bar(colour = "black", fill = "gray70", alpha = 1, width = 1) +
+  scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
+  scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
+  theme_bw() + 
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+    panel.border = element_blank(),
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.line = element_line(colour = "black")
+  ) +
+  labs(
+    x = "Year of Publication",
+    y = "Number of Studies"
+  ); timeline_plot
 
+```
+
+## Primary study sample size and effective sample sizes (SUPPLEMENTARY MATERIAL)
+```{r}
+sample_size_dat <- 
+  group_based_dat %>% 
+  group_by(year, studyid, sample_id) %>% 
+  summarise_at(
+    vars(N_t, N_c, N_total), list(mean = mean)
+    
+  )
+
+sample_size_dat %>% 
+  pivot_longer(
+        cols = N_t_mean:N_total_mean,
+    names_to = "sample_sizes_char",
+    values_to = "sample_size"
+  ) %>% 
+  group_by(sample_sizes_char) %>% 
+  summarise(
+    mean = mean(sample_size, na.rm = TRUE),
+    sd = sd(sample_size, na.rm = TRUE),
+    q = list(quantile(sample_size, na.rm = TRUE))
+  ) %>% 
+  unnest_wider(q, names_repair = ~paste0('Q_', sub('%', '', .))) %>% 
+  rename(mean = Q_mean, sd = Q_sd) %>% 
+  mutate(
+    id = rev(1:3)
+  ) %>% 
+  arrange(id) %>% 
+  select(-id)
+
+SS1 <- ggplot(sample_size_dat, aes(N_t_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Treatment group sample size")
+
+SS2 <- ggplot(sample_size_dat, aes(N_c_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Control group sample size")
+
+SS3 <- ggplot(sample_size_dat, aes(N_total_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Total sample size")
+
+```
 
 ## **References**
 
