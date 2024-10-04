@@ -1,0 +1,215 @@
+---
+title: Effect size calculation for 'Group-based community interventions to support
+  the social reintegration of marginalised adults with mental illness'
+date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
+output: 
+  html_document:
+    toc: true
+    code_folding: show
+    code_download: true
+bibliography: Group-based interventions.bib
+link-citations: yes
+fontsize: 11pt
+spacing: single
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+
+options(pillar.sigfig = 4) # ensure tibble include 4 digits
+options(tibble.width = Inf)
+options(dplyr.print_min = 310)
+options(scipen = 10)
+options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
+
+```
+
+# Load data
+
+```{r}
+# Loading the needed data for analysis
+group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS")
+
+```
+
+# Descriptive plots
+
+## Timeline
+
+```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
+# Figure 1: Number of included studies in the meta-analysis by year
+timeline_plot <- 
+  group_based_dat %>% 
+  group_by(authors) %>% 
+  summarise(year = unique(year)) %>% 
+  ggplot(aes(x = year)) + 
+  geom_bar(colour = "black", fill = "gray70", alpha = 1, width = 1) +
+  scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
+  scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
+  theme_bw() + 
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+    panel.border = element_blank(),
+    legend.position = "none",
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.line = element_line(colour = "black")
+  ) +
+  labs(
+    x = "Year of Publication",
+    y = "Number of Studies"
+  ); timeline_plot
+
+```
+
+## Primary study sample size and effective sample sizes (SUPPLEMENTARY MATERIAL)
+
+### Making a effetive sample size (ESS)
+
+```{r}
+GBD_effect <- group_based_dat |> 
+  filter(variable_type != "Binary") |>
+  mutate(
+    es_id = 1:n(),
+    gt = if_else(!is.na(gt_post), gt_post, NA_real_),
+    gt = if_else(!is.na(gt_DD), gt_DD, gt),
+    gt = if_else(!is.na(gt_adj), gt_adj, gt),
+    gt = if_else(!is.na(gt_reg), gt_reg, gt),
+    
+    vgt = if_else(!is.na(vgt_post), vgt_post, NA_real_),
+    vgt = if_else(!is.na(vgt_DD), vgt_DD, vgt),
+    vgt = if_else(!is.na(vgt_adj), vgt_adj, vgt),
+    vgt = if_else(!is.na(vgt_reg), vgt_reg, vgt),
+    
+  )
+
+GBD_effect <- GBD_effect|> 
+  mutate(
+  ESS = round(4/vgt) # Using cluster bias corrected sampling variance
+)
+
+```
+
+```{r}
+sample_size_dat <- 
+  GBD_effect %>% 
+  group_by(year, studyid, sample_id) %>% 
+  summarise_at(
+    vars(N_t, N_c, N_total, ESS), list(mean = mean)
+    
+  )
+
+sample_size_dat %>% 
+  pivot_longer(
+        cols = N_t_mean:ESS_mean,
+    names_to = "sample_sizes_char",
+    values_to = "sample_size"
+  ) %>% 
+  group_by(sample_sizes_char) %>% 
+  summarise(
+    mean = mean(sample_size, na.rm = TRUE),
+    sd = sd(sample_size, na.rm = TRUE),
+    q = list(quantile(sample_size, na.rm = TRUE))
+  ) %>% 
+  unnest_wider(q, names_repair = ~paste0('Q_', sub('%', '', .))) %>% 
+  rename(mean = Q_mean, sd = Q_sd) %>% 
+  mutate(
+    id = rev(1:4)
+  ) %>% 
+  arrange(id) %>% 
+  select(-id)
+
+SS1 <- ggplot(sample_size_dat, aes(N_t_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Treatment group sample size")
+
+SS2 <- ggplot(sample_size_dat, aes(N_c_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Control group sample size")
+
+SS3 <- ggplot(sample_size_dat, aes(N_total_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Total sample size")
+
+SS4 <- ggplot(sample_size_dat, aes(ESS_mean)) + 
+  geom_density(fill = "cornflowerblue", trim = TRUE) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug() + 
+  theme_minimal() +
+  theme(axis.title.y = element_blank()) +
+  scale_x_continuous(breaks = seq(0, 120, 5), limits = c(0, 125)) + 
+  labs(x = "Approximate effective sample size (4/SE_total)")
+
+library(patchwork)
+
+sample_dist_plot <- SS1 / SS2 / SS3 / SS4
+sample_dist_plot
+
+
+```
+
+# Empirical distribution of effect size estimtes (SUPPLEMENTARY MATERIAL)
+
+```{r}
+qrtls <- quantile(GBD_effect$gt, c(.25, .75), na.rm = TRUE)
+fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
+fence_dat <- data.frame(qrtl = qrtls, fence = fences)
+
+es_dist_plot <- 
+  ggplot(GBD_effect, aes(gt)) + 
+  geom_density(fill = "cornflowerblue") + 
+  geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
+  geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
+  geom_rug(alpha = 0.25) + 
+   scale_x_continuous(limits = c(-3, 3)) +
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+```
+
+```{r}
+# This is not done
+GB_outcome_reintergration <- GBD_effect |> 
+  filter(!str_detect(analysis_plan, "mental")) %>%
+  filter(!str_detect(analysis_plan, "used")) %>%
+  filter(!str_detect(analysis_plan, "abuse")) %>%
+  group_by(analysis_plan) |> 
+  summarise(
+    qrtl = quantile(gt,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .groups = "drop"
+  )
+
+
+# Without mental health outcomes: reintergration
+reintegration_outcome_plot <- GBD_effect %>% 
+ filter(!str_detect(analysis_plan, "mental")) %>%
+  filter(!str_detect(analysis_plan, "used")) %>%
+   filter(!str_detect(analysis_plan, "abuse")) %>%
+  ggplot(aes(x = gt, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = GB_outcome_reintergration, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = GB_outcome_reintergration, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+```
