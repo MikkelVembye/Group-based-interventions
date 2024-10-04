@@ -1,3 +1,7 @@
+group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS")
+
+library(tidyverse)
+
 GBD_effect <- group_based_dat |> 
   filter(variable_type != "Binary") |>
   mutate(
@@ -14,21 +18,11 @@ GBD_effect <- group_based_dat |>
     
   )
 
-covariates$variable_type |> unique()
-
-
-dat |> select(contains("gt")) |> glimpse()
 
 GBD_effect |> select(contains("gt")) |> View()
 
 GBD_effect |> select(contains("analysis")) |> glimpse()
 
-
-
-GBD_effect$analysis_plan |> str_detect("mental")
-
-GBD_all_mental <- GBD_effect |> 
-  filter(str_detect(analysis_plan, "mental"))
   
 
 # str_detect(outcome_measure, "All_mental")    
@@ -49,9 +43,14 @@ main_employ_model <-
 
 # All mental health ----
 
+GBD_effect$analysis_plan |> str_detect("mental")
+
+GBD_all_mental <- GBD_effect |> 
+  filter(str_detect(analysis_plan, "mental"))
+
 V_mat_all <- vcalc(vi = vgt, cluster = authors, obs = es_id, data = GBD_all_mental, rho = 0.7)
 
-main_employ_model_all <- 
+main_model_all <- 
   rma.mv(
     gt,
     V = V_mat_all,
@@ -61,5 +60,39 @@ main_employ_model_all <-
   robust(cluster = authors, clubSandwich = TRUE)
 
 # Singel vs. TAU ----
+GBD_all_mental_ctr <- 
+  GBD_all_mental |> 
+  mutate(
+    ctr_binary = case_when(
+      str_detect(control, "Individual|(EST)") ~ "Single treatment",
+      TRUE ~ "TAU"
+    )
+  )
 
+# SCE+
+V_mat_ctr <- 
+  vcalc(
+    vi = vgt, 
+    cluster = authors, 
+    obs = es_id, 
+    subgroup = ctr_binary, 
+    data = GBD_all_mental_ctr, 
+    rho = 0.7
+  )
+
+ctr_sce_model <- 
+  rma.mv(
+    gt ~ 0 + ctr_binary,
+    V = V_mat_ctr,
+    random = list(~ ctr_binary | authors, ~ ctr_binary | es_id), 
+    struct = c("DIAG", "DIAG"),
+    data = GBD_all_mental_ctr,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = authors, clubSandwich = TRUE); ctr_sce_model
+  
+GBD_all_mental_ctr |> 
+  filter(ctr_binary == "TAU")
+
+sample(unique(GBD_all_mental_ctr$authors), 3)
 
