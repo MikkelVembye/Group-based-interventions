@@ -32,7 +32,10 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 ```{r}
 # Loading the needed data for analysis
-group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS")
+group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |> 
+  # The post-measurement of Empowerment Scale seems flawed for the study by 
+  # Barbic et al. 2009 we therefore we exclude it from the analysis
+  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale"))
 
 ```
 
@@ -42,11 +45,12 @@ group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS")
 
 ```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
 # Figure 1: Number of included studies in the meta-analysis by year
-timeline_plot <- 
-  group_based_dat %>% 
+G_timepllot <- group_based_dat %>% 
   group_by(authors) %>% 
-  summarise(year = unique(year)) %>% 
-  ggplot(aes(x = year)) + 
+  summarise(year = unique(year))
+
+
+timeline_plot <-  ggplot(G_timepllot,aes(x = year)) + 
   geom_bar(colour = "black", fill = "gray70", alpha = 1, width = 1) +
   scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
   scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
@@ -96,7 +100,6 @@ GBD_effect <- GBD_effect|>
   mutate(
   ESS = round(4/vgt) # Using cluster bias corrected sampling variance
 )
-
 ```
 
 ```{r}
@@ -158,7 +161,7 @@ SS4 <- ggplot(sample_size_dat, aes(ESS_mean)) +
   geom_rug() + 
   theme_minimal() +
   theme(axis.title.y = element_blank()) +
-  scale_x_continuous(breaks = seq(0, 120, 5), limits = c(0, 125)) + 
+  #scale_x_continuous(breaks = seq(0, 120, 5), limits = c(0, 125)) + 
   labs(x = "Approximate effective sample size (4/SE_total)")
 
 library(patchwork)
@@ -182,19 +185,18 @@ es_dist_plot <-
   geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
   geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
   geom_rug(alpha = 0.25) + 
-   scale_x_continuous(limits = c(-3, 3)) +
   theme_minimal() + 
   theme(axis.title.y = element_blank()) +
   labs(x = "Effect size estimate")
 ```
 
 ```{r}
-# This is not done
+# Making data for plotting outcomes
+
+
+# Without mental health outcomes and only reintergration-outcomes
 GB_outcome_reintergration <- GBD_effect |> 
-  # filter(!str_detect(analysis_plan, "mental|used|abuse")) %>%
-  # filter(str_detect(analysis_plan, "func")) %>%
-  #filter(!str_detect(analysis_plan, "used")) %>%
-  #filter(!str_detect(analysis_plan, "abuse")) %>%
+   filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
   group_by(analysis_plan) |> 
   summarise(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -204,20 +206,161 @@ GB_outcome_reintergration <- GBD_effect |>
   )
 
 
-# Without mental health outcomes: reintergration
+# Therefore All mental health outcomes, Unused outcome and hospitalization are excluded
 reintegration_outcome_plot <- GBD_effect %>% 
- #filter(!str_detect(analysis_plan, "mental|used|abuse")) %>%
+ filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
   ggplot(aes(x = gt, fill = analysis_plan)) + 
   geom_density(alpha = 0.7) +
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = qrtl), linetype = "solid")+
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = fence), linetype = "dashed")+
   geom_rug(alpha = 0.25) +
-  facet_wrap(~analysis_plan) +
+  facet_wrap(~analysis_plan, scales = "free", ncol = 4) +
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
   labs(x = "Effect size estimate")
 
 
-df <- GBD_effect |> 
-   filter(gt < -1) 
+# Plot with all mental health outcomes 
+
+# Total mental health:
+GB_outcome_mental_health <- GBD_effect |> 
+   filter(str_detect(analysis_plan, "mental")) |> 
+  filter(!str_detect(analysis_plan, "Unused")) |>
+  summarise(
+    qrtl = quantile(gt,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .groups = "drop"
+  )
+
+mental_health_outcome_plot <- GBD_effect %>% 
+ filter(str_detect(analysis_plan, "mental")) %>%
+  ggplot(aes(x = gt)) + 
+  geom_density(alpha = 0.7, fill = "cornflowerblue") +
+  geom_vline(data = GB_outcome_mental_health, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = GB_outcome_mental_health, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+
+# Seperated mental health outcomes
+GB_outcomes_mental_health <- GBD_effect |> 
+  mutate(analysis_plan = case_when(
+  str_detect(analysis_plan, "All mental health outcomes/Symptoms of psychosis|All mental health outcomes/Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis",
+   TRUE ~ analysis_plan)) |> 
+   filter(str_detect(analysis_plan, "mental")) |>
+  filter(!str_detect(analysis_plan, "Unused")) |>
+  group_by(analysis_plan) |> 
+  summarise(
+    qrtl = quantile(gt,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .groups = "drop"
+  )
+
+
+mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
+  # Gathering negative symptoms and symptoms of psychosis as negative symptoms refers to same symptoms
+  str_detect(analysis_plan, "All mental health outcomes/Symptoms of psychosis|All mental health outcomes/Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis", 
+   TRUE ~ analysis_plan)) |> 
+  filter(str_detect(analysis_plan, "mental")) |> 
+  filter(!str_detect(analysis_plan, "Unused")) |>
+  ggplot(aes(x = gt, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = GB_outcomes_mental_health, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = GB_outcomes_mental_health, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan, scales = "free") +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+```
+
+# Funnel-plot
+```{r}
+# data prep
+GBD_effect <- GBD_effect |> 
+  mutate(timing = case_when(
+    timing == "Followup" ~ "3m",
+    timing == "Posttest" ~ "Post",
+    timing == "12" ~ "12m",
+    timing == "24" ~ "24m",
+    timing == "post" ~ "Post",
+    timing == "3 months" ~ "3m",
+    timing == "6 months" ~ "6m",
+    timing == "6w" ~ "Post",
+    TRUE ~ timing))
+
+unique_values <- unique(GBD_effect$timing)
+
+GB_dat <- 
+  GBD_effect |> 
+  select(studyid, g = gt, vg = vgt, timing) |> 
+  mutate(
+    seg = sqrt(vg),
+    timing = if_else(is.na(timing), "Post", timing),
+    timing = factor(
+      timing, 
+      levels = c("Post", "3m", "6m", "9m", "12", "18", "24m")
+    ),
+    es_ID = 1:n()
+  ) |> 
+  arrange(timing)
+
+
+V_mat_GB <- clubSandwich::impute_covariance_matrix(
+  vi = GB_dat$vg,
+  cluster = GB_dat$studyid,
+  r = rho06,
+  smooth_vi = TRUE
+)
+
+
+mean_es_GB <- 
+  metafor::rma.mv(
+    g,
+    V_mat_GB,
+    random = ~ 1 | studyid / es_ID,
+    data = GB_dat,
+  ) |> 
+  robust(cluster = studyid, clubSandwich = TRUE)
+
+
+
+
+es_exp <- as.numeric(mean_es_GB$b)
+y_lim_exp <- max(sqrt(GB_dat$vg)) + 0.02 
+
+
+funnel_exp <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
+  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  0,     0,     0,     0
+) 
+
+
+GB_plot_all <-
+  GB_dat |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_abline(slope = qnorm(0.975), intercept = es_exp, linetype = "dashed") + 
+  geom_abline(slope = qnorm(0.025), intercept = es_exp, linetype = "dashed") + 
+  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  geom_hline(yintercept = es_exp, linetype = "dashed") +
+  coord_flip() + 
+  #facet_grid(~timing, scales = "free") +
+  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "bottom")
+
 ```

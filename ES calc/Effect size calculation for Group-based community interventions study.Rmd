@@ -416,7 +416,7 @@ Barbic2009 <- tibble(
   
   m_post = c(
     38.93, 35.06, 
-    14.93, 61.96, 
+    14.93, 61.96, # The post-measurement seems flawed from therefore we exclude it from the analysis
     21.60, 22.27, 
     168.81, 149.11),
   
@@ -456,7 +456,7 @@ Barbic2009_est <-
   mutate(
     analysis_plan = rep(
       c("Hope, Empowerment & Self-efficacy", "Wellbeing and Quality of Life", 
-        "All mental health outcomes/Hope, Empowerment & Self-efficacy"), 
+        "Hope, Empowerment & Self-efficacy"), 
       c(2, 1, 1))
   ) |> 
   rowwise() |> 
@@ -597,7 +597,7 @@ Bond2015_continious <-
     m_post_c = c(4.14, 10.44), 
     sd_post_c = c(0.57, 23.07),
     
-    analysis_plan = c("All mental health outcomes/Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
+    analysis_plan = c("Hope, Empowerment & Self-efficacy", "Psychiatric hospitalization"),
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
@@ -2396,7 +2396,7 @@ Dyck2000_wide <-
 Dyck2000_est <-           
   Dyck2000_wide |>
   mutate(
-    analysis_plan = "All mental health outcomes/Negative Symptoms",
+    analysis_plan = "All mental health outcomes/Negative symptoms",
     
     F_val = 6.1,
   
@@ -3050,7 +3050,7 @@ Gonzalez2007_est <-
     
     analysis_plan = c(
       "Social functioning (degree of impairment)",
-      "All mental health outcomes health outcomes"
+      "All mental health outcomes"
     ),
     
     effect_size = "SMD",
@@ -5408,9 +5408,9 @@ Lim2020_est <-
     
     analysis_plan = case_when(
       str_detect(outcome, "QLS") ~ "Wellbeing and Quality of Life",
-      str_detect(outcome, "Negative") ~ "All mental health outcomes/Symptoms of psychosis/negative symptoms",
+      str_detect(outcome, "Negative") ~ "All mental health outcomes/Symptoms of psychosis",
       
-      .default = "All mental health outcomes health/Symptoms of psychosis"
+      .default = "All mental health outcomes/Symptoms of psychosis"
     ),
     
     # ppcor is imputed
@@ -6029,7 +6029,7 @@ Madigan2013_est <-
   mutate(
     analysis_plan = case_when(
       str_detect(outcome, "ASI") ~ "Alcohol and drug abuse/misuse",
-      str_detect(outcome, "Depressive symptoms") ~ "Depression/All mental health outcomes",
+      str_detect(outcome, "Depressive symptoms") ~ "All mental health outcomes/Depression",
       str_detect(outcome, "Positive") ~ "All mental health outcomes",
       str_detect(outcome, "Negative") ~ "All mental health outcomes/Negative symptoms",
       str_detect(outcome, "Global") ~ "Social functioning (degree of impairment)",
