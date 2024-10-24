@@ -5178,8 +5178,8 @@ Kanie2019_est <-
     analysis_plan = case_when(
       str_detect(outcome, "SCSQ") ~ "Unused",
       str_detect(outcome, "BACS") ~ "All mental health outcomes",
-      str_detect(outcome, "SFS|GAF") ~ "Social functioning",
-      str_detect(outcome, "PANSS") ~ "Symptoms of psychosis",
+      str_detect(outcome, "SFS|GAF") ~ "Social functioning (degree of impairment)",
+      str_detect(outcome, "PANSS") ~ "All mental health outcomes/Symptoms of psychosis",
       .default = NA_character_
     ),
 
@@ -6203,8 +6203,8 @@ McCay2006_est <-
     
     outcome = c("MES", "QLS total", "PANSS Negative", "PANSS total"),
     analysis_plan = c(
-      "Self-esteem ", "Wellbeing and Quality of Life", 
-      "Negative symptoms", "All mental health outcomes/Symptoms of psychosis"
+      "Self-esteem", "Wellbeing and Quality of Life", 
+      "All mental health outcomes/Negative symptoms", "All mental health outcomes/Symptoms of psychosis"
       ),
     
     
@@ -10154,8 +10154,8 @@ Somers2017_est <-
     ),
     
     analysis_plan = c(
-      "Social functioning",
-      "social functioning",
+      "Social functioning (degree of impairment)",
+      "Social functioning (degree of impairment)",
       "All mental health outcomes",
       "Alcohol and drug abuse/misuse",
       "Wellbeing and Quality of Life"
