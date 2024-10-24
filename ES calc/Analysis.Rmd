@@ -85,6 +85,11 @@ GBD_effect <- group_based_dat |>
     vgt = if_else(!is.na(vgt_adj), vgt_adj, vgt),
     vgt = if_else(!is.na(vgt_reg), vgt_reg, vgt),
     
+    Wgt = if_else(!is.na(Wgt_post), Wgt_post, NA_real_),
+    Wgt = if_else(!is.na(Wgt_DD), Wgt_DD, Wgt),
+    Wgt = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt),
+    Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt)
+    
   )
 
 GBD_effect <- GBD_effect|> 
@@ -164,7 +169,7 @@ sample_dist_plot
 
 ```
 
-# Empirical distribution of effect size estimtes (SUPPLEMENTARY MATERIAL)
+# Empirical distribution of effect size estimates (SUPPLEMENTARY MATERIAL)
 
 ```{r}
 qrtls <- quantile(GBD_effect$gt, c(.25, .75), na.rm = TRUE)
@@ -186,9 +191,10 @@ es_dist_plot <-
 ```{r}
 # This is not done
 GB_outcome_reintergration <- GBD_effect |> 
-  filter(!str_detect(analysis_plan, "mental")) %>%
-  filter(!str_detect(analysis_plan, "used")) %>%
-  filter(!str_detect(analysis_plan, "abuse")) %>%
+  # filter(!str_detect(analysis_plan, "mental|used|abuse")) %>%
+  # filter(str_detect(analysis_plan, "func")) %>%
+  #filter(!str_detect(analysis_plan, "used")) %>%
+  #filter(!str_detect(analysis_plan, "abuse")) %>%
   group_by(analysis_plan) |> 
   summarise(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -200,9 +206,7 @@ GB_outcome_reintergration <- GBD_effect |>
 
 # Without mental health outcomes: reintergration
 reintegration_outcome_plot <- GBD_effect %>% 
- filter(!str_detect(analysis_plan, "mental")) %>%
-  filter(!str_detect(analysis_plan, "used")) %>%
-   filter(!str_detect(analysis_plan, "abuse")) %>%
+ #filter(!str_detect(analysis_plan, "mental|used|abuse")) %>%
   ggplot(aes(x = gt, fill = analysis_plan)) + 
   geom_density(alpha = 0.7) +
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = qrtl), linetype = "solid")+
@@ -212,4 +216,8 @@ reintegration_outcome_plot <- GBD_effect %>%
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
   labs(x = "Effect size estimate")
+
+
+df <- GBD_effect |> 
+   filter(gt < -1) 
 ```
