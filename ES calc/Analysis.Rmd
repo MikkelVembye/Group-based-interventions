@@ -296,40 +296,40 @@ unique_values <- unique(GBD_effect$timing)
 
 GB_dat <- 
   GBD_effect |> 
-  select(studyid, g = gt, vg = vgt, timing) |> 
+  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
   mutate(
     seg = sqrt(vg),
     timing = if_else(is.na(timing), "Post", timing),
     timing = factor(
       timing, 
-      levels = c("Post", "3m", "6m", "9m", "12", "18", "24m")
+      levels = c("Post", "3m", "6m", "9m", "12m", "18m", "24m")
     ),
     es_ID = 1:n()
   ) |> 
   arrange(timing)
 
 
-V_mat_GB <- clubSandwich::impute_covariance_matrix(
-  vi = GB_dat$vg,
-  cluster = GB_dat$studyid,
-  r = rho06,
-  smooth_vi = TRUE
-)
+ #V_mat_GB <- clubSandwich::impute_covariance_matrix(
+#  vi = GB_dat$vg,
+#  cluster = GB_dat$studyid,
+#  r = 0.5,
+#  smooth_vi = TRUE
+# )
 
 
-mean_es_GB <- 
-  metafor::rma.mv(
-    g,
-    V_mat_GB,
-    random = ~ 1 | studyid / es_ID,
-    data = GB_dat,
-  ) |> 
-  robust(cluster = studyid, clubSandwich = TRUE)
+#mean_es_GB <- 
+#  metafor::rma.mv(
+#    g,
+#    V_mat_GB,
+#    random = ~ 1 | studyid / es_ID,
+#    data = GB_dat,
+#  ) |> 
+#  robust(cluster = studyid, clubSandwich = TRUE)
 
 
 
 
-es_exp <- as.numeric(mean_es_GB$b)
+#es_exp <- as.numeric(mean_es_GB$b)
 y_lim_exp <- max(sqrt(GB_dat$vg)) + 0.02 
 
 
@@ -348,13 +348,9 @@ GB_plot_all <-
   geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_abline(slope = qnorm(0.975), intercept = es_exp, linetype = "dashed") + 
-  geom_abline(slope = qnorm(0.025), intercept = es_exp, linetype = "dashed") + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
-  geom_hline(yintercept = es_exp, linetype = "dashed") +
   coord_flip() + 
-  #facet_grid(~timing, scales = "free") +
   scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
@@ -362,5 +358,71 @@ GB_plot_all <-
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(legend.position = "bottom")
+
+# Funnelplot reintegration outcomes - Subgroup
+GB_dat_reintergration <- 
+  GBD_effect |> 
+  filter(!str_detect(analysis_plan, "mental|used|hospi|Employment|Physical")) |> 
+  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
+  mutate(
+    seg = sqrt(vg),
+    timing = if_else(is.na(timing), "Post", timing),
+    timing = factor(
+      timing, 
+      levels = c("Post", "3m", "6m", "9m", "12m", "18m", "24m")
+    ),
+    es_ID = 1:n()
+  ) |> 
+  arrange(timing)
+
+
+
+sub_GB_dat_reintergration <- 
+  GB_dat_reintergration |> 
+  summarise(
+    across(where(is.numeric), mean),
+    .by = analysis_plan
+  ) |> 
+  mutate(
+    Study_ID = 1, 
+   # es_exp = as.numeric(mean_es_FP_subgrp$b),
+    slope_upper = qnorm(0.975),
+    slope_lower = qnorm(0.025)
+  )
+
+
+
+funnel_exp <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
+  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  0,     0,     0,     0
+) 
+
+FP_plot_subgrp <-
+  GB_dat_reintergration |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  #geom_text(
+  #  data = sub_label_dat, 
+  #  aes(x = x_pos, y = y_pos, label = n_label, shape = NULL, color = NULL), 
+  #  size = 3, 
+  #  color = "black"
+  #) +
+  coord_flip() + 
+  facet_grid(~analysis_plan, scales = "free") +
+  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "none")
+
 
 ```
