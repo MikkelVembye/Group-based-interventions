@@ -45,8 +45,8 @@ group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |>
 
 ```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
 # Figure 1: Number of included studies in the meta-analysis by year
-G_timepllot <- group_based_dat %>% 
-  group_by(authors) %>% 
+G_timepllot <- group_based_dat |> 
+  group_by(authors) |>  
   summarise(year = unique(year))
 
 
@@ -100,6 +100,14 @@ GBD_effect <- GBD_effect|>
   mutate(
   ESS = round(4/vgt) # Using cluster bias corrected sampling variance
 )
+
+# Change Study-id for Gonzalez & Prihoda because of duplicated id
+GBD_effect <- GBD_effect %>%
+  mutate(studyid = ifelse(authors == "Gonzalez & Prihoda", 500, studyid), 
+         cnt = if_else(cnt == "USA", "US", cnt),
+         design = ifelse(design  == "QES-pretest","QES", design),
+         design = ifelse(design  == "CRCT","RCT", design))
+
 ```
 
 ```{r}
@@ -279,6 +287,8 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
 
 # Funnel-plot
 ```{r}
+# Funnel plot for overall effectsizes ----
+
 # data prep
 GBD_effect <- GBD_effect |> 
   mutate(timing = case_when(
@@ -307,26 +317,6 @@ GB_dat <-
     es_ID = 1:n()
   ) |> 
   arrange(timing)
-
-
- #V_mat_GB <- clubSandwich::impute_covariance_matrix(
-#  vi = GB_dat$vg,
-#  cluster = GB_dat$studyid,
-#  r = 0.5,
-#  smooth_vi = TRUE
-# )
-
-
-#mean_es_GB <- 
-#  metafor::rma.mv(
-#    g,
-#    V_mat_GB,
-#    random = ~ 1 | studyid / es_ID,
-#    data = GB_dat,
-#  ) |> 
-#  robust(cluster = studyid, clubSandwich = TRUE)
-
-
 
 
 #es_exp <- as.numeric(mean_es_GB$b)
@@ -359,7 +349,7 @@ GB_plot_all <-
        color = "", shape = "") +
   theme(legend.position = "bottom")
 
-# Funnelplot reintegration outcomes - Subgroup
+# Funnelplot reintegration outcomes - Subgroup analysis ----
 GB_dat_reintergration <- 
   GBD_effect |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|Employment|Physical")) |> 
@@ -377,19 +367,18 @@ GB_dat_reintergration <-
 
 
 
-sub_GB_dat_reintergration <- 
-  GB_dat_reintergration |> 
-  summarise(
-    across(where(is.numeric), mean),
-    .by = analysis_plan
-  ) |> 
-  mutate(
-    Study_ID = 1, 
+#sub_GB_dat_reintergration <- 
+#  GB_dat_reintergration |> 
+#  summarise(
+#    across(where(is.numeric), mean),
+#    .by = analysis_plan
+#  ) |> 
+#  mutate(
+#    Study_ID = 1, 
    # es_exp = as.numeric(mean_es_FP_subgrp$b),
-    slope_upper = qnorm(0.975),
-    slope_lower = qnorm(0.025)
-  )
-
+#    slope_upper = qnorm(0.975),
+#    slope_lower = qnorm(0.025)
+#  )
 
 
 funnel_exp <-  tribble(
@@ -400,7 +389,9 @@ funnel_exp <-  tribble(
   0,     0,     0,     0
 ) 
 
-FP_plot_subgrp <-
+
+# Overall effect-size for reintegration outcome
+FP_plot_reintegration_overall <-
   GB_dat_reintergration |> 
   ggplot() + 
   geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
@@ -408,12 +399,25 @@ FP_plot_subgrp <-
   geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
-  #geom_text(
-  #  data = sub_label_dat, 
-  #  aes(x = x_pos, y = y_pos, label = n_label, shape = NULL, color = NULL), 
-  #  size = 3, 
-  #  color = "black"
-  #) +
+  coord_flip() + 
+  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "none")
+
+
+# Effect-sizes for separated reintegration outcome
+FP_plot_reintergration_subgrp <-
+  GB_dat_reintergration |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   facet_grid(~analysis_plan, scales = "free") +
   scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
@@ -424,5 +428,283 @@ FP_plot_subgrp <-
        color = "", shape = "") +
   theme(legend.position = "none")
 
+# Funnel-plot health outcomes - Subgroup analysis ----
+GB_dat_mental_health <- 
+  GBD_effect |> 
+  mutate(analysis_plan = case_when(
+  str_detect(analysis_plan, "All mental health outcomes/Symptoms of psychosis|All mental health outcomes/Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis",
+   TRUE ~ analysis_plan)) |> 
+  filter(str_detect(analysis_plan, "mental")) |>
+  filter(!str_detect(analysis_plan, "Unused")) |>
+  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
+  mutate(
+    seg = sqrt(vg),
+    timing = if_else(is.na(timing), "Post", timing),
+    timing = factor(
+      timing, 
+      levels = c("Post", "3m", "6m", "9m", "12m", "18m", "24m")
+    ),
+    es_ID = 1:n()
+  ) |> 
+  arrange(timing)
+
+
+funnel_exp <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
+  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  0,     0,     0,     0
+) 
+
+
+# Overall effect size for mental health outcome
+FP_plot_overall_mental <-
+  GB_dat_mental_health |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() + 
+  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "none")
+
+# Subgroup effect size for mental health outcome
+FP_plot_subgrp_mental <-
+  GB_dat_mental_health |> 
+  filter(!(analysis_plan == "All mental health outcomes")) |>
+  ggplot() + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() + 
+  facet_grid(~analysis_plan, scales = "free") +
+  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "none")
+
+```
+
+# Desriptive Tables 
+```{r}
+# Study context
+
+# Percent studies by countries
+country_all <- GBD_effect |> 
+  group_by(studyid, cnt) |> 
+  summarise(
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  group_by(cnt) |>
+  summarise(
+    study_char = "Percentage of studies by countries",
+    
+    I = n_distinct(studyid),
+    K = sum(es_n),
+    
+    Mean = I/n_distinct(GBD_effect$studyid),
+    SD = NA,
+    
+    range = "0-1",
+    
+    .groups = "drop"
+  ); country_all
+
+
+# Average number of participants per effect size 
+
+participants <- GBD_effect |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_sample = mean(N_total),
+    es_n = n(), 
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Number of particiapnts",
+    
+    I = n_distinct(studyid),
+    K = sum(es_n),
+    
+    Mean = round(mean(study_avg_sample)),
+    SD = round(sd(study_avg_sample)),
+    
+    range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
+    
+  ); participants
+
+# Effective sample size 
+ESS <- GBD_effect |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_ESS = mean(ESS),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Effective sample size",
+    
+    I = n_distinct(studyid),
+    K = sum(es_n),
+    
+    Mean = round(mean(study_avg_ESS)),
+    SD = round(sd(study_avg_ESS)),
+    
+    range = paste0(min(study_avg_ESS), "-", round(max(study_avg_ESS)))
+    
+  ); ESS
+
+# Average size of treatment group
+group_size <- GBD_effect |> 
+  group_by(studyid) |> 
+  summarise(
+    treat_SampS = mean(N_t),
+    cont_SampS = mean(N_c),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = c("Intervention group", "Control group"),
+    
+    I = n_distinct(studyid),
+    K = sum(es_n),
+    
+    Mean = c(mean(treat_SampS), mean(cont_SampS)),
+    SD = c(sd(treat_SampS), sd(cont_SampS)),
+    
+    range = c(
+      paste0(min(treat_SampS), "-", round(max(treat_SampS))),
+      paste0(min(cont_SampS), "-", round(max(cont_SampS)))
+    )
+    
+  ); group_size
+
+# Number of samples per study 
+samples_per_study <- GBD_effect |> 
+  group_by(studyid) |> 
+  summarise(
+    samples = n_distinct(sample_id), 
+    es_n = n(),
+    
+    .groups = "drop"
+  ) %>%
+  summarise(
+    study_char = "Number of samples per study",
+    
+    I = sum(samples),  
+    K = sum(es_n),  
+    
+    Mean = mean(samples), 
+    SD = sd(samples),  
+    
+    range = paste0(min(samples), "-", max(samples)),
+    
+    .groups = "drop"
+  ); samples_per_study
+
+
+# Number of distinct studies in review
+
+n_distinct(GBD_effect$studyid)
+
+study_context <- 
+  bind_rows(
+    country_all,
+    participants,
+    ESS,
+    group_size,
+    samples_per_study
+    
+); study_context
+
+
+```
+
+## Descriptive of studies design
+```{r}
+
+# Proportion cluster randomized or RCT studies
+
+study_design <- GBD_effect |>  
+  group_by(studyid) %>% 
+  summarise(
+    design = unique(design),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) %>% 
+  group_by(design) %>% 
+  summarise(
+
+    I = n_distinct(studyid),
+    K = sum(es_n),
+    
+  ) %>% 
+  mutate(
+    
+    study_char = paste("%", design),
+    
+    Mean = I/n_distinct(GBD_effect$studyid),
+    SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) %>% 
+  select(-c(design)); study_design
+
+# Dont no if relevant to show details about study outlet and publishment as
+# Every indcluded study is a journal article and published. 
+
+
+```
+
+## Participants characteristics 
+```{r}
+# % Males in treatment and control group
+
+male_per <- 
+  GBD_effect %>% 
+  group_by(studyid) %>% 
+  summarise(
+    
+    t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
+    c_male = mean(as.numeric(male_pct_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(male_pct_t)),
+    
+    .groups = "drop"
+    
+  ) %>% 
+  filter(es_n != 0) %>% 
+   summarise(
+    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
+    I = n_distinct(studyid),  
+    K = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)),  # Gennemsnit for hver gruppe
+    SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  # Range for hver gruppe
+              paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
+  ); male_per
 
 ```
