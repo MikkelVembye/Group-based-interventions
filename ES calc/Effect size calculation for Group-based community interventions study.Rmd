@@ -11556,16 +11556,15 @@ Wuthrich2013_2021_est <-
     study = "Wuthrich et al. 2013/2021",
     vary_id = outcome,
     analysis_plan = case_when(
-      
-           outcome == "All mental health outcomes/Anxiety"  ~  "the Anxiety Disorders Interview Schedule for DSM-IV (ADIS- IV)", 
-           outcome == "All mental health outcomes/Anxiety"  ~ "the Anxiety Disorders Interview Schedule for DSM-IV (ADIS- IV)", 
-           outcome == "All mental health outcomes/Depression"  ~ "Geriatric Depression Scale (GDS)", 
-           outcome == "All mental health outcomes/Depression"  ~ "Geriatric Depression Scale (GDS)", 
-           outcome == "Loneliness"  ~ "The Center for Epidemiologic Studies-Depression Scale",
-           outcome == "All mental health outcomes/Anxiety" ~ "The Geriatric Anxiety Inventory (GAI)",
-           outcome == "Unused outcomes" ~ "The Penn State Worry Questionnaire (PSWQ)",
-           outcome == "Wellbeing and Quality of Life" ~ "Short Form-12",
-           outcome == "Recovery rates" ~ "???" # Couldn't figure this one out (Jakob)
+           outcome =="Primary problem" ~ "All mental health outcomes/Anxiety", 
+           outcome == "Anxiety" ~ "All mental health outcomes/Anxiety", 
+           outcome == "Depression" ~ "All mental health outcomes/Depression", 
+           outcome == "GDS" ~ "All mental health outcomes/Depression", 
+           outcome == "Loneliness (CES-D 14)"~"Loneliness" ,
+           outcome == "GAI"~"All mental health outcomes/Anxiety" ,
+           outcome == "PSWQ"~"Unused outcomes",
+           outcome == "SF12"~"Wellbeing and Quality of Life",
+           outcome == "Recovery rates" ~ "Unused outcomes"  # Couldn't figure this one out (Jakob)
          )
   )
 
@@ -11574,7 +11573,24 @@ Wuthrich2013_2021_est
 
 #rm(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat)
 
+GBD_effect <- GBD_effect |> 
+  mutate(
+    analysis_plan = case_when(
+           outcome =="Primary problem" ~ "All mental health outcomes/Anxiety", 
+           outcome == "Anxiety" ~ "All mental health outcomes/Anxiety", 
+           outcome == "Depression" ~ "All mental health outcomes/Depression", 
+           outcome == "GDS" ~ "All mental health outcomes/Depression", 
+           outcome == "Loneliness (CES-D 14)"~"Loneliness" ,
+           outcome == "GAI"~"All mental health outcomes/Anxiety" ,
+           outcome == "PSWQ"~"Unused outcomes",
+           outcome == "SF12"~"Wellbeing and Quality of Life",
+           outcome == "Recovery rates" ~ "Unsued outcome",  # Couldn't figure this one out (Jakob)
+           TRUE ~ analysis_plan
+           )
+  )
 
+df <- GBD_effect |> 
+ select(analysis_plan)
 ```
 
 ```{r, echo=FALSE}
