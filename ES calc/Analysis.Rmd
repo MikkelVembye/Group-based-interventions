@@ -358,6 +358,7 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
 ```
 
 # Funnel-plot
+
 ```{r}
 # Funnel plot for overall effectsizes ----
 
@@ -570,7 +571,12 @@ FP_plot_subgrp_mental <-
 
 ```
 
+<<<<<<< HEAD
 # Descriptive Tables 
+=======
+# Descriptive Tables
+
+>>>>>>> 9a77c09fc8c17b0cb994434cd2d8c199da36108f
 ```{r}
 # Study context
 # Percent studies by countries
@@ -716,6 +722,7 @@ study_context <-
 ```
 
 ## Descriptive of studies design
+
 ```{r}
 
 # Proportion cluster randomized or RCT studies
@@ -849,7 +856,8 @@ design <-
 
 ```
 
-## Participants characteristics 
+## Participants characteristics
+
 ```{r}
 # % Males in treatment and control group
 
@@ -1034,7 +1042,9 @@ study_participants <-
 
 
 ```
+
 ## Intervention characteristics
+
 ```{r}
 # Duration of intervention
 duration <- 
@@ -1247,7 +1257,9 @@ intervention_characteristics <- bind_rows(
 
 
 ```
+
 ## Control group
+
 ```{r}
 # Control types 
 control <- GBD_effect |>  
@@ -1278,7 +1290,9 @@ control <- GBD_effect |>
   relocate(study_char) |>  
   select(-c(control)); control
 ```
+
 ## Methodological features
+
 ```{r}
 # Average number of effect size per study
 avg_es_study <- 
@@ -1307,6 +1321,7 @@ avg_es_study <-
 ```
 
 ## Outcome and measurement characteristics
+
 ```{r}
 # Overall constructs
 construct <- GBD_effect |>  
@@ -1403,7 +1418,9 @@ outcome_measurement <- bind_rows(
 )
 
 ```
+
 ## Overall RoB
+
 ```{r}
 overall_rob <- GBD_effect |>  
   group_by(studyid) |>  
@@ -1469,6 +1486,7 @@ rob <- bind_rows(
 ```
 
 ## Table 1 and 2
+
 ```{r}
 table1 <- bind_rows(
   study_context, design, 
@@ -1506,7 +1524,6 @@ table2_rest_desc <-
 
 
 ```
-
 
 ```{r}
 
