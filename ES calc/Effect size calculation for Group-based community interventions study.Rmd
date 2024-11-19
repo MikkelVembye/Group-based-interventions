@@ -9,6 +9,7 @@ output:
     code_download: true
 bibliography: Group-based interventions.bib
 link-citations: yes
+csl: apa.csl
 fontsize: 11pt
 spacing: single
 editor_options: 
@@ -28,13 +29,18 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 ```
 
-### Introduction
+```{r, echo = FALSE}
+gotop::use_gotop()
+```
+
+## Introduction
 
 This document contains effect size calculation for the Campbell systematic review 'Group-based community interventions to support the social reintegration of marginalised adults with mental illness' [@Dalgaard2022a].
 
 ### R package used for effect size calculation
 
 ```{r}
+# To retrieved the function used to cluster bias correct effect sizes
 # devtools::install_github("MikkelVembye/VIVECampbell")
 
 library(tidyverse)
@@ -59,14 +65,16 @@ R2_imp <- 0
 
 grp_size_imp <- 8
 
+dat_string <- if (isTRUE(getOption('knitr.in.progress'))) "GAF_res.rds" else "ES calc/GAF_res.rds"
+
 # Loading data used to calculate population-based effect size estimates
-GAF_pop_res <- readRDS("ES calc\\GAF_res.rds")
+GAF_pop_res <- readRDS(dat_string)
 
 ```
 
 ## **Studies in meta-analysis**
 
-### **Acarturk et al. [-@Acarturk2022] (Change var names)**
+### **Acarturk et al. [-@Acarturk2022] (Quality-checked)**
 
 #### (Multi-level analysis and reported raw means, at baseline, post, and followup times)
 
@@ -388,7 +396,7 @@ dat <-
   rename(m_post = m_diff_post, mean_diff = DD)
 ```
 
-### **Barbic et al. [-@Barbic2009]**
+### **Barbic et al. [-@Barbic2009] (Quality-checked)**
 
 #### (Randomized trial reporting raw means at baseline and after treatment. Uses repeated ANOVA and does not account for clusting in treament)
 
@@ -573,7 +581,7 @@ dat <-
   relocate(study)
 ```
 
-### **Bond et al. [-@Bond2015]**
+### **Bond et al. [-@Bond2015] (Quality-checked)**
 
 #### (RCT - no treatment of clustering)
 
@@ -730,7 +738,7 @@ dat <-
 
 ```
 
-### **Bækkelund et al. [-@Bækkelund2022]**
+### **Bækkelund et al. [-@Bækkelund2022] (Quality-checked)**
 
 ```{r Bækkelund et al 2022}
 Bækkelund2022 <- tibble(
@@ -967,7 +975,7 @@ dat <-
   relocate(study)
 ```
 
-### **Cano-Vindel et al. [-@Cano-Vindel2022]**
+### **Cano-Vindel et al. [-@Cano-Vindel2021] (Quality-checked)**
 
 Data entered from Tables 2 and 3 (pp. 3342-45)
 
@@ -1425,7 +1433,7 @@ dat <-
   bind_rows(Cano_vindel2021_est) 
 ```
 
-### **Craigie & Nathan [-@Craigie2009]**
+### **Craigie & Nathan [-@Craigie2009] (Quality-checked)**
 
 #### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
 
@@ -1661,7 +1669,7 @@ dat <-
   bind_rows(Craigie2009_est)
 ```
 
-### **Crawford et al. [-@Crawford2012]**
+### **Crawford et al. [-@Crawford2012] (Quality-checked)**
 
 #### (RCT - clustering was not handle for the means we apply for effect size calculation)
 
@@ -1951,7 +1959,7 @@ dat <-
   bind_rows(Crawford2012_est)
 ```
 
-### **Druss et al. [-@Druss2010]**
+### **Druss et al. [-@Druss2010] (Quality-checked)**
 
 #### (RCT - no usuable treatment of clustering)
 
@@ -2142,7 +2150,7 @@ dat <-
   relocate(study)
 ```
 
-### **Druss et al. [-@Druss2018] (Double-check)**
+### **Druss et al. [-@Druss2018] (Quality-checked)**
 
 Data from Table 2 (p. 532), containing means and SD for health related quality of life (PCS and MCS),and Table 3 (p. 533), containing means and SD for RAS
 
@@ -2339,7 +2347,7 @@ dat <-
   bind_rows(Druss2018_est) 
 ```
 
-### **Dyck et al. [-@Dyck2000]**
+### **Dyck et al. [-@Dyck2000] (Quality-checked)**
 
 Data from table 2 (p. 516) containing means and standard deviation
 
@@ -2504,7 +2512,7 @@ dat <-
   bind_rows(Dyck2000_est) 
 ```
 
-### **Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Change var names)**
+### **van Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Quality-checked)**
 
 #### (Multi-level analysis to handle clustering)
 
@@ -2875,7 +2883,7 @@ dat <-
 
 ```
 
-### **Gatz et al. [-@Gatz2007]**
+### **Gatz et al. [-@Gatz2007] (Quality-checked)**
 
 Entering data from Table 2 (p. 872)
 
@@ -3041,7 +3049,7 @@ dat <-
   bind_rows(Gatz2007_est) 
 ```
 
-### **Gonzalez and Prihoda [-@GonzalesPrihoda2007]**
+### **Gonzalez and Prihoda [-@Gonzalez2007] (Quality-checked)**
 
 ```{r Gonzalez and Prihoda 2007}
 Gonzalez2007_est <- 
@@ -3154,7 +3162,7 @@ dat <-
 
 ```
 
-### **Gordon et al. [-@Gordon2018]**
+### **Gordon et al. [-@Gordon2018] (Quality-checked)**
 
 Entering data from Table 2 (p. 124)
 
@@ -3366,7 +3374,7 @@ dat <-
   bind_rows(Gordon2018_est)
 ```
 
-### **Gutman et al. [-@Gutman2019]**
+### **Gutman et al. [-@Gutman2019] (Quality-checked)**
 
 Entering raw data from Table 2 (p. 67)
 
@@ -3587,7 +3595,7 @@ dat <-
 
 ```
 
-### **Hagen et al. [-@Hagen2005]**
+### **Hagen et al. [-@Hagen2005] (Quality-checked)**
 
 ```{r Hagen et al 2018}
 # Data from table 2, p. 39 
@@ -3820,7 +3828,7 @@ dat <-
   bind_rows(Hagen2005_est) 
 ```
 
-### \*\*Haslam et al. [-@Haslam2019]
+### **Haslam et al. [-@Haslam2019] (Quality-checked)**
 
 ```{r Haslam et al 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
@@ -4000,7 +4008,7 @@ dat <-
 
 ```
 
-### \*\*Hilden et al. [-@Hilden2021]
+### **Hilden et al. [-@Hilden2021] (Quality-checked)**
 
 ```{r Hilden et al 2021}
 # Table 2, p. 181
@@ -4214,7 +4222,7 @@ dat <-
   bind_rows(Hilden2021_est) 
 ```
 
-### **Himle et al. [-@Himle2014]**
+### **Himle et al. [-@Himle2014] (Quality-checked)**
 
 ```{r Himle et al 2014}
 # From table 2, p. 174
@@ -4887,7 +4895,7 @@ dat <-
   bind_rows(Jacob2010_est) 
 ```
 
-### **James et al. [-@James2004]**
+### **James et al. [-@James2004] (Quality-checked)**
 
 ```{r James et al 2004}
 James2004 <- tibble(
@@ -5318,7 +5326,7 @@ dat <-
 
 ```
 
-### **Lim et al. [-@Lim2020]**
+### **Lim et al. [-@Lim2020] (Quality-checked)**
 
 ```{r Lim et al 2020}
 # Data from table 2 (p.5)  containing means, standard deviation and ANOVA estimations
@@ -5522,7 +5530,7 @@ dat <-
   bind_rows(Lim2020_est) 
 ```
 
-### **Lloyd-Evans et al. [-@Lloyd-Evans2020]**
+### **Lloyd-Evans et al. [-@Lloyd-Evans2020] (Quality-checked)**
 
 From Table 2 on page 9
 
@@ -6187,7 +6195,7 @@ dat <-
 
 ```
 
-### **McCay et al. 2006 (Should be double-checked)[INSERT REFERENCE]**
+### **McCay et al. [-@McCay2006] (Quality-checked)**
 
 ```{r}
 
@@ -6357,7 +6365,7 @@ dat <-
 
 ```
 
-### **McCay et al. 2007/2014 [INSERT REFERENCE]**
+### **McCay et al. [-@McCay2007] (Quality-checked)**
 
 Results are extracted from Table 3 (p. 6) and Table 4 (p. 7). Sample size data is retrieved from Table 1 (p. 6)
 
@@ -6466,7 +6474,7 @@ dat <-
 
 ```
 
-### **Michalak et al. [-@Michalak2015]**
+### **Michalak et al. [-@Michalak2015] (Quality-checked)**
 
 ```{r Michalak et al 2015}
 Michalak_2015 <- tibble(
@@ -7545,7 +7553,7 @@ dat <-
   bind_rows(Patterson2003_est) 
 ```
 
-### **Popolo et al. [-@Popolo2019] (Quality-checked) Hast to be checked by MVH: this adds these variable =\> within_group_d**
+### **Popolo et al. [-@Popolo2019] (Quality-checked)**
 
 Data was extracted from Table 2 (p. 351)
 
@@ -8050,7 +8058,7 @@ dat <-
   bind_rows(Rabenstein2015_est) 
 ```
 
-### **Rosenblum et al. [-@Rosenblum2014]**
+### **Rosenblum et al. [-@Rosenblum2014] (Quality-checked)**
 
 ```{r Rosenblum et al 2014}
 # Extracting data from table 3 p. 85 
@@ -8336,7 +8344,7 @@ dat <-
   bind_rows(Rosenblum2014_est)
 ```
 
-### **Russinova et al. [-@Russinova2018]**
+### **Russinova et al. [-@Russinova2018] (Quality-checked)**
 
 ```{r Russinova et al 2018}
 # Taken from table 
@@ -8950,7 +8958,7 @@ dat <-
   bind_rows(Rüsch2019_est) 
 ```
 
-### **Sacks et al. [-@Sacks2011]**
+### **Sacks et al. [-@Sacks2011] (Quality-checked)**
 
 ```{r Sacks et al 2011}
 # This study makes estimations based on two different analysis based on their
@@ -9497,7 +9505,7 @@ dat <-
   bind_rows(Sajatovic2009_est)
 ```
 
-### **Saloheimo et al. [-@Saloheimo2016] (Needs to be double-checked)**
+### **Saloheimo et al. [-@Saloheimo2016] (Quality-checked)**
 
 Sample size data was extracted from page 5. Effect size data was retrieved from Table 1 and text reported results (p. 6)
 
@@ -9877,7 +9885,7 @@ dat <-
   bind_rows(Schrank2016_est) 
 ```
 
-### **Schäfer et al. [-@Schäfer]**
+### **Schäfer et al. [-@Schäfer2019] (Quality-checked)**
 
 ```{r Schäfer et al 2019}
 
@@ -10137,7 +10145,7 @@ dat <-
   bind_rows(schafer2019_est)
 ```
 
-### **Somers et al. [-@Somers2017] (Should be double-checked)**
+### **Somers et al. [-@Somers2017] (Quality-checked)**
 
 ```{r}
 
@@ -10316,7 +10324,7 @@ dat <- # Not included in the covariaters sheet
 
 ```
 
-### **Tjaden et al. [-@Tjaden2022]**
+### **Tjaden et al. [-@Tjaden2021] (Quality-checked)**
 
 ```{r Tjaden et al 2021}
 Tjaden2021 <- tibble(
@@ -10562,7 +10570,7 @@ dat <-
 
 ```
 
-### **Valiente et al. [-@Valiente2022]**
+### **Valiente et al. [-@Valiente2022] (Quality-checked)**
 
 ```{r Valiente et al 2022}
 # Data from Table 3 and Table  4 (p. 4)  containing means, standard deviation. It also contains
@@ -10831,7 +10839,7 @@ dat <-
   bind_rows(Valiente2022_est) 
 ```
 
-### **Volpe et al. [-@Volpe2015]**
+### **Volpe et al. [-@Volpe2015] (Quality-checked)**
 
 ```{r Volpe et al 2015}
 Volpe_2015 <- tibble(
@@ -11034,7 +11042,7 @@ dat <-
   bind_rows(Volpe2015_est)
 ```
 
-### **Wojtalik et al. [-@Wojtalik2022]**
+### **Wojtalik et al. [-@Wojtalik2019] (Quality-checked)**
 
 ```{r}
 # Data from table 2 and table (p. 505)  containing marginal means with standard error
@@ -11253,7 +11261,7 @@ dat <-
   bind_rows(Wojtalik2019_est) 
 ```
 
-### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021] (Change var names)**
+### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021] (Quality-checked)**
 
 #### (Accounts for clustering via the use of mixed-effects models/multi-level models)
 
@@ -11572,25 +11580,6 @@ Wuthrich2013_2021_est <-
 Wuthrich2013_2021_est
 
 #rm(Wuthrich2013_2021_smd_est, Wuthrich2013_OR_dat)
-
-GBD_effect <- GBD_effect |> 
-  mutate(
-    analysis_plan = case_when(
-           outcome =="Primary problem" ~ "All mental health outcomes/Anxiety", 
-           outcome == "Anxiety" ~ "All mental health outcomes/Anxiety", 
-           outcome == "Depression" ~ "All mental health outcomes/Depression", 
-           outcome == "GDS" ~ "All mental health outcomes/Depression", 
-           outcome == "Loneliness (CES-D 14)"~"Loneliness" ,
-           outcome == "GAI"~"All mental health outcomes/Anxiety" ,
-           outcome == "PSWQ"~"Unused outcomes",
-           outcome == "SF12"~"Wellbeing and Quality of Life",
-           outcome == "Recovery rates" ~ "Unsued outcome",  # Couldn't figure this one out (Jakob)
-           TRUE ~ analysis_plan
-           )
-  )
-
-df <- GBD_effect |> 
- select(analysis_plan)
 ```
 
 ```{r, echo=FALSE}
@@ -11609,72 +11598,15 @@ dat <-
 
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
- covariates <- read_xlsx(
+covariates <- read_xlsx(
   "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx",
   na = c(".", "")
  )
-
-
-
-# Integrate the timing variable across datasets, it's necessary to convert  the timing 
-# column in the Crawford2012 dataset to a character type, aligning it with the 
-# corresponding column in other datasets
-Crawford2012_est <- Crawford2012_est |> 
-  mutate(timing = as.character(timing))
-
-group_based_dat_es <- 
-  bind_rows(
-    # Timmermans2012_est,
-    # Wuthrich2013_2021_est,
-   Acarturk2022_est,
-    Barbic2009_est,
-    Bond2015_est,
-    Bækkelund2022_est,
-    Cano_vindel2021_est,
-    Craigie2009_est,
-    Crawford2012_est,
-    Druss2010_est,
-    Druss2018_est,
-    Dyck2000_est,
-    Gatz2007_est,
-    Gonzalez2007_est,
-    Gordon2018_est,
-    Hagen2005_est,
-    Haslam2019_est,
-    Hilden2021_est,     
-    Himle2014_est,  
-    izquierdo2021_est,
-    Jacob2010_est,  
-    Kanie2019_est,
-    Lim2020_est,
-    lloyd_Evans2020_est,
-    Madigan2013_est,
-    Michalak2015_est_combined,
-    Morley2014_est,
-    Morton2012_est, 
-    Patterson2003_est,
-    Popolo2019_est,
-    Rabenstein2015_est,
-    Rosenblum2014_est,
-    Rüsch2019_est,
-    Russinova2018_est,
-    Sacks2011_est,
-    Sajatovic2009_est,
-    Schrank2016_est,
-    schafer2019_est,
-    Tjaden2021_est,
-    Valiente2022_est,
-    Volpe2015_est,
-    Wojtalik2019_est
-    
-  ) |> 
-  relocate(sd_pool, .after = sd_used) 
 
 group_based_dat <- 
   bind_cols(
     covariates,
     dat
-
 )
 
 # To check the symmetry between R-file and Excel-extraction sheet
@@ -11690,16 +11622,6 @@ saveRDS(group_based_dat, file = "ES calc/Group-based interventions data.RDS")
 #  r = c(.7, 0.1),
 #  smooth_vi = TRUE
 #)
-```
-
-```{r, eval=FALSE, include=FALSE}
-
-test_dat <- covariates |> 
-  filter(str_detect(authors, "Gordon")) |> 
-  bind_cols(Gordon_2018_est)
-
-select(test_dat, varifier, vary_id)
-
 ```
 
 ## Using extant data to estimate population standard deviations
@@ -11773,5 +11695,56 @@ GAF_res
 
 ```
 
-## **References**
 
+PHQ-9 population measures
+
+```{r, eval=FALSE}
+
+PHQ_9_dat <- 
+  group_based_dat |>
+  filter(
+    str_detect(authors, "Cano|Hilden|Himle|Lloyd|Volpe") & 
+    str_detect(outcome, "9") & measure_type == 	"Post-intervention"
+  )
+
+PHQ_9_dat <- PHQ_9_dat[-2,]
+
+ggplot(data.frame(x = c(0, 100)), aes(x)) + 
+  mapply(function(mean, sd, col) {
+    stat_function(fun = dnorm, args = list(mean = mean, sd = sd), linetype = "dashed", color = col)
+  }, 
+  # enter means, standard deviations and colors here
+  mean = PHQ_9_dat$m_post_c, 
+  sd = PHQ_9_dat$sd_post_c,
+  col = "black"
+  ) + 
+  theme_bw() +
+  scale_x_continuous(limits = c(0, 35)) +
+  labs(x = "PHQ-9 score", y = "Density")
+
+PHQ_9_res <- population_SMD(PHQ_9_dat)
+PHQ_9_res
+
+#saveRDS(PHQ_9_res, "ES calc/PHQ_9_res.rds")
+
+```
+
+BDI: 7 Studier
+
+```{r}
+
+# Craige & Nathan
+# Hagen et al. 2005
+# Jacob et al. 2010
+# Michalak et al. 2015
+# Rabenstein et al. 2016
+# Sacks et al. 2011
+# Schäfer et al. 2019
+
+
+```
+
+
+
+
+## **References**

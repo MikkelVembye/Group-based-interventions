@@ -1,14 +1,12 @@
 ---
-title: Effect size calculation for 'Group-based community interventions to support
-  the social reintegration of marginalised adults with mental illness'
+title: "Statistical Analysis for 'Group-based community interventions to support
+  the social reintegration of marginalised adults with mental illness'"
 date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
 output: 
   html_document:
     toc: true
     code_folding: show
     code_download: true
-bibliography: Group-based interventions.bib
-link-citations: yes
 fontsize: 11pt
 spacing: single
 editor_options: 
@@ -19,6 +17,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(eval = FALSE)
 
 options(pillar.sigfig = 4) # ensure tibble include 4 digits
 options(tibble.width = Inf)
@@ -28,30 +27,58 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 ```
 
+# R package
+```{r}
+
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(stringr)
+
+```
+
 # Load data
 
-```{r}
+```{r, eval = TRUE}
 # Loading the needed data for analysis
 group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |> 
   # The post-measurement of Empowerment Scale seems flawed for the study by 
   # Barbic et al. 2009 we therefore we exclude it from the analysis
-  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale"))
+  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
+  mutate(
+    author_year = paste(authors, year),
+    eppi_id = if_else(author_year == "McCay et al. 2006", 105904715, eppi_id)
+  )
 
 ```
 
 # Descriptive plots
+
+```{r, echo=FALSE, eval=FALSE}
+# Check studies IDs. MHV: Hvor kommer studyid fra?
+
+group_based_dat |> 
+  summarise(
+    n_eppi_ids = n_distinct(eppi_id),
+    .by = studyid
+  ) |> 
+  filter(n_eppi_ids > 1)
+
+group_based_dat |> filter(studyid %in% c(113, 120, 2) ) |> arrange(studyid)|> View()
+
+```
+
 
 ## Timeline
 
 ```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
 # Figure 1: Number of included studies in the meta-analysis by year
 G_timepllot <- group_based_dat |> 
-  group_by(authors) |>  
-  summarise(year = unique(year))
+  summarise(year = unique(year), .by =  author_year)
 
-
+# DONE
 timeline_plot <-  ggplot(G_timepllot,aes(x = year)) + 
-  geom_bar(colour = "black", fill = "gray70", alpha = 1, width = 1) +
+  geom_bar(colour = "black", fill = "cornflowerblue", alpha = 1, width = 1) +
   scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
   scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
   theme_bw() + 
@@ -66,7 +93,9 @@ timeline_plot <-  ggplot(G_timepllot,aes(x = year)) +
   labs(
     x = "Year of Publication",
     y = "Number of Studies"
-  ); timeline_plot
+  )
+
+timeline_plot
 
 ```
 
@@ -75,7 +104,8 @@ timeline_plot <-  ggplot(G_timepllot,aes(x = year)) +
 ### Making a effetive sample size (ESS)
 
 ```{r}
-GBD_effect <- group_based_dat |> 
+GBD_effect <- 
+  group_based_dat |> 
   filter(variable_type != "Binary") |>
   mutate(
     es_id = 1:n(),
@@ -92,59 +122,66 @@ GBD_effect <- group_based_dat |>
     Wgt = if_else(!is.na(Wgt_post), Wgt_post, NA_real_),
     Wgt = if_else(!is.na(Wgt_DD), Wgt_DD, Wgt),
     Wgt = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt),
-    Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt)
+    Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt),
     
-  )
-
-GBD_effect <- GBD_effect|> 
-  mutate(
-  ESS = round(4/vgt) # Using cluster bias corrected sampling variance
-)
-
-# Change Study-id for Gonzalez & Prihoda because of duplicated id
-GBD_effect <- GBD_effect %>%
-  mutate(studyid = ifelse(authors == "Gonzalez & Prihoda", 500, studyid), 
-         cnt = if_else(cnt == "USA", "US", cnt),
-         design = ifelse(design  == "QES-pretest","QES", design),
-         design = ifelse(design  == "CRCT","RCT", design), 
-         assessment = ifelse(assessment == "Self  assesment", "Self assesment", assessment),
-         randomization = ifelse(randomization == "Simple Block Randomization", "Block randomized",
-                                randomization),
-         randomization = ifelse(randomization == "Simple with permuted blocks, stratified by site",
-                                "Block randomized stratified by site", randomization),
-         randomization = ifelse(randomization == "Stratified?", 
-                                "Stratified randomization", randomization),
-         trt_type = ifelse(trt_type == "Group-based  Cognitive Behavioral Therapy", 
-                           "Group based Cognitive Behavioural Therapy", trt_type),
-         trt_type = ifelse(trt_type == "Group-based Cognitive Behavioral Therapy", 
-                           "Group based Cognitive Behavioural Therapy", trt_type),
-         trt_type = ifelse(trt_type =="Group psychoeducation & Social skill training", 
-                           "Group psychoeducation & Social Skill Training", trt_type),
-         trt_type = ifelse(trt_type =="Group psychoeducation", 
-                           "Group Psychoeducation", trt_type),
-         trt_type = ifelse(trt_type =="Group psychoeducation & Social Skill Training", 
-                           "Group Psychoeducation & Social Skill Training", trt_type),
-         trt_type = ifelse(trt_type =="Education and Illness Management", 
-                           "Group Psychoeducation & Social Skill Training", trt_type),
-         trt_type = ifelse(trt_type =="Illness management", 
-                           "Illness Management", trt_type),
-         sample_factors = ifelse(sample_factors =="Older with depression and anxiety", 
-                                 "Mixed", sample_factors), 
-         sample_factors = ifelse(sample_factors =="All suffered from severe mental illness", 
-                                 "Shared Social problem(s)/challenge(s)", sample_factors),
-         sample_factors = ifelse(sample_factors =="Shared origin and psychological distress", 
-                                 "Mixed", sample_factors),
-         sample_factors = ifelse(sample_factors =="persons with major psychiatric problems", 
-                                 "Shared Social problem(s)/challenge(s)", sample_factors),
-         analysis_plan = ifelse(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
-         test_type = ifelse(test_type == "Clinical administered", "Clinician-rated measure", test_type),
-         test_type = ifelse(test_type == "Clinical interviews", "Clinician-rated measure", test_type),
-         test_type = ifelse(test_type == "Self report", "Self-reported", test_type),
-         test_type = ifelse(test_type == "Self report through clinical interview", "Self-reported", test_type),
-         test_type = ifelse(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
-         measure_type = ifelse(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
-         rob_tool = ifelse(rob_tool == "RoB2", "Rob2", rob_tool)
-         )
+    ESS = round(4/vgt), # Using cluster bias corrected sampling variance
+    
+    studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
+    
+    cnt = if_else(cnt == "USA", "US", cnt),
+    
+    design = if_else(design  == "QES-pretest", "QES", design),
+    
+    # MHV: Jeg synes ikke det er en god ide at ændre CRCT til RCT. Jeg vil gerne kunne se forskel.  
+    # design = ifelse(design  == "CRCT", "RCT", design), 
+    
+    assessment = if_else(assessment == "Self  assesment", "Self assesment", assessment),
+    
+    randomization = if_else(randomization == "Simple Block Randomization", "Block randomized",
+                           randomization),
+    randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
+                           "Block randomized stratified by site", randomization),
+    randomization = if_else(randomization == "Stratified?", 
+                           "Stratified randomization", randomization),
+    
+    trt_type = if_else(trt_type == "Group-based  Cognitive Behavioral Therapy", 
+                      "Group based Cognitive Behavioural Therapy", trt_type),
+    trt_type = if_else(trt_type == "Group-based Cognitive Behavioral Therapy", 
+                      "Group based Cognitive Behavioural Therapy", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation & Social skill training", 
+                      "Group psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation", 
+                      "Group Psychoeducation", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation & Social Skill Training", 
+                      "Group Psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Education and Illness Management", 
+                      "Group Psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Illness management", 
+                      "Illness Management", trt_type),
+    
+    sample_factors = if_else(sample_factors =="Older with depression and anxiety", 
+                            "Mixed", sample_factors), 
+    sample_factors = if_else(sample_factors =="All suffered from severe mental illness", 
+                            "Shared Social problem(s)/challenge(s)", sample_factors),
+    sample_factors = if_else(sample_factors =="Shared origin and psychological distress", 
+                            "Mixed", sample_factors),
+    sample_factors = if_else(sample_factors =="persons with major psychiatric problems", 
+                            "Shared Social problem(s)/challenge(s)", sample_factors),
+    
+    analysis_plan = ifelse(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
+    
+    test_type = ifelse(test_type == "Clinical administered", "Clinician-rated measure", test_type),
+    test_type = ifelse(test_type == "Clinical interviews", "Clinician-rated measure", test_type),
+    test_type = ifelse(test_type == "Self report", "Self-reported", test_type),
+    test_type = ifelse(test_type == "Self report through clinical interview", "Self-reported", test_type),
+    test_type = ifelse(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
+    
+    measure_type = ifelse(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
+    
+    rob_tool = ifelse(rob_tool == "RoB2", "Rob2", rob_tool)
+ ) |> 
+ # MHV: I og med at vi ikke benytter unused outcomes, så kan disse slettes
+ filter(str_detect(analysis_plan, "Unused"))
 ```
 
 ```{r}
@@ -237,10 +274,9 @@ es_dist_plot <-
 ```{r}
 # Making data for plotting outcomes
 
-
 # Without mental health outcomes and only reintergration-outcomes
 GB_outcome_reintergration <- GBD_effect |> 
-   filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
+  filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
   group_by(analysis_plan) |> 
   summarise(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -268,7 +304,7 @@ reintegration_outcome_plot <- GBD_effect %>%
 
 # Total mental health:
 GB_outcome_mental_health <- GBD_effect |> 
-   filter(str_detect(analysis_plan, "mental")) |> 
+  filter(str_detect(analysis_plan, "mental")) |> 
   filter(!str_detect(analysis_plan, "Unused")) |>
   summarise(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -534,10 +570,9 @@ FP_plot_subgrp_mental <-
 
 ```
 
-# Desriptive Tables 
+# Descriptive Tables 
 ```{r}
 # Study context
-
 # Percent studies by countries
 country_all <- GBD_effect |> 
   group_by(studyid, cnt) |> 
