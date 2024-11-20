@@ -46,8 +46,7 @@ group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |>
   # Barbic et al. 2009 we therefore we exclude it from the analysis
   filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
   mutate(
-    author_year = paste(authors, year),
-    eppi_id = if_else(author_year == "McCay et al. 2006", 105904715, eppi_id)
+    author_year = paste(authors, year)
   )
 
 ```
