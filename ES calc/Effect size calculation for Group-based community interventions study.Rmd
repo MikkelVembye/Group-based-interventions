@@ -33,7 +33,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 gotop::use_gotop()
 ```
 
-## Introduction
+## **Introduction**
 
 This document contains effect size calculation for the Campbell systematic review 'Group-based community interventions to support the social reintegration of marginalised adults with mental illness' [@Dalgaard2022a].
 
@@ -64,19 +64,25 @@ ppcor_imp <- 0.5
 R2_imp <- 0
 
 grp_size_imp <- 8
+```
 
-dat_string <- if (isTRUE(getOption('knitr.in.progress'))) "GAF_res.rds" else "ES calc/GAF_res.rds"
-
+# Loading extant data used to calculated population-based effect sizes
+```{r}
 # Loading data used to calculate population-based effect size estimates
-GAF_pop_res <- readRDS(dat_string)
+GAF_string <- if (isTRUE(getOption('knitr.in.progress'))) "GAF_res.rds" else "ES calc/GAF_res.rds"
+GAF_pop_res <- readRDS(GAF_string )
+
+PHQ_string <- if (isTRUE(getOption('knitr.in.progress'))) "PHQ_9_res.rds" else "ES calc/PHQ_9_res.rds"
+PHQ_pop_res <- readRDS(PHQ_string)
+
+BDI_string <- if (isTRUE(getOption('knitr.in.progress'))) "BDI_res.rds" else "ES calc/BDI_res.rds"
+BDI_pop_res <- readRDS(BDI_string)
 
 ```
 
 ## **Studies in meta-analysis**
 
 ### **Acarturk et al. [-@Acarturk2022] (Quality-checked)**
-
-#### (Multi-level analysis and reported raw means, at baseline, post, and followup times)
 
 To calculate pretest-adjusted effect sizes, we first estimate pre-post and pre-followup correlations from the reported results in "Treatment effect" section (p. 7)
 
@@ -398,8 +404,6 @@ dat <-
 
 ### **Barbic et al. [-@Barbic2009] (Quality-checked)**
 
-#### (Randomized trial reporting raw means at baseline and after treatment. Uses repeated ANOVA and does not account for clusting in treament)
-
 Entering data from Table 3 (p. 495).
 
 ```{r Barbic et al 2009}
@@ -582,8 +586,6 @@ dat <-
 ```
 
 ### **Bond et al. [-@Bond2015] (Quality-checked)**
-
-#### (RCT - no treatment of clustering)
 
 Entering data from Table 3 and 4 (p. 1032). Recovery Assessment Scale Scores are retrieved from the text on page 1032 reported under Table 3. In our analysis, we do not distinguish between different types of work as done in the paper. We, therefore, amalgamate all work categories. We coded the control group as the treatment group because the control is the group-based treatment, which is of our main concern.
 
@@ -861,7 +863,6 @@ Bækkelund2022_est <-
     
     m_diff_t = m_post_t - m_pre_t, 
     m_diff_c = m_post_c - m_pre_c,
-    #MHV DID scorerne skal også omvendes lige som post scorer :) 
     # SCL-90 R lower scores are beneficial why these is reverted
     mean_diff = if_else(outcome != "GAF-S", (m_diff_t - m_diff_c)*-1,
                         m_diff_t - m_diff_c),
@@ -873,24 +874,24 @@ Bækkelund2022_est <-
     sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
     
     N_total = N_t + N_c,
-    df_ind = N_total, # frihedsgrader svarer til den samlede stikprøvestørrelse
+    df_ind = N_total, 
     
-    d_post = m_post/sd_pool, # Cohens Post D - posttest baseret effektstørrelse
-    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind), # varians af effekstørrelsen
-    Wd_post = (1/N_t + 1/N_c), # Det store variansled 
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind), 
+    Wd_post = (1/N_t + 1/N_c), 
     
-    d_DD = (mean_diff/sd_pool), #Cohens d
-    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df_ind), # skaber falsk korrelation, hvorfor vi beregner det store variansled
-    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), # det store variansled
+    d_DD = (mean_diff/sd_pool), 
+    vd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + d_DD^2/(2*df_ind), 
+    Wd_DD = (1/N_t + 1/N_c) * 2*(1-ppcor), 
     
-    J = 1 - 3/(4*df_ind-1), # her bruger vi J som er en korrigeringsfaktor som vi kan bruge til at beregne Hedges' g (fra d til g)
+    J = 1 - 3/(4*df_ind-1), 
     
     g_post = J * (m_post/sd_pool),
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = (1/N_t + 1/N_c),
   
-    g_DD = J * (mean_diff/sd_pool), # her beregner vi Difference in difference effektstørrelse som er Mikkels foretrukne - baseline korrigeret effekstørrelse
-    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df_ind), # variansen af den baseline adjusted effekstørrelse
+    g_DD = J * (mean_diff/sd_pool), 
+    vg_DD = (1/N_t + 1/N_c) * 2*(1-ppcor) + g_DD^2/(2*df_ind),
     Wg_DD = Wd_DD,
     
     .by = outcome
@@ -903,7 +904,6 @@ Bækkelund2022_est <-
     avg_cl_size = 9,
     avg_cl_type = "Obtained from article (p. 4)",
     
-    # Laver variabel med den imputere ICC værdi
     icc = ICC_01,
     icc_type = "Imputed",
     
@@ -944,14 +944,14 @@ Bækkelund2022_est <-
     
     gt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population) * gamma_sqrt,
       NA_real_
       ),
   
     # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*GAF_pop_res$df_pop),
       NA_real_
       ),
     
@@ -1417,6 +1417,24 @@ Cano_vindel2021_est <-
       vars = -var_term1_DD
       ),
     
+    gt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      omega * ((m_diff_t - m_diff_c)/PHQ_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*PHQ_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
     
     vary_id = paste(analysis, outcome, timing, sep = "/")
     
@@ -1434,8 +1452,6 @@ dat <-
 ```
 
 ### **Craigie & Nathan [-@Craigie2009] (Quality-checked)**
-
-#### (No randmoized studie, with a pre-posttest design with adjusting for clustering in treatment)
 
 Entering data from Table 2 and Treatment Format $\times$ Time interaction estimate from text results reported on pages 307-08
 
@@ -1540,7 +1556,7 @@ ppcors_Craigie2009 <-
   summarise(
     mean_z = sum(w*z)/sum(w),
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
-    ppcor_method = "F_values used, but calcuable from study",
+    ppcor_method = "F_values used, but calcuable from study and used in the population-based effect sizes",
     .by = c(analysis, outcome)
   )
 
@@ -1655,6 +1671,25 @@ Craigie2009_est <-
       vars = -var_term1_DD
       ),
     
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
     vary_id = paste0(analysis, "/", outcome)
     
   ) |> 
@@ -1670,8 +1705,6 @@ dat <-
 ```
 
 ### **Crawford et al. [-@Crawford2012] (Quality-checked)**
-
-#### (RCT - clustering was not handle for the means we apply for effect size calculation)
 
 Entering data from Table 2 (p. 7)
 
@@ -1924,14 +1957,14 @@ Crawford2012_est <-
     
     gt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population) * gamma_sqrt,
       NA_real_
       ),
   
     # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*GAF_pop_res$df_pop),
       NA_real_
       ),
     
@@ -1960,8 +1993,6 @@ dat <-
 ```
 
 ### **Druss et al. [-@Druss2010] (Quality-checked)**
-
-#### (RCT - no usuable treatment of clustering)
 
 Entering data from Table 2 (p. 268)
 
@@ -2446,7 +2477,7 @@ Dyck2000_est <-
   
   ) |> 
   rowwise() |> 
-  mutate( # Attempt to make cluster corrected estimates. Has to be checked!
+  mutate(
   
   # Average cluster size in treatment group
   
@@ -2513,8 +2544,6 @@ dat <-
 ```
 
 ### **van Gestel-Timmermans et al. [-@VanGestel-Timmermans2012] (Quality-checked)**
-
-#### (Multi-level analysis to handle clustering)
 
 Missing data analysis to support the RoB 2 D4 assessment
 
@@ -3088,7 +3117,7 @@ Gonzalez2007_est <-
     mean_b_emm = if_else(outcome == "GAF", (b_emm_post_t - b_emm_post_c), (b_emm_post_t - b_emm_post_c) * -1),
     
     sd_total = abs(mean_b_emm)/es_paper,
-    # Using E.14 from WWC Handbook (ver. 5). We imputed the covariate-adjusted mean difference to obtain this esti
+    # Using E.14 from WWC Handbook (ver. 5). We imputed the covariate-adjusted mean difference to obtain this estimate
     sd_pool = sqrt( ((N_total-1)/(N_total-2)) * sd_total^2 - ((N_t*N_c)/(N_total*(N_total-2))) * mean_b_emm^2),
     
     pval_paper = c(
@@ -3148,6 +3177,26 @@ Gonzalez2007_est <-
       add_name_to_vars = "_adj",
       vars = -var_term1_adj
     ),
+    
+    gt_adj_pop = if_else(
+      str_detect(outcome, "GAF"),
+      omega * (mean_b_emm/GAF_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_adj_pop = if_else(
+      str_detect(outcome, "GAF"),
+      # We did not use the F value for variance estimation here
+      GAF_pop_res$WaboveT * (1/N_t + 1/N_c) * adj_value_adj + gt_adj_pop^2/(2*GAF_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_adj_pop = if_else(
+      str_detect(outcome, "GAF"),
+      GAF_pop_res$WaboveT * (1/N_t + 1/N_c) * adj_value_adj,
+      NA_real_
+      ),
     
     vary_id = outcome
     
@@ -3814,9 +3863,29 @@ Hagen2005_est <-
       prepost_cor = ppcor,
       q = n_covariates,
       add_name_to_vars = "_DD",
-      vars = -var_term1_DD)
+      vars = -var_term1_DD),
+    
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
+    
     )|> 
-      
   ungroup() |> 
   mutate(vary_id = outcome); Hagen2005_est
 ```
@@ -4204,7 +4273,27 @@ Hilden2021_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -c("var_term1_DD")
-    )
+    ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      omega * ((m_diff_t - m_diff_c)/PHQ_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*PHQ_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
+    
   ) |> 
   ungroup() |> 
   mutate(
@@ -4453,7 +4542,27 @@ Himle2014_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -c("var_term1_DD")
-    )
+    ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      omega * ((m_diff_t - m_diff_c)/PHQ_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*PHQ_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
+    
   ) |> 
   ungroup() |> 
   mutate(
@@ -4881,7 +4990,26 @@ Jacob2010_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-    )
+    ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
     
   ) |> 
   ungroup() |> 
@@ -5092,7 +5220,6 @@ Kanie2019 <- tibble(
   
   timing = "Post", 
   
-  
   outcome = rep(c(
     "SCSQ total", # Social Cognition Screening Questionnaire
     "BACS", # Brief Assessment of Cognition in Schizophrenia
@@ -5295,14 +5422,14 @@ Kanie2019_est <-
     
     gt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population) * gamma_sqrt,
       NA_real_
       ),
   
     # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*GAF_pop_res$df_pop),
       NA_real_
       ),
     
@@ -5886,7 +6013,28 @@ lloyd_Evans2020_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-  )) |> 
+    ),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      omega * ((m_diff_t - m_diff_c)/PHQ_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*PHQ_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
+    
+    ) |> 
   ungroup(); lloyd_Evans2020_est
 
 ```
@@ -6164,14 +6312,14 @@ Madigan2013_est <-
     
     gt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population) * gamma_sqrt,
       NA_real_
       ),
   
     # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*GAF_pop_res$df_pop),
       NA_real_
       ),
     
@@ -6728,7 +6876,26 @@ Michalak_2015_est <-
     ),
     
     across(c(Wgt_post, Wgt_DD:adj_value_DD), ~ if_else(!str_detect(outcome, "HAM|BDI"), NA, .x)),
-    across(c(Wgt_reg:adj_value_reg), ~ if_else(str_detect(outcome, "HAM|BDI"), NA, .x))
+    across(c(Wgt_reg:adj_value_reg), ~ if_else(str_detect(outcome, "HAM|BDI"), NA, .x)),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      )
     
   ) |> 
   ungroup(); Michalak_2015_est
@@ -8046,6 +8213,25 @@ Rabenstein2015_est <-
       vars = -var_term1_DD
     ),
     
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
     vary_id = outcome
   ) |> 
   ungroup(); Rabenstein2015_est
@@ -9243,8 +9429,29 @@ Sacks2011_est <-
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
     ),
-         vary_id = paste0(outcome, "/", sample)) |> 
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
   
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
+    vary_id = paste0(outcome, "/", sample)
+    
+  ) |> 
   ungroup(); Sacks2011_est
 
 
@@ -10131,9 +10338,27 @@ schafer2019_est <-
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD),
+    
+    gt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      omega * ((m_diff_t - m_diff_c)/BDI_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*BDI_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "BDI"),
+      BDI_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
       
-      
-      vary_id = paste(outcome, timing, treatment, sep = "/")
+    vary_id = paste(outcome, timing, treatment, sep = "/")
   ) |> 
   ungroup(); schafer2019_est
 ```
@@ -10537,14 +10762,14 @@ Tjaden2021_est <- Tjaden2021_wide |>
     
     gt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population_GAF) * gamma_sqrt,
+      omega * ((m_diff_t - m_diff_c)/GAF_pop_res$sd_population) * gamma_sqrt,
       NA_real_
       ),
   
     # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
     vgt_DD_pop = if_else(
       str_detect(outcome, "GAF"),
-      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + g_DD^2/(2*GAF_pop_res$df_pop),
+      GAF_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*GAF_pop_res$df_pop),
       NA_real_
       ),
     
@@ -11029,6 +11254,25 @@ Volpe2015_est <-
       add_name_to_vars = "_DD",
       vars = -var_term1_DD),
     
+    gt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      omega * ((m_diff_t - m_diff_c)/PHQ_pop_res$sd_population) * gamma_sqrt,
+      NA_real_
+      ),
+  
+    # Calculated from Eq. 28 (Fitzgerald & Tipton, 2024)
+    vgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD) + gt_DD_pop^2/(2*PHQ_pop_res$df_pop),
+      NA_real_
+      ),
+    
+    Wgt_DD_pop = if_else(
+      str_detect(outcome, "9"),
+      PHQ_pop_res$WaboveT * (2*(1-ppcor) * (1/N_t + 1/N_c) * adj_value_DD),
+      NA_real_
+      ),
+    
     vary_id = outcome
     
   ) |> 
@@ -11262,8 +11506,6 @@ dat <-
 ```
 
 ### **Wuthrich & Rapee [-@Wuthrich2013] and Smith et al. [-@Smith2021] (Quality-checked)**
-
-#### (Accounts for clustering via the use of mixed-effects models/multi-level models)
 
 Entering data from Table 2 (p. 445). Sample size information is retrieved from Table 1 (p. 442).
 
@@ -11591,17 +11833,20 @@ dat <-
 
 ```
 
-## Amalgating covariates and effect size data
+## **Amalgamating covariate and effect size data**
 
-```{r dataamalgamation, eval=FALSE}
+```{r dataamalgamation}
 # REMEMBER TO REMOVE EMPOWERMENT OUTCOME FROM BARBIC2009
 
 #Remember to see working directory to "Group-based-interventions/ES calc"
 
-covariates <- read_xlsx(
-  "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx",
-  na = c(".", "")
- )
+cov_string <- if (isTRUE(getOption('knitr.in.progress')))  {
+  "Descriptive coding scheme for group-based interventions (data).xlsx"
+  } else {
+    "ES calc/Descriptive coding scheme for group-based interventions (data).xlsx"
+  }
+
+covariates <- read_xlsx(cov_string, na = c(".", ""))
 
 group_based_dat <- 
   bind_cols(
@@ -11610,23 +11855,20 @@ group_based_dat <-
 )
 
 # To check the symmetry between R-file and Excel-extraction sheet
-D <- group_based_dat |> 
-  select(Author, vary_id, varifier)
+#D <- group_based_dat |> 
+#  select(Author, vary_id, varifier)
 
-write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
-saveRDS(group_based_dat, file = "ES calc/Group-based interventions data.RDS")
-
-#clubSandwich::impute_covariance_matrix(
-#  vi = group_based_dat$vgt,
-#  cluster = group_based_dat$studyid,
-#  r = c(.7, 0.1),
-#  smooth_vi = TRUE
-#)
+#write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
+#saveRDS(group_based_dat, file = "ES calc/Group-based interventions data.RDS")
 ```
 
-## Using extant data to estimate population standard deviations
+## **Using extant data to estimate population standard deviations**
 
-```{r, eval=FALSE}
+To increase the generalization of the effect size estimates, we used extant data (i.e., all standard deviations from the control groups that has been measure on the same scale) to calculate population-based effect sizes. We only do so when more than four studies has reported the same outcomes on the same scale. This was recommended by Fitzgerald & Tipton [-@Fitzgerald2024]. We could calculate this standard deviation for the Global Assessment of Functioning Scale, Patient Health Questionnaire-9 (PHQ-9), and Beck Depression Inventory (BDI). 
+\ 
+
+Below, you find the function we used for these calculations--all of which can be found Fitzgerald & Tipton [-@Fitzgerald2024].
+```{r}
 # Function contain ANOVA estimation techniques from Fitzgerald & Tipton 2024
 population_SMD <- 
   function(data){
@@ -11645,7 +11887,7 @@ population_SMD <-
     #Equation 12
     sigma2_B = (MSB0 - sigma2_WA)/n0_star,
     sigma2_TA = ((n0_star-1)/n0_star) * sigma2_WA + (MSB0/n0_star),
-    sd_population_GAF = sqrt(sigma2_TA),
+    sd_population = sqrt(sigma2_TA),
     n_star = (N_0 - sum(N_c^2/N_0))/(J-1),
     c1 = (n_star-1)*sigma2_WA/(n_star*(N-2*J)),
     c2 = (sigma2_WA + n_star * sigma2_B)/(n_star*(J-1)),
@@ -11661,13 +11903,15 @@ population_SMD <-
 
 ```
 
-GAF population measures
+### GAF population measures
 
-```{r, eval=FALSE}
+```{r}
 
 GAF_dat <- 
   dat |> 
-  filter(str_detect(outcome, "GAF|Global")) |> 
+  # Filtering GAF measures and remove Gonzalez and Prihoda since they don't
+  # provide enough data to be used for this calculation
+  filter(str_detect(outcome, "GAF") & !str_detect(study, "Gon")) |> 
   relocate(study) 
 
 GAF_dat_restricted <- 
@@ -11696,9 +11940,9 @@ GAF_res
 ```
 
 
-PHQ-9 population measures
+### PHQ-9 population measures
 
-```{r, eval=FALSE}
+```{r}
 
 PHQ_9_dat <- 
   group_based_dat |>
@@ -11707,9 +11951,10 @@ PHQ_9_dat <-
     str_detect(outcome, "9") & measure_type == 	"Post-intervention"
   )
 
+# Removing follow-up effect size from Cano-Vindel
 PHQ_9_dat <- PHQ_9_dat[-2,]
 
-ggplot(data.frame(x = c(0, 100)), aes(x)) + 
+ggplot(data.frame(x = c(0, 35)), aes(x)) + 
   mapply(function(mean, sd, col) {
     stat_function(fun = dnorm, args = list(mean = mean, sd = sd), linetype = "dashed", color = col)
   }, 
@@ -11719,7 +11964,6 @@ ggplot(data.frame(x = c(0, 100)), aes(x)) +
   col = "black"
   ) + 
   theme_bw() +
-  scale_x_continuous(limits = c(0, 35)) +
   labs(x = "PHQ-9 score", y = "Density")
 
 PHQ_9_res <- population_SMD(PHQ_9_dat)
@@ -11729,22 +11973,36 @@ PHQ_9_res
 
 ```
 
-BDI: 7 Studier
+### BDI population measures
 
 ```{r}
 
-# Craige & Nathan
-# Hagen et al. 2005
-# Jacob et al. 2010
-# Michalak et al. 2015
-# Rabenstein et al. 2016
-# Sacks et al. 2011
-# Schäfer et al. 2019
+BDI_dat <- 
+  group_based_dat |>
+  filter(
+    str_detect(authors, "Craigie|Hagen|Jacob|Michalak|Rabenstein|Sacks|Schäfer") &
+    str_detect(outcome, "BDI")
+  )
 
+BDI_dat <- BDI_dat[-c(2, 5, 7, 10:13, 15),]
+
+ggplot(data.frame(x = c(0, 60)), aes(x)) + 
+  mapply(function(mean, sd, col) {
+    stat_function(fun = dnorm, args = list(mean = mean, sd = sd), linetype = "dashed", color = col)
+  }, 
+  # enter means, standard deviations and colors here
+  mean = BDI_dat$m_post_c, 
+  sd = BDI_dat$sd_post_c,
+  col = "black"
+  ) + 
+  theme_bw() +
+  labs(x = "BDI_dat score", y = "Density")
+
+BDI_res <- population_SMD(BDI_dat)
+BDI_res
+
+#saveRDS(BDI_res, "ES calc/BDI_res.rds")
 
 ```
-
-
-
 
 ## **References**
