@@ -3607,23 +3607,6 @@ Gutman2019_est <-
     add_name_to_vars = "_reg"
   ),
   
-  
-  #adj_fct = eta_1armcluster(N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc),
-  #
-  ## Accounting for the fact that this study is single sited/clustered
-  #gt_post = gamma_sqrt * g_post * sqrt(1-icc),
-  #vgt_post = adj_fct * vg_post * (1-icc),
-  #Wgt_post = adj_fct * Wg_post * (1-icc),
-  #
-  #gt_reg = gamma_sqrt * g_reg * sqrt(1-icc),
-  #vgt_reg = adj_fct * vg_reg * (1-icc),
-  #Wgt_reg = adj_fct * Wg_reg * (1-icc),
-  #
-  #a = sqrt(2*Wgt_reg*df_ind),
-  #hg_reg = sqrt(2) * sign(gt_reg) * (log(abs(gt_reg) + sqrt(gt_reg^2 + a^2)) - log(a)),
-  #vhg_reg = 1/df_ind,
-  
-  
   vary_id = outcome,
 
   analysis_plan = case_when(
@@ -3646,6 +3629,7 @@ dat <-
 
 ### **Hagen et al. [-@Hagen2005] (Quality-checked)**
 
+Entering data from Table 2 (p. 39) 
 ```{r Hagen et al 2018}
 # Data from table 2, p. 39 
 Hagen2005 <- tibble(
@@ -3727,7 +3711,6 @@ Hagen2005 <- tibble(
 
 # Making the Hagen2006 tibble wide in order to estimate the effect sizes and
 # further analysis. 
-
 
 Hagen2005_wide <-
   Hagen2005 |> 
@@ -3899,6 +3882,7 @@ dat <-
 
 ### **Haslam et al. [-@Haslam2019] (Quality-checked)**
 
+Entering data from Table 2 (p. 794)
 ```{r Haslam et al 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
 # means with standard errors for post-measurements.
@@ -4078,6 +4062,7 @@ dat <-
 ```
 
 ### **Hilden et al. [-@Hilden2021] (Quality-checked)**
+Entering data from Table 2 (p. 181)
 
 ```{r Hilden et al 2021}
 # Table 2, p. 181
@@ -4312,6 +4297,7 @@ dat <-
 ```
 
 ### **Himle et al. [-@Himle2014] (Quality-checked)**
+Entering data from Table 2 (p. 174)
 
 ```{r Himle et al 2014}
 # From table 2, p. 174
@@ -4581,6 +4567,7 @@ dat <-
 
 ### **Izquierdo et al. [-@Izquierdo2021] (Excluded because flawed result reproted. See calculations below)**
 
+Entering data from Table 3 (p. 10) and Table 4 (p. 13)
 ```{r Izquierdo et al 2021}
 # Rows 1-10 is data from Table 3, p. 10 and rows 11-22 is from Table 4 p. 13. 
 
@@ -5212,6 +5199,7 @@ dat <-
 ```
 
 ### **Kanie et al. [-@Kanie2019] (Quality-checked)**
+Entering data from Table 4 (p. 8)
 
 ```{r Kanie et al 2019}
 # Taken from table 4, p. 8
@@ -5228,7 +5216,7 @@ Kanie2019 <- tibble(
     "SFS" # Social Functioning Scale
   ),  each = 2,1), 
   
-  N = rep(c(32, 29), 5), #MHV Check if you agree that it should be 29 participant in the control              
+  N = rep(c(32, 29), 5),            
   
   N_start = 36,
   
@@ -5292,8 +5280,6 @@ Kanie2019_wide <- Kanie2019 |>
         values_from = N:last_col()
       ) |> 
   mutate(
-    # Obtained from last column of Table 4 (p. 8)
-    # MHV: Check if these turn the right way in interpretation relative to how we convert them
     es_paper = c(0.33, -0.05, -0.04, 0.26, -0.04),
     es_paper_type = "DiD"
   ); Kanie2019_wide
@@ -5454,10 +5440,10 @@ dat <-
 ```
 
 ### **Lim et al. [-@Lim2020] (Quality-checked)**
+Entering data from Table 2 (p. 5)
 
 ```{r Lim et al 2020}
-# Data from table 2 (p.5)  containing means, standard deviation and ANOVA estimations
-# with F-values and η2. Table 3 (p.6) has the same values but with ANCOVAS (i.e. indcludes covariates)
+# Data from table 2 (p.5)  containing means, standard deviation
 
 
 Lim2020 <- tibble(
@@ -5659,7 +5645,7 @@ dat <-
 
 ### **Lloyd-Evans et al. [-@Lloyd-Evans2020] (Quality-checked)**
 
-From Table 2 on page 9
+Entering data from Table 2 (p. 9)
 
 ```{r Lloyd-Evans et al 2020}
 # Dataextraction from Lloyd-Evans (2020)
@@ -6048,7 +6034,7 @@ dat <-
 
 ### **Madigan et al. [-@Madigan2013] (Quality-checked)**
 
-We extracted data from Table 2 (p. 141)
+Entering data from Table 2 (p. 141)
 
 ```{r Madigan et al 2013}
 # Table 2, p. 141
@@ -6912,7 +6898,7 @@ dat <-
 
 ### **Morley et al. [-@Morley2014] (Quality-checked)**
 
-Data from table 2 containing means and standard deviation on page 136
+Entering data from Table 2 (p. 136)
 
 ```{r Morley et al 2014}
 # Data from table 2 containing means and standard deviation on page 136
@@ -7122,8 +7108,7 @@ dat <-
 ```
 
 ### **Morton et al. [-@Morton2012] (Quality-checked)**
-
-Data is extracted from Table 3 containing means and standard deviation (p. 538)
+Entering data from Table 3 (p. 538)
 
 ```{r}
 # Data from table 3 containing means and standard deviation (p. 538)
@@ -7492,7 +7477,7 @@ dat <-
 
 ### **Patterson et al. [-@Patterson2003] (Quality-checked)**
 
-Data was extracted from Table 3 (p. 21)
+Entering data from Table 3 (p. 21)
 
 ```{r Patterson et al 2003}
 # Data from Table 3 (p. 21)  containing means, standard deviation. It also contains
@@ -7722,7 +7707,7 @@ dat <-
 
 ### **Popolo et al. [-@Popolo2019] (Quality-checked)**
 
-Data was extracted from Table 2 (p. 351)
+Entering data from Table 2 (p. 351)
 
 ```{r Popolo et al 2019}
 # Data from Table 2 containing means and standard deviation + within effect size.
@@ -8245,7 +8230,7 @@ dat <-
 ```
 
 ### **Rosenblum et al. [-@Rosenblum2014] (Quality-checked)**
-
+Entering data from Table 3 (p. 85)
 ```{r Rosenblum et al 2014}
 # Extracting data from table 3 p. 85 
 
@@ -9145,6 +9130,7 @@ dat <-
 ```
 
 ### **Sacks et al. [-@Sacks2011] (Quality-checked)**
+Extracting data from Table 4 (p. 1682)
 
 ```{r Sacks et al 2011}
 # This study makes estimations based on two different analysis based on their
@@ -10093,7 +10079,7 @@ dat <-
 ```
 
 ### **Schäfer et al. [-@Schäfer2019] (Quality-checked)**
-
+Entering data from table 2 (p. 9)
 ```{r Schäfer et al 2019}
 
 # Taken from table 2, p. 9 
@@ -10126,7 +10112,7 @@ schafer2019 <- tibble(
     .09, .1, .09,
     25.3, 29.4, 28.6,
     100.5, 110.7, 111.9),
-    each = 1,3), # fordi der er tre opfølgningsperioder
+    each = 1,3), 
   
   sd_pre = rep(c(
     9.7, 9.8, 9.4,
@@ -10136,7 +10122,7 @@ schafer2019 <- tibble(
     .11, .14, .11,
     13.2, 11.7, 10.9,
     26.9, 24.6, 25.3),
-    each = 1,3), #fordi tre opfølgningsperioder
+    each = 1,3), 
   
   
   
