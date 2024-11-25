@@ -742,6 +742,8 @@ dat <-
 
 ### **Bækkelund et al. [-@Bækkelund2022] (Quality-checked)**
 
+Entering data from Table 5 (p. 10)
+
 ```{r Bækkelund et al 2022}
 Bækkelund2022 <- tibble(
   group = rep(c("Intervention", #Intervention group
@@ -3080,6 +3082,8 @@ dat <-
 
 ### **Gonzalez and Prihoda [-@Gonzalez2007] (Quality-checked)**
 
+Data extracted from Table 3 (p. 413)
+
 ```{r Gonzalez and Prihoda 2007}
 Gonzalez2007_est <- 
   tibble(
@@ -3630,6 +3634,7 @@ dat <-
 ### **Hagen et al. [-@Hagen2005] (Quality-checked)**
 
 Entering data from Table 2 (p. 39) 
+
 ```{r Hagen et al 2018}
 # Data from table 2, p. 39 
 Hagen2005 <- tibble(
@@ -3883,6 +3888,7 @@ dat <-
 ### **Haslam et al. [-@Haslam2019] (Quality-checked)**
 
 Entering data from Table 2 (p. 794)
+
 ```{r Haslam et al 2019}
 # Study only provides raw means and standard errors for pre-measurements and only estimated marginal 
 # means with standard errors for post-measurements.
@@ -4062,6 +4068,7 @@ dat <-
 ```
 
 ### **Hilden et al. [-@Hilden2021] (Quality-checked)**
+
 Entering data from Table 2 (p. 181)
 
 ```{r Hilden et al 2021}
@@ -4297,6 +4304,7 @@ dat <-
 ```
 
 ### **Himle et al. [-@Himle2014] (Quality-checked)**
+
 Entering data from Table 2 (p. 174)
 
 ```{r Himle et al 2014}
@@ -4568,6 +4576,7 @@ dat <-
 ### **Izquierdo et al. [-@Izquierdo2021] (Excluded because flawed result reproted. See calculations below)**
 
 Entering data from Table 3 (p. 10) and Table 4 (p. 13)
+
 ```{r Izquierdo et al 2021}
 # Rows 1-10 is data from Table 3, p. 10 and rows 11-22 is from Table 4 p. 13. 
 
@@ -4784,6 +4793,8 @@ izquierdo2021_est <-
 ```
 
 ### **Jacob et al. [-@Jacob2010] (Quality-checked)**
+
+Entering data from Table 2 (p. 383)
 
 ```{r Jacob et al 2010}
 Jacob2010 <- tibble(
@@ -5012,6 +5023,8 @@ dat <-
 
 ### **James et al. [-@James2004] (Quality-checked)**
 
+Entering data from Table 2 (p. 988)
+
 ```{r James et al 2004}
 James2004 <- tibble(
   group = rep(c("Treatment", "Control"), each = 1,5),
@@ -5199,6 +5212,7 @@ dat <-
 ```
 
 ### **Kanie et al. [-@Kanie2019] (Quality-checked)**
+
 Entering data from Table 4 (p. 8)
 
 ```{r Kanie et al 2019}
@@ -5440,6 +5454,7 @@ dat <-
 ```
 
 ### **Lim et al. [-@Lim2020] (Quality-checked)**
+
 Entering data from Table 2 (p. 5)
 
 ```{r Lim et al 2020}
@@ -6331,6 +6346,8 @@ dat <-
 
 ### **McCay et al. [-@McCay2006] (Quality-checked)**
 
+Entering data from Table 2 (p. 109)
+
 ```{r}
 
 McCay2006_est <- 
@@ -6609,6 +6626,8 @@ dat <-
 ```
 
 ### **Michalak et al. [-@Michalak2015] (Quality-checked)**
+
+Entering data from Table 2 (p. 957)
 
 ```{r Michalak et al 2015}
 Michalak_2015 <- tibble(
@@ -7108,6 +7127,7 @@ dat <-
 ```
 
 ### **Morton et al. [-@Morton2012] (Quality-checked)**
+
 Entering data from Table 3 (p. 538)
 
 ```{r}
@@ -8230,7 +8250,9 @@ dat <-
 ```
 
 ### **Rosenblum et al. [-@Rosenblum2014] (Quality-checked)**
+
 Entering data from Table 3 (p. 85)
+
 ```{r Rosenblum et al 2014}
 # Extracting data from table 3 p. 85 
 
@@ -8517,6 +8539,8 @@ dat <-
 
 ### **Russinova et al. [-@Russinova2018] (Quality-checked)**
 
+Entering data from Table 4 (p. 203)
+
 ```{r Russinova et al 2018}
 # Taken from table 
 Russinova2018 <- tibble(
@@ -8573,7 +8597,7 @@ Russinova2018 <- tibble(
     4.38, 4.16,
     7.79, 7.04,
     3.09, 2.96),
-    each = 1,2), # fordi der er tre opfølgningsperioder
+    each = 1,2), 
   
   sd_pre = rep(c(
     .3, .21,
@@ -9130,6 +9154,7 @@ dat <-
 ```
 
 ### **Sacks et al. [-@Sacks2011] (Quality-checked)**
+
 Extracting data from Table 4 (p. 1682)
 
 ```{r Sacks et al 2011}
@@ -9843,7 +9868,7 @@ dat <-
 
 ### **Schrank et al. [-@Schrank2016] (Quality-checked)**
 
-Data was extracted from Tables 1, 2, and 3 in the same article
+Data was extracted from Tables 1, 2, and 3 in the same article (p. 240-242)
 
 ```{r Schrank et al 2016}
 # Based on table 1, 2 and 3 in the same article 
@@ -10079,7 +10104,9 @@ dat <-
 ```
 
 ### **Schäfer et al. [-@Schäfer2019] (Quality-checked)**
+
 Entering data from table 2 (p. 9)
+
 ```{r Schäfer et al 2019}
 
 # Taken from table 2, p. 9 
@@ -10358,6 +10385,8 @@ dat <-
 
 ### **Somers et al. [-@Somers2017] (Quality-checked)**
 
+Data extracted from Table 1 (p. 7) and Table 3 (p. 9)
+
 ```{r}
 
 Somers2017_est <- 
@@ -10536,6 +10565,8 @@ dat <- # Not included in the covariaters sheet
 ```
 
 ### **Tjaden et al. [-@Tjaden2021] (Quality-checked)**
+
+Entering data from Table 2 (p. 1313)
 
 ```{r Tjaden et al 2021}
 Tjaden2021 <- tibble(
@@ -10782,6 +10813,8 @@ dat <-
 ```
 
 ### **Valiente et al. [-@Valiente2022] (Quality-checked)**
+
+Entering data from Table 3 and 4 (p. 4)
 
 ```{r Valiente et al 2022}
 # Data from Table 3 and Table  4 (p. 4)  containing means, standard deviation. It also contains
@@ -11052,6 +11085,8 @@ dat <-
 
 ### **Volpe et al. [-@Volpe2015] (Quality-checked)**
 
+Entering data from Table 2 (p. 19)
+
 ```{r Volpe et al 2015}
 Volpe_2015 <- tibble(
   # Taken from table 2, p. 19
@@ -11273,6 +11308,8 @@ dat <-
 ```
 
 ### **Wojtalik et al. [-@Wojtalik2019] (Quality-checked)**
+
+Entering data from Table 2 and 3 (p. 505)
 
 ```{r}
 # Data from table 2 and table (p. 505)  containing marginal means with standard error
