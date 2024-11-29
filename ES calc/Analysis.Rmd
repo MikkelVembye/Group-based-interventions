@@ -111,7 +111,7 @@ GBD_effect <-
     Wgt = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt),
     Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt),
     
-    ESS = round(4/vgt), # Using cluster bias corrected sampling variance
+   # ESS = round(4/vgt), # Using cluster bias corrected sampling variance
     
     studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
     
@@ -369,14 +369,15 @@ GB_dat <-
 
 
 #es_exp <- as.numeric(mean_es_GB$b)
-y_lim_exp <- max(sqrt(GB_dat$vg)) + 0.02 
+y_lim_exp1 <- max(sqrt(GB_dat$vg)) + 0.02 
 
 
-funnel_exp <-  tribble(
+
+funnel_exp1 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
   0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
-  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
   0,     0,     0,     0
 ) 
 
@@ -384,19 +385,20 @@ funnel_exp <-  tribble(
 GB_plot_all <-
   GB_dat |> 
   ggplot() + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(legend.position = "bottom")
+
 
 # Funnelplot reintegration outcomes - Subgroup analysis ----
 GB_dat_reintergration <- 
@@ -430,26 +432,29 @@ GB_dat_reintergration <-
 #  )
 
 
-funnel_exp <-  tribble(
+y_lim_exp2 <- max(sqrt(GB_dat_reintergration$vg)) + 0.02 
+
+funnel_exp2 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
   0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
-  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  qnorm(0.05) * y_lim_exp2, qnorm(0.025) * y_lim_exp2, qnorm(0.005) * y_lim_exp2, y_lim_exp2,
+  qnorm(0.95) * y_lim_exp2, qnorm(0.975) * y_lim_exp2, qnorm(0.995) * y_lim_exp2, y_lim_exp2,
   0,     0,     0,     0
 ) 
+
 
 
 # Overall effect-size for reintegration outcome
 FP_plot_reintegration_overall <-
   GB_dat_reintergration |> 
   ggplot() + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -462,14 +467,14 @@ FP_plot_reintegration_overall <-
 FP_plot_reintergration_subgrp <-
   GB_dat_reintergration |> 
   ggplot() + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   facet_grid(~analysis_plan, scales = "free") +
-  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -498,13 +503,13 @@ GB_dat_mental_health <-
   arrange(timing)
 
 
-y_lim_exp2 <- max(sqrt(GB_dat_mental_health$vg)) + 0.02 
+y_lim_exp3 <- max(sqrt(GB_dat_mental_health$vg)) + 0.02 
 
-funnel_exp <-  tribble(
+funnel_exp3 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
   0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp2, qnorm(0.025) * y_lim_exp2, qnorm(0.005) * y_lim_exp2, y_lim_exp2,
-  qnorm(0.95) * y_lim_exp2, qnorm(0.975) * y_lim_exp2, qnorm(0.995) * y_lim_exp2, y_lim_exp2,
+  qnorm(0.05) * y_lim_exp3, qnorm(0.025) * y_lim_exp3, qnorm(0.005) * y_lim_exp3, y_lim_exp3,
+  qnorm(0.95) * y_lim_exp3, qnorm(0.975) * y_lim_exp3, qnorm(0.995) * y_lim_exp3, y_lim_exp3,
   0,     0,     0,     0
 ) 
 
@@ -513,13 +518,13 @@ funnel_exp <-  tribble(
 FP_plot_overall_mental <-
   GB_dat_mental_health |> 
   ggplot() + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp3, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -532,14 +537,14 @@ FP_plot_subgrp_mental <-
   GB_dat_mental_health |> 
   filter(!(analysis_plan == "All mental health outcomes")) |>
   ggplot() + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-  geom_polygon(data = funnel_exp, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+  geom_polygon(data = funnel_exp3, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   facet_grid(~analysis_plan, scales = "free") +
-  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp3, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -601,29 +606,29 @@ participants <- GBD_effect |>
     
   ); participants
 
-# Effective sample size 
-ESS <- GBD_effect |> 
-  group_by(studyid) |> 
-  summarise(
-    study_avg_ESS = mean(ESS),
+# Effective sample size (removed) 
+#ESS <- GBD_effect |> 
+#  group_by(studyid) |> 
+#  summarise(
+#    study_avg_ESS = mean(ESS),
     
-    es_n = n(),
+#    es_n = n(),
     
-    .groups = "drop"
-  ) |> 
-  summarise(
-    variable = "Effective sample size",
-    study_char = "Sample size",
+#    .groups = "drop"
+#  ) |> 
+#  summarise(
+#    variable = "Effective sample size",
+#    study_char = "Sample size",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+#    I = n_distinct(studyid),
+#    K = sum(es_n),
     
-    Mean = round(mean(study_avg_ESS)),
-    SD = round(sd(study_avg_ESS)),
+#    Mean = round(mean(study_avg_ESS)),
+#    SD = round(sd(study_avg_ESS)),
     
-    range = paste0(min(study_avg_ESS), "-", round(max(study_avg_ESS)))
+#    range = paste0(min(study_avg_ESS), "-", round(max(study_avg_ESS)))
     
-  ); ESS
+#  ); ESS
 
 # Average size of the groups
 group_size <- GBD_effect |> 
@@ -686,7 +691,7 @@ study_context <-
   bind_rows(
     country_all,
     participants,
-    ESS,
+ #   ESS,
     group_size,
     samples_per_study
     
@@ -1393,71 +1398,6 @@ outcome_measurement <- bind_rows(
 
 ```
 
-## Overall RoB
-
-```{r}
-overall_rob <- GBD_effect |>  
-  group_by(studyid) |>  
-  summarise(
-    overall_rob = unique(Overall),
-    es_n = n(),
-    
-    .groups = "drop"
-    
-  ) |>  
-  group_by(overall_rob) |> 
-  summarise(
-    variable = "Overall risk of bias",
-    I = n_distinct(studyid),
-    K = sum(es_n),
-    
-  ) |>  
-  mutate(
-    overall_rob = factor(overall_rob, levels = c("Serious", "High","Some concerns" ,"Moderate", "Low")),
-    study_char = paste("%", overall_rob),
-    
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
-    range = "0-1",
-    
-   ) |> 
-  arrange(overall_rob) |>
-  relocate(variable,study_char) |> 
-  select(-c(overall_rob)); overall_rob
-
-rob_tools <- GBD_effect |> 
-  group_by(studyid) |>  
-  summarise(
-    rob_tools = unique(rob_tool),
-    es_n = n(),
-    
-    .groups = "drop"
-    
-  ) |>   
-  group_by(rob_tools) |> 
-  summarise(
-    variable = "Risk of Bias tool",
-    I = n_distinct(studyid),
-    K = sum(es_n),
-    
-  ) |>  
-  mutate(
-    
-    study_char = paste("%", rob_tools),
-    
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
-    range = "0-1",
-    
-   ) |> 
-  relocate(variable,study_char) |> 
-  select(-c(rob_tools)); rob_tools
-
-rob <- bind_rows(
-  overall_rob,rob_tools
-)
-
-```
 
 ## Table 1 and 2
 
