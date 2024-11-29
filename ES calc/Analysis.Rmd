@@ -34,6 +34,8 @@ library(dplyr)
 library(tibble)
 library(ggplot2)
 library(stringr)
+library(robvis)
+library(tidyr)
 
 ```
 
@@ -52,21 +54,6 @@ group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |>
 ```
 
 # Descriptive plots
-
-```{r, echo=FALSE, eval=FALSE}
-# Check studies IDs. MHV: Hvor kommer studyid fra?
-
-group_based_dat |> 
-  summarise(
-    n_eppi_ids = n_distinct(eppi_id),
-    .by = studyid
-  ) |> 
-  filter(n_eppi_ids > 1)
-
-group_based_dat |> filter(studyid %in% c(113, 120, 2) ) |> arrange(studyid)|> View()
-
-```
-
 
 ## Timeline
 
@@ -97,6 +84,7 @@ timeline_plot <-  ggplot(G_timepllot,aes(x = year)) +
 timeline_plot
 
 ```
+
 
 ## Primary study sample size and effective sample sizes (SUPPLEMENTARY MATERIAL)
 
@@ -175,12 +163,10 @@ GBD_effect <-
     test_type = ifelse(test_type == "Self report through clinical interview", "Self-reported", test_type),
     test_type = ifelse(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
     
-    measure_type = ifelse(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
-    
-    rob_tool = ifelse(rob_tool == "RoB2", "Rob2", rob_tool)
+    measure_type = ifelse(measure_type == "Pre-post with controls", "Post-intervention", measure_type)
  ) |> 
- # MHV: I og med at vi ikke benytter unused outcomes, så kan disse slettes
- filter(str_detect(analysis_plan, "Unused"))
+ # Remove unused outcomes
+ filter(!str_detect(analysis_plan, "Unused"))
 ```
 
 ```{r}
@@ -235,18 +221,9 @@ SS3 <- ggplot(sample_size_dat, aes(N_total_mean)) +
   theme(axis.title.y = element_blank()) +
   labs(x = "Total sample size")
 
-SS4 <- ggplot(sample_size_dat, aes(ESS_mean)) + 
-  geom_density(fill = "cornflowerblue", trim = TRUE) + 
-  geom_blank(aes(x = 0, y = 0)) + 
-  geom_rug() + 
-  theme_minimal() +
-  theme(axis.title.y = element_blank()) +
-  #scale_x_continuous(breaks = seq(0, 120, 5), limits = c(0, 125)) + 
-  labs(x = "Approximate effective sample size (4/SE_total)")
-
 library(patchwork)
 
-sample_dist_plot <- SS1 / SS2 / SS3 / SS4
+sample_dist_plot <- SS1 / SS2 / SS3
 sample_dist_plot
 
 
@@ -277,7 +254,7 @@ es_dist_plot <-
 GB_outcome_reintergration <- GBD_effect |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
   group_by(analysis_plan) |> 
-  summarise(
+  reframe(
     qrtl = quantile(gt,  c(.25, .75)),
     fence = qrtl + 3 * diff(qrtl) * c(-1,1),
     
@@ -305,7 +282,7 @@ reintegration_outcome_plot <- GBD_effect %>%
 GB_outcome_mental_health <- GBD_effect |> 
   filter(str_detect(analysis_plan, "mental")) |> 
   filter(!str_detect(analysis_plan, "Unused")) |>
-  summarise(
+  reframe(
     qrtl = quantile(gt,  c(.25, .75)),
     fence = qrtl + 3 * diff(qrtl) * c(-1,1),
     
@@ -331,7 +308,7 @@ GB_outcomes_mental_health <- GBD_effect |>
    filter(str_detect(analysis_plan, "mental")) |>
   filter(!str_detect(analysis_plan, "Unused")) |>
   group_by(analysis_plan) |> 
-  summarise(
+  reframe(
     qrtl = quantile(gt,  c(.25, .75)),
     fence = qrtl + 3 * diff(qrtl) * c(-1,1),
     
@@ -521,11 +498,13 @@ GB_dat_mental_health <-
   arrange(timing)
 
 
+y_lim_exp2 <- max(sqrt(GB_dat_mental_health$vg)) + 0.02 
+
 funnel_exp <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
   0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp, qnorm(0.025) * y_lim_exp, qnorm(0.005) * y_lim_exp, y_lim_exp,
-  qnorm(0.95) * y_lim_exp, qnorm(0.975) * y_lim_exp, qnorm(0.995) * y_lim_exp, y_lim_exp,
+  qnorm(0.05) * y_lim_exp2, qnorm(0.025) * y_lim_exp2, qnorm(0.005) * y_lim_exp2, y_lim_exp2,
+  qnorm(0.95) * y_lim_exp2, qnorm(0.975) * y_lim_exp2, qnorm(0.995) * y_lim_exp2, y_lim_exp2,
   0,     0,     0,     0
 ) 
 
@@ -540,7 +519,7 @@ FP_plot_overall_mental <-
   geom_point(aes(seg, g), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -560,7 +539,7 @@ FP_plot_subgrp_mental <-
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   facet_grid(~analysis_plan, scales = "free") +
-  scale_x_reverse(limits = c(y_lim_exp, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
   labs(x = "Standard error (adjusted)", 
@@ -570,12 +549,8 @@ FP_plot_subgrp_mental <-
 
 ```
 
-<<<<<<< HEAD
-# Descriptive Tables 
-=======
 # Descriptive Tables
 
->>>>>>> 9a77c09fc8c17b0cb994434cd2d8c199da36108f
 ```{r}
 # Study context
 # Percent studies by countries
@@ -616,8 +591,8 @@ participants <- GBD_effect |>
     variable = "Average number of participants per effect size",
     study_char = "Number of particiapnts",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    I = n_distinct(studyid), # Studies
+    K = sum(es_n), # Effect size
     
     Mean = round(mean(study_avg_sample)),
     SD = round(sd(study_avg_sample)),
@@ -1507,7 +1482,7 @@ table1_percent <-
     Mean = round(Mean, 3),
     
   ) |> 
-  select(-cnt); table1_percent
+  select(-c(cnt, variable)) ; table1_percent
 
 
 table2_rest_desc <- 
@@ -1519,10 +1494,75 @@ table2_rest_desc <-
     
   ); table2_rest_desc
 
-
+report_table(table = table1_percent[1:2,], file_name = "Table1", format = "word_document")
 
 
 ```
+
+## Print Table
+
+```{r}
+
+# Report table function --------------------------------------------------------------
+report_table <- 
+  function(table, file_name, format = "html_document", ...){
+    
+    if (!require(gt)){
+      install.packages(gt)
+    }  
+    
+    if (!is.data.frame(table)) stop("This function only takes object of class 'data.frame'") 
+    
+    if (missing(file_name)) stop("Please provide a name to the word file you want to generate. Use file_name")
+    
+    # Make if command with .Rmd     
+    name <- paste0(file_name, ".Rmd")  
+    
+    if (length(unique(names(table))) !=  length(names(table))){
+      
+     output <- suppressMessages(tibble::tibble(table, .name_repair = "universal"))
+      
+    } else {
+      
+      output <- table
+      
+    }
+    
+    
+    
+    cat("---
+title: \"Table output\"
+output: html_document
+---
+           
+\`\`\`{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gt)
+\`\`\`
+
+
+\`\`\`{r, echo=FALSE, results='asis', include=TRUE}
+
+output |> gt()
+
+\`\`\`", 
+        file = name
+    )
+    #message(paste0("Saving to", getwd(), "/", "StudyReport.Rmd")) 
+    message(paste("Rendering", name))  
+    file_out <-  rmarkdown::render(name, output_format = format, quiet = TRUE, ...) 
+    
+    message(paste("Opening", name))  
+    shell.exec(file_out)
+    
+    invisible(file_out)
+    invisible(file.remove(name))
+    
+  }
+
+
+```
+
 
 ```{r}
 

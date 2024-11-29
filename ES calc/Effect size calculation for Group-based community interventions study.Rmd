@@ -26,7 +26,6 @@ options(tibble.width = Inf)
 options(dplyr.print_min = 310)
 options(scipen = 10)
 options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
-
 ```
 
 ```{r, echo = FALSE}
