@@ -28,6 +28,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 ```
 
 # R package
+
 ```{r}
 
 library(dplyr)
@@ -85,7 +86,6 @@ timeline_plot
 
 ```
 
-
 ## Primary study sample size and effective sample sizes (SUPPLEMENTARY MATERIAL)
 
 ### Making a effetive sample size (ESS)
@@ -127,8 +127,21 @@ GBD_effect <-
     randomization = if_else(randomization == "Simple Block Randomization", "Block randomized",
                            randomization),
     randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
-                           "Block randomized stratified by site", randomization),
-    randomization = if_else(randomization == "Stratified?", 
+                           "Stratified randomization", randomization),
+   
+    randomization = if_else(is.na(randomization) & studyid == 102, 
+                            "Stratified randomization", randomization),
+   
+    randomization = if_else(randomization == "Ratio and block randomized",
+                           "Block randomized", randomization),
+    
+   randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
+                           "Stratified randomization", randomization),
+   
+   randomization = if_else(randomization == "Unequal simple randomization ",
+                           "Block randomization", randomization),
+   
+   randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
                            "Stratified randomization", randomization),
     
     trt_type = if_else(trt_type == "Group-based  Cognitive Behavioral Therapy", 
@@ -155,15 +168,24 @@ GBD_effect <-
     sample_factors = if_else(sample_factors =="persons with major psychiatric problems", 
                             "Shared Social problem(s)/challenge(s)", sample_factors),
     
-    analysis_plan = ifelse(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
+    analysis_plan = if_else(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
     
-    test_type = ifelse(test_type == "Clinical administered", "Clinician-rated measure", test_type),
-    test_type = ifelse(test_type == "Clinical interviews", "Clinician-rated measure", test_type),
-    test_type = ifelse(test_type == "Self report", "Self-reported", test_type),
-    test_type = ifelse(test_type == "Self report through clinical interview", "Self-reported", test_type),
-    test_type = ifelse(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
+    test_type = if_else(test_type == "Clinical administered", "Clinician-rated measure", test_type),
+    test_type = if_else(test_type == "Clinical interviews", "Clinician-rated measure", test_type),
+    test_type = if_else(test_type == "Self report", "Self-reported", test_type),
+    test_type = if_else(test_type == "Self report through clinical interview", "Self-reported", test_type),
+    test_type = if_else(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
     
-    measure_type = ifelse(measure_type == "Pre-post with controls", "Post-intervention", measure_type)
+    measure_type = if_else(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
+   
+   cluster_treatment = if_else(cluster_treatment == "Hierarchical mixed models", "Mixed-model", cluster_treatment),
+   
+   cluster_treatment = if_else(cluster_treatment == "Multilevel analysis and clustered standard errors", 
+                        "Multilevel analysis", cluster_treatment),
+   
+   rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
+   rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool)
+   
  ) |> 
  # Remove unused outcomes
  filter(!str_detect(analysis_plan, "Unused"))
@@ -171,30 +193,30 @@ GBD_effect <-
 
 ```{r}
 sample_size_dat <- 
-  GBD_effect %>% 
-  group_by(year, studyid, sample_id) %>% 
+  GBD_effect |> 
+  group_by(year, studyid, sample_id) |> 
   summarise_at(
-    vars(N_t, N_c, N_total, ESS), list(mean = mean)
+    vars(N_t, N_c, N_total), list(mean = mean)
   )
 
-sample_size_dat %>% 
+sample_size_dat |> 
   pivot_longer(
         cols = N_t_mean:ESS_mean,
     names_to = "sample_sizes_char",
     values_to = "sample_size"
-  ) %>% 
-  group_by(sample_sizes_char) %>% 
+  ) |> 
+  group_by(sample_sizes_char) |> 
   summarise(
     mean = mean(sample_size, na.rm = TRUE),
     sd = sd(sample_size, na.rm = TRUE),
     q = list(quantile(sample_size, na.rm = TRUE))
-  ) %>% 
-  unnest_wider(q, names_repair = ~paste0('Q_', sub('%', '', .))) %>% 
-  rename(mean = Q_mean, sd = Q_sd) %>% 
+  ) |> 
+  unnest_wider(q, names_repair = ~paste0('Q_', sub('%', '', .))) |> 
+  rename(mean = Q_mean, sd = Q_sd) |> 
   mutate(
     id = rev(1:4)
-  ) %>% 
-  arrange(id) %>% 
+  ) |> 
+  arrange(id) |> 
   select(-id)
 
 SS1 <- ggplot(sample_size_dat, aes(N_t_mean)) + 
@@ -252,7 +274,7 @@ es_dist_plot <-
 
 # Without mental health outcomes and only reintergration-outcomes
 GB_outcome_reintergration <- GBD_effect |> 
-  filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
+  filter(!str_detect(analysis_plan, "mental|used|hospi")) |>
   group_by(analysis_plan) |> 
   reframe(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -263,8 +285,8 @@ GB_outcome_reintergration <- GBD_effect |>
 
 
 # Therefore All mental health outcomes, Unused outcome and hospitalization are excluded
-reintegration_outcome_plot <- GBD_effect %>% 
- filter(!str_detect(analysis_plan, "mental|used|hospi")) %>%
+reintegration_outcome_plot <- GBD_effect |> 
+ filter(!str_detect(analysis_plan, "mental|used|hospi")) |>
   ggplot(aes(x = gt, fill = analysis_plan)) + 
   geom_density(alpha = 0.7) +
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = qrtl), linetype = "solid")+
@@ -289,8 +311,8 @@ GB_outcome_mental_health <- GBD_effect |>
     .groups = "drop"
   )
 
-mental_health_outcome_plot <- GBD_effect %>% 
- filter(str_detect(analysis_plan, "mental")) %>%
+mental_health_outcome_plot <- GBD_effect |> 
+ filter(str_detect(analysis_plan, "mental")) |>
   ggplot(aes(x = gt)) + 
   geom_density(alpha = 0.7, fill = "cornflowerblue") +
   geom_vline(data = GB_outcome_mental_health, aes(xintercept = qrtl), linetype = "solid")+
@@ -355,9 +377,9 @@ unique_values <- unique(GBD_effect$timing)
 
 GB_dat <- 
   GBD_effect |> 
-  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
+  select(studyid, gt, vgt, timing, analysis_plan, outcome) |> 
   mutate(
-    seg = sqrt(vg),
+    seg = sqrt(vgt),
     timing = if_else(is.na(timing), "Post", timing),
     timing = factor(
       timing, 
@@ -367,9 +389,19 @@ GB_dat <-
   ) |> 
   arrange(timing)
 
+# Who are those with big seg
+GB_high_seg <- GB_dat |> 
+  filter(seg > 0.75) |> 
+  left_join(GBD_effect, by = c("studyid", "outcome"))
+  
+
+# Discarded in this data frame
+GB_dat <- GB_dat |> 
+  filter(!seg > 0.75)
+
 
 #es_exp <- as.numeric(mean_es_GB$b)
-y_lim_exp1 <- max(sqrt(GB_dat$vg)) + 0.02 
+y_lim_exp1 <- max(sqrt(GB_dat$vgt)) + 0.02 
 
 
 
@@ -388,7 +420,7 @@ GB_plot_all <-
   geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  geom_point(aes(seg, gt), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
@@ -404,9 +436,9 @@ GB_plot_all <-
 GB_dat_reintergration <- 
   GBD_effect |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|Employment|Physical")) |> 
-  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
+  select(studyid, gt, vgt, timing, analysis_plan) |> 
   mutate(
-    seg = sqrt(vg),
+    seg = sqrt(vgt),
     timing = if_else(is.na(timing), "Post", timing),
     timing = factor(
       timing, 
@@ -414,6 +446,7 @@ GB_dat_reintergration <-
     ),
     es_ID = 1:n()
   ) |> 
+  filter(!seg > 0.75) |> 
   arrange(timing)
 
 
@@ -432,7 +465,7 @@ GB_dat_reintergration <-
 #  )
 
 
-y_lim_exp2 <- max(sqrt(GB_dat_reintergration$vg)) + 0.02 
+y_lim_exp2 <- max(sqrt(GB_dat_reintergration$vgt)) + 0.02 
 
 funnel_exp2 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
@@ -451,7 +484,7 @@ FP_plot_reintegration_overall <-
   geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  geom_point(aes(seg, gt), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
@@ -470,10 +503,10 @@ FP_plot_reintergration_subgrp <-
   geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  geom_point(aes(seg, gt), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  facet_grid(~analysis_plan, scales = "free") +
+  facet_wrap(~analysis_plan, scales = "free") +
   scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
@@ -490,9 +523,9 @@ GB_dat_mental_health <-
    TRUE ~ analysis_plan)) |> 
   filter(str_detect(analysis_plan, "mental")) |>
   filter(!str_detect(analysis_plan, "Unused")) |>
-  select(studyid, g = gt, vg = vgt, timing, analysis_plan) |> 
+  select(studyid, gt, vgt, timing, analysis_plan) |> 
   mutate(
-    seg = sqrt(vg),
+    seg = sqrt(vgt),
     timing = if_else(is.na(timing), "Post", timing),
     timing = factor(
       timing, 
@@ -503,7 +536,7 @@ GB_dat_mental_health <-
   arrange(timing)
 
 
-y_lim_exp3 <- max(sqrt(GB_dat_mental_health$vg)) + 0.02 
+y_lim_exp3 <- max(sqrt(GB_dat_mental_health$vgt)) + 0.02 
 
 funnel_exp3 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
@@ -521,7 +554,7 @@ FP_plot_overall_mental <-
   geom_polygon(data = funnel_exp3, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp3, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp3, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  geom_point(aes(seg, gt), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
   scale_x_reverse(limits = c(y_lim_exp3, 0.0), expand = c(0,0)) + 
@@ -540,10 +573,10 @@ FP_plot_subgrp_mental <-
   geom_polygon(data = funnel_exp3, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
   geom_polygon(data = funnel_exp3, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
   geom_polygon(data = funnel_exp3, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-  geom_point(aes(seg, g), alpha = 1, size = 1.2) +
+  geom_point(aes(seg, gt), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() + 
-  facet_grid(~analysis_plan, scales = "free") +
+  facet_wrap(~analysis_plan, scales = "free") +
   scale_x_reverse(limits = c(y_lim_exp3, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = seq(-3, 3, 1)) + 
   theme_bw() + 
@@ -559,7 +592,7 @@ FP_plot_subgrp_mental <-
 ```{r}
 # Study context
 # Percent studies by countries
-country_all <- GBD_effect |> 
+study_context <- GBD_effect |> 
   group_by(studyid, cnt) |> 
   summarise(
     es_n = n(),
@@ -568,20 +601,19 @@ country_all <- GBD_effect |>
   ) |> 
   group_by(cnt) |>
   summarise(
-    variable = "Country location of intervention",
-    study_char = "Percentage of studies by countries",
+    study_char = paste0("% ", unique(cnt)), 
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
     
     range = "0-1",
     
     .groups = "drop"
-  ); country_all
-
+  ) |> 
+  select(-cnt); study_context
 
 # Average number of participants per effect size 
 
@@ -593,14 +625,13 @@ participants <- GBD_effect |>
     .groups = "drop"
   ) |> 
   summarise(
-    variable = "Average number of participants per effect size",
     study_char = "Number of particiapnts",
     
-    I = n_distinct(studyid), # Studies
-    K = sum(es_n), # Effect size
+    Study = n_distinct(studyid), # Studies
+    Effect_size = sum(es_n), # Effect size
     
     Mean = round(mean(study_avg_sample)),
-    SD = round(sd(study_avg_sample)),
+  #  SD = round(sd(study_avg_sample)),
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
@@ -642,14 +673,13 @@ group_size <- GBD_effect |>
     .groups = "drop"
   ) |> 
   summarise(
-    variable = "Average sample size by treatment status",
     study_char = c("Intervention group", "Control group"),
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
     Mean = c(mean(treat_SampS), mean(cont_SampS)),
-    SD = c(sd(treat_SampS), sd(cont_SampS)),
+   # SD = c(sd(treat_SampS), sd(cont_SampS)),
     
     range = c(
       paste0(min(treat_SampS), "-", round(max(treat_SampS))),
@@ -666,16 +696,15 @@ samples_per_study <- GBD_effect |>
     es_n = n(),
     
     .groups = "drop"
-  ) %>%
+  ) |>
   summarise(
-    variable = "Average number of samples for each study",
     study_char = "Samples per study",
     
-    I = sum(samples),  
-    K = sum(es_n),  
+    Study = sum(samples),  
+    Effect_size = sum(es_n),  
     
     Mean = mean(samples), 
-    SD = sd(samples),  
+   # SD = sd(samples),  
     
     range = paste0(min(samples), "-", max(samples)),
     
@@ -707,31 +736,30 @@ study_context <-
 # Proportion cluster randomized or RCT studies
 
 study_design <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     design = unique(design),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(design) %>% 
+  ) |> 
+  group_by(design) |> 
   summarise(
-    variable = "Study design",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", design),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |>  
   select(-c(design)); study_design
 
 # Dont no if relevant to show details about study outlet and publishment as
@@ -739,89 +767,86 @@ study_design <- GBD_effect |>
 
 # Randomization
 study_randomization <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |>  
   summarise(
     randomization = unique(randomization),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(randomization) %>% 
+  ) |> 
+  group_by(randomization) |> 
   summarise(
-    variable = "Type of randomization",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", randomization),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/sum(Study),
+    #SD = NA,
     range = "0-1",
-    
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |>  
   select(-c(randomization)); study_randomization
 
 # Handling of clustering
 clustering <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
-    clustering = unique(cluster_treatment),
+    clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(clustering) %>% 
+  ) |> 
+  group_by(clustering) |> 
   summarise(
-    variable = "Cluster handling",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", clustering),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/sum(Study),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(clustering)); clustering
 
 # Analysis strategy 
 analysis_strategy <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     analysis_strat = unique(analysis_strategy),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(analysis_strat) %>% 
+  ) |> 
+  filter(!is.na(analysis_strat)) |> 
+  group_by(analysis_strat) |> 
   summarise(
-    variable = "Analysis strategy",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |>
   mutate(
     
     study_char = paste("%", analysis_strat),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study / sum(Study),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |>  
   select(-c(analysis_strat)); analysis_strategy
 
 design <- 
@@ -841,8 +866,8 @@ design <-
 # % Males in treatment and control group
 
 male_per <- 
-  GBD_effect %>% 
-  group_by(studyid) %>% 
+  GBD_effect |> 
+  group_by(studyid) |>  
   summarise(
     
     t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
@@ -852,24 +877,23 @@ male_per <-
     
     .groups = "drop"
     
-  ) %>% 
-  filter(es_n != 0) %>% 
+  ) |> 
+  filter(es_n != 0) |> 
    summarise(
-    variable = "Male in percent",
-    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
-    I = n_distinct(studyid),  
-    K = sum(es_n, na.rm = TRUE),
+    study_char = c("Intervention group", "Control group"), 
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
     
-    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)),  # Gennemsnit for hver gruppe
-    SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
-    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  # Range for hver gruppe
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)), 
+  #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
   ); male_per
 
 # Mean age
 age_mean <- 
-  GBD_effect %>% 
-  group_by(studyid) %>% 
+  GBD_effect |> 
+  group_by(studyid) |> 
   summarise(
     
     t_age = mean(as.numeric(age_mean_t), na.rm = TRUE),
@@ -879,134 +903,129 @@ age_mean <-
     
     .groups = "drop"
     
-  ) %>% 
-  filter(es_n != 0) %>% 
+  ) |>  
+  filter(es_n != 0) |> 
    summarise(
-    variable = "Age",
     study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
-    I = n_distinct(studyid),  
-    K = sum(es_n, na.rm = TRUE),
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
     
     Mean = c(mean(t_age, na.rm = TRUE), mean(c_age, na.rm = TRUE)),  # Gennemsnit for hver gruppe
-    SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
   ); age_mean
 
 # Disorder type
 disorder_type <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     disorder = unique(disorder_type),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(disorder) %>% 
+  ) |> 
+  group_by(disorder) |> 
   summarise(
-    variable = "Type of disorder",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", disorder),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/sum(Study),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(disorder)); disorder_type
 
 
 assesment <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |>  
   summarise(
     assessment = unique(assessment),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(assessment) %>% 
+  ) |> 
+  group_by(assessment) |> 
   summarise(
-    variable = "Assesment of diagnosis",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", assessment),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    #SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(assessment)); assesment
 
 # Sample composition
 sample_composition <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     composition = unique(sample_comp),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(composition) %>% 
+  ) |> 
+  group_by(composition) |> 
   summarise(
-    variable = "Sample composition",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", composition),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(composition)); sample_composition
 
 # Sample factors
 sample_factors <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     sample_factors = unique(sample_factors),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(sample_factors) %>% 
+  ) |> 
+  group_by(sample_factors) |> 
   summarise(
-    variable = "Sample factor",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", sample_factors),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(sample_factors)); sample_factors
 
 
@@ -1027,11 +1046,11 @@ study_participants <-
 ```{r}
 # Duration of intervention
 duration <- 
-  GBD_effect %>% 
-  group_by(studyid) %>% 
+  GBD_effect |> 
+  group_by(studyid) |>  
   summarise(
     
-    m_duration_J = mean(duration_weeks, na.rm = TRUE),
+    m_duration = mean(duration_weeks, na.rm = TRUE),
   
     es_n = n(),
     
@@ -1041,24 +1060,21 @@ duration <-
     
     .groups = "drop"
      
-  ) %>% 
-  filter(dur_report != "Not reported") %>% 
+  ) |>  
+  filter(dur_report != "Not reported") |>  
   summarise(
-    variable = "Duration of the intervention",
     study_char = "Duration in weeks",
     
-    #J = n_distinct(study_year),
-    I = n_distinct(studyid),
-    K = sum(es_n),
     
-    Mean = mean(m_duration_J, na.rm = TRUE),
-    SD = sd(m_duration_J, na.rm = TRUE),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-    range = paste0(min(m_duration_J, na.rm = TRUE), "-",
-                   max(m_duration_J, na.rm = TRUE)),
+    Mean = mean(m_duration, na.rm = TRUE),
+ #   SD = sd(m_duration, na.rm = TRUE),
     
-    #Median = round(median(m_duration_J, na.rm = TRUE)),
-    #IQR = IQR(m_duration_J, na.rm = TRUE),
+    range = paste0(min(m_duration, na.rm = TRUE), "-",
+                   max(m_duration, na.rm = TRUE)),
+  
     
   ); duration
 
@@ -1070,7 +1086,7 @@ sessions_per_week <-
   group_by(studyid)  |>  
   summarise(
     
-    m_intensity_J = mean(sessions_per_week, na.rm = TRUE),
+    m_intensity = mean(sessions_per_week, na.rm = TRUE),
   
     es_n = n(),
     
@@ -1080,21 +1096,19 @@ sessions_per_week <-
     
     .groups = "drop"
      
-  ) %>% 
+  ) |> 
   filter(int_report != "Not reported") |>  
   summarise(
-    variable = "Intensity of the treatment intervention",
-    
     study_char = "Number of sessions per week",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-    Mean = mean(m_intensity_J, na.rm = TRUE),
-    SD = sd(m_intensity_J, na.rm = TRUE),
+    Mean = mean(m_intensity, na.rm = TRUE),
+ #   SD = sd(m_intensity, na.rm = TRUE),
     
-    range = paste0(min(m_intensity_J, na.rm = TRUE), "-",
-                   max(m_intensity_J, na.rm = TRUE))
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
     
   ); sessions_per_week
 
@@ -1105,7 +1119,7 @@ avg_intevention_group_size <-
   group_by(studyid)  |>  
   summarise(
     
-    m_intensity_J = mean(avg_group_size, na.rm = TRUE),
+    m_intensity = mean(avg_group_size, na.rm = TRUE),
   
     es_n = n(),
     
@@ -1115,20 +1129,19 @@ avg_intevention_group_size <-
     
     .groups = "drop"
      
-  ) %>% 
+  ) |> 
   filter(int_report != "Not reported") |>  
   summarise(
-    variable = "Group sizes of the intervention",
     study_char = "Average group size",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-    Mean = mean(m_intensity_J, na.rm = TRUE),
-    SD = sd(m_intensity_J, na.rm = TRUE),
+    Mean = mean(m_intensity, na.rm = TRUE),
+    #SD = sd(m_intensity, na.rm = TRUE),
     
-    range = paste0(min(m_intensity_J, na.rm = TRUE), "-",
-                   max(m_intensity_J, na.rm = TRUE))
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
     
   ); avg_intevention_group_size
 
@@ -1138,7 +1151,7 @@ interventions <- GBD_effect|>
   group_by(studyid)  |>  
   summarise(
     
-    m_intensity_J = mean(N_treatments, na.rm = TRUE),
+    m_intensity = mean(N_treatments, na.rm = TRUE),
   
     es_n = n(),
     
@@ -1151,79 +1164,75 @@ interventions <- GBD_effect|>
   ) |> 
   filter(int_report != "Not reported") |>  
   summarise(
-    variable = "Number of interventions in each study",
     study_char = "Treatments",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-    Mean = mean(m_intensity_J, na.rm = TRUE),
-    SD = sd(m_intensity_J, na.rm = TRUE),
+    Mean = mean(m_intensity, na.rm = TRUE),
+  #  SD = sd(m_intensity, na.rm = TRUE),
     
-    range = paste0(min(m_intensity_J, na.rm = TRUE), "-",
-                   max(m_intensity_J, na.rm = TRUE))
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
     
   ); interventions
 
 # Treatment types 
 treatment_types <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     treatment_type = unique(trt_type),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(treatment_type) %>% 
+  ) |> 
+  group_by(treatment_type) |> 
   summarise(
 
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
-    variable = "Type of treatment", 
-    
     study_char = paste("%", treatment_type),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/sum(Study),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) %>% 
+  relocate(study_char) |> 
   select(-c(treatment_type)); treatment_types
 
 
 
 # Implementation types 
 implementation <- GBD_effect |>  
-  group_by(studyid) %>% 
+  group_by(studyid) |> 
   summarise(
     implementation = unique(implementation),
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
-  group_by(implementation) %>% 
+  ) |> 
+  group_by(implementation) |> 
   summarise(
-    variable = "Implementation initiated/conducted/monitored by researcher/programme professionel",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", implementation),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(study_char) %>% 
+  relocate(study_char) |> 
   select(-c(implementation)); implementation
 
 
@@ -1252,17 +1261,16 @@ control <- GBD_effect |>
   ) |>  
   group_by(control) |> 
   summarise(
-    variable = "Control groups",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", control),
     
-    Mean = I/n_distinct(GBD_effect$studyid),
-    SD = NA,
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    # SD = NA,
     range = "0-1",
     
    ) |> 
@@ -1275,24 +1283,23 @@ control <- GBD_effect |>
 ```{r}
 # Average number of effect size per study
 avg_es_study <- 
-  GBD_effect %>% 
-  group_by(studyid) %>% 
+  GBD_effect |> 
+  group_by(studyid) |> 
   summarise(
     
     es_n = n(),
     
     .groups = "drop"
     
-  ) %>% 
+  ) |> 
   summarise(
-    variable = "Averager number of effect sizes per study",
     study_char = "Average n of es",
     
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
     Mean = mean(es_n),
-    SD = sd(es_n),
+  #  SD = sd(es_n),
     
     range = paste0(min(es_n), "-", max(es_n))
     
@@ -1314,26 +1321,24 @@ construct <- GBD_effect |>
   ) |>  
   group_by(overall_construct) |> 
   summarise(
-    variable = "Overall construct",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", overall_construct),
     
-    Mean = I/sum(I),
-    SD = NA,
+    Mean = Study/sum(Study),
+   # SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) |> 
+  relocate(study_char) |> 
   select(-c(overall_construct)); construct
 
 
 # Type of test 
-
 test <- GBD_effect |>  
   group_by(studyid) |>  
   summarise(
@@ -1345,21 +1350,20 @@ test <- GBD_effect |>
   ) |>  
   group_by(test_type) |> 
   summarise(
-    variable = "Type of test",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
     
     study_char = paste("%", test_type),
     
-    Mean = I/sum(I),
-    SD = NA,
+    Mean = Study/sum(Study),
+  #  SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) |> 
+  relocate(study_char) |> 
   select(-c(test_type)); test
 
 # Type of measurement
@@ -1374,21 +1378,19 @@ measure_type <- GBD_effect |>
   ) |>  
   group_by(measure_type) |> 
   summarise(
-    variable = "Type of measurement",
-    I = n_distinct(studyid),
-    K = sum(es_n),
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
     
-  ) %>% 
+  ) |> 
   mutate(
-    
     study_char = paste("%", measure_type),
     
-    Mean = I/sum(I),
-    SD = NA,
+    Mean = Study/sum(Study),
+  #  SD = NA,
     range = "0-1",
     
    ) |> 
-  relocate(variable,study_char) |> 
+  relocate(study_char) |> 
   select(-c(measure_type)); measure_type
 
 outcome_measurement <- bind_rows(
@@ -1397,7 +1399,6 @@ outcome_measurement <- bind_rows(
 )
 
 ```
-
 
 ## Table 1 and 2
 
@@ -1408,35 +1409,59 @@ table1 <- bind_rows(
   intervention_characteristics, 
   control, 
   avg_es_study, 
-  outcome_measurement, 
-  rob
+  outcome_measurement
 )
 
 
 
 table1_percent <- 
-  table1 %>% 
-  filter(str_detect(study_char, "%")) %>% 
-  select(-c(SD, range)) %>% 
+  table1 |> 
+  filter(str_detect(study_char, "%")) |> 
+  select(-c(range)) |> 
   mutate(
     Mean = round(Mean, 3),
     
-  ) |> 
-  select(-c(cnt, variable)) ; table1_percent
+  ); table1_percent
 
 
 table2_rest_desc <- 
-  table1 %>% 
-  filter(!str_detect(study_char, "%")) %>% 
+  table1 |> 
+  filter(!str_detect(study_char, "%")) |> 
   mutate(
     
-    across(Mean:SD, ~ round(.x, 3))
+    across(Mean, ~ round(.x, 3))
     
   ); table2_rest_desc
+
 
 report_table(table = table1_percent[1:2,], file_name = "Table1", format = "word_document")
 
 
+```
+## Risk of Bias details
+```{r}
+# Distribution of RoB2 evaluations
+RoB2_dat <- GBD_effect |> 
+  select(rob_tool:Overall, studyid, Author) |> 
+  filter(rob_tool == "RoB2") |> 
+  select(-c(rob_tool,D6:D7))
+
+p_rob2 <- rob_summary(data = RoB2_dat, tool = "ROB2", overall = TRUE)
+
+# Distribution of ROBINS-I evaluations
+ROBINS1_dat <- GBD_effect |> 
+  select(rob_tool:Overall, studyid, Author) |> 
+  filter(rob_tool == "ROBINS-I") |> 
+  select(-c(rob_tool))
+
+p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
+
+```
+
+## Descrptive tables: Wellbeing and Quality of life
+```{r}
+wellbeing_QoL <- GBD_effect |> 
+  filter(analysis_plan != "Wellbeing and Quality of Life")
 ```
 
 ## Print Table
@@ -1502,7 +1527,6 @@ output |> gt()
 
 
 ```
-
 
 ```{r}
 
