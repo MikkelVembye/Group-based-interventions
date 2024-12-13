@@ -595,7 +595,7 @@ FP_plot_subgrp_mental <-
 ```{r}
 # Study context
 # Percent studies by countries
-study_context <- GBD_effect |> 
+study_country <- GBD_effect |> 
   group_by(studyid, cnt) |> 
   summarise(
     es_n = n(),
@@ -616,7 +616,7 @@ study_context <- GBD_effect |>
     
     .groups = "drop"
   ) |> 
-  select(-cnt); study_context
+  select(-cnt); study_country
 
 # Average number of participants per effect size 
 
@@ -721,7 +721,7 @@ n_distinct(GBD_effect$studyid)
 
 study_context <- 
   bind_rows(
-    country_all,
+    study_country,
     participants,
  #   ESS,
     group_size,
@@ -1436,8 +1436,14 @@ table2_rest_desc <-
     
   ); table2_rest_desc
 
+# Converting into readable APA-style in word
+table1_percent_out <- nice_table(table1_percent)
 
-report_table(table = table1_percent[1:2,], file_name = "Table1", format = "word_document")
+flextable::save_as_docx(table1_percent_out, path = "ES calc/table1_percent.docx")
+
+table2_rest_desc_out <- nice_table(table2_rest_desc)
+
+flextable::save_as_docx(table2_rest_desc_out, path = "ES calc/table2_rest_desc.docx")
 
 
 ```
