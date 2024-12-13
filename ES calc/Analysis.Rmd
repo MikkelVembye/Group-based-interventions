@@ -134,12 +134,15 @@ GBD_effect <-
    
     randomization = if_else(randomization == "Ratio and block randomized",
                            "Block randomized", randomization),
+   
+   randomization = if_else(randomization == "Block randomized stratified by site",
+                           "Block randomized", randomization),
     
    randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
                            "Stratified randomization", randomization),
    
-   randomization = if_else(randomization == "Unequal simple randomization ",
-                           "Block randomization", randomization),
+   randomization = if_else(randomization == "Unequal simple randomization",
+                           "Block randomized", randomization),
    
    randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
                            "Stratified randomization", randomization),
@@ -1458,11 +1461,1548 @@ p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
 
 ```
 
-## Descrptive tables: Wellbeing and Quality of life
+# Descrptive tables: Wellbeing and Quality of life
 ```{r}
 wellbeing_QoL <- GBD_effect |> 
-  filter(analysis_plan != "Wellbeing and Quality of Life")
+  filter(analysis_plan == "Wellbeing and Quality of Life")
+
+
+# Study context
+# Percent studies by countries
+study_context_WQoL <- wellbeing_QoL |> 
+  group_by(studyid, cnt) |> 
+  summarise(
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  group_by(cnt) |>
+  summarise(
+    study_char = paste0("% ", unique(cnt)), 
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
+    
+    range = "0-1",
+    
+    .groups = "drop"
+  ) |> 
+  select(-cnt); study_context_WQoL
+
+# Average number of participants per effect size 
+
+participants_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_sample = mean(N_total),
+    es_n = n(), 
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Number of particiapnts",
+    
+    Study = n_distinct(studyid), # Studies
+    Effect_size = sum(es_n), # Effect size
+    
+    Mean = round(mean(study_avg_sample)),
+  #  SD = round(sd(study_avg_sample)),
+    
+    range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
+    
+  ); participants_WQoL
+
+
+
+# Average size of the groups
+group_size_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    treat_SampS = mean(N_t),
+    cont_SampS = mean(N_c),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = c("Intervention group", "Control group"),
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = c(mean(treat_SampS), mean(cont_SampS)),
+   # SD = c(sd(treat_SampS), sd(cont_SampS)),
+    
+    range = c(
+      paste0(min(treat_SampS), "-", round(max(treat_SampS))),
+      paste0(min(cont_SampS), "-", round(max(cont_SampS)))
+    )
+    
+  ); group_size_WQoL
+
+# Number of samples per study 
+samples_per_study_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    samples = n_distinct(sample_id), 
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |>
+  summarise(
+    study_char = "Samples per study",
+    
+    Study = sum(samples),  
+    Effect_size = sum(es_n),  
+    
+    Mean = mean(samples), 
+   # SD = sd(samples),  
+    
+    range = paste0(min(samples), "-", max(samples)),
+    
+    .groups = "drop"
+  ); samples_per_study_WQoL
+
+
+# Number of distinct studies in review
+
+n_distinct(GBD_effect$studyid)
+
+study_context_WQoL <- 
+  bind_rows(
+    study_context_WQoL,
+    participants_WQoL,
+ #   ESS,
+    group_size_WQoL,
+    samples_per_study_WQoL
+    
+); study_context_WQoL
+
+# Study Design
+# Proportion cluster randomized or RCT studies
+study_design_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    design = unique(design),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(design) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", design),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(design)); study_design_WQoL
+
+
+# Randomization
+study_randomization_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    randomization = unique(randomization),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(randomization) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", randomization),
+    
+    Mean = Study/sum(Study),
+    #SD = NA,
+    range = "0-1",
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(randomization)); study_randomization_WQoL
+
+# Handling of clustering
+clustering_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(clustering) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", clustering),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(clustering)); clustering_WQoL
+
+# Analysis strategy 
+analysis_strategy_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    analysis_strat = unique(analysis_strategy),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(!is.na(analysis_strat)) |> 
+  group_by(analysis_strat) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |>
+  mutate(
+    
+    study_char = paste("%", analysis_strat),
+    
+    Mean = Study / sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(analysis_strat)); analysis_strategy_WQoL
+
+design_WQoL <- 
+  bind_rows(
+    study_design_WQoL,
+    study_randomization_WQoL,
+    clustering_WQoL,
+    analysis_strategy_WQoL
+); design_WQoL
+
+
+# Study participants
+# % Males in treatment and control group
+
+male_per_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
+    c_male = mean(as.numeric(male_pct_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(male_pct_t)),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"), 
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)), 
+  #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
+              paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
+  ); male_per_WQoL
+
+# Mean age
+age_mean_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    t_age = mean(as.numeric(age_mean_t), na.rm = TRUE),
+    c_age = mean(as.numeric(age_mean_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(age_mean_c)),
+    
+    .groups = "drop"
+    
+  ) |>  
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_age, na.rm = TRUE), mean(c_age, na.rm = TRUE)),  # Gennemsnit for hver gruppe
+    #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
+              paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
+  ); age_mean_WQoL
+
+# Disorder type
+disorder_type_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    disorder = unique(disorder_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(disorder) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", disorder),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(disorder)); disorder_type_WQoL
+
+
+assesment_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    assessment = unique(assessment),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(assessment) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", assessment),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    #SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(assessment)); assesment_WQoL
+
+# Sample composition
+sample_composition_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    composition = unique(sample_comp),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(composition) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", composition),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(composition)); sample_composition_WQoL
+
+# Sample factors
+sample_factors_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    sample_factors = unique(sample_factors),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(sample_factors) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", sample_factors),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(sample_factors)); sample_factors_WQoL
+
+
+study_participants_WQoL <- 
+  bind_rows(
+    male_per_WQoL, age_mean_WQoL, 
+   # disorder_type, 
+    assesment_WQoL,
+    sample_composition_WQoL,
+    sample_factors_WQoL
+); study_participants_WQoL
+
+
+# Intervention characteristics 
+
+# Duration of intervention
+duration_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    m_duration = mean(duration_weeks, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_dur = sum(is.na(duration_weeks)),
+    
+    dur_report = if_else(miss_dur == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |>  
+  filter(dur_report != "Not reported") |>  
+  summarise(
+    study_char = "Duration in weeks",
+    
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_duration, na.rm = TRUE),
+ #   SD = sd(m_duration, na.rm = TRUE),
+    
+    range = paste0(min(m_duration, na.rm = TRUE), "-",
+                   max(m_duration, na.rm = TRUE)),
+  
+    
+  ); duration_WQoL
+
+# Mean number of sessions per week
+
+sessions_per_week_WQoL <- 
+  wellbeing_QoL|> 
+  mutate(sessions_per_week = as.numeric(sessions_per_week)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(sessions_per_week, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(sessions_per_week)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Number of sessions per week",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+ #   SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); sessions_per_week_WQoL
+
+# Average group size in the treatment intervention
+avg_intevention_group_size_WQoL <- 
+  wellbeing_QoL|> 
+  mutate(avg_group_size = as.numeric(avg_group_size)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(avg_group_size, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(avg_group_size)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Average group size",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+    #SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); avg_intevention_group_size_WQoL
+
+# Number of interventions of each study
+interventions_WQoL <- wellbeing_QoL|> 
+ mutate(N_treatments = as.numeric(N_treatments)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(N_treatments, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(N_treatments)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Treatments",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+  #  SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); interventions_WQoL
+
+# Treatment types 
+treatment_types_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    treatment_type = unique(trt_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(treatment_type) |> 
+  summarise(
+
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", treatment_type),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(treatment_type)); treatment_types_WQoL
+
+
+
+# Implementation types 
+implementation_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    implementation = unique(implementation),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(implementation) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", implementation),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(implementation)); implementation_WQoL
+
+
+intervention_characteristics_WQoL <- bind_rows(
+  duration_WQoL, sessions_per_week_WQoL, 
+  avg_intevention_group_size_WQoL, 
+  interventions_WQoL, 
+  treatment_types_WQoL
+)
+
+# Control group 
+# Control types 
+control_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    control = unique(control),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(control) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", control),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(control)); control_WQoL
+
+# Methodological features
+# Average number of effect size per study
+avg_es_study_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  summarise(
+    study_char = "Average n of es",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(es_n),
+  #  SD = sd(es_n),
+    
+    range = paste0(min(es_n), "-", max(es_n))
+    
+  ); avg_es_study_WQoL
+
+
+
+# Outcome and measurement characteristics
+# Type of test 
+test_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    test_type = unique(test_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(test_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", test_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(test_type)); test_WQoL
+
+# Type of measurement
+measure_type_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    measure_type = unique(measure_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(measure_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", measure_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(measure_type)); measure_type_WQoL
+
+outcome_measurement_WQoL <- bind_rows(
+  test_WQoL, measure_type_WQoL
+); outcome_measurement_WQoL
 ```
+
+## Tables for Wellbeing and Quality of Life
+```{r}
+table_WQoL <- bind_rows(
+  study_context_WQoL, design_WQoL, 
+  study_participants_WQoL, 
+  intervention_characteristics_WQoL, 
+  control_WQoL, 
+  avg_es_study_WQoL, 
+  outcome_measurement_WQoL
+)
+
+
+
+table_WQoL_percent <- 
+  table_WQoL |> 
+  filter(str_detect(study_char, "%")) |> 
+  select(-c(range)) |> 
+  mutate(
+    Mean = round(Mean, 3),
+    
+  ); table_WQoL_percent
+
+
+table_WQoL_rest_desc <- 
+  table_WQoL |> 
+  filter(!str_detect(study_char, "%")) |> 
+  mutate(
+    
+    across(Mean, ~ round(.x, 3))
+    
+  ); table_WQoL_rest_desc
+```
+
+
+# Descrptive tables: Social functioning (degree of impairment)
+```{r}
+social_functioning <- GBD_effect |> 
+  filter(analysis_plan == "Social functioning (degree of impairment)")
+
+
+# Study context
+# Percent studies by countries
+study_context_functioning <- social_functioning |> 
+  group_by(studyid, cnt) |> 
+  summarise(
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  group_by(cnt) |>
+  summarise(
+    study_char = paste0("% ", unique(cnt)), 
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
+    
+    range = "0-1",
+    
+    .groups = "drop"
+  ) |> 
+  select(-cnt); study_context_functioning
+
+# Average number of participants per effect size 
+
+participants_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_sample = mean(N_total),
+    es_n = n(), 
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Number of particiapnts",
+    
+    Study = n_distinct(studyid), # Studies
+    Effect_size = sum(es_n), # Effect size
+    
+    Mean = round(mean(study_avg_sample)),
+  #  SD = round(sd(study_avg_sample)),
+    
+    range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
+    
+  ); participants_WQoL
+
+
+
+# Average size of the groups
+group_size_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    treat_SampS = mean(N_t),
+    cont_SampS = mean(N_c),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = c("Intervention group", "Control group"),
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = c(mean(treat_SampS), mean(cont_SampS)),
+   # SD = c(sd(treat_SampS), sd(cont_SampS)),
+    
+    range = c(
+      paste0(min(treat_SampS), "-", round(max(treat_SampS))),
+      paste0(min(cont_SampS), "-", round(max(cont_SampS)))
+    )
+    
+  ); group_size_WQoL
+
+# Number of samples per study 
+samples_per_study_WQoL <- wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    samples = n_distinct(sample_id), 
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |>
+  summarise(
+    study_char = "Samples per study",
+    
+    Study = sum(samples),  
+    Effect_size = sum(es_n),  
+    
+    Mean = mean(samples), 
+   # SD = sd(samples),  
+    
+    range = paste0(min(samples), "-", max(samples)),
+    
+    .groups = "drop"
+  ); samples_per_study_WQoL
+
+
+# Number of distinct studies in review
+
+n_distinct(GBD_effect$studyid)
+
+study_context_WQoL <- 
+  bind_rows(
+    study_context_WQoL,
+    participants_WQoL,
+ #   ESS,
+    group_size_WQoL,
+    samples_per_study_WQoL
+    
+); study_context_WQoL
+
+# Study Design
+# Proportion cluster randomized or RCT studies
+study_design_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    design = unique(design),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(design) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", design),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(design)); study_design_WQoL
+
+
+# Randomization
+study_randomization_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    randomization = unique(randomization),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(randomization) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", randomization),
+    
+    Mean = Study/sum(Study),
+    #SD = NA,
+    range = "0-1",
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(randomization)); study_randomization_WQoL
+
+# Handling of clustering
+clustering_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(clustering) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", clustering),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(clustering)); clustering_WQoL
+
+# Analysis strategy 
+analysis_strategy_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    analysis_strat = unique(analysis_strategy),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(!is.na(analysis_strat)) |> 
+  group_by(analysis_strat) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |>
+  mutate(
+    
+    study_char = paste("%", analysis_strat),
+    
+    Mean = Study / sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(analysis_strat)); analysis_strategy_WQoL
+
+design_WQoL <- 
+  bind_rows(
+    study_design_WQoL,
+    study_randomization_WQoL,
+    clustering_WQoL,
+    analysis_strategy_WQoL
+); design_WQoL
+
+
+# Study participants
+# % Males in treatment and control group
+
+male_per_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
+    c_male = mean(as.numeric(male_pct_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(male_pct_t)),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"), 
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)), 
+  #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
+              paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
+  ); male_per_WQoL
+
+# Mean age
+age_mean_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    t_age = mean(as.numeric(age_mean_t), na.rm = TRUE),
+    c_age = mean(as.numeric(age_mean_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(age_mean_c)),
+    
+    .groups = "drop"
+    
+  ) |>  
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_age, na.rm = TRUE), mean(c_age, na.rm = TRUE)),  # Gennemsnit for hver gruppe
+    #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
+              paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
+  ); age_mean_WQoL
+
+# Disorder type
+disorder_type_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    disorder = unique(disorder_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(disorder) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", disorder),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(disorder)); disorder_type_WQoL
+
+
+assesment_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    assessment = unique(assessment),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(assessment) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", assessment),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    #SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(assessment)); assesment_WQoL
+
+# Sample composition
+sample_composition_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    composition = unique(sample_comp),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(composition) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", composition),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(composition)); sample_composition_WQoL
+
+# Sample factors
+sample_factors_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    sample_factors = unique(sample_factors),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(sample_factors) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", sample_factors),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(sample_factors)); sample_factors_WQoL
+
+
+study_participants_WQoL <- 
+  bind_rows(
+    male_per_WQoL, age_mean_WQoL, 
+   # disorder_type, 
+    assesment_WQoL,
+    sample_composition_WQoL,
+    sample_factors_WQoL
+); study_participants_WQoL
+
+
+# Intervention characteristics 
+
+# Duration of intervention
+duration_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    m_duration = mean(duration_weeks, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_dur = sum(is.na(duration_weeks)),
+    
+    dur_report = if_else(miss_dur == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |>  
+  filter(dur_report != "Not reported") |>  
+  summarise(
+    study_char = "Duration in weeks",
+    
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_duration, na.rm = TRUE),
+ #   SD = sd(m_duration, na.rm = TRUE),
+    
+    range = paste0(min(m_duration, na.rm = TRUE), "-",
+                   max(m_duration, na.rm = TRUE)),
+  
+    
+  ); duration_WQoL
+
+# Mean number of sessions per week
+
+sessions_per_week_WQoL <- 
+  wellbeing_QoL|> 
+  mutate(sessions_per_week = as.numeric(sessions_per_week)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(sessions_per_week, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(sessions_per_week)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Number of sessions per week",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+ #   SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); sessions_per_week_WQoL
+
+# Average group size in the treatment intervention
+avg_intevention_group_size_WQoL <- 
+  wellbeing_QoL|> 
+  mutate(avg_group_size = as.numeric(avg_group_size)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(avg_group_size, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(avg_group_size)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Average group size",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+    #SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); avg_intevention_group_size_WQoL
+
+# Number of interventions of each study
+interventions_WQoL <- wellbeing_QoL|> 
+ mutate(N_treatments = as.numeric(N_treatments)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(N_treatments, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(N_treatments)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Treatments",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+  #  SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); interventions_WQoL
+
+# Treatment types 
+treatment_types_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    treatment_type = unique(trt_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(treatment_type) |> 
+  summarise(
+
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", treatment_type),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(treatment_type)); treatment_types_WQoL
+
+
+
+# Implementation types 
+implementation_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |> 
+  summarise(
+    implementation = unique(implementation),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(implementation) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", implementation),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(implementation)); implementation_WQoL
+
+
+intervention_characteristics_WQoL <- bind_rows(
+  duration_WQoL, sessions_per_week_WQoL, 
+  avg_intevention_group_size_WQoL, 
+  interventions_WQoL, 
+  treatment_types_WQoL
+)
+
+# Control group 
+# Control types 
+control_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    control = unique(control),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(control) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", control),
+    
+    Mean = Study/n_distinct(GBD_effect$studyid),
+    # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(control)); control_WQoL
+
+# Methodological features
+# Average number of effect size per study
+avg_es_study_WQoL <- 
+  wellbeing_QoL |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  summarise(
+    study_char = "Average n of es",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(es_n),
+  #  SD = sd(es_n),
+    
+    range = paste0(min(es_n), "-", max(es_n))
+    
+  ); avg_es_study_WQoL
+
+
+
+# Outcome and measurement characteristics
+# Type of test 
+test_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    test_type = unique(test_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(test_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", test_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(test_type)); test_WQoL
+
+# Type of measurement
+measure_type_WQoL <- wellbeing_QoL |>  
+  group_by(studyid) |>  
+  summarise(
+    measure_type = unique(measure_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(measure_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", measure_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(measure_type)); measure_type_WQoL
+
+outcome_measurement_WQoL <- bind_rows(
+  test_WQoL, measure_type_WQoL
+); outcome_measurement_WQoL
+```
+
+## Tables for Wellbeing and Quality of Life
+```{r}
+table_WQoL <- bind_rows(
+  study_context_WQoL, design_WQoL, 
+  study_participants_WQoL, 
+  intervention_characteristics_WQoL, 
+  control_WQoL, 
+  avg_es_study_WQoL, 
+  outcome_measurement_WQoL
+)
+
+
+
+table_WQoL_percent <- 
+  table_WQoL |> 
+  filter(str_detect(study_char, "%")) |> 
+  select(-c(range)) |> 
+  mutate(
+    Mean = round(Mean, 3),
+    
+  ); table_WQoL_percent
+
+
+table_WQoL_rest_desc <- 
+  table_WQoL |> 
+  filter(!str_detect(study_char, "%")) |> 
+  mutate(
+    
+    across(Mean, ~ round(.x, 3))
+    
+  ); table_WQoL_rest_desc
+
 
 ## Print Table
 
