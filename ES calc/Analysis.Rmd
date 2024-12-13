@@ -1483,7 +1483,7 @@ study_context_WQoL <- wellbeing_QoL |>
     Study = n_distinct(studyid),
     Effect_size = sum(es_n),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
    # SD = NA,
     
     range = "0-1",
@@ -1569,7 +1569,7 @@ samples_per_study_WQoL <- wellbeing_QoL |>
 
 # Number of distinct studies in review
 
-n_distinct(GBD_effect$studyid)
+n_distinct(wellbeing_QoL$studyid)
 
 study_context_WQoL <- 
   bind_rows(
@@ -1602,7 +1602,7 @@ study_design_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", design),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
   #  SD = NA,
     range = "0-1",
     
@@ -1806,7 +1806,7 @@ assesment_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", assessment),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
     #SD = NA,
     range = "0-1",
     
@@ -1834,7 +1834,7 @@ sample_composition_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", composition),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
   #  SD = NA,
     range = "0-1",
     
@@ -1862,7 +1862,7 @@ sample_factors_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", sample_factors),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
    # SD = NA,
     range = "0-1",
     
@@ -2066,7 +2066,7 @@ implementation_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", implementation),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
   #  SD = NA,
     range = "0-1",
     
@@ -2103,7 +2103,7 @@ control_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", control),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(wellbeing_QoL$studyid),
     # SD = NA,
     range = "0-1",
     
@@ -2255,7 +2255,7 @@ study_context_functioning <- social_functioning |>
     Study = n_distinct(studyid),
     Effect_size = sum(es_n),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
    # SD = NA,
     
     range = "0-1",
@@ -2266,7 +2266,7 @@ study_context_functioning <- social_functioning |>
 
 # Average number of participants per effect size 
 
-participants_WQoL <- wellbeing_QoL |> 
+participants_functioning <- social_functioning |> 
   group_by(studyid) |> 
   summarise(
     study_avg_sample = mean(N_total),
@@ -2284,12 +2284,12 @@ participants_WQoL <- wellbeing_QoL |>
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
-  ); participants_WQoL
+  ); participants_functioning
 
 
 
 # Average size of the groups
-group_size_WQoL <- wellbeing_QoL |> 
+group_size_functioning <- social_functioning |> 
   group_by(studyid) |> 
   summarise(
     treat_SampS = mean(N_t),
@@ -2313,10 +2313,10 @@ group_size_WQoL <- wellbeing_QoL |>
       paste0(min(cont_SampS), "-", round(max(cont_SampS)))
     )
     
-  ); group_size_WQoL
+  ); group_size_functioning
 
 # Number of samples per study 
-samples_per_study_WQoL <- wellbeing_QoL |> 
+samples_per_study_functioning <- social_functioning |> 
   group_by(studyid) |> 
   summarise(
     samples = n_distinct(sample_id), 
@@ -2336,26 +2336,26 @@ samples_per_study_WQoL <- wellbeing_QoL |>
     range = paste0(min(samples), "-", max(samples)),
     
     .groups = "drop"
-  ); samples_per_study_WQoL
+  ); samples_per_study_functioning
 
 
 # Number of distinct studies in review
 
-n_distinct(GBD_effect$studyid)
+n_distinct(social_functioning$studyid)
 
-study_context_WQoL <- 
+study_context_functioning <- 
   bind_rows(
-    study_context_WQoL,
-    participants_WQoL,
+    study_context_functioning,
+    participants_functioning,
  #   ESS,
-    group_size_WQoL,
-    samples_per_study_WQoL
+    group_size_functioning,
+    samples_per_study_functioning
     
-); study_context_WQoL
+); study_context_functioning
 
 # Study Design
 # Proportion cluster randomized or RCT studies
-study_design_WQoL <- wellbeing_QoL |>  
+study_design_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     design = unique(design),
@@ -2374,17 +2374,17 @@ study_design_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", design),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
   #  SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(design)); study_design_WQoL
+  select(-c(design)); study_design_functioning
 
 
 # Randomization
-study_randomization_WQoL <- wellbeing_QoL |>  
+study_randomization_functioning <- social_functioning |>  
   group_by(studyid) |>  
   summarise(
     randomization = unique(randomization),
@@ -2408,10 +2408,10 @@ study_randomization_WQoL <- wellbeing_QoL |>
     range = "0-1",
    ) |> 
   relocate(study_char) |>  
-  select(-c(randomization)); study_randomization_WQoL
+  select(-c(randomization)); study_randomization_functioning
 
 # Handling of clustering
-clustering_WQoL <- wellbeing_QoL |>  
+clustering_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
@@ -2436,10 +2436,10 @@ clustering_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(clustering)); clustering_WQoL
+  select(-c(clustering)); clustering_functioning
 
 # Analysis strategy 
-analysis_strategy_WQoL <- wellbeing_QoL |>  
+analysis_strategy_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     analysis_strat = unique(analysis_strategy),
@@ -2465,22 +2465,22 @@ analysis_strategy_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(analysis_strat)); analysis_strategy_WQoL
+  select(-c(analysis_strat)); analysis_strategy_functioning
 
-design_WQoL <- 
+design_functioning <- 
   bind_rows(
-    study_design_WQoL,
-    study_randomization_WQoL,
-    clustering_WQoL,
-    analysis_strategy_WQoL
-); design_WQoL
+    study_design_functioning,
+    study_randomization_functioning,
+    clustering_functioning,
+    analysis_strategy_functioning
+); design_functioning
 
 
 # Study participants
 # % Males in treatment and control group
 
-male_per_WQoL <- 
-  wellbeing_QoL |> 
+male_per_functioning <- 
+  social_functioning |> 
   group_by(studyid) |>  
   summarise(
     
@@ -2502,11 +2502,11 @@ male_per_WQoL <-
   #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
     range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
-  ); male_per_WQoL
+  ); male_per_functioning
 
 # Mean age
-age_mean_WQoL <- 
-  wellbeing_QoL |> 
+age_mean_functioning <- 
+  social_functioning |> 
   group_by(studyid) |> 
   summarise(
     
@@ -2528,10 +2528,10 @@ age_mean_WQoL <-
     #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
-  ); age_mean_WQoL
+  ); age_mean_functioning
 
 # Disorder type
-disorder_type_WQoL <- wellbeing_QoL |>  
+disorder_type_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     disorder = unique(disorder_type),
@@ -2556,10 +2556,10 @@ disorder_type_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(disorder)); disorder_type_WQoL
+  select(-c(disorder)); disorder_type_functioning
 
 
-assesment_WQoL <- wellbeing_QoL |>  
+assesment_functioning <- social_functioning |>  
   group_by(studyid) |>  
   summarise(
     assessment = unique(assessment),
@@ -2578,16 +2578,16 @@ assesment_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", assessment),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
     #SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(assessment)); assesment_WQoL
+  select(-c(assessment)); assesment_functioning
 
 # Sample composition
-sample_composition_WQoL <- wellbeing_QoL |>  
+sample_composition_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     composition = unique(sample_comp),
@@ -2606,16 +2606,16 @@ sample_composition_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", composition),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
   #  SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(composition)); sample_composition_WQoL
+  select(-c(composition)); sample_composition_functioning
 
 # Sample factors
-sample_factors_WQoL <- wellbeing_QoL |>  
+sample_factors_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     sample_factors = unique(sample_factors),
@@ -2634,30 +2634,30 @@ sample_factors_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", sample_factors),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
    # SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(sample_factors)); sample_factors_WQoL
+  select(-c(sample_factors)); sample_factors_functioning
 
 
-study_participants_WQoL <- 
+study_participants_functioning <- 
   bind_rows(
-    male_per_WQoL, age_mean_WQoL, 
+    male_per_functioning, age_mean_functioning, 
    # disorder_type, 
-    assesment_WQoL,
-    sample_composition_WQoL,
-    sample_factors_WQoL
-); study_participants_WQoL
+    assesment_functioning,
+    sample_composition_functioning,
+    sample_factors_functioning
+); study_participants_functioning
 
 
 # Intervention characteristics 
 
 # Duration of intervention
-duration_WQoL <- 
-  wellbeing_QoL |> 
+duration_functioning <- 
+  social_functioning |> 
   group_by(studyid) |>  
   summarise(
     
@@ -2687,12 +2687,12 @@ duration_WQoL <-
                    max(m_duration, na.rm = TRUE)),
   
     
-  ); duration_WQoL
+  ); duration_functioning
 
 # Mean number of sessions per week
 
-sessions_per_week_WQoL <- 
-  wellbeing_QoL|> 
+sessions_per_week_functioning <- 
+  social_functioning|> 
   mutate(sessions_per_week = as.numeric(sessions_per_week)) |> 
   group_by(studyid)  |>  
   summarise(
@@ -2721,11 +2721,11 @@ sessions_per_week_WQoL <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); sessions_per_week_WQoL
+  ); sessions_per_week_functioning
 
 # Average group size in the treatment intervention
-avg_intevention_group_size_WQoL <- 
-  wellbeing_QoL|> 
+avg_intevention_group_size_functioning <- 
+  social_functioning|> 
   mutate(avg_group_size = as.numeric(avg_group_size)) |> 
   group_by(studyid)  |>  
   summarise(
@@ -2754,10 +2754,10 @@ avg_intevention_group_size_WQoL <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); avg_intevention_group_size_WQoL
+  ); avg_intevention_group_size_functioning
 
 # Number of interventions of each study
-interventions_WQoL <- wellbeing_QoL|> 
+interventions_functioning <- social_functioning|> 
  mutate(N_treatments = as.numeric(N_treatments)) |> 
   group_by(studyid)  |>  
   summarise(
@@ -2786,10 +2786,10 @@ interventions_WQoL <- wellbeing_QoL|>
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); interventions_WQoL
+  ); interventions_functioning
 
 # Treatment types 
-treatment_types_WQoL <- wellbeing_QoL |>  
+treatment_types_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     treatment_type = unique(trt_type),
@@ -2814,12 +2814,12 @@ treatment_types_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(treatment_type)); treatment_types_WQoL
+  select(-c(treatment_type)); treatment_types_functioning
 
 
 
 # Implementation types 
-implementation_WQoL <- wellbeing_QoL |>  
+implementation_functioning <- social_functioning |>  
   group_by(studyid) |> 
   summarise(
     implementation = unique(implementation),
@@ -2838,25 +2838,25 @@ implementation_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", implementation),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
   #  SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(implementation)); implementation_WQoL
+  select(-c(implementation)); implementation_functioning
 
 
-intervention_characteristics_WQoL <- bind_rows(
-  duration_WQoL, sessions_per_week_WQoL, 
-  avg_intevention_group_size_WQoL, 
-  interventions_WQoL, 
-  treatment_types_WQoL
-)
+intervention_characteristics_functioning <- bind_rows(
+  duration_functioning, sessions_per_week_functioning, 
+  avg_intevention_group_size_functioning, 
+  interventions_functioning, 
+  treatment_types_functioning
+); intervention_characteristics_functioning
 
 # Control group 
 # Control types 
-control_WQoL <- wellbeing_QoL |>  
+control_functioning <- social_functioning |>  
   group_by(studyid) |>  
   summarise(
     control = unique(control),
@@ -2875,18 +2875,18 @@ control_WQoL <- wellbeing_QoL |>
     
     study_char = paste("%", control),
     
-    Mean = Study/n_distinct(GBD_effect$studyid),
+    Mean = Study/n_distinct(social_functioning$studyid),
     # SD = NA,
     range = "0-1",
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(control)); control_WQoL
+  select(-c(control)); control_functioning
 
 # Methodological features
 # Average number of effect size per study
-avg_es_study_WQoL <- 
-  wellbeing_QoL |> 
+avg_es_study_functioning <- 
+  social_functioning |> 
   group_by(studyid) |> 
   summarise(
     
@@ -2906,13 +2906,13 @@ avg_es_study_WQoL <-
     
     range = paste0(min(es_n), "-", max(es_n))
     
-  ); avg_es_study_WQoL
+  ); avg_es_study_functioning
 
 
 
 # Outcome and measurement characteristics
 # Type of test 
-test_WQoL <- wellbeing_QoL |>  
+test_functioning <- social_functioning |>  
   group_by(studyid) |>  
   summarise(
     test_type = unique(test_type),
@@ -2937,10 +2937,10 @@ test_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(test_type)); test_WQoL
+  select(-c(test_type)); test_functioning
 
 # Type of measurement
-measure_type_WQoL <- wellbeing_QoL |>  
+measure_type_functioning <- social_functioning |>  
   group_by(studyid) |>  
   summarise(
     measure_type = unique(measure_type),
@@ -2964,47 +2964,1596 @@ measure_type_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(measure_type)); measure_type_WQoL
+  select(-c(measure_type)); measure_type_functioning
 
-outcome_measurement_WQoL <- bind_rows(
-  test_WQoL, measure_type_WQoL
-); outcome_measurement_WQoL
+outcome_measurement_functioning <- bind_rows(
+  test_functioning, measure_type_functioning
+); outcome_measurement_functioning
 ```
 
-## Tables for Wellbeing and Quality of Life
+## Tables for Social functioning (degree of impairment)
 ```{r}
-table_WQoL <- bind_rows(
-  study_context_WQoL, design_WQoL, 
-  study_participants_WQoL, 
-  intervention_characteristics_WQoL, 
-  control_WQoL, 
-  avg_es_study_WQoL, 
-  outcome_measurement_WQoL
+table_functioning <- bind_rows(
+  study_context_functioning, design_functioning, 
+  study_participants_functioning, 
+  intervention_characteristics_functioning, 
+  control_functioning, 
+  avg_es_study_functioning, 
+  outcome_measurement_functioning
 )
 
 
 
-table_WQoL_percent <- 
-  table_WQoL |> 
+table_functioning_percent <- 
+  table_functioning |> 
   filter(str_detect(study_char, "%")) |> 
   select(-c(range)) |> 
   mutate(
     Mean = round(Mean, 3),
     
-  ); table_WQoL_percent
+  ); table_functioning_percent
 
 
-table_WQoL_rest_desc <- 
-  table_WQoL |> 
+table_functioning_rest_desc <- 
+  table_functioning |> 
   filter(!str_detect(study_char, "%")) |> 
   mutate(
     
     across(Mean, ~ round(.x, 3))
     
-  ); table_WQoL_rest_desc
+  ); table_functioning_rest_desc
+
+```
 
 
-## Print Table
+# Descrptive tables: Hope, Empowerment & Self-efficacy
+
+```{r}
+hope <- GBD_effect |> 
+  filter(analysis_plan == "Hope, Empowerment & Self-efficacy")
+
+
+# Study context
+# Percent studies by countries
+study_context_hope <- hope |> 
+  group_by(studyid, cnt) |> 
+  summarise(
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  group_by(cnt) |>
+  summarise(
+    study_char = paste0("% ", unique(cnt)), 
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = Study/n_distinct(hope$studyid),
+   # SD = NA,
+    
+    range = "0-1",
+    
+    .groups = "drop"
+  ) |> 
+  select(-cnt); study_context_hope
+
+# Average number of participants per effect size 
+
+participants_hope <- hope |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_sample = mean(N_total),
+    es_n = n(), 
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Number of particiapnts",
+    
+    Study = n_distinct(studyid), # Studies
+    Effect_size = sum(es_n), # Effect size
+    
+    Mean = round(mean(study_avg_sample)),
+  #  SD = round(sd(study_avg_sample)),
+    
+    range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
+    
+  ); participants_hope
+
+
+
+# Average size of the groups
+group_size_hope <- hope |> 
+  group_by(studyid) |> 
+  summarise(
+    treat_SampS = mean(N_t),
+    cont_SampS = mean(N_c),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = c("Intervention group", "Control group"),
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = c(mean(treat_SampS), mean(cont_SampS)),
+   # SD = c(sd(treat_SampS), sd(cont_SampS)),
+    
+    range = c(
+      paste0(min(treat_SampS), "-", round(max(treat_SampS))),
+      paste0(min(cont_SampS), "-", round(max(cont_SampS)))
+    )
+    
+  ); group_size_hope
+
+# Number of samples per study 
+samples_per_study_hope <- hope |> 
+  group_by(studyid) |> 
+  summarise(
+    samples = n_distinct(sample_id), 
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |>
+  summarise(
+    study_char = "Samples per study",
+    
+    Study = sum(samples),  
+    Effect_size = sum(es_n),  
+    
+    Mean = mean(samples), 
+   # SD = sd(samples),  
+    
+    range = paste0(min(samples), "-", max(samples)),
+    
+    .groups = "drop"
+  ); samples_per_study_hope
+
+
+# Number of distinct studies in review
+
+n_distinct(hope$studyid)
+
+study_context_hope <- 
+  bind_rows(
+    study_context_hope,
+    participants_hope,
+ #   ESS,
+    group_size_hope,
+    samples_per_study_hope
+    
+); study_context_hope
+
+# Study Design
+# Proportion cluster randomized or RCT studies
+study_design_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    design = unique(design),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(design) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", design),
+    
+    Mean = Study/n_distinct(hope$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(design)); study_design_hope
+
+
+# Randomization
+study_randomization_hope <- hope |>  
+  group_by(studyid) |>  
+  summarise(
+    randomization = unique(randomization),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(randomization) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", randomization),
+    
+    Mean = Study/sum(Study),
+    #SD = NA,
+    range = "0-1",
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(randomization)); study_randomization_hope
+
+# Handling of clustering
+clustering_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(clustering) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", clustering),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(clustering)); clustering_hope
+
+# Analysis strategy 
+analysis_strategy_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    analysis_strat = unique(analysis_strategy),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(!is.na(analysis_strat)) |> 
+  group_by(analysis_strat) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |>
+  mutate(
+    
+    study_char = paste("%", analysis_strat),
+    
+    Mean = Study / sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(analysis_strat)); analysis_strategy_hope
+
+design_hope <- 
+  bind_rows(
+    study_design_hope,
+    study_randomization_hope,
+    clustering_hope,
+    analysis_strategy_hope
+); design_hope
+
+
+# Study participants
+# % Males in treatment and control group
+
+male_per_hope <- 
+  hope |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
+    c_male = mean(as.numeric(male_pct_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(male_pct_t)),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"), 
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)), 
+  #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
+              paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
+  ); male_per_hope
+
+# Mean age
+age_mean_hope <- 
+  hope |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    t_age = mean(as.numeric(age_mean_t), na.rm = TRUE),
+    c_age = mean(as.numeric(age_mean_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(age_mean_c)),
+    
+    .groups = "drop"
+    
+  ) |>  
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_age, na.rm = TRUE), mean(c_age, na.rm = TRUE)),  # Gennemsnit for hver gruppe
+    #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
+              paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
+  ); age_mean_hope
+
+# Disorder type
+disorder_type_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    disorder = unique(disorder_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(disorder) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", disorder),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(disorder)); disorder_type_hope
+
+
+assesment_hope <- hope |>  
+  group_by(studyid) |>  
+  summarise(
+    assessment = unique(assessment),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(assessment) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", assessment),
+    
+    Mean = Study/n_distinct(hope$studyid),
+    #SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(assessment)); assesment_hope
+
+# Sample composition
+sample_composition_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    composition = unique(sample_comp),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(composition) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", composition),
+    
+    Mean = Study/n_distinct(hope$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(composition)); sample_composition_hope
+
+# Sample factors
+sample_factors_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    sample_factors = unique(sample_factors),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(sample_factors) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", sample_factors),
+    
+    Mean = Study/n_distinct(hope$studyid),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(sample_factors)); sample_factors_hope
+
+
+study_participants_hope <- 
+  bind_rows(
+    male_per_hope, age_mean_hope, 
+   # disorder_type, 
+    assesment_hope,
+    sample_composition_hope,
+    sample_factors_hope
+); study_participants_hope
+
+
+# Intervention characteristics 
+
+# Duration of intervention
+duration_hope <- 
+  hope |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    m_duration = mean(duration_weeks, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_dur = sum(is.na(duration_weeks)),
+    
+    dur_report = if_else(miss_dur == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |>  
+  filter(dur_report != "Not reported") |>  
+  summarise(
+    study_char = "Duration in weeks",
+    
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_duration, na.rm = TRUE),
+ #   SD = sd(m_duration, na.rm = TRUE),
+    
+    range = paste0(min(m_duration, na.rm = TRUE), "-",
+                   max(m_duration, na.rm = TRUE)),
+  
+    
+  ); duration_hope
+
+# Mean number of sessions per week
+
+sessions_per_week_hope <- 
+  hope|> 
+  mutate(sessions_per_week = as.numeric(sessions_per_week)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(sessions_per_week, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(sessions_per_week)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Number of sessions per week",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+ #   SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); sessions_per_week_hope
+
+# Average group size in the treatment intervention
+avg_intevention_group_size_hope <- 
+  hope|> 
+  mutate(avg_group_size = as.numeric(avg_group_size)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(avg_group_size, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(avg_group_size)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Average group size",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+    #SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); avg_intevention_group_size_hope
+
+# Number of interventions of each study
+interventions_hope <- hope|> 
+ mutate(N_treatments = as.numeric(N_treatments)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(N_treatments, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(N_treatments)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Treatments",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+  #  SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); interventions_hope
+
+# Treatment types 
+treatment_types_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    treatment_type = unique(trt_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(treatment_type) |> 
+  summarise(
+
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", treatment_type),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(treatment_type)); treatment_types_hope
+
+
+
+# Implementation types 
+implementation_hope <- hope |>  
+  group_by(studyid) |> 
+  summarise(
+    implementation = unique(implementation),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(implementation) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", implementation),
+    
+    Mean = Study/n_distinct(hope$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(implementation)); implementation_hope
+
+
+intervention_characteristics_hope <- bind_rows(
+  duration_hope, sessions_per_week_hope, 
+  avg_intevention_group_size_hope, 
+  interventions_hope, 
+  treatment_types_hope
+); intervention_characteristics_hope
+
+# Control group 
+# Control types 
+control_hope <- hope |>  
+  group_by(studyid) |>  
+  summarise(
+    control = unique(control),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(control) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", control),
+    
+    Mean = Study/n_distinct(hope$studyid),
+    # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(control)); control_hope
+
+# Methodological features
+# Average number of effect size per study
+avg_es_study_hope <- 
+  hope |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  summarise(
+    study_char = "Average n of es",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(es_n),
+  #  SD = sd(es_n),
+    
+    range = paste0(min(es_n), "-", max(es_n))
+    
+  ); avg_es_study_hope
+
+
+
+# Outcome and measurement characteristics
+# Type of test 
+test_hope <- hope |>  
+  group_by(studyid) |>  
+  summarise(
+    test_type = unique(test_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(test_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", test_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(test_type)); test_hope
+
+# Type of measurement
+measure_type_hope <- hope |>  
+  group_by(studyid) |>  
+  summarise(
+    measure_type = unique(measure_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(measure_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", measure_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(measure_type)); measure_type_hope
+
+outcome_measurement_hope <- bind_rows(
+  test_hope, measure_type_hope
+); outcome_measurement_hope
+```
+
+## Tables for Hope, Empowerment & Self-efficacy
+```{r}
+table_hope <- bind_rows(
+  study_context_hope, design_hope, 
+  study_participants_hope, 
+  intervention_characteristics_hope, 
+  control_hope, 
+  avg_es_study_hope, 
+  outcome_measurement_hope
+)
+
+
+
+table_hope_percent <- 
+  table_hope |> 
+  filter(str_detect(study_char, "%")) |> 
+  select(-c(range)) |> 
+  mutate(
+    Mean = round(Mean, 3),
+    
+  ); table_hope_percent
+
+
+table_hope_rest_desc <- 
+  table_hope |> 
+  filter(!str_detect(study_char, "%")) |> 
+  mutate(
+    
+    across(Mean, ~ round(.x, 3))
+    
+  ); table_hope_rest_desc
+
+```
+
+
+# Descrptive tables: Alcohol and drug abuse/misuse
+
+```{r}
+abuse_misuse <- GBD_effect |> 
+  filter(analysis_plan == "Alcohol and drug abuse/misuse")
+
+
+# Study context
+# Percent studies by countries
+study_context_abuse_misuse <- abuse_misuse |> 
+  group_by(studyid, cnt) |> 
+  summarise(
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  group_by(cnt) |>
+  summarise(
+    study_char = paste0("% ", unique(cnt)), 
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+   # SD = NA,
+    
+    range = "0-1",
+    
+    .groups = "drop"
+  ) |> 
+  select(-cnt); study_context_abuse_misuse
+
+# Average number of participants per effect size 
+
+participants_abuse_misuse <- abuse_misuse |> 
+  group_by(studyid) |> 
+  summarise(
+    study_avg_sample = mean(N_total),
+    es_n = n(), 
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = "Number of particiapnts",
+    
+    Study = n_distinct(studyid), # Studies
+    Effect_size = sum(es_n), # Effect size
+    
+    Mean = round(mean(study_avg_sample)),
+  #  SD = round(sd(study_avg_sample)),
+    
+    range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
+    
+  ); participants_abuse_misuse
+
+
+
+# Average size of the groups
+group_size_abuse_misuse <- abuse_misuse |> 
+  group_by(studyid) |> 
+  summarise(
+    treat_SampS = mean(N_t),
+    cont_SampS = mean(N_c),
+    
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |> 
+  summarise(
+    study_char = c("Intervention group", "Control group"),
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = c(mean(treat_SampS), mean(cont_SampS)),
+   # SD = c(sd(treat_SampS), sd(cont_SampS)),
+    
+    range = c(
+      paste0(min(treat_SampS), "-", round(max(treat_SampS))),
+      paste0(min(cont_SampS), "-", round(max(cont_SampS)))
+    )
+    
+  ); group_size_abuse_misuse
+
+# Number of samples per study 
+samples_per_study_abuse_misuse <- abuse_misuse |> 
+  group_by(studyid) |> 
+  summarise(
+    samples = n_distinct(sample_id), 
+    es_n = n(),
+    
+    .groups = "drop"
+  ) |>
+  summarise(
+    study_char = "Samples per study",
+    
+    Study = sum(samples),  
+    Effect_size = sum(es_n),  
+    
+    Mean = mean(samples), 
+   # SD = sd(samples),  
+    
+    range = paste0(min(samples), "-", max(samples)),
+    
+    .groups = "drop"
+  ); samples_per_study_abuse_misuse
+
+
+# Number of distinct studies in review
+
+n_distinct(abuse_misuse$studyid)
+
+study_context_abuse_misuse <- 
+  bind_rows(
+    study_context_abuse_misuse,
+    participants_abuse_misuse,
+ #   ESS,
+    group_size_abuse_misuse,
+    samples_per_study_abuse_misuse
+    
+); study_context_abuse_misuse
+
+# Study Design
+# Proportion cluster randomized or RCT studies
+study_design_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    design = unique(design),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(design) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", design),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(design)); study_design_abuse_misuse
+
+
+# Randomization
+study_randomization_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |>  
+  summarise(
+    randomization = unique(randomization),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(randomization) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", randomization),
+    
+    Mean = Study/sum(Study),
+    #SD = NA,
+    range = "0-1",
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(randomization)); study_randomization_abuse_misuse
+
+# Handling of clustering
+clustering_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    clustering = unique(cluster_treatment[!is.na(cluster_treatment)]),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(clustering) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", clustering),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(clustering)); clustering_abuse_misuse
+
+# Analysis strategy 
+analysis_strategy_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    analysis_strat = unique(analysis_strategy),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(!is.na(analysis_strat)) |> 
+  group_by(analysis_strat) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |>
+  mutate(
+    
+    study_char = paste("%", analysis_strat),
+    
+    Mean = Study / sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(analysis_strat)); analysis_strategy_abuse_misuse
+
+design_abuse_misuse <- 
+  bind_rows(
+    study_design_abuse_misuse,
+    study_randomization_abuse_misuse,
+    clustering_abuse_misuse,
+    analysis_strategy_abuse_misuse
+); design_abuse_misuse
+
+
+# Study participants
+# % Males in treatment and control group
+
+male_per_abuse_misuse <- 
+  abuse_misuse |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    t_male = mean(as.numeric(male_pct_t), na.rm = TRUE),
+    c_male = mean(as.numeric(male_pct_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(male_pct_t)),
+    
+    .groups = "drop"
+    
+  ) |> 
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"), 
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_male, na.rm = TRUE), mean(c_male, na.rm = TRUE)), 
+  #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
+    range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
+              paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
+  ); male_per_abuse_misuse
+
+# Mean age
+age_mean_abuse_misuse <- 
+  abuse_misuse |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    t_age = mean(as.numeric(age_mean_t), na.rm = TRUE),
+    c_age = mean(as.numeric(age_mean_c), na.rm = TRUE),
+    
+     es_n = sum(!is.na(age_mean_c)),
+    
+    .groups = "drop"
+    
+  ) |>  
+  filter(es_n != 0) |> 
+   summarise(
+    study_char = c("Intervention group", "Control group"),  # Kategorier for hver gruppe
+    Study = n_distinct(studyid),  
+    Effect_size = sum(es_n, na.rm = TRUE),
+    
+    Mean = c(mean(t_age, na.rm = TRUE), mean(c_age, na.rm = TRUE)),  # Gennemsnit for hver gruppe
+    #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
+    range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
+              paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
+  ); age_mean_abuse_misuse
+
+# Disorder type
+disorder_type_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    disorder = unique(disorder_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(disorder) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", disorder),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(disorder)); disorder_type_abuse_misuse
+
+
+assesment_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |>  
+  summarise(
+    assessment = unique(assessment),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(assessment) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", assessment),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+    #SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(assessment)); assesment_abuse_misuse
+
+# Sample composition
+sample_composition_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    composition = unique(sample_comp),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(composition) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", composition),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(composition)); sample_composition_abuse_misuse
+
+# Sample factors
+sample_factors_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    sample_factors = unique(sample_factors),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(sample_factors) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", sample_factors),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(sample_factors)); sample_factors_abuse_misuse
+
+
+study_participants_abuse_misuse <- 
+  bind_rows(
+    male_per_abuse_misuse, age_mean_abuse_misuse, 
+   # disorder_type, 
+    assesment_abuse_misuse,
+    sample_composition_abuse_misuse,
+    sample_factors_abuse_misuse
+); study_participants_abuse_misuse
+
+
+# Intervention characteristics 
+
+# Duration of intervention
+duration_abuse_misuse <- 
+  abuse_misuse |> 
+  group_by(studyid) |>  
+  summarise(
+    
+    m_duration = mean(duration_weeks, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_dur = sum(is.na(duration_weeks)),
+    
+    dur_report = if_else(miss_dur == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |>  
+  filter(dur_report != "Not reported") |>  
+  summarise(
+    study_char = "Duration in weeks",
+    
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_duration, na.rm = TRUE),
+ #   SD = sd(m_duration, na.rm = TRUE),
+    
+    range = paste0(min(m_duration, na.rm = TRUE), "-",
+                   max(m_duration, na.rm = TRUE)),
+  
+    
+  ); duration_abuse_misuse
+
+# Mean number of sessions per week
+
+sessions_per_week_abuse_misuse <- 
+  abuse_misuse|> 
+  mutate(sessions_per_week = as.numeric(sessions_per_week)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(sessions_per_week, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(sessions_per_week)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Number of sessions per week",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+ #   SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); sessions_per_week_abuse_misuse
+
+# Average group size in the treatment intervention
+avg_intevention_group_size_abuse_misuse <- 
+  abuse_misuse|> 
+  mutate(avg_group_size = as.numeric(avg_group_size)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(avg_group_size, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(avg_group_size)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Average group size",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+    #SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); avg_intevention_group_size_abuse_misuse
+
+# Number of interventions of each study
+interventions_abuse_misuse <- abuse_misuse|> 
+ mutate(N_treatments = as.numeric(N_treatments)) |> 
+  group_by(studyid)  |>  
+  summarise(
+    
+    m_intensity = mean(N_treatments, na.rm = TRUE),
+  
+    es_n = n(),
+    
+    miss_int = sum(is.na(N_treatments)),
+    
+    int_report = if_else(miss_int == 0, "Reported", "Not reported"),
+    
+    .groups = "drop"
+     
+  ) |> 
+  filter(int_report != "Not reported") |>  
+  summarise(
+    study_char = "Treatments",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(m_intensity, na.rm = TRUE),
+  #  SD = sd(m_intensity, na.rm = TRUE),
+    
+    range = paste0(min(m_intensity, na.rm = TRUE), "-",
+                   max(m_intensity, na.rm = TRUE))
+    
+  ); interventions_abuse_misuse
+
+# Treatment types 
+treatment_types_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    treatment_type = unique(trt_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(treatment_type) |> 
+  summarise(
+
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", treatment_type),
+    
+    Mean = Study/sum(Study),
+   # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(treatment_type)); treatment_types_abuse_misuse
+
+
+
+# Implementation types 
+implementation_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |> 
+  summarise(
+    implementation = unique(implementation),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  group_by(implementation) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", implementation),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(implementation)); implementation_abuse_misuse
+
+
+intervention_characteristics_abuse_misuse <- bind_rows(
+  duration_abuse_misuse, sessions_per_week_abuse_misuse, 
+  avg_intevention_group_size_abuse_misuse, 
+  interventions_abuse_misuse, 
+  treatment_types_abuse_misuse
+); intervention_characteristics_abuse_misuse
+
+# Control group 
+# Control types 
+control_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |>  
+  summarise(
+    control = unique(control),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(control) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", control),
+    
+    Mean = Study/n_distinct(abuse_misuse$studyid),
+    # SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |>  
+  select(-c(control)); control_abuse_misuse
+
+# Methodological features
+# Average number of effect size per study
+avg_es_study_abuse_misuse <- 
+  abuse_misuse |> 
+  group_by(studyid) |> 
+  summarise(
+    
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |> 
+  summarise(
+    study_char = "Average n of es",
+    
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+    Mean = mean(es_n),
+  #  SD = sd(es_n),
+    
+    range = paste0(min(es_n), "-", max(es_n))
+    
+  ); avg_es_study_abuse_misuse
+
+
+
+# Outcome and measurement characteristics
+# Type of test 
+test_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |>  
+  summarise(
+    test_type = unique(test_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(test_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    
+    study_char = paste("%", test_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(test_type)); test_abuse_misuse
+
+# Type of measurement
+measure_type_abuse_misuse <- abuse_misuse |>  
+  group_by(studyid) |>  
+  summarise(
+    measure_type = unique(measure_type),
+    es_n = n(),
+    
+    .groups = "drop"
+    
+  ) |>  
+  group_by(measure_type) |> 
+  summarise(
+    Study = n_distinct(studyid),
+    Effect_size = sum(es_n),
+    
+  ) |> 
+  mutate(
+    study_char = paste("%", measure_type),
+    
+    Mean = Study/sum(Study),
+  #  SD = NA,
+    range = "0-1",
+    
+   ) |> 
+  relocate(study_char) |> 
+  select(-c(measure_type)); measure_type_abuse_misuse
+
+outcome_measurement_abuse_misuse <- bind_rows(
+  test_abuse_misuse, measure_type_abuse_misuse
+); outcome_measurement_abuse_misuse
+```
+
+## Tables for Alcohol and drug abuse/misuse
+```{r}
+table_abuse_misuse <- bind_rows(
+  study_context_abuse_misuse, design_abuse_misuse, 
+  study_participants_abuse_misuse, 
+  intervention_characteristics_abuse_misuse, 
+  control_abuse_misuse, 
+  avg_es_study_abuse_misuse, 
+  outcome_measurement_abuse_misuse
+)
+
+
+
+table_abuse_misuse_percent <- 
+  table_abuse_misuse |> 
+  filter(str_detect(study_char, "%")) |> 
+  select(-c(range)) |> 
+  mutate(
+    Mean = round(Mean, 3),
+    
+  ); table_abuse_misuse_percent
+
+
+table_abuse_misuse_rest_desc <- 
+  table_abuse_misuse |> 
+  filter(!str_detect(study_char, "%")) |> 
+  mutate(
+    
+    across(Mean, ~ round(.x, 3))
+    
+  ); table_abuse_misuse_rest_desc
+
+```
+
+# Print Table
 
 ```{r}
 
