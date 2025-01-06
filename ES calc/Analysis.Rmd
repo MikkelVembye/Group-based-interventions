@@ -204,7 +204,7 @@ sample_size_dat <-
 
 sample_size_dat |> 
   pivot_longer(
-        cols = N_t_mean:ESS_mean,
+        cols = N_t_mean:N_total_mean,
     names_to = "sample_sizes_char",
     values_to = "sample_size"
   ) |> 
@@ -217,7 +217,7 @@ sample_size_dat |>
   unnest_wider(q, names_repair = ~paste0('Q_', sub('%', '', .))) |> 
   rename(mean = Q_mean, sd = Q_sd) |> 
   mutate(
-    id = rev(1:4)
+    id = rev(1:3)
   ) |> 
   arrange(id) |> 
   select(-id)
