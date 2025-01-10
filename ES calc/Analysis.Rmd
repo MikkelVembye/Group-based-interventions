@@ -37,6 +37,10 @@ library(ggplot2)
 library(stringr)
 library(robvis)
 library(tidyr)
+library(rempsyc)
+library(flextable)
+library(purrr)
+library(metafor)
 
 ```
 
@@ -127,6 +131,9 @@ GBD_effect <-
     randomization = if_else(randomization == "Simple Block Randomization", "Block randomized",
                            randomization),
     randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
+                           "Stratified randomization", randomization),
+   
+   randomization = if_else(randomization == "Stratified?",
                            "Stratified randomization", randomization),
    
     randomization = if_else(is.na(randomization) & studyid == 102, 
@@ -4665,4 +4672,348 @@ ggplot(distribution_summary, aes(x = trt_type, y = proportion, fill = analysis_p
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1)
   )
+```
+
+# Sensitivity Analysis of Mean Effect Size using the correlated-hierarchical effects (CHE-RVE) model
+```{r}
+# Function designed to perform a robust variance estimation meta-analysis. 
+# For overall average effect modeling
+.CHE_RVE <- function(data, rho = 0.7, study_out){
+  
+  if (missing(study_out)) {
+    dat <- data
+  } else{
+    dat <- data |> 
+      filter(year != study_out)
+  }
+  
+  V_mat <- vcalc(vi = vgt, cluster = studyid, obs = es_id, data = dat, rho = rho) 
+  
+  overall_res <- 
+    rma.mv(
+      gt, 
+      V = V_mat,
+      random = ~ 1 | studyid / es_id,
+      data = dat
+    ) |> 
+    robust(cluster = studyid, clubSandwich = TRUE) 
+  
+  # I2 calcution
+  # See https://www.metafor-project.org/doku.php/tips:i2_multilevel_multivariate?s[]=i2
+  W <- solve(V_mat)
+  X <- model.matrix(overall_res)
+  P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
+  
+  I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
+                                                   (overall_res$k - overall_res$p)/sum(diag(P))), 2)
+  
+  res <- 
+    tibble(
+      rho = rho, 
+      studies = overall_res$n,
+      effects = overall_res$k,
+      b = as.numeric(overall_res$b),
+      se = overall_res$se,
+      lb = overall_res$ci.lb,
+      ub = overall_res$ci.ub,
+      pval = overall_res$pval,
+      df_satt = overall_res$dfs,
+      tau = sqrt(overall_res$sigma2[1]), 
+      omega = sqrt(overall_res$sigma2[2]), 
+      sd_total = sqrt(sum(overall_res$sigma2)),
+      QE = overall_res$QE,
+      I2 = I2_tot
+    )
+  
+  if (!missing(study_out)) res <- res |> mutate(omitted_study = study_out)
+  
+  res
+  
+}
+
+# Specifying the data frames to be used representing the relevant outcomes: 
+# Alcohol and drug abuse/misuse, Hope, Social Functioning, Well-being and Quality of Life
+data_list <- list(
+  abuse_misuse = abuse_misuse, 
+  hope = hope, 
+  social_functioning = social_functioning, 
+  wellbeing_QoL = wellbeing_QoL
+)
+
+
+rho_calc_all <- function(data, rho_seq = 0:9/10) {
+  map_dfr(rho_seq, ~ .CHE_RVE(data = data, rho = .x))
+}
+
+
+for (df_name in names(data_list)) {
+  # run the estimation
+  results <- rho_calc_all(data_list[[df_name]])
+  
+  # saving results as separate data frames
+  assign(paste0("rho_", df_name), results)
+}
+
+# Plotting "Alcohol and Drug Abuse/Misuse" ----
+rho_beta_plot_abuse_misuse <- 
+  rho_abuse_misuse |> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+rho_var_plot_abuse_misuse <- 
+  rho_abuse_misuse |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_abuse_misuse  <- rho_beta_plot_abuse_misuse / rho_var_plot_abuse_misuse + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Alcohol and Drug Abuse/Misuse")
+
+# Plotting "Hope" ----
+rho_beta_plot_hope <- 
+  rho_hope |> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+rho_var_plot_hope <- 
+  rho_hope |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+
+plot_hope <- rho_beta_plot_hope / rho_var_plot_hope + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Hope")
+
+# Plotting "Social Functioning" ----
+rho_beta_plot_social_functioning <- 
+  rho_social_functioning |> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+rho_var_plot_social_functioning <- 
+  rho_social_functioning |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_social_functioning <- rho_beta_plot_social_functioning / rho_var_plot_social_functioning + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Social Functioning")
+
+
+# Plotting "Wellbeing and Quality of Life" ----
+rho_beta_plot_wellbeing_QoL <- 
+  rho_wellbeing_QoL|> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+rho_var_plot_wellbeing_QoL <- 
+  rho_wellbeing_QoL |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_wellbeing_QoL<- rho_beta_plot_wellbeing_QoL / rho_var_plot_wellbeing_QoL + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Wellbeing and Quality of Life")
 ```
