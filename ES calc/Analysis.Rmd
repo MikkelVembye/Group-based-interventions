@@ -5013,7 +5013,7 @@ rho_var_plot_wellbeing_QoL <-
   )
 
 
-plot_wellbeing_QoL<- rho_beta_plot_wellbeing_QoL / rho_var_plot_wellbeing_QoL + 
+plot_wellbeing_QoL <- rho_beta_plot_wellbeing_QoL / rho_var_plot_wellbeing_QoL + 
   plot_layout(guides = 'collect') & 
   plot_annotation(title = "Outcome: Wellbeing and Quality of Life")
 ```
