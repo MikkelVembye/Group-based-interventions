@@ -7,6 +7,7 @@ output:
     toc: true
     code_folding: show
     code_download: true
+    css: styles.css
 fontsize: 11pt
 spacing: single
 editor_options: 
@@ -41,6 +42,7 @@ library(rempsyc)
 library(flextable)
 library(purrr)
 library(metafor)
+library(patchwork)
 
 ```
 
@@ -1474,7 +1476,8 @@ p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
 
 ```
 
-# Descrptive tables: Wellbeing and Quality of life
+# Descriptive tables for each outcome {.tabset}
+## Descrptive tables: Wellbeing and Quality of life
 ```{r}
 wellbeing_QoL <- GBD_effect |> 
   filter(analysis_plan == "Wellbeing and Quality of Life")
@@ -2246,7 +2249,7 @@ table_WQoL_rest_desc <-
 ```
 
 
-# Descrptive tables: Social functioning (degree of impairment)
+## Descrptive tables: Social functioning (degree of impairment)
 ```{r}
 social_functioning <- GBD_effect |> 
   filter(analysis_plan == "Social functioning (degree of impairment)")
@@ -3019,7 +3022,7 @@ table_functioning_rest_desc <-
 ```
 
 
-# Descrptive tables: Hope, Empowerment & Self-efficacy
+## Descrptive tables: Hope, Empowerment & Self-efficacy
 
 ```{r}
 hope <- GBD_effect |> 
@@ -3793,7 +3796,7 @@ table_hope_rest_desc <-
 ```
 
 
-# Descrptive tables: Alcohol and drug abuse/misuse
+## Descrptive tables: Alcohol and drug abuse/misuse
 
 ```{r}
 abuse_misuse <- GBD_effect |> 
