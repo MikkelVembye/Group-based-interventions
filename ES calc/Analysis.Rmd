@@ -18,7 +18,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(message = FALSE)
 knitr::opts_chunk$set(warning = FALSE)
-knitr::opts_chunk$set(eval = FALSE)
+#knitr::opts_chunk$set(eval = FALSE)
 
 options(pillar.sigfig = 4) # ensure tibble include 4 digits
 options(tibble.width = Inf)
@@ -30,7 +30,7 @@ options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse
 
 # R package
 
-```{r}
+```{r, echo=FALSE}
 
 library(dplyr)
 library(tibble)
@@ -44,13 +44,16 @@ library(purrr)
 library(metafor)
 library(patchwork)
 
+# Loading in helper function used to calculate effect size and conduct the analysis
+source("Helpers.R")
+
 ```
 
 # Load data
 
 ```{r, eval = TRUE}
 # Loading the needed data for analysis
-group_based_dat <- readRDS("ES calc/Group-based interventions data.RDS") |> 
+group_based_dat <- readRDS("Group-based interventions data.RDS") |> 
   # The post-measurement of Empowerment Scale seems flawed for the study by 
   # Barbic et al. 2009 we therefore we exclude it from the analysis
   filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
@@ -370,7 +373,7 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
 # Funnel-plot
 
 ```{r}
-# Funnel plot for overall effectsizes ----
+# Funnel plot for overall effect sizes ----
 
 # data prep
 GBD_effect <- GBD_effect |> 
@@ -649,29 +652,6 @@ participants <- GBD_effect |>
     
   ); participants
 
-# Effective sample size (removed) 
-#ESS <- GBD_effect |> 
-#  group_by(studyid) |> 
-#  summarise(
-#    study_avg_ESS = mean(ESS),
-    
-#    es_n = n(),
-    
-#    .groups = "drop"
-#  ) |> 
-#  summarise(
-#    variable = "Effective sample size",
-#    study_char = "Sample size",
-    
-#    I = n_distinct(studyid),
-#    K = sum(es_n),
-    
-#    Mean = round(mean(study_avg_ESS)),
-#    SD = round(sd(study_avg_ESS)),
-    
-#    range = paste0(min(study_avg_ESS), "-", round(max(study_avg_ESS)))
-    
-#  ); ESS
 
 # Average size of the groups
 group_size <- GBD_effect |> 
@@ -732,7 +712,6 @@ study_context <-
   bind_rows(
     study_country,
     participants,
- #   ESS,
     group_size,
     samples_per_study
     
@@ -1446,13 +1425,13 @@ table2_rest_desc <-
   ); table2_rest_desc
 
 # Converting into readable APA-style in word
-table1_percent_out <- nice_table(table1_percent)
+table1_percent_out <- nice_table(table1_percent); table1_percent_out
 
-flextable::save_as_docx(table1_percent_out, path = "ES calc/table1_percent.docx")
+#flextable::save_as_docx(table1_percent_out, path = "table1_percent.docx")
 
-table2_rest_desc_out <- nice_table(table2_rest_desc)
+table2_rest_desc_out <- nice_table(table2_rest_desc); table2_rest_desc_out
 
-flextable::save_as_docx(table2_rest_desc_out, path = "ES calc/table2_rest_desc.docx")
+#flextable::save_as_docx(table2_rest_desc_out, path = "table2_rest_desc.docx")
 
 
 ```
@@ -1478,7 +1457,7 @@ p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
 
 # Descriptive tables for each outcome {.tabset}
 ## Descrptive tables: Wellbeing and Quality of life
-```{r}
+```{r, echo=FALSE}
 wellbeing_QoL <- GBD_effect |> 
   filter(analysis_plan == "Wellbeing and Quality of Life")
 
@@ -2215,7 +2194,7 @@ outcome_measurement_WQoL <- bind_rows(
 ); outcome_measurement_WQoL
 ```
 
-## Tables for Wellbeing and Quality of Life
+### Tables for Wellbeing and Quality of Life
 ```{r}
 table_WQoL <- bind_rows(
   study_context_WQoL, design_WQoL, 
@@ -2250,7 +2229,7 @@ table_WQoL_rest_desc <-
 
 
 ## Descrptive tables: Social functioning (degree of impairment)
-```{r}
+```{r, echo=FALSE}
 social_functioning <- GBD_effect |> 
   filter(analysis_plan == "Social functioning (degree of impairment)")
 
@@ -2987,7 +2966,7 @@ outcome_measurement_functioning <- bind_rows(
 ); outcome_measurement_functioning
 ```
 
-## Tables for Social functioning (degree of impairment)
+### Tables for Social functioning (degree of impairment)
 ```{r}
 table_functioning <- bind_rows(
   study_context_functioning, design_functioning, 
@@ -3024,7 +3003,7 @@ table_functioning_rest_desc <-
 
 ## Descrptive tables: Hope, Empowerment & Self-efficacy
 
-```{r}
+```{r, echo=FALSE}
 hope <- GBD_effect |> 
   filter(analysis_plan == "Hope, Empowerment & Self-efficacy")
 
@@ -3761,7 +3740,7 @@ outcome_measurement_hope <- bind_rows(
 ); outcome_measurement_hope
 ```
 
-## Tables for Hope, Empowerment & Self-efficacy
+### Tables for Hope, Empowerment & Self-efficacy
 ```{r}
 table_hope <- bind_rows(
   study_context_hope, design_hope, 
@@ -3798,7 +3777,7 @@ table_hope_rest_desc <-
 
 ## Descrptive tables: Alcohol and drug abuse/misuse
 
-```{r}
+```{r, echo=FALSE}
 abuse_misuse <- GBD_effect |> 
   filter(analysis_plan == "Alcohol and drug abuse/misuse")
 
@@ -4535,7 +4514,7 @@ outcome_measurement_abuse_misuse <- bind_rows(
 ); outcome_measurement_abuse_misuse
 ```
 
-## Tables for Alcohol and drug abuse/misuse
+### Tables for Alcohol and drug abuse/misuse
 ```{r}
 table_abuse_misuse <- bind_rows(
   study_context_abuse_misuse, design_abuse_misuse, 
@@ -4677,63 +4656,8 @@ ggplot(distribution_summary, aes(x = trt_type, y = proportion, fill = analysis_p
   )
 ```
 
-# Sensitivity Analysis of Mean Effect Size using the correlated-hierarchical effects (CHE-RVE) model
-```{r}
-# Function designed to perform a robust variance estimation meta-analysis. 
-# For overall average effect modeling
-.CHE_RVE <- function(data, rho = 0.7, study_out){
-  
-  if (missing(study_out)) {
-    dat <- data
-  } else{
-    dat <- data |> 
-      filter(year != study_out)
-  }
-  
-  V_mat <- vcalc(vi = vgt, cluster = studyid, obs = es_id, data = dat, rho = rho) 
-  
-  overall_res <- 
-    rma.mv(
-      gt, 
-      V = V_mat,
-      random = ~ 1 | studyid / es_id,
-      data = dat
-    ) |> 
-    robust(cluster = studyid, clubSandwich = TRUE) 
-  
-  # I2 calcution
-  # See https://www.metafor-project.org/doku.php/tips:i2_multilevel_multivariate?s[]=i2
-  W <- solve(V_mat)
-  X <- model.matrix(overall_res)
-  P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
-  
-  I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
-                                                   (overall_res$k - overall_res$p)/sum(diag(P))), 2)
-  
-  res <- 
-    tibble(
-      rho = rho, 
-      studies = overall_res$n,
-      effects = overall_res$k,
-      b = as.numeric(overall_res$b),
-      se = overall_res$se,
-      lb = overall_res$ci.lb,
-      ub = overall_res$ci.ub,
-      pval = overall_res$pval,
-      df_satt = overall_res$dfs,
-      tau = sqrt(overall_res$sigma2[1]), 
-      omega = sqrt(overall_res$sigma2[2]), 
-      sd_total = sqrt(sum(overall_res$sigma2)),
-      QE = overall_res$QE,
-      I2 = I2_tot
-    )
-  
-  if (!missing(study_out)) res <- res |> mutate(omitted_study = study_out)
-  
-  res
-  
-}
-
+# Sensitivity Analysis of Mean Effect Size using the correlated-hierarchical effects (CHE-RVE) model {.tabset}
+```{r, echo=FALSE}
 # Specifying the data frames to be used representing the relevant outcomes: 
 # Alcohol and drug abuse/misuse, Hope, Social Functioning, Well-being and Quality of Life
 data_list <- list(
@@ -4757,17 +4681,26 @@ for (df_name in names(data_list)) {
   assign(paste0("rho_", df_name), results)
 }
 
+```
+
+## p impact
+### Outcome {.tabset}
+#### Alcohol and Drug Abuse/Misuse 
+Plot is based on `r unique(rho_abuse_misuse$effects)` effect sizes and `r unique(rho_abuse_misuse$studies)` studies
+```{r, echo= FALSE}
 # Plotting "Alcohol and Drug Abuse/Misuse" ----
 rho_beta_plot_abuse_misuse <- 
   rho_abuse_misuse |> 
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 0.8)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4803,7 +4736,8 @@ rho_var_plot_abuse_misuse <-
   ) |> 
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
-  scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) +
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 0.8)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4819,10 +4753,14 @@ rho_var_plot_abuse_misuse <-
   )
 
 
-plot_abuse_misuse  <- rho_beta_plot_abuse_misuse / rho_var_plot_abuse_misuse + 
+plot_abuse_misuse  <- rho_beta_plot_abuse_misuse + rho_var_plot_abuse_misuse + 
   plot_layout(guides = 'collect') & 
-  plot_annotation(title = "Outcome: Alcohol and Drug Abuse/Misuse")
+  plot_annotation(title = "Outcome: Alcohol and Drug Abuse/Misuse"); plot_abuse_misuse
+```
 
+#### Hope
+Plot is based on `r unique(rho_hope$effects)` effect sizes and `r unique(rho_hope$studies)` studies
+```{r, echo=FALSE}
 # Plotting "Hope" ----
 rho_beta_plot_hope <- 
   rho_hope |> 
@@ -4831,9 +4769,11 @@ rho_beta_plot_hope <-
   geom_line(aes(color = param), linewidth = 1) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
-  scale_x_continuous(breaks = 0:9/10) + 
+  scale_x_continuous(breaks = 0:9/10) +
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.2, 0.8)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4869,6 +4809,7 @@ rho_var_plot_hope <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.2, 0.8)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4885,21 +4826,27 @@ rho_var_plot_hope <-
 
 
 
-plot_hope <- rho_beta_plot_hope / rho_var_plot_hope + 
+plot_hope <- rho_beta_plot_hope + rho_var_plot_hope + 
   plot_layout(guides = 'collect') & 
-  plot_annotation(title = "Outcome: Hope")
+  plot_annotation(title = "Outcome: Hope"); plot_hope
+```
 
+#### Social Functioning (Degree of impairment)
+Plot is based on `r unique(rho_social_functioning$effects)` effect sizes and `r unique(rho_social_functioning$studies)` studies
+```{r, echo=FALSE}
 # Plotting "Social Functioning" ----
 rho_beta_plot_social_functioning <- 
   rho_social_functioning |> 
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4935,6 +4882,7 @@ rho_var_plot_social_functioning <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4950,22 +4898,29 @@ rho_var_plot_social_functioning <-
   )
 
 
-plot_social_functioning <- rho_beta_plot_social_functioning / rho_var_plot_social_functioning + 
+plot_social_functioning <- rho_beta_plot_social_functioning + rho_var_plot_social_functioning + 
   plot_layout(guides = 'collect') & 
-  plot_annotation(title = "Outcome: Social Functioning")
+  plot_annotation(title = "Outcome: Social Functioning"); plot_social_functioning
+
+```
 
 
+#### Wellbeing and Quality of Life
+Plot is based on `r unique(rho_wellbeing_QoL$effects)` effect sizes and `r unique(rho_wellbeing_QoL$studies)` studies
+```{r, echo=FALSE}
 # Plotting "Wellbeing and Quality of Life" ----
 rho_beta_plot_wellbeing_QoL <- 
   rho_wellbeing_QoL|> 
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -5001,6 +4956,7 @@ rho_var_plot_wellbeing_QoL <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -5016,7 +4972,310 @@ rho_var_plot_wellbeing_QoL <-
   )
 
 
-plot_wellbeing_QoL <- rho_beta_plot_wellbeing_QoL / rho_var_plot_wellbeing_QoL + 
+plot_wellbeing_QoL <- rho_beta_plot_wellbeing_QoL + rho_var_plot_wellbeing_QoL + 
   plot_layout(guides = 'collect') & 
-  plot_annotation(title = "Outcome: Wellbeing and Quality of Life")
+  plot_annotation(title = "Outcome: Wellbeing and Quality of Life"); plot_wellbeing_QoL
+```
+
+## Leave one study out 
+```{r, echo=FALSE}
+data_list_rho <- list(
+  abuse_misuse = rho_abuse_misuse, 
+  hope = rho_hope, 
+  social_functioning = rho_social_functioning, 
+  wellbeing_QoL = rho_wellbeing_QoL
+)
+
+
+for (df_name in names(data_list_rho)) {
+  
+  avg_model_res <- data_list_rho[[df_name]] |> 
+    filter(rho == 0.7)
+  
+  assign(paste0("avg_model_res_", df_name), avg_model_res, envir = .GlobalEnv)
+}
+
+for (df_name in names(data_list)) {
+  omitted_stud_dat <- map_dfr(
+    unique(data_list[[df_name]]$Author), 
+    ~ .CHE_RVE(study_out = .x, data = data_list[[df_name]])
+  )
+  
+  assign(paste0("omitted_stud_", df_name), omitted_stud_dat, envir = .GlobalEnv)
+}
+```
+
+### Outcome {.tabset}
+#### Alcohol and Drug Abuse/Misuse 
+```{r, echo=FALSE}
+l1out_plot_abuse_misuse <- 
+  omitted_stud_abuse_misuse |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+beta_facet_abuse_misuse <- 
+  l1out_plot_abuse_misuse |> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res_abuse_misuse$lb,
+    ub_all = avg_model_res_abuse_misuse$ub,
+    mean = avg_model_res_abuse_misuse$b
+  )
+
+# Continue here: 
+var_facet_abuse_misuse <- 
+  l1out_plot_abuse_misuse |> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res_abuse_misuse$omega, avg_model_res_abuse_misuse$tau, avg_model_res_abuse_misuse$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+  l1out_abuse_misuse <- ggplot(data = l1out_plot_abuse_misuse,aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_abuse_misuse, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_abuse_misuse, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_abuse_misuse, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_abuse_misuse, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ); l1out_abuse_misuse
+
+```
+
+#### Hope
+```{r, echo=FALSE}
+l1out_plot_hope <- 
+  omitted_stud_hope |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+beta_facet_hope<- 
+  l1out_plot_hope|> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res_hope$lb,
+    ub_all = avg_model_res_hope$ub,
+    mean = avg_model_res_hope$b
+  )
+
+# Continue here: 
+var_facet_hope<- 
+  l1out_plot_hope|> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res_hope$omega, avg_model_res_hope$tau, avg_model_res_hope$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_hope<- ggplot(data = l1out_plot_hope,aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_hope, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_hope, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_hope, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_hope, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ); l1out_hope
+```
+
+#### Social Functioning (Degree of impairment)
+```{r, echo=FALSE}
+l1out_plot_social_functioning <- 
+  omitted_stud_social_functioning |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+beta_facet_social_functioning<- 
+  l1out_plot_social_functioning|> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res_social_functioning$lb,
+    ub_all = avg_model_res_social_functioning$ub,
+    mean = avg_model_res_social_functioning$b
+  )
+
+# Continue here: 
+var_facet_social_functioning<- 
+  l1out_plot_social_functioning|> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res_social_functioning$omega, avg_model_res_social_functioning$tau, avg_model_res_social_functioning$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_social_functioning<- ggplot(data = l1out_plot_social_functioning,aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_social_functioning, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_social_functioning, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_social_functioning, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_social_functioning, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ); l1out_social_functioning
+```
+
+#### Wellbeing and Quality of Life
+```{r, echo=FALSE}
+l1out_plot_wellbeing_QoL <- 
+  omitted_stud_wellbeing_QoL |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+beta_facet_wellbeing_QoL<- 
+  l1out_plot_wellbeing_QoL|> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res_wellbeing_QoL$lb,
+    ub_all = avg_model_res_wellbeing_QoL$ub,
+    mean = avg_model_res_wellbeing_QoL$b
+  )
+
+# Continue here: 
+var_facet_wellbeing_QoL<- 
+  l1out_plot_wellbeing_QoL|> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res_wellbeing_QoL$omega, avg_model_res_wellbeing_QoL$tau, avg_model_res_wellbeing_QoL$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_wellbeing_QoL<- ggplot(data = l1out_plot_wellbeing_QoL,aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_wellbeing_QoL, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_wellbeing_QoL, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_wellbeing_QoL, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_wellbeing_QoL, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ); l1out_wellbeing_QoL
+```
+
+# Colophon
+```{r}
+devtools::session_info()
 ```
