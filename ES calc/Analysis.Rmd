@@ -266,8 +266,9 @@ sample_dist_plot
 
 ```
 
-# Empirical distribution of effect size estimates (SUPPLEMENTARY MATERIAL)
+# Empirical distribution of effect size estimates (SUPPLEMENTARY MATERIAL) {.tabset}
 
+## Overall distribution
 ```{r}
 qrtls <- quantile(GBD_effect$gt, c(.25, .75), na.rm = TRUE)
 fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
@@ -281,11 +282,12 @@ es_dist_plot <-
   geom_rug(alpha = 0.25) + 
   theme_minimal() + 
   theme(axis.title.y = element_blank()) +
-  labs(x = "Effect size estimate")
+  labs(x = "Effect size estimate"); es_dist_plot
 ```
 
+## Reintergrational/social outcomes
 ```{r}
-# Making data for plotting outcomes
+# Making data for plotting the specific outcomes
 
 # Without mental health outcomes and only reintergration-outcomes
 GB_outcome_reintergration <- GBD_effect |> 
@@ -310,11 +312,12 @@ reintegration_outcome_plot <- GBD_effect |>
   facet_wrap(~analysis_plan, scales = "free", ncol = 4) +
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
-  labs(x = "Effect size estimate")
+  labs(x = "Effect size estimate"); reintegration_outcome_plot
 
+```
 
-# Plot with all mental health outcomes 
-
+## Plot with all mental health outcomes 
+```{r}
 # Total mental health:
 GB_outcome_mental_health <- GBD_effect |> 
   filter(str_detect(analysis_plan, "mental")) |> 
@@ -335,9 +338,12 @@ mental_health_outcome_plot <- GBD_effect |>
   geom_rug(alpha = 0.25) +
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
-  labs(x = "Effect size estimate")
+  labs(x = "Effect size estimate"); mental_health_outcome_plot
 
-# Seperated mental health outcomes
+```
+
+## Seperated mental health outcomes
+```{r}
 GB_outcomes_mental_health <- GBD_effect |> 
   mutate(analysis_plan = case_when(
   str_detect(analysis_plan, "All mental health outcomes/Symptoms of psychosis|All mental health outcomes/Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis",
@@ -367,13 +373,14 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
   facet_wrap(~analysis_plan, scales = "free") +
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
-  labs(x = "Effect size estimate")
+  labs(x = "Effect size estimate"); mental_health_outcomes_plot
 ```
 
-# Funnel-plot
+# Funnel-plot {.tabset}
 
-```{r}
-# Funnel plot for overall effect sizes ----
+## Funnel plot for overall effect sizes
+```{r, echo=FALSE}
+
 
 # data prep
 GBD_effect <- GBD_effect |> 
@@ -444,12 +451,12 @@ GB_plot_all <-
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom"); GB_plot_all
 
 ```
 
 
-## Funnelplot reintegration outcomes - Subgroup analysis {.tabset}
+## Funnelplot reintegrational/social outcomes - Subgroup analysis {.tabset}
 ```{r}
 GB_dat_reintergration <- 
   GBD_effect |> 
@@ -468,21 +475,6 @@ GB_dat_reintergration <-
   arrange(timing)
 
 
-
-#sub_GB_dat_reintergration <- 
-#  GB_dat_reintergration |> 
-#  summarise(
-#    across(where(is.numeric), mean),
-#    .by = analysis_plan
-#  ) |> 
-#  mutate(
-#    Study_ID = 1, 
-   # es_exp = as.numeric(mean_es_FP_subgrp$b),
-#    slope_upper = qnorm(0.975),
-#    slope_lower = qnorm(0.025)
-#  )
-
-
 y_lim_exp2 <- max(sqrt(GB_dat_reintergration$vgt)) + 0.02 
 
 funnel_exp2 <-  tribble(
@@ -497,7 +489,7 @@ funnel_exp2 <-  tribble(
 ```
 
 
-### Overall effect-size for reintegration outcome
+### Overall effect-size for reintegrational/social outcome
 ```{r}
 FP_plot_reintegration_overall <-
   GB_dat_reintergration |> 
@@ -514,10 +506,10 @@ FP_plot_reintegration_overall <-
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "none")
+  theme(legend.position = "none");FP_plot_reintegration_overall
 ```
 
-### Effect-sizes for separated reintegration outcome
+### Effect-sizes for separated reintegrational/social outcomes
 ```{r}
 FP_plot_reintergration_subgrp <-
   GB_dat_reintergration |> 
@@ -535,7 +527,7 @@ FP_plot_reintergration_subgrp <-
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "none")
+  theme(legend.position = "none"); FP_plot_reintergration_subgrp
 
 ```
 
@@ -590,7 +582,7 @@ FP_plot_overall_mental <-
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "none")
+  theme(legend.position = "none"); FP_plot_overall_mental
 ```
 
 ### Subgroup effect size for mental health outcome
@@ -612,12 +604,13 @@ FP_plot_subgrp_mental <-
   labs(x = "Standard error (adjusted)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "none")
+  theme(legend.position = "none"); FP_plot_subgrp_mental
 
 ```
 
-# Descriptive Tables
+# Descriptive Tables {.tabset}
 
+## Study Context
 ```{r}
 # Study context
 # Percent studies by countries
@@ -1407,7 +1400,7 @@ outcome_measurement <- bind_rows(
 
 ## Table 1 and 2
 
-```{r}
+```{r, echo=FALSE}
 table1 <- bind_rows(
   study_context, design, 
   study_participants, 
@@ -1473,9 +1466,9 @@ p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
 
 # Descriptive tables for each outcome {.tabset}
 
-## Descrptive tables: Wellbeing and Quality of life
+## Generating descrptive tables: Wellbeing and Quality of life
 
-```{r, echo=FALSE}
+```{r}
 wellbeing_QoL <- GBD_effect |> 
   filter(analysis_plan == "Wellbeing and Quality of Life")
 
@@ -1503,7 +1496,7 @@ study_context_WQoL <- wellbeing_QoL |>
     
     .groups = "drop"
   ) |> 
-  select(-cnt); study_context_WQoL
+  select(-cnt)
 
 # Average number of participants per effect size 
 
@@ -1525,7 +1518,7 @@ participants_WQoL <- wellbeing_QoL |>
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
-  ); participants_WQoL
+  )
 
 
 
@@ -1554,7 +1547,7 @@ group_size_WQoL <- wellbeing_QoL |>
       paste0(min(cont_SampS), "-", round(max(cont_SampS)))
     )
     
-  ); group_size_WQoL
+  )
 
 # Number of samples per study 
 samples_per_study_WQoL <- wellbeing_QoL |> 
@@ -1577,7 +1570,7 @@ samples_per_study_WQoL <- wellbeing_QoL |>
     range = paste0(min(samples), "-", max(samples)),
     
     .groups = "drop"
-  ); samples_per_study_WQoL
+  )
 
 
 # Number of distinct studies in review
@@ -1592,7 +1585,7 @@ study_context_WQoL <-
     group_size_WQoL,
     samples_per_study_WQoL
     
-); study_context_WQoL
+)
 
 # Study Design
 # Proportion cluster randomized or RCT studies
@@ -1621,7 +1614,7 @@ study_design_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(design)); study_design_WQoL
+  select(-c(design))
 
 
 # Randomization
@@ -1649,7 +1642,7 @@ study_randomization_WQoL <- wellbeing_QoL |>
     range = "0-1",
    ) |> 
   relocate(study_char) |>  
-  select(-c(randomization)); study_randomization_WQoL
+  select(-c(randomization))
 
 # Handling of clustering
 clustering_WQoL <- wellbeing_QoL |>  
@@ -1677,7 +1670,7 @@ clustering_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(clustering)); clustering_WQoL
+  select(-c(clustering))
 
 # Analysis strategy 
 analysis_strategy_WQoL <- wellbeing_QoL |>  
@@ -1706,7 +1699,7 @@ analysis_strategy_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(analysis_strat)); analysis_strategy_WQoL
+  select(-c(analysis_strat))
 
 design_WQoL <- 
   bind_rows(
@@ -1714,7 +1707,7 @@ design_WQoL <-
     study_randomization_WQoL,
     clustering_WQoL,
     analysis_strategy_WQoL
-); design_WQoL
+)
 
 
 # Study participants
@@ -1743,7 +1736,7 @@ male_per_WQoL <-
   #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
     range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
-  ); male_per_WQoL
+  )
 
 # Mean age
 age_mean_WQoL <- 
@@ -1769,7 +1762,7 @@ age_mean_WQoL <-
     #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
-  ); age_mean_WQoL
+  )
 
 # Disorder type
 disorder_type_WQoL <- wellbeing_QoL |>  
@@ -1797,7 +1790,7 @@ disorder_type_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(disorder)); disorder_type_WQoL
+  select(-c(disorder))
 
 
 assesment_WQoL <- wellbeing_QoL |>  
@@ -1825,7 +1818,7 @@ assesment_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(assessment)); assesment_WQoL
+  select(-c(assessment))
 
 # Sample composition
 sample_composition_WQoL <- wellbeing_QoL |>  
@@ -1853,7 +1846,7 @@ sample_composition_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(composition)); sample_composition_WQoL
+  select(-c(composition))
 
 # Sample factors
 sample_factors_WQoL <- wellbeing_QoL |>  
@@ -1881,7 +1874,7 @@ sample_factors_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(sample_factors)); sample_factors_WQoL
+  select(-c(sample_factors))
 
 
 study_participants_WQoL <- 
@@ -1891,7 +1884,7 @@ study_participants_WQoL <-
     assesment_WQoL,
     sample_composition_WQoL,
     sample_factors_WQoL
-); study_participants_WQoL
+)
 
 
 # Intervention characteristics 
@@ -1928,7 +1921,7 @@ duration_WQoL <-
                    max(m_duration, na.rm = TRUE)),
   
     
-  ); duration_WQoL
+  )
 
 # Mean number of sessions per week
 
@@ -1962,7 +1955,7 @@ sessions_per_week_WQoL <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); sessions_per_week_WQoL
+  )
 
 # Average group size in the treatment intervention
 avg_intevention_group_size_WQoL <- 
@@ -1995,7 +1988,7 @@ avg_intevention_group_size_WQoL <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); avg_intevention_group_size_WQoL
+  )
 
 # Number of interventions of each study
 interventions_WQoL <- wellbeing_QoL|> 
@@ -2027,7 +2020,7 @@ interventions_WQoL <- wellbeing_QoL|>
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); interventions_WQoL
+  )
 
 # Treatment types 
 treatment_types_WQoL <- wellbeing_QoL |>  
@@ -2055,7 +2048,7 @@ treatment_types_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(treatment_type)); treatment_types_WQoL
+  select(-c(treatment_type))
 
 
 
@@ -2085,7 +2078,7 @@ implementation_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(implementation)); implementation_WQoL
+  select(-c(implementation))
 
 
 intervention_characteristics_WQoL <- bind_rows(
@@ -2122,7 +2115,7 @@ control_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(control)); control_WQoL
+  select(-c(control))
 
 # Methodological features
 # Average number of effect size per study
@@ -2147,7 +2140,7 @@ avg_es_study_WQoL <-
     
     range = paste0(min(es_n), "-", max(es_n))
     
-  ); avg_es_study_WQoL
+  )
 
 
 
@@ -2178,7 +2171,7 @@ test_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(test_type)); test_WQoL
+  select(-c(test_type))
 
 # Type of measurement
 measure_type_WQoL <- wellbeing_QoL |>  
@@ -2205,14 +2198,14 @@ measure_type_WQoL <- wellbeing_QoL |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(measure_type)); measure_type_WQoL
+  select(-c(measure_type))
 
 outcome_measurement_WQoL <- bind_rows(
   test_WQoL, measure_type_WQoL
-); outcome_measurement_WQoL
+)
 ```
 
-### Tables for Wellbeing and Quality of Life
+## Tables for Wellbeing and Quality of Life
 
 ```{r}
 table_WQoL <- bind_rows(
@@ -2233,7 +2226,7 @@ table_WQoL_percent <-
   mutate(
     Mean = round(Mean, 3),
     
-  ); table_WQoL_percent
+  )
 
 
 table_WQoL_rest_desc <- 
@@ -2243,7 +2236,17 @@ table_WQoL_rest_desc <-
     
     across(Mean, ~ round(.x, 3))
     
-  ); table_WQoL_rest_desc
+  )
+
+
+# Converting into readable APA-style in word
+table_WQoL_percent_out <- nice_table(table_WQoL_percent); table_WQoL_percent_out
+
+#flextable::save_as_docx(table1_percent_out, path = "table1_percent.docx")
+
+table_WQoL_rest_desc_out <- nice_table(table_WQoL_rest_desc); table_WQoL_rest_desc_out
+
+
 ```
 
 ## Descrptive tables: Social functioning (degree of impairment)
@@ -2276,7 +2279,7 @@ study_context_functioning <- social_functioning |>
     
     .groups = "drop"
   ) |> 
-  select(-cnt); study_context_functioning
+  select(-cnt)
 
 # Average number of participants per effect size 
 
@@ -2298,7 +2301,7 @@ participants_functioning <- social_functioning |>
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
-  ); participants_functioning
+  )
 
 
 
@@ -2327,7 +2330,7 @@ group_size_functioning <- social_functioning |>
       paste0(min(cont_SampS), "-", round(max(cont_SampS)))
     )
     
-  ); group_size_functioning
+  )
 
 # Number of samples per study 
 samples_per_study_functioning <- social_functioning |> 
@@ -2350,7 +2353,7 @@ samples_per_study_functioning <- social_functioning |>
     range = paste0(min(samples), "-", max(samples)),
     
     .groups = "drop"
-  ); samples_per_study_functioning
+  )
 
 
 # Number of distinct studies in review
@@ -2365,7 +2368,7 @@ study_context_functioning <-
     group_size_functioning,
     samples_per_study_functioning
     
-); study_context_functioning
+)
 
 # Study Design
 # Proportion cluster randomized or RCT studies
@@ -2394,7 +2397,7 @@ study_design_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(design)); study_design_functioning
+  select(-c(design))
 
 
 # Randomization
@@ -2422,7 +2425,7 @@ study_randomization_functioning <- social_functioning |>
     range = "0-1",
    ) |> 
   relocate(study_char) |>  
-  select(-c(randomization)); study_randomization_functioning
+  select(-c(randomization))
 
 # Handling of clustering
 clustering_functioning <- social_functioning |>  
@@ -2450,7 +2453,7 @@ clustering_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(clustering)); clustering_functioning
+  select(-c(clustering))
 
 # Analysis strategy 
 analysis_strategy_functioning <- social_functioning |>  
@@ -2479,7 +2482,7 @@ analysis_strategy_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(analysis_strat)); analysis_strategy_functioning
+  select(-c(analysis_strat))
 
 design_functioning <- 
   bind_rows(
@@ -2487,7 +2490,7 @@ design_functioning <-
     study_randomization_functioning,
     clustering_functioning,
     analysis_strategy_functioning
-); design_functioning
+)
 
 
 # Study participants
@@ -2516,7 +2519,7 @@ male_per_functioning <-
   #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
     range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
-  ); male_per_functioning
+  )
 
 # Mean age
 age_mean_functioning <- 
@@ -2542,7 +2545,7 @@ age_mean_functioning <-
     #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
-  ); age_mean_functioning
+  )
 
 # Disorder type
 disorder_type_functioning <- social_functioning |>  
@@ -2570,7 +2573,7 @@ disorder_type_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(disorder)); disorder_type_functioning
+  select(-c(disorder))
 
 
 assesment_functioning <- social_functioning |>  
@@ -2598,7 +2601,7 @@ assesment_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(assessment)); assesment_functioning
+  select(-c(assessment))
 
 # Sample composition
 sample_composition_functioning <- social_functioning |>  
@@ -2626,7 +2629,7 @@ sample_composition_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(composition)); sample_composition_functioning
+  select(-c(composition))
 
 # Sample factors
 sample_factors_functioning <- social_functioning |>  
@@ -2654,7 +2657,7 @@ sample_factors_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(sample_factors)); sample_factors_functioning
+  select(-c(sample_factors))
 
 
 study_participants_functioning <- 
@@ -2664,7 +2667,7 @@ study_participants_functioning <-
     assesment_functioning,
     sample_composition_functioning,
     sample_factors_functioning
-); study_participants_functioning
+)
 
 
 # Intervention characteristics 
@@ -2701,7 +2704,7 @@ duration_functioning <-
                    max(m_duration, na.rm = TRUE)),
   
     
-  ); duration_functioning
+  )
 
 # Mean number of sessions per week
 
@@ -2735,7 +2738,7 @@ sessions_per_week_functioning <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); sessions_per_week_functioning
+  )
 
 # Average group size in the treatment intervention
 avg_intevention_group_size_functioning <- 
@@ -2768,7 +2771,7 @@ avg_intevention_group_size_functioning <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); avg_intevention_group_size_functioning
+  )
 
 # Number of interventions of each study
 interventions_functioning <- social_functioning|> 
@@ -2800,7 +2803,7 @@ interventions_functioning <- social_functioning|>
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); interventions_functioning
+  )
 
 # Treatment types 
 treatment_types_functioning <- social_functioning |>  
@@ -2828,7 +2831,7 @@ treatment_types_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(treatment_type)); treatment_types_functioning
+  select(-c(treatment_type))
 
 
 
@@ -2858,7 +2861,7 @@ implementation_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(implementation)); implementation_functioning
+  select(-c(implementation))
 
 
 intervention_characteristics_functioning <- bind_rows(
@@ -2866,7 +2869,7 @@ intervention_characteristics_functioning <- bind_rows(
   avg_intevention_group_size_functioning, 
   interventions_functioning, 
   treatment_types_functioning
-); intervention_characteristics_functioning
+)
 
 # Control group 
 # Control types 
@@ -2895,7 +2898,7 @@ control_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(control)); control_functioning
+  select(-c(control))
 
 # Methodological features
 # Average number of effect size per study
@@ -2920,7 +2923,7 @@ avg_es_study_functioning <-
     
     range = paste0(min(es_n), "-", max(es_n))
     
-  ); avg_es_study_functioning
+  )
 
 
 
@@ -2951,7 +2954,7 @@ test_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(test_type)); test_functioning
+  select(-c(test_type))
 
 # Type of measurement
 measure_type_functioning <- social_functioning |>  
@@ -2978,16 +2981,16 @@ measure_type_functioning <- social_functioning |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(measure_type)); measure_type_functioning
+  select(-c(measure_type))
 
 outcome_measurement_functioning <- bind_rows(
   test_functioning, measure_type_functioning
-); outcome_measurement_functioning
+)
 ```
 
-### Tables for Social functioning (degree of impairment)
+## Tables for Social functioning (degree of impairment)
 
-```{r}
+```{r, echo=FALSE}
 table_functioning <- bind_rows(
   study_context_functioning, design_functioning, 
   study_participants_functioning, 
@@ -3006,8 +3009,7 @@ table_functioning_percent <-
   mutate(
     Mean = round(Mean, 3),
     
-  ); table_functioning_percent
-
+  )
 
 table_functioning_rest_desc <- 
   table_functioning |> 
@@ -3016,7 +3018,17 @@ table_functioning_rest_desc <-
     
     across(Mean, ~ round(.x, 3))
     
-  ); table_functioning_rest_desc
+  )
+
+
+
+
+# Converting into readable APA-style in word
+table_functioning_percent_out <- nice_table(table_functioning_percent); table_functioning_percent_out
+
+#flextable::save_as_docx(table1_percent_out, path = "table1_percent.docx")
+
+table_functioning_rest_desc_out <- nice_table(table_functioning_rest_desc); table_functioning_rest_desc_out
 
 ```
 
@@ -3050,7 +3062,7 @@ study_context_hope <- hope |>
     
     .groups = "drop"
   ) |> 
-  select(-cnt); study_context_hope
+  select(-cnt)
 
 # Average number of participants per effect size 
 
@@ -3072,7 +3084,7 @@ participants_hope <- hope |>
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
-  ); participants_hope
+  )
 
 
 
@@ -3101,7 +3113,7 @@ group_size_hope <- hope |>
       paste0(min(cont_SampS), "-", round(max(cont_SampS)))
     )
     
-  ); group_size_hope
+  )
 
 # Number of samples per study 
 samples_per_study_hope <- hope |> 
@@ -3124,8 +3136,7 @@ samples_per_study_hope <- hope |>
     range = paste0(min(samples), "-", max(samples)),
     
     .groups = "drop"
-  ); samples_per_study_hope
-
+  )
 
 # Number of distinct studies in review
 
@@ -3139,7 +3150,7 @@ study_context_hope <-
     group_size_hope,
     samples_per_study_hope
     
-); study_context_hope
+)
 
 # Study Design
 # Proportion cluster randomized or RCT studies
@@ -3168,7 +3179,7 @@ study_design_hope <- hope |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(design)); study_design_hope
+  select(-c(design))
 
 
 # Randomization
@@ -3196,7 +3207,7 @@ study_randomization_hope <- hope |>
     range = "0-1",
    ) |> 
   relocate(study_char) |>  
-  select(-c(randomization)); study_randomization_hope
+  select(-c(randomization))
 
 # Handling of clustering
 clustering_hope <- hope |>  
@@ -3224,7 +3235,7 @@ clustering_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(clustering)); clustering_hope
+  select(-c(clustering))
 
 # Analysis strategy 
 analysis_strategy_hope <- hope |>  
@@ -3253,7 +3264,7 @@ analysis_strategy_hope <- hope |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(analysis_strat)); analysis_strategy_hope
+  select(-c(analysis_strat))
 
 design_hope <- 
   bind_rows(
@@ -3261,8 +3272,7 @@ design_hope <-
     study_randomization_hope,
     clustering_hope,
     analysis_strategy_hope
-); design_hope
-
+)
 
 # Study participants
 # % Males in treatment and control group
@@ -3290,7 +3300,7 @@ male_per_hope <-
   #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
     range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
-  ); male_per_hope
+  )
 
 # Mean age
 age_mean_hope <- 
@@ -3316,7 +3326,7 @@ age_mean_hope <-
     #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
-  ); age_mean_hope
+  )
 
 # Disorder type
 disorder_type_hope <- hope |>  
@@ -3344,7 +3354,7 @@ disorder_type_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(disorder)); disorder_type_hope
+  select(-c(disorder))
 
 
 assesment_hope <- hope |>  
@@ -3372,7 +3382,7 @@ assesment_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(assessment)); assesment_hope
+  select(-c(assessment))
 
 # Sample composition
 sample_composition_hope <- hope |>  
@@ -3400,7 +3410,7 @@ sample_composition_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(composition)); sample_composition_hope
+  select(-c(composition))
 
 # Sample factors
 sample_factors_hope <- hope |>  
@@ -3428,7 +3438,7 @@ sample_factors_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(sample_factors)); sample_factors_hope
+  select(-c(sample_factors))
 
 
 study_participants_hope <- 
@@ -3438,7 +3448,7 @@ study_participants_hope <-
     assesment_hope,
     sample_composition_hope,
     sample_factors_hope
-); study_participants_hope
+)
 
 
 # Intervention characteristics 
@@ -3475,7 +3485,7 @@ duration_hope <-
                    max(m_duration, na.rm = TRUE)),
   
     
-  ); duration_hope
+  )
 
 # Mean number of sessions per week
 
@@ -3509,7 +3519,7 @@ sessions_per_week_hope <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); sessions_per_week_hope
+  )
 
 # Average group size in the treatment intervention
 avg_intevention_group_size_hope <- 
@@ -3542,7 +3552,7 @@ avg_intevention_group_size_hope <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); avg_intevention_group_size_hope
+  )
 
 # Number of interventions of each study
 interventions_hope <- hope|> 
@@ -3574,7 +3584,7 @@ interventions_hope <- hope|>
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); interventions_hope
+  )
 
 # Treatment types 
 treatment_types_hope <- hope |>  
@@ -3602,7 +3612,7 @@ treatment_types_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(treatment_type)); treatment_types_hope
+  select(-c(treatment_type))
 
 
 
@@ -3632,7 +3642,7 @@ implementation_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(implementation)); implementation_hope
+  select(-c(implementation))
 
 
 intervention_characteristics_hope <- bind_rows(
@@ -3640,7 +3650,7 @@ intervention_characteristics_hope <- bind_rows(
   avg_intevention_group_size_hope, 
   interventions_hope, 
   treatment_types_hope
-); intervention_characteristics_hope
+)
 
 # Control group 
 # Control types 
@@ -3669,7 +3679,7 @@ control_hope <- hope |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(control)); control_hope
+  select(-c(control))
 
 # Methodological features
 # Average number of effect size per study
@@ -3694,7 +3704,7 @@ avg_es_study_hope <-
     
     range = paste0(min(es_n), "-", max(es_n))
     
-  ); avg_es_study_hope
+  )
 
 
 
@@ -3725,7 +3735,7 @@ test_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(test_type)); test_hope
+  select(-c(test_type))
 
 # Type of measurement
 measure_type_hope <- hope |>  
@@ -3752,16 +3762,16 @@ measure_type_hope <- hope |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(measure_type)); measure_type_hope
+  select(-c(measure_type))
 
 outcome_measurement_hope <- bind_rows(
   test_hope, measure_type_hope
-); outcome_measurement_hope
+)
 ```
 
-### Tables for Hope, Empowerment & Self-efficacy
+## Tables for Hope, Empowerment & Self-efficacy
 
-```{r}
+```{r, echo=FALSE}
 table_hope <- bind_rows(
   study_context_hope, design_hope, 
   study_participants_hope, 
@@ -3780,7 +3790,7 @@ table_hope_percent <-
   mutate(
     Mean = round(Mean, 3),
     
-  ); table_hope_percent
+  )
 
 
 table_hope_rest_desc <- 
@@ -3790,7 +3800,15 @@ table_hope_rest_desc <-
     
     across(Mean, ~ round(.x, 3))
     
-  ); table_hope_rest_desc
+  )
+
+
+# Converting into readable APA-style in word
+table_hope_percent_out <- nice_table(table_hope_percent); table_hope_percent_out
+
+#flextable::save_as_docx(table1_percent_out, path = "table1_percent.docx")
+
+table_hope_rest_desc_out <- nice_table(table_hope_rest_desc); table_hope_rest_desc_out
 
 ```
 
@@ -3824,7 +3842,7 @@ study_context_abuse_misuse <- abuse_misuse |>
     
     .groups = "drop"
   ) |> 
-  select(-cnt); study_context_abuse_misuse
+  select(-cnt)
 
 # Average number of participants per effect size 
 
@@ -3846,7 +3864,7 @@ participants_abuse_misuse <- abuse_misuse |>
     
     range = paste0(min(study_avg_sample), "-", max(study_avg_sample))
     
-  ); participants_abuse_misuse
+  )
 
 
 
@@ -3875,7 +3893,7 @@ group_size_abuse_misuse <- abuse_misuse |>
       paste0(min(cont_SampS), "-", round(max(cont_SampS)))
     )
     
-  ); group_size_abuse_misuse
+  )
 
 # Number of samples per study 
 samples_per_study_abuse_misuse <- abuse_misuse |> 
@@ -3898,7 +3916,7 @@ samples_per_study_abuse_misuse <- abuse_misuse |>
     range = paste0(min(samples), "-", max(samples)),
     
     .groups = "drop"
-  ); samples_per_study_abuse_misuse
+  )
 
 
 # Number of distinct studies in review
@@ -3913,7 +3931,7 @@ study_context_abuse_misuse <-
     group_size_abuse_misuse,
     samples_per_study_abuse_misuse
     
-); study_context_abuse_misuse
+)
 
 # Study Design
 # Proportion cluster randomized or RCT studies
@@ -3942,7 +3960,7 @@ study_design_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(design)); study_design_abuse_misuse
+  select(-c(design))
 
 
 # Randomization
@@ -3970,7 +3988,7 @@ study_randomization_abuse_misuse <- abuse_misuse |>
     range = "0-1",
    ) |> 
   relocate(study_char) |>  
-  select(-c(randomization)); study_randomization_abuse_misuse
+  select(-c(randomization))
 
 # Handling of clustering
 clustering_abuse_misuse <- abuse_misuse |>  
@@ -3998,7 +4016,7 @@ clustering_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(clustering)); clustering_abuse_misuse
+  select(-c(clustering))
 
 # Analysis strategy 
 analysis_strategy_abuse_misuse <- abuse_misuse |>  
@@ -4027,7 +4045,7 @@ analysis_strategy_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(analysis_strat)); analysis_strategy_abuse_misuse
+  select(-c(analysis_strat))
 
 design_abuse_misuse <- 
   bind_rows(
@@ -4035,7 +4053,7 @@ design_abuse_misuse <-
     study_randomization_abuse_misuse,
     clustering_abuse_misuse,
     analysis_strategy_abuse_misuse
-); design_abuse_misuse
+)
 
 
 # Study participants
@@ -4064,7 +4082,7 @@ male_per_abuse_misuse <-
   #  SD = c(sd(t_male, na.rm = TRUE), sd(c_male, na.rm = TRUE)), 
     range = c(paste(min(t_male, na.rm = TRUE), "-", max(t_male, na.rm = TRUE)),  
               paste(min(c_male, na.rm = TRUE), "-", max(c_male, na.rm = TRUE)))
-  ); male_per_abuse_misuse
+  )
 
 # Mean age
 age_mean_abuse_misuse <- 
@@ -4090,7 +4108,7 @@ age_mean_abuse_misuse <-
     #SD = c(sd(t_age, na.rm = TRUE), sd(c_age, na.rm = TRUE)),  # Standardafvigelse for hver gruppe
     range = c(paste(min(t_age, na.rm = TRUE), "-", max(t_age, na.rm = TRUE)),  # Range for hver gruppe
               paste(min(c_age, na.rm = TRUE), "-", max(c_age, na.rm = TRUE)))
-  ); age_mean_abuse_misuse
+  )
 
 # Disorder type
 disorder_type_abuse_misuse <- abuse_misuse |>  
@@ -4118,7 +4136,7 @@ disorder_type_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(disorder)); disorder_type_abuse_misuse
+  select(-c(disorder))
 
 
 assesment_abuse_misuse <- abuse_misuse |>  
@@ -4146,7 +4164,7 @@ assesment_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(assessment)); assesment_abuse_misuse
+  select(-c(assessment))
 
 # Sample composition
 sample_composition_abuse_misuse <- abuse_misuse |>  
@@ -4174,7 +4192,7 @@ sample_composition_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(composition)); sample_composition_abuse_misuse
+  select(-c(composition))
 
 # Sample factors
 sample_factors_abuse_misuse <- abuse_misuse |>  
@@ -4202,7 +4220,7 @@ sample_factors_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(sample_factors)); sample_factors_abuse_misuse
+  select(-c(sample_factors))
 
 
 study_participants_abuse_misuse <- 
@@ -4212,7 +4230,7 @@ study_participants_abuse_misuse <-
     assesment_abuse_misuse,
     sample_composition_abuse_misuse,
     sample_factors_abuse_misuse
-); study_participants_abuse_misuse
+)
 
 
 # Intervention characteristics 
@@ -4249,7 +4267,7 @@ duration_abuse_misuse <-
                    max(m_duration, na.rm = TRUE)),
   
     
-  ); duration_abuse_misuse
+  )
 
 # Mean number of sessions per week
 
@@ -4283,7 +4301,7 @@ sessions_per_week_abuse_misuse <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); sessions_per_week_abuse_misuse
+  )
 
 # Average group size in the treatment intervention
 avg_intevention_group_size_abuse_misuse <- 
@@ -4316,7 +4334,7 @@ avg_intevention_group_size_abuse_misuse <-
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); avg_intevention_group_size_abuse_misuse
+  )
 
 # Number of interventions of each study
 interventions_abuse_misuse <- abuse_misuse|> 
@@ -4348,7 +4366,7 @@ interventions_abuse_misuse <- abuse_misuse|>
     range = paste0(min(m_intensity, na.rm = TRUE), "-",
                    max(m_intensity, na.rm = TRUE))
     
-  ); interventions_abuse_misuse
+  )
 
 # Treatment types 
 treatment_types_abuse_misuse <- abuse_misuse |>  
@@ -4376,7 +4394,7 @@ treatment_types_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(treatment_type)); treatment_types_abuse_misuse
+  select(-c(treatment_type))
 
 
 
@@ -4406,7 +4424,7 @@ implementation_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(implementation)); implementation_abuse_misuse
+  select(-c(implementation))
 
 
 intervention_characteristics_abuse_misuse <- bind_rows(
@@ -4414,7 +4432,7 @@ intervention_characteristics_abuse_misuse <- bind_rows(
   avg_intevention_group_size_abuse_misuse, 
   interventions_abuse_misuse, 
   treatment_types_abuse_misuse
-); intervention_characteristics_abuse_misuse
+)
 
 # Control group 
 # Control types 
@@ -4443,7 +4461,7 @@ control_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |>  
-  select(-c(control)); control_abuse_misuse
+  select(-c(control))
 
 # Methodological features
 # Average number of effect size per study
@@ -4468,7 +4486,7 @@ avg_es_study_abuse_misuse <-
     
     range = paste0(min(es_n), "-", max(es_n))
     
-  ); avg_es_study_abuse_misuse
+  )
 
 
 
@@ -4499,7 +4517,7 @@ test_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(test_type)); test_abuse_misuse
+  select(-c(test_type))
 
 # Type of measurement
 measure_type_abuse_misuse <- abuse_misuse |>  
@@ -4526,14 +4544,14 @@ measure_type_abuse_misuse <- abuse_misuse |>
     
    ) |> 
   relocate(study_char) |> 
-  select(-c(measure_type)); measure_type_abuse_misuse
+  select(-c(measure_type))
 
 outcome_measurement_abuse_misuse <- bind_rows(
   test_abuse_misuse, measure_type_abuse_misuse
-); outcome_measurement_abuse_misuse
+)
 ```
 
-### Tables for Alcohol and drug abuse/misuse
+## Tables for Alcohol and drug abuse/misuse
 
 ```{r}
 table_abuse_misuse <- bind_rows(
@@ -4554,7 +4572,7 @@ table_abuse_misuse_percent <-
   mutate(
     Mean = round(Mean, 3),
     
-  ); table_abuse_misuse_percent
+  )
 
 
 table_abuse_misuse_rest_desc <- 
@@ -4564,7 +4582,14 @@ table_abuse_misuse_rest_desc <-
     
     across(Mean, ~ round(.x, 3))
     
-  ); table_abuse_misuse_rest_desc
+  )
+
+# Converting into readable APA-style in word
+table_abuse_misuse_percent_out <- nice_table(table_abuse_misuse_percent); table_abuse_misuse_percent_out
+
+#flextable::save_as_docx(table1_percent_out, path = "table1_percent.docx")
+
+table_abuse_misuse_rest_desc_out <- nice_table(table_abuse_misuse_rest_desc); table_abuse_misuse_rest_desc_out
 
 ```
 
