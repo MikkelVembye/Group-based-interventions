@@ -446,8 +446,11 @@ GB_plot_all <-
        color = "", shape = "") +
   theme(legend.position = "bottom")
 
+```
 
-# Funnelplot reintegration outcomes - Subgroup analysis ----
+
+## Funnelplot reintegration outcomes - Subgroup analysis {.tabset}
+```{r}
 GB_dat_reintergration <- 
   GBD_effect |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|Employment|Physical")) |> 
@@ -491,8 +494,11 @@ funnel_exp2 <-  tribble(
 ) 
 
 
+```
 
-# Overall effect-size for reintegration outcome
+
+### Overall effect-size for reintegration outcome
+```{r}
 FP_plot_reintegration_overall <-
   GB_dat_reintergration |> 
   ggplot() + 
@@ -509,9 +515,10 @@ FP_plot_reintegration_overall <-
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(legend.position = "none")
+```
 
-
-# Effect-sizes for separated reintegration outcome
+### Effect-sizes for separated reintegration outcome
+```{r}
 FP_plot_reintergration_subgrp <-
   GB_dat_reintergration |> 
   ggplot() + 
@@ -530,7 +537,11 @@ FP_plot_reintergration_subgrp <-
        color = "", shape = "") +
   theme(legend.position = "none")
 
-# Funnel-plot health outcomes - Subgroup analysis ----
+```
+
+## Funnel-plot health outcomes - Subgroup analysis {.tabset}
+
+```{r}
 GB_dat_mental_health <- 
   GBD_effect |> 
   mutate(analysis_plan = case_when(
@@ -560,9 +571,10 @@ funnel_exp3 <-  tribble(
   qnorm(0.95) * y_lim_exp3, qnorm(0.975) * y_lim_exp3, qnorm(0.995) * y_lim_exp3, y_lim_exp3,
   0,     0,     0,     0
 ) 
+```
 
-
-# Overall effect size for mental health outcome
+### Overall effect size for mental health outcome
+```{r}
 FP_plot_overall_mental <-
   GB_dat_mental_health |> 
   ggplot() + 
@@ -579,8 +591,10 @@ FP_plot_overall_mental <-
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(legend.position = "none")
+```
 
-# Subgroup effect size for mental health outcome
+### Subgroup effect size for mental health outcome
+```{r}
 FP_plot_subgrp_mental <-
   GB_dat_mental_health |> 
   filter(!(analysis_plan == "All mental health outcomes")) |>
@@ -1435,7 +1449,9 @@ table2_rest_desc_out <- nice_table(table2_rest_desc); table2_rest_desc_out
 
 
 ```
+
 ## Risk of Bias details
+
 ```{r}
 # Distribution of RoB2 evaluations
 RoB2_dat <- GBD_effect |> 
@@ -1456,7 +1472,9 @@ p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
 ```
 
 # Descriptive tables for each outcome {.tabset}
+
 ## Descrptive tables: Wellbeing and Quality of life
+
 ```{r, echo=FALSE}
 wellbeing_QoL <- GBD_effect |> 
   filter(analysis_plan == "Wellbeing and Quality of Life")
@@ -2195,6 +2213,7 @@ outcome_measurement_WQoL <- bind_rows(
 ```
 
 ### Tables for Wellbeing and Quality of Life
+
 ```{r}
 table_WQoL <- bind_rows(
   study_context_WQoL, design_WQoL, 
@@ -2227,8 +2246,8 @@ table_WQoL_rest_desc <-
   ); table_WQoL_rest_desc
 ```
 
-
 ## Descrptive tables: Social functioning (degree of impairment)
+
 ```{r, echo=FALSE}
 social_functioning <- GBD_effect |> 
   filter(analysis_plan == "Social functioning (degree of impairment)")
@@ -2967,6 +2986,7 @@ outcome_measurement_functioning <- bind_rows(
 ```
 
 ### Tables for Social functioning (degree of impairment)
+
 ```{r}
 table_functioning <- bind_rows(
   study_context_functioning, design_functioning, 
@@ -2999,7 +3019,6 @@ table_functioning_rest_desc <-
   ); table_functioning_rest_desc
 
 ```
-
 
 ## Descrptive tables: Hope, Empowerment & Self-efficacy
 
@@ -3741,6 +3760,7 @@ outcome_measurement_hope <- bind_rows(
 ```
 
 ### Tables for Hope, Empowerment & Self-efficacy
+
 ```{r}
 table_hope <- bind_rows(
   study_context_hope, design_hope, 
@@ -3773,7 +3793,6 @@ table_hope_rest_desc <-
   ); table_hope_rest_desc
 
 ```
-
 
 ## Descrptive tables: Alcohol and drug abuse/misuse
 
@@ -4515,6 +4534,7 @@ outcome_measurement_abuse_misuse <- bind_rows(
 ```
 
 ### Tables for Alcohol and drug abuse/misuse
+
 ```{r}
 table_abuse_misuse <- bind_rows(
   study_context_abuse_misuse, design_abuse_misuse, 
@@ -4657,6 +4677,7 @@ ggplot(distribution_summary, aes(x = trt_type, y = proportion, fill = analysis_p
 ```
 
 # Sensitivity Analysis of Mean Effect Size using the correlated-hierarchical effects (CHE-RVE) model {.tabset}
+
 ```{r, echo=FALSE}
 # Specifying the data frames to be used representing the relevant outcomes: 
 # Alcohol and drug abuse/misuse, Hope, Social Functioning, Well-being and Quality of Life
@@ -4683,12 +4704,16 @@ for (df_name in names(data_list)) {
 
 ```
 
-## p impact
+## *p* impact
+
 ### Outcome {.tabset}
-#### Alcohol and Drug Abuse/Misuse 
+
+#### Alcohol and Drug Abuse/Misuse
+
 Plot is based on `r unique(rho_abuse_misuse$effects)` effect sizes and `r unique(rho_abuse_misuse$studies)` studies
+
 ```{r, echo= FALSE}
-# Plotting "Alcohol and Drug Abuse/Misuse" ----
+# Plotting "Alcohol and Drug Abuse/Misuse"
 rho_beta_plot_abuse_misuse <- 
   rho_abuse_misuse |> 
   mutate(param = "CHE-RVE") |> 
@@ -4759,7 +4784,9 @@ plot_abuse_misuse  <- rho_beta_plot_abuse_misuse + rho_var_plot_abuse_misuse +
 ```
 
 #### Hope
+
 Plot is based on `r unique(rho_hope$effects)` effect sizes and `r unique(rho_hope$studies)` studies
+
 ```{r, echo=FALSE}
 # Plotting "Hope" ----
 rho_beta_plot_hope <- 
@@ -4832,7 +4859,9 @@ plot_hope <- rho_beta_plot_hope + rho_var_plot_hope +
 ```
 
 #### Social Functioning (Degree of impairment)
+
 Plot is based on `r unique(rho_social_functioning$effects)` effect sizes and `r unique(rho_social_functioning$studies)` studies
+
 ```{r, echo=FALSE}
 # Plotting "Social Functioning" ----
 rho_beta_plot_social_functioning <- 
@@ -4904,9 +4933,10 @@ plot_social_functioning <- rho_beta_plot_social_functioning + rho_var_plot_socia
 
 ```
 
-
 #### Wellbeing and Quality of Life
+
 Plot is based on `r unique(rho_wellbeing_QoL$effects)` effect sizes and `r unique(rho_wellbeing_QoL$studies)` studies
+
 ```{r, echo=FALSE}
 # Plotting "Wellbeing and Quality of Life" ----
 rho_beta_plot_wellbeing_QoL <- 
@@ -4977,7 +5007,8 @@ plot_wellbeing_QoL <- rho_beta_plot_wellbeing_QoL + rho_var_plot_wellbeing_QoL +
   plot_annotation(title = "Outcome: Wellbeing and Quality of Life"); plot_wellbeing_QoL
 ```
 
-## Leave one study out 
+## Leave one study out
+
 ```{r, echo=FALSE}
 data_list_rho <- list(
   abuse_misuse = rho_abuse_misuse, 
@@ -5006,7 +5037,9 @@ for (df_name in names(data_list)) {
 ```
 
 ### Outcome {.tabset}
-#### Alcohol and Drug Abuse/Misuse 
+
+#### Alcohol and Drug Abuse/Misuse
+
 ```{r, echo=FALSE}
 l1out_plot_abuse_misuse <- 
   omitted_stud_abuse_misuse |>
@@ -5075,6 +5108,7 @@ var_facet_abuse_misuse <-
 ```
 
 #### Hope
+
 ```{r, echo=FALSE}
 l1out_plot_hope <- 
   omitted_stud_hope |>
@@ -5142,6 +5176,7 @@ l1out_hope<- ggplot(data = l1out_plot_hope,aes(x = est, y = omitted_study)) +
 ```
 
 #### Social Functioning (Degree of impairment)
+
 ```{r, echo=FALSE}
 l1out_plot_social_functioning <- 
   omitted_stud_social_functioning |>
@@ -5209,6 +5244,7 @@ l1out_social_functioning<- ggplot(data = l1out_plot_social_functioning,aes(x = e
 ```
 
 #### Wellbeing and Quality of Life
+
 ```{r, echo=FALSE}
 l1out_plot_wellbeing_QoL <- 
   omitted_stud_wellbeing_QoL |>
@@ -5275,7 +5311,653 @@ l1out_wellbeing_QoL<- ggplot(data = l1out_plot_wellbeing_QoL,aes(x = est, y = om
   ); l1out_wellbeing_QoL
 ```
 
+## Mental health outcome {.tabset}
+
+### p-impact {.tabset}
+
+#### All mental health
+```{r, echo=FALSE}
+# prepping data for plotting
+
+# All mental health outcomes combined
+all_mental_health <- 
+  GBD_effect |> 
+  mutate(analysis_plan = case_when(
+  str_detect(analysis_plan, "All mental health outcomes/Symptoms of psychosis|All mental health outcomes/Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis",
+   TRUE ~ analysis_plan)) |> 
+  filter(str_detect(analysis_plan, "mental")) |>
+  filter(!str_detect(analysis_plan, "Unused")) 
+
+rho_mental_health <- map_dfr(0:9/10, ~ .CHE_RVE(data = all_mental_health, rho = .x))
+
+# Making data frames for subgroups of mental health outcomes
+
+# Plotting "All mental health outcome" ----
+rho_beta_plot_mental_health  <- 
+  rho_mental_health |> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 1)) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+rho_var_plot_mental_health <- 
+  rho_mental_health |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) +
+  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 1)) +
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_mental_health  <- rho_beta_plot_mental_health+ rho_var_plot_mental_health + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: All mental health outcomes"); plot_mental_health
+
+```
+
+#### Depression
+```{r, echo=FALSE}
+# All mental health outcomes combined
+depression <- 
+  all_mental_health |> 
+  filter(str_detect(analysis_plan, "Depression"))
+
+rho_depression <- map_dfr(0:9/10, ~ .CHE_RVE(data = depression, rho = .x))
+
+
+
+# Plotting "Depression" ----
+rho_beta_plot_depression  <- 
+  rho_depression |> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-1, 1.2, .2), limits = c(-0.6, 1.1)) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+rho_var_plot_depression <- 
+  rho_depression |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) +
+  scale_y_continuous(breaks = seq(-1, 1.2, .2), limits = c(-0.6, 1.1)) +
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_depression  <- rho_beta_plot_depression+ rho_var_plot_depression + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Depression"); plot_depression
+
+```
+
+#### Anxiety
+```{r, echo=FALSE}
+# Outcome: Anxiety
+anxiety <- 
+  all_mental_health |> 
+  filter(str_detect(analysis_plan, "Anxiety"))
+
+rho_anxiety <- map_dfr(0:9/10, ~ .CHE_RVE(data = anxiety, rho = .x))
+
+
+
+# Plotting "Depression" ----
+rho_beta_plot_anxiety  <- 
+  rho_anxiety|> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-2, 2, .2), limits = c(-1.1, 1.7)) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+rho_var_plot_anxiety <- 
+  rho_anxiety |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) +
+  scale_y_continuous(breaks = seq(-2, 2, .2), limits = c(-1.1, 1.7)) +
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_anxiety  <- rho_beta_plot_anxiety+ rho_var_plot_anxiety + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Anxiety"); plot_anxiety
+
+```
+
+
+#### Symptoms of psychosis
+```{r, echo=FALSE}
+# Outcome: Symptoms of psychosis
+psychosis <- 
+  all_mental_health |> 
+  filter(str_detect(analysis_plan, "psychosis"))
+
+rho_psychosis <- map_dfr(0:9/10, ~ .CHE_RVE(data = psychosis, rho = .x))
+
+
+
+# Plotting "Symptoms of psychosis" ----
+rho_beta_plot_psychosis  <- 
+  rho_psychosis|> 
+  mutate(param = "CHE-RVE") |> 
+  ggplot(aes(x = rho, y = b)) +
+  geom_line(aes(color = param), linewidth = 1) +
+  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+  geom_ribbon(aes(ymin = lb, ymax = ub, 
+                  fill = param), alpha = .2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  scale_x_continuous(breaks = 0:9/10) + 
+  scale_y_continuous(breaks = seq(-2, 2, .2), limits = c(-0.8, 1)) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.position = "none"
+  ) + 
+  facet_grid(~param) +
+  scale_fill_manual(values = "cornflowerblue", name = "fill") +
+  scale_color_manual(values = "cornflowerblue") + 
+  labs(y = "Average effect size", 
+       x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+rho_var_plot_psychosis <- 
+  rho_psychosis |> 
+  pivot_longer(
+    cols = tau:sd_total,
+    names_to = "var"
+  ) |>  
+  arrange(var, rho) |> 
+  mutate(
+    Variance = case_when(
+      var == "omega" ~ "Within-study SD",
+      var == "tau" ~ "Between-study SD",
+      var == "sd_total" ~ "SD total",
+      .default = NA_character_
+    ),
+    
+    Variance = factor(Variance, levels = c("Within-study SD", "Between-study SD", "SD total")),
+    
+    param = "Variance components"
+    
+  ) |> 
+  ggplot(aes(x = rho, y = value, color = Variance)) +
+  geom_line(size = 1) +
+  scale_x_continuous(breaks = seq(0,0.9,0.1)) +
+  scale_y_continuous(breaks = seq(-2, 2, .2), limits = c(-0.8, 1)) +
+  scale_color_brewer(type = "qual", palette = 2) +
+  geom_hline(yintercept = 0) +
+  geom_vline(xintercept = 0.7, linetype = "dashed") +
+  facet_grid(~param) +
+  theme_light() +
+  theme(
+    strip.text = element_text(color = "black"),
+    legend.title=element_blank()
+  ) + 
+  labs(
+    y = "Variance component", 
+    x = expression(Assumed~sampling~correlation~(rho))
+  )
+
+
+plot_psychosis  <- rho_beta_plot_psychosis+ rho_var_plot_psychosis + 
+  plot_layout(guides = 'collect') & 
+  plot_annotation(title = "Outcome: Symptoms of psychosis"); plot_psychosis
+
+```
+
+### Leave one study out {.tabset}
+
+#### All mental health 
+```{r}
+omitted_stud_all_mental <- map_dfr(
+  unique(all_mental_health$Author), 
+  ~ .CHE_RVE(data= all_mental_health,study_out = .x)
+)
+
+
+l1out_plot_all_mental <- 
+  omitted_stud_all_mental |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+
+beta_facet_all_mental <- 
+  l1out_plot_all_mental |> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res$lb,
+    ub_all = avg_model_res$ub,
+    mean = avg_model_res$b
+  )
+
+# Continue here: 
+var_facet_all_mental <- 
+  l1out_plot_all_mental |> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res$omega, avg_model_res$tau, avg_model_res$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_plot_all_mental |> 
+  ggplot(aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_all_mental, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_all_mental, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_all_mental, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_all_mental, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ) 
+
+```
+
+#### Depression
+```{r, echo=FALSE}
+omitted_stud_depression <- map_dfr(
+  unique(depression$Author), 
+  ~ .CHE_RVE(data= depression,study_out = .x)
+)
+
+
+l1out_plot_depression <- 
+  omitted_stud_depression |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+
+beta_facet_depression <- 
+  l1out_plot_depression |> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res$lb,
+    ub_all = avg_model_res$ub,
+    mean = avg_model_res$b
+  )
+
+# Continue here: 
+var_facet_depression <- 
+  l1out_plot_depression |> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res$omega, avg_model_res$tau, avg_model_res$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_plot_depression |> 
+  ggplot(aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_depression, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_depression, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_depression, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_depression, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ) 
+
+```
+
+#### Anxiety
+```{r, echo=FALSE}
+omitted_stud_anxiety <- map_dfr(
+  unique(anxiety$Author), 
+  ~ .CHE_RVE(data= anxiety,study_out = .x)
+)
+
+
+l1out_plot_anxiety <- 
+  omitted_stud_anxiety |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+
+beta_facet_anxiety <- 
+  l1out_plot_anxiety |> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res$lb,
+    ub_all = avg_model_res$ub,
+    mean = avg_model_res$b
+  )
+
+# Continue here: 
+var_facet_anxiety <- 
+  l1out_plot_anxiety |> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res$omega, avg_model_res$tau, avg_model_res$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_plot_anxiety|> 
+  ggplot(aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_anxiety, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_anxiety, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_anxiety, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_anxiety, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  ) 
+
+```
+
+#### Symptoms of psychosis
+```{r, echo=FALSE}
+omitted_stud_psychosis <- map_dfr(
+  unique(psychosis$Author), 
+  ~ .CHE_RVE(data= psychosis,study_out = .x)
+)
+
+
+l1out_plot_psychosis <- 
+  omitted_stud_psychosis |>
+  arrange(desc(b)) |> 
+  mutate(
+    omitted_study = factor(omitted_study, levels = unique(omitted_study))
+  ) |> 
+  select(omitted_study, studies:b, lb:ub, omega, tau, sd_total) |> 
+  pivot_longer(
+    cols = c(b, omega:sd_total),
+    names_to = "param",
+    values_to = "est"
+  ) |>
+  relocate(lb:ub, .after = est) |> 
+  mutate(
+  
+    param = case_match(
+      param,
+      "b" ~ "Average ES (%95 CI)",
+      "omega" ~ "Within-Study SD",
+      "tau" ~ "Between-Study SD",
+      "sd_total" ~ "Total SD"
+    ),
+    
+    param = factor(
+      param, 
+      levels = c("Average ES (%95 CI)", "Between-Study SD", "Within-Study SD", "Total SD")
+    )
+  )
+
+
+beta_facet_psychosis <- 
+  l1out_plot_psychosis |> 
+  filter(str_detect(param, "ES")) |> 
+  mutate(
+    lb_all = avg_model_res$lb,
+    ub_all = avg_model_res$ub,
+    mean = avg_model_res$b
+  )
+
+# Continue here: 
+var_facet_psychosis <- 
+  l1out_plot_psychosis |> 
+  filter(!str_detect(param, "ES")) |>
+  slice_head(n = 3) |> 
+  mutate(
+    sd_all = c(avg_model_res$omega, avg_model_res$tau, avg_model_res$sd_total)
+  )
+  
+#png(filename = "Figures/Sup/l1out_plot.png", width = 9, height = 6, units = "in", res = 600)
+l1out_plot_psychosis|> 
+  ggplot(aes(x = est, y = omitted_study)) + 
+  geom_vline(xintercept = 0) + 
+  geom_rect(data = beta_facet_psychosis, aes(xmin = lb_all, xmax = ub_all, ymin = -Inf, ymax = Inf),
+            fill = "gray90", alpha = 0.1, color = "gray90") +
+  geom_vline(data = beta_facet_psychosis, aes(xintercept = mean), color = "blue", size = 1, alpha = 1) +
+  geom_vline(data = var_facet_psychosis, aes(xintercept = sd_all), color = "blue", size = 1, alpha = 1) + 
+  geom_point(size = 3) +
+  geom_errorbarh(data = beta_facet_psychosis, aes(xmin = lb, xmax = ub), height=0) + 
+  facet_grid(~ param) +
+  theme_light() +
+  labs(x = "Estimate", y = "Excluded study") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+  )
+
+```
+
 # Colophon
+
 ```{r}
 devtools::session_info()
 ```
