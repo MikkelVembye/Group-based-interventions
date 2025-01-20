@@ -378,7 +378,7 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
 
 # Funnel-plot {.tabset}
 
-## Funnel plot for overall effect sizes
+## Overall effect sizes
 ```{r, echo=FALSE}
 
 
@@ -456,8 +456,8 @@ GB_plot_all <-
 ```
 
 
-## Funnelplot reintegrational/social outcomes - Subgroup analysis {.tabset}
-```{r}
+## Reintegrational/social outcomes {.tabset}
+```{r, echo=FALSE}
 GB_dat_reintergration <- 
   GBD_effect |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|Employment|Physical")) |> 
@@ -489,8 +489,8 @@ funnel_exp2 <-  tribble(
 ```
 
 
-### Overall effect-size for reintegrational/social outcome
-```{r}
+### Overall effect-size
+```{r, echo=FALSE}
 FP_plot_reintegration_overall <-
   GB_dat_reintergration |> 
   ggplot() + 
@@ -509,8 +509,8 @@ FP_plot_reintegration_overall <-
   theme(legend.position = "none");FP_plot_reintegration_overall
 ```
 
-### Effect-sizes for separated reintegrational/social outcomes
-```{r}
+### Subgroup effect-sizes
+```{r, echo=FALSE}
 FP_plot_reintergration_subgrp <-
   GB_dat_reintergration |> 
   ggplot() + 
@@ -531,9 +531,8 @@ FP_plot_reintergration_subgrp <-
 
 ```
 
-## Funnel-plot health outcomes - Subgroup analysis {.tabset}
-
-```{r}
+## Health outcomes {.tabset}
+```{r, echo=FALSE}
 GB_dat_mental_health <- 
   GBD_effect |> 
   mutate(analysis_plan = case_when(
@@ -565,8 +564,8 @@ funnel_exp3 <-  tribble(
 ) 
 ```
 
-### Overall effect size for mental health outcome
-```{r}
+### Overall effect size 
+```{r, echo=FALSE}
 FP_plot_overall_mental <-
   GB_dat_mental_health |> 
   ggplot() + 
@@ -585,8 +584,8 @@ FP_plot_overall_mental <-
   theme(legend.position = "none"); FP_plot_overall_mental
 ```
 
-### Subgroup effect size for mental health outcome
-```{r}
+### Subgroup effect sizes
+```{r, echo=FALSE}
 FP_plot_subgrp_mental <-
   GB_dat_mental_health |> 
   filter(!(analysis_plan == "All mental health outcomes")) |>
@@ -611,7 +610,7 @@ FP_plot_subgrp_mental <-
 # Descriptive Tables {.tabset}
 
 ## Study Context
-```{r}
+```{r, echo=FALSE}
 # Study context
 # Percent studies by countries
 study_country <- GBD_effect |> 
@@ -729,7 +728,7 @@ study_context <-
 
 ## Descriptive of studies design
 
-```{r}
+```{r, echo=FALSE}
 
 # Proportion cluster randomized or RCT studies
 
@@ -860,7 +859,7 @@ design <-
 
 ## Participants characteristics
 
-```{r}
+```{r, echo=FALSE}
 # % Males in treatment and control group
 
 male_per <- 
@@ -1041,7 +1040,7 @@ study_participants <-
 
 ## Intervention characteristics
 
-```{r}
+```{r, echo=FALSE}
 # Duration of intervention
 duration <- 
   GBD_effect |> 
@@ -1246,7 +1245,7 @@ intervention_characteristics <- bind_rows(
 
 ## Control group
 
-```{r}
+```{r, echo=FALSE}
 # Control types 
 control <- GBD_effect |>  
   group_by(studyid) |>  
@@ -1278,7 +1277,7 @@ control <- GBD_effect |>
 
 ## Methodological features
 
-```{r}
+```{r, echo=FALSE}
 # Average number of effect size per study
 avg_es_study <- 
   GBD_effect |> 
@@ -1306,7 +1305,7 @@ avg_es_study <-
 
 ## Outcome and measurement characteristics
 
-```{r}
+```{r, echo=FALSE}
 # Overall constructs
 construct <- GBD_effect |>  
   group_by(studyid) |>  
@@ -1445,14 +1444,14 @@ table2_rest_desc_out <- nice_table(table2_rest_desc); table2_rest_desc_out
 
 ## Risk of Bias details
 
-```{r}
+```{r, echo=FALSE}
 # Distribution of RoB2 evaluations
 RoB2_dat <- GBD_effect |> 
   select(rob_tool:Overall, studyid, Author) |> 
   filter(rob_tool == "RoB2") |> 
   select(-c(rob_tool,D6:D7))
 
-p_rob2 <- rob_summary(data = RoB2_dat, tool = "ROB2", overall = TRUE)
+p_rob2 <- rob_summary(data = RoB2_dat, tool = "ROB2", overall = TRUE); p_rob2
 
 # Distribution of ROBINS-I evaluations
 ROBINS1_dat <- GBD_effect |> 
@@ -1460,15 +1459,15 @@ ROBINS1_dat <- GBD_effect |>
   filter(rob_tool == "ROBINS-I") |> 
   select(-c(rob_tool))
 
-p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE)
+p_robins <- rob_summary(data = ROBINS1_dat, tool = "ROBINS-I", overall = TRUE); p_robins
 
 ```
 
 # Descriptive tables for each outcome {.tabset}
 
-## Generating descrptive tables: Wellbeing and Quality of life
+## Tables for Wellbeing and Quality of Life
 
-```{r}
+```{r, echo=FALSE}
 wellbeing_QoL <- GBD_effect |> 
   filter(analysis_plan == "Wellbeing and Quality of Life")
 
@@ -2205,7 +2204,7 @@ outcome_measurement_WQoL <- bind_rows(
 )
 ```
 
-## Tables for Wellbeing and Quality of Life
+
 
 ```{r}
 table_WQoL <- bind_rows(
@@ -2249,8 +2248,7 @@ table_WQoL_rest_desc_out <- nice_table(table_WQoL_rest_desc); table_WQoL_rest_de
 
 ```
 
-## Descrptive tables: Social functioning (degree of impairment)
-
+## Tables for Social functioning (degree of impairment)
 ```{r, echo=FALSE}
 social_functioning <- GBD_effect |> 
   filter(analysis_plan == "Social functioning (degree of impairment)")
@@ -2988,7 +2986,6 @@ outcome_measurement_functioning <- bind_rows(
 )
 ```
 
-## Tables for Social functioning (degree of impairment)
 
 ```{r, echo=FALSE}
 table_functioning <- bind_rows(
@@ -3032,7 +3029,7 @@ table_functioning_rest_desc_out <- nice_table(table_functioning_rest_desc); tabl
 
 ```
 
-## Descrptive tables: Hope, Empowerment & Self-efficacy
+## Tables for Hope, Empowerment & Self-efficacy
 
 ```{r, echo=FALSE}
 hope <- GBD_effect |> 
@@ -3769,7 +3766,6 @@ outcome_measurement_hope <- bind_rows(
 )
 ```
 
-## Tables for Hope, Empowerment & Self-efficacy
 
 ```{r, echo=FALSE}
 table_hope <- bind_rows(
@@ -3812,7 +3808,7 @@ table_hope_rest_desc_out <- nice_table(table_hope_rest_desc); table_hope_rest_de
 
 ```
 
-## Descrptive tables: Alcohol and drug abuse/misuse
+## Tables for Alcohol and drug abuse/misuse
 
 ```{r, echo=FALSE}
 abuse_misuse <- GBD_effect |> 
@@ -4551,7 +4547,7 @@ outcome_measurement_abuse_misuse <- bind_rows(
 )
 ```
 
-## Tables for Alcohol and drug abuse/misuse
+
 
 ```{r}
 table_abuse_misuse <- bind_rows(
@@ -4729,7 +4725,7 @@ for (df_name in names(data_list)) {
 
 ```
 
-## *p* impact
+## $\rho$ impact
 
 ### Outcome {.tabset}
 
@@ -4744,13 +4740,13 @@ rho_beta_plot_abuse_misuse <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+  #geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4787,7 +4783,7 @@ rho_var_plot_abuse_misuse <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) +
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.6, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .05), limits = c(-0.2, 0.4)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4821,11 +4817,11 @@ rho_beta_plot_hope <-
   geom_line(aes(color = param), linewidth = 1) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+ # geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) +
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.2, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4861,7 +4857,7 @@ rho_var_plot_hope <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.2, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4894,13 +4890,13 @@ rho_beta_plot_social_functioning <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+ # geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -4936,7 +4932,7 @@ rho_var_plot_social_functioning <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -4969,13 +4965,13 @@ rho_beta_plot_wellbeing_QoL <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+ # geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
   scale_x_continuous(breaks = 0:9/10) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   theme_light() +
   theme(
     strip.text = element_text(color = "black"),
@@ -5011,7 +5007,7 @@ rho_var_plot_wellbeing_QoL <-
   ggplot(aes(x = rho, y = value, color = Variance)) +
   geom_line(size = 1) +
   scale_x_continuous(breaks = seq(0,0.9,0.1)) + 
-  scale_y_continuous(breaks = seq(-1, 1, .2), limits = c(-0.4, 0.8)) +
+  scale_y_continuous(breaks = seq(-1, 1, .1), limits = c(-0.2, 0.4)) +
   scale_color_brewer(type = "qual", palette = 2) +
   geom_hline(yintercept = 0) +
   geom_vline(xintercept = 0.7, linetype = "dashed") +
@@ -5338,7 +5334,7 @@ l1out_wellbeing_QoL<- ggplot(data = l1out_plot_wellbeing_QoL,aes(x = est, y = om
 
 ## Mental health outcome {.tabset}
 
-### p-impact {.tabset}
+### $\rho$ impact {.tabset}
 
 #### All mental health
 ```{r, echo=FALSE}
@@ -5363,7 +5359,7 @@ rho_beta_plot_mental_health  <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+#  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
@@ -5445,7 +5441,7 @@ rho_beta_plot_depression  <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+#  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
@@ -5527,7 +5523,7 @@ rho_beta_plot_anxiety  <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+#  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
@@ -5610,7 +5606,7 @@ rho_beta_plot_psychosis  <-
   mutate(param = "CHE-RVE") |> 
   ggplot(aes(x = rho, y = b)) +
   geom_line(aes(color = param), linewidth = 1) +
-  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
+#  geom_ribbon(aes(ymin = pi_lb, ymax = pi_ub), fill = "grey", alpha = 0.5) +
   geom_ribbon(aes(ymin = lb, ymax = ub, 
                   fill = param), alpha = .2) +
   geom_hline(yintercept = 0) +
