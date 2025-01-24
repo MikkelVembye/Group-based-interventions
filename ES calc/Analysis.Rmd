@@ -6049,7 +6049,7 @@ egm_dat <-
     ) |>  
   summarise(
     n = n(),
-    n_studies = factor(n_distinct(Author), level = c(1:11)),
+    n_studies = n_distinct(Author), level = c(1:11)),
     .by = c(intervention_group, analysis_plan, n_timing)
   ) |> 
   mutate(constant = "Intervention")
