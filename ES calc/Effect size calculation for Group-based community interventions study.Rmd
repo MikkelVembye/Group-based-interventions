@@ -9009,12 +9009,12 @@ Rüsch2019_est <-
     main_es_method = "Raw diff-in-diffs",
     
     ppcor = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       ppcor_imp,
       NA_real_
     ),
     ppcor_method = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       "Imputed - We did not trust the reported F values",
       "F values from ANCOVA was used for variance estimation"
     ),
@@ -9112,7 +9112,7 @@ Rüsch2019_est <-
     gt_DD = omega * d_DD * gamma_sqrt,
     
     if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       VIVECampbell::vgt_smd_1armcluster(
         N_cl_grp = N_t, 
         N_ind_grp = N_c, 
@@ -11881,7 +11881,8 @@ group_based_dat <-
 #  select(Author, vary_id, varifier)
 
 #write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
-#saveRDS(group_based_dat, file = "ES calc/Group-based interventions data.RDS")
+#saveRDS(group_based_dat, file = "Group-based interventions data.RDS")
+#save(group_based_dat, file = "Group-based interventions data.RData")
 ```
 
 ## **Using extant data to estimate population standard deviations**

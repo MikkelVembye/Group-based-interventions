@@ -45,7 +45,9 @@ library(metafor)
 library(patchwork)
 
 # Loading in helper function used to calculate effect size and conduct the analysis
-source("Helpers.R")
+source_path <- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"
+
+source(source_path)
 
 ```
 
@@ -69,11 +71,11 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
 
 ```{r, echo=FALSE, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in the meta-analysis by year'}
 # Figure 1: Number of included studies in the meta-analysis by year
-G_timepllot <- group_based_dat |> 
+G_timeplot <- group_based_dat |> 
   summarise(year = unique(year), .by =  author_year)
 
 # DONE
-timeline_plot <-  ggplot(G_timepllot,aes(x = year)) + 
+timeline_plot <-  ggplot(G_timeplot, aes(x = year)) + 
   geom_bar(colour = "black", fill = "cornflowerblue", alpha = 1, width = 1) +
   scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
   scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
@@ -299,6 +301,65 @@ sample_dist_plot
 
 ```
 
+# Number of studies and effect size {.tabset}
+
+## Reintegrational outcomes
+```{r}
+
+GBD_effect |> 
+  filter(!str_detect(analysis_plan, "mental|used|hospi")) |> 
+  summarise(
+    n_es = n(),
+    .by = c(analysis_plan, eppi_id)
+  ) |> 
+  summarise(
+    N_studies = length(eppi_id),
+    N_es = sum(n_es),
+    .by = analysis_plan
+  ) |> 
+  rename(
+    outcome = analysis_plan
+  )
+
+```
+
+## All mental health outcomes
+
+```{r}
+
+GBD_effect |> 
+  filter(str_detect(analysis_plan, "mental")) |> 
+  filter(!str_detect(analysis_plan, "Unused")) |> 
+  mutate(
+    analysis_plan = case_when(
+  str_detect(analysis_plan, "Symptoms of psychosis|Negative symptoms") ~ "All mental health outcomes/Symptoms of psychosis",
+   TRUE ~ analysis_plan
+    )
+  ) |> 
+  summarise(
+    n_es = n(),
+    .by = c(analysis_plan, eppi_id)
+  ) |> 
+  summarise(
+    N_studies = length(eppi_id),
+    N_es = sum(n_es),
+    .by = analysis_plan
+  ) |> 
+  rename(
+    outcome = analysis_plan
+  ) |> 
+  mutate(
+    outcome = str_remove_all(outcome, "All mental health outcomes"),
+    outcome = if_else(outcome == "", "General mental health", outcome),
+    outcome = str_remove(outcome, "/")
+  )
+
+```
+
+# Average means {.tabset}
+
+
+
 # Empirical distribution of effect size estimates (SUPPLEMENTARY MATERIAL) {.tabset}
 
 ## Overall distribution
@@ -324,7 +385,7 @@ es_dist_plot <-
 
 # Without mental health outcomes and only reintergration-outcomes
 GB_outcome_reintergration <- GBD_effect |> 
-  filter(!str_detect(analysis_plan, "mental|used|hospi")) |>
+  filter(!str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli")) |>
   group_by(analysis_plan) |> 
   reframe(
     qrtl = quantile(gt,  c(.25, .75)),
@@ -335,19 +396,24 @@ GB_outcome_reintergration <- GBD_effect |>
 
 
 # Therefore All mental health outcomes, Unused outcome and hospitalization are excluded
+
 reintegration_outcome_plot <- GBD_effect |> 
- filter(!str_detect(analysis_plan, "mental|used|hospi")) |>
+  filter(!str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli")) |>
   ggplot(aes(x = gt, fill = analysis_plan)) + 
   geom_density(alpha = 0.7) +
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = qrtl), linetype = "solid")+
   geom_vline(data = GB_outcome_reintergration, aes(xintercept = fence), linetype = "dashed")+
   geom_rug(alpha = 0.25) +
-  facet_wrap(~analysis_plan, scales = "free", ncol = 4) +
+  facet_wrap(~analysis_plan, ncol = 2) +
   theme_minimal() +
   theme(legend.position = "none", axis.title.y = element_blank()) +
   labs(x = "Effect size estimate"); reintegration_outcome_plot
 
+# We filtered out Employment, Physical health, and loneliness outcomes, since
+# only few studies reported results for these outcomes. See above
+
 ```
+
 
 ## Plot with all mental health outcomes 
 ```{r}
@@ -413,7 +479,6 @@ mental_health_outcomes_plot <- GBD_effect |> mutate(analysis_plan = case_when(
 
 ## Overall effect sizes
 ```{r, echo=FALSE}
-
 
 # data prep
 GBD_effect <- GBD_effect |> 
@@ -4747,6 +4812,7 @@ rho_calc_all <- function(data, rho_seq = 0:9/10) {
   map_dfr(rho_seq, ~ .CHE_RVE(data = data, rho = .x))
 }
 
+#map(data_list, .f = rho_calc_all)
 
 for (df_name in names(data_list)) {
   # run the estimation
@@ -5938,7 +6004,7 @@ l1out_plot_anxiety|>
 ```{r, echo=FALSE}
 omitted_stud_psychosis <- map_dfr(
   unique(psychosis$Author), 
-  ~ .CHE_RVE(data= psychosis,study_out = .x)
+  ~ .CHE_RVE(data= psychosis, study_out = .x)
 )
 
 
@@ -6049,7 +6115,7 @@ egm_dat <-
     ) |>  
   summarise(
     n = n(),
-    n_studies = n_distinct(Author), level = c(1:11)),
+    n_studies = n_distinct(Author), level = c(1:11),
     .by = c(intervention_group, analysis_plan, n_timing)
   ) |> 
   mutate(constant = "Intervention")
