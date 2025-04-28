@@ -60,12 +60,45 @@ source(source_path)
 group_based_dat <- readRDS("Group-based interventions data.RDS") |> 
   # The post-measurement of Empowerment Scale seems flawed for the study by 
   # Barbic et al. 2009 we therefore we exclude it from the analysis
-  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
+  #filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
   mutate(
     author_year = paste(authors, year)
-  )
+  ) |> 
+ # Remove unused outcomes
+ filter(!str_detect(analysis_plan, "Unused"))
 
 ```
+
+## Number effect size across standardized mean differences (SMD) and odds ratios (OR) 
+
+```{r}
+# Number of studies reporting OR
+group_based_dat |> 
+  summarise(
+    n = n(), 
+    .by = c(author_year, effect_size)
+  ) |> 
+  summarise(
+    n_studies = length(effect_size), 
+    n_es = sum(n),
+    .by = effect_size
+  )
+```
+
+
+## Filter out apparently flawed results
+
+```{r}
+
+group_based_dat <- 
+  group_based_dat |> 
+  # The post-measurement of Empowerment Scale seems flawed for the study by 
+  # Barbic et al. 2009 we therefore we exclude it from the analysis
+  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale"))
+
+```
+
+
 
 # Timeline
 
@@ -233,9 +266,7 @@ GBD_effect <-
    timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
    timing = if_else(Author == "Dyck et al. 2000", "post", timing)
    
- ) |> 
- # Remove unused outcomes
- filter(!str_detect(analysis_plan, "Unused"))
+ ) 
 ```
 
 # Number of studies and effect sizes {.tabset}
@@ -386,6 +417,17 @@ tab_header(
 ) 
 
 ```
+
+## Difference-in-differences effect sizes
+
+```{r}
+GBD_effect |> 
+  filter(str_detect(main_es_method, "diff-in-diffs")) |> 
+  summarise(n = n(), .by = author_year) |> 
+  summarise(n_studies = length(author_year), n_es = sum(n))
+```
+
+
 
 # Forest plots {.tabset}
 

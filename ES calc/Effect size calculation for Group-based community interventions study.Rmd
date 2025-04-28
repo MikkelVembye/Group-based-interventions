@@ -856,7 +856,7 @@ Bækkelund2022_est <-
       str_detect(outcome, "GAF-S") ~ "Social functioning (degree of impairment)",
       str_detect(outcome, "SCL-90 R") ~ "All mental health outcomes"),
     
-    main_es_method = "diff-in-diffs",
+    main_es_method = "Raw diff-in-diffs",
     
     mean_z =  (w_t*z_t + w_c*z_c)/(w_t + w_c),  
     ppcor = (exp(2*mean_z)-1)/(exp(2*mean_z)+1),
@@ -6357,7 +6357,7 @@ McCay2006_est <-
     effect_size = "SMD",
     sd_used = "Pooled posttest SDs",
     
-    main_es_method = "Raw diff-in-diff",
+    main_es_method = "Raw diff-in-diffs",
     
     outcome = c("MES", "QLS total", "PANSS Negative", "PANSS total"),
     analysis_plan = c(
