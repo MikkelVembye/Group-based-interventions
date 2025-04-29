@@ -335,6 +335,17 @@ GBD_effect |>
 
 ```
 
+## Average group size across group treatment
+
+```{r}
+GBD_effect |> 
+  filter(str_detect(avg_cl_type, "study")) |> 
+  select(avg_cl_size) |> 
+  pull(avg_cl_size) |> 
+  mean()
+```
+
+
 # Overall means and contrast test using SCE+ models {.tabset}
 
 ## Reintegrational outcomes
