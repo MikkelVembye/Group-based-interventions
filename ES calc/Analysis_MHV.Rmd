@@ -264,10 +264,30 @@ GBD_effect <-
    timing = if_else(Author == "Wuthrich et al. 2013/2021", "post", timing),
    timing = if_else(Author == "Druss et al. 2010", "post", timing),
    timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
-   timing = if_else(Author == "Dyck et al. 2000", "post", timing)
+   timing = if_else(Author == "Dyck et al. 2000", "post", timing),
    
- ) 
+   analysis_strategy = if_else(str_detect(author_year, "Michalak"), "ITT", analysis_strategy),
+   
+   conventional = if_else(protocol != "Yes", 1, 0)
+   
+ ) |> 
+  mutate(
+    # Used to remove ITT outcomes from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
+    n_analysis_strategies = n_distinct(analysis_strategy),
+    .by = author_year
+  )
 ```
+
+
+```{r, echo = FALSE}
+# Removing ITT analyses from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
+
+gb_dat <- 
+  GBD_effect |> 
+  filter(!c(str_detect(author_year, "Cano|Craigie") & analysis_strategy == "ITT")) 
+
+```
+
 
 # Number of studies and effect sizes {.tabset}
 
