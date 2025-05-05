@@ -1,6 +1,6 @@
 # Function designed to perform a robust variance estimation meta-analysis. 
 # For overall average effect modeling
-.CHE_RVE <- function(data, rho = 0.7, study_out){
+.CHE_RVE <- function(data, rho = 0.7, study_out, pred_int = 80){
   
   if (missing(study_out)) {
     dat <- data
@@ -39,7 +39,10 @@
   I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
                                                    (overall_res$k - overall_res$p)/sum(diag(P))), 2)
   
-  pred <- predict(overall_res)
+  pred <- predict(overall_res, level = pred_int)
+  
+  pi_lb_name <- paste0("pi_lb_", pred_int)
+  pi_ub_name <- paste0("pi_ub_", pred_int)
   
   res <- 
     tibble(
@@ -50,8 +53,8 @@
       se = overall_res$se,
       LL = overall_res$ci.lb,
       UL = overall_res$ci.ub,
-      pi_lb = pred$pi.lb,  
-      pi_ub = pred$pi.ub,  
+      !!pi_lb_name := pred$pi.lb,  
+      !!pi_ub_name := pred$pi.ub,  
       pval = overall_res$pval,
       df_satt = overall_res$dfs,
       tau = sqrt(overall_res$sigma2[1]), 

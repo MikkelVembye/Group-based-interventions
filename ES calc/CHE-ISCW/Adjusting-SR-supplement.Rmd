@@ -1,0 +1,1878 @@
+---
+title: "Supplementary materials for 'Adapting Methods for Correcting Selection Bias in Meta-Analysis of Dependent Effect Sizes'"
+output: 
+  html_document:
+      number_sections: yes
+      toc: true
+      toc_float: true
+      css: styles.css
+      # code_folding: hide
+bibliography: bibliography.bib
+# csl: apa7.csl
+fontsize: 11pt
+geometry: margin=1in
+linestretch: 1.1
+header-includes:
+- \usepackage{float}
+- \renewcommand{\thesection}{S\arabic{section}}
+- \renewcommand{\thetable}{S\arabic{table}}   
+- \renewcommand{\thefigure}{S\arabic{figure}}
+- \renewcommand{\theequation}{S\arabic{equation}}
+---
+
+\newpage
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+options(knitr.kable.NA = '')
+
+source("simulations/plot-functions.R")
+load("simulations/sim-res.Rdata")
+
+# for graphs with criteria as row facet
+yints <- data.frame(criteria = c("Bias", "Coverage"), yint = c(0, 0.95))
+yints <- 
+  yints |> 
+  mutate(criteria = factor(criteria, levels = c("Bias", "Coverage")))
+
+plot_height <- 7
+plot_width <- 9
+```
+
+# Monte Carlo standard error {.tabset}
+
+## One-step selection mechanism {.tabset}
+
+### $k=10$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "One-step selection", k == 10) %>% 
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=30$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "One-step selection", k == 30) %>%  
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=60$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "One-step selection", k == 60) %>%
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=100$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "One-step selection", k == 100) %>%
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+## Two-step selection mechanism {.tabset}
+
+### $k=10$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "Two-step selection", k == 10) %>% 
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=30$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "Two-step selection", k == 30) %>%  
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=60$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "Two-step selection", k == 60) %>%
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=100$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7), sel_mechanism == "Two-step selection", k == 100) %>%
+  group_by(method) %>% 
+  summarise(
+    bias_mcse_m = mean(bias_mcse),
+    rmse_mcse_m = mean(rmse_mcse),
+    cover_mcse_m = mean(coverage_mcse, na.rm = TRUE),
+    width_mcse_m = mean(width_mcse, na.rm = TRUE),
+    rej_mcse_m = mean(rej_rate_mcse, na.rm = TRUE)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+# Convergence rates {.tabset}
+
+## One-step selection mechanism {.tabset}
+
+### $k=10$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "One-step selection", k == 10) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=30$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "One-step selection", k == 30) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=60$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "One-step selection", k == 60) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=100$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "One-step selection", k == 100) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+## Two-step selection mechanism {.tabset}
+
+### $k=10$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "Two-step selection", k == 10) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=30$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "Two-step selection", k == 30) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=60$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "Two-step selection", k == 60) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+### $k=100$
+
+```{r}
+res_dat %>% 
+  filter(k_stop %in% c("NA", 7) , sel_mechanism == "Two-step selection", k == 100) %>% 
+  mutate(conv_prop = n_converged / 2000) %>% 
+  group_by(sel_mechanism, k, method) %>% 
+  summarise(
+    mean_convergence = mean(conv_prop),
+    min_convergence = min(conv_prop),
+    max_convergence = max(conv_prop)
+  ) %>% 
+  kbl(digits = 5) %>% 
+  kable_styling(full_width = FALSE)
+```
+
+# Univariate adjustment methods under one-step selection {.tabset}
+
+## Bias {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k=10$
+
+```{r bias-k10-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+# out.extra = 'angle = 90', 
+dat_uni_rho2_onestep <- 
+  res_dat %>% 
+  filter(cor_mu == 0.2, k_stop %in% c("NA", 7),
+         sel_mechanism == "One-step selection") %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "UNI_PET-PEESE", "UNI_EK", 
+                       "UNI_RE-ISW", "UNI_WAAP", "UNI_WILS")) %>% 
+  mutate(method = if_else(method %in% c("p-uniform*", "3PSM", "4PSM"),
+                          method, sub("^[^_]*_", "", method)))
+
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 10), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=30$
+
+```{r bias-k30-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 30), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r bias-k60-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 60), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r bias-k100-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 100), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k=10$
+
+```{r bias-k10-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+dat_uni_rho4_onestep <- 
+  res_dat %>% 
+  filter(cor_mu == 0.4, k_stop %in% c("NA", 7),
+         sel_mechanism == "One-step selection") %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "UNI_PET-PEESE", "UNI_EK", 
+                       "UNI_RE-ISW", "UNI_WAAP", "UNI_WILS")) %>% 
+  mutate(method = if_else(method %in% c("p-uniform*", "3PSM", "4PSM"),
+                          method, sub("^[^_]*_", "", method)))
+
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 10), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=30$
+
+```{r bias-k30-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 30), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r bias-k60-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 60), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r bias-k100-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 100), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k=10$
+
+```{r bias-k10-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+dat_uni_rho8_onestep <- 
+  res_dat %>% 
+  filter(cor_mu == 0.8, k_stop %in% c("NA", 7),
+         sel_mechanism == "One-step selection") %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "UNI_PET-PEESE", "UNI_EK", 
+                       "UNI_RE-ISW", "UNI_WAAP", "UNI_WILS")) %>% 
+  mutate(method = if_else(method %in% c("p-uniform*", "3PSM", "4PSM"),
+                          method, sub("^[^_]*_", "", method)))
+
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 10), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=30$
+
+```{r bias-k30-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 30), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r bias-k60-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 60), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r bias-k100-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 100), 
+        x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+## RMSE {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k=30$ 
+
+```{r rmse-k30-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 30), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r rmse-k60-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 60), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r rmse-k100-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 100), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k=30$
+
+```{r rmse-k30-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 30), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r rmse-k60-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 60), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r rmse-k100-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 100), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k=30$
+
+```{r rmse-k30-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 30), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r rmse-k60-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 60), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r rmse-k100-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 100), 
+        x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+## Confidence intervals {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k=30$
+
+```{r cover-k30-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 30), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r cover-k60-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 60), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r cover-k100-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho2_onestep %>% filter(k == 100), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k=30$
+
+```{r cover-k30-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 30), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r cover-k60-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 60), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r cover-k100-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho4_onestep %>% filter(k == 100), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k=30$
+
+```{r cover-k30-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 30), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=60$
+
+```{r cover-k60-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 60), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k=100$
+
+```{r cover-k100-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_SR(dat = dat_uni_rho8_onestep %>% filter(k == 100), 
+        x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+# Comparison between one- and two-step selection for univariate adjustment methods {.tabset}
+
+## $\bar{\rho} = 0.2$ {.tabset}
+
+### $k=30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 30, cor_mu == 0.2, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 60, cor_mu == 0.2, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 100, cor_mu == 0.2, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+## $\bar{\rho} = 0.4$ {.tabset}
+
+### $k=30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 30, cor_mu == 0.4, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 60, cor_mu == 0.4, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 100, cor_mu == 0.4, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+
+## $\bar{\rho} = 0.2$ {.tabset}
+
+### $k=30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 30, cor_mu == 0.8, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 60, cor_mu == 0.8, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $k=100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat |> 
+  filter(k == 100, cor_mu == 0.8, k_stop %in% c("NA", 7),
+         method %in% c("3PSM", "4PSM", "UNI_EK", "UNI_RE-ISW", 
+                                "p-uniform*", "UNI_PET-PEESE")) |>
+  mutate(method = ifelse(method == "UNI_EK", "Univariate EK",
+                         ifelse(method == "UNI_PET-PEESE", "Univariate PET-PEESE",
+                                ifelse(method == "UNI_RE-ISW", "RE-ISW", method)))) |>
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+# Novel adaptations performance
+
+## Comparsion between CHE-ISCW and CHE {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 30, cor_mu == 0.2) %>% plot_che_iscw(.)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 60, cor_mu == 0.2) %>% plot_che_iscw(.)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 100, cor_mu == 0.2) %>% plot_che_iscw(.)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 30, cor_mu == 0.4) %>% plot_che_iscw(.)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 60, cor_mu == 0.4) %>% plot_che_iscw(.)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 100, cor_mu == 0.4) %>% plot_che_iscw(.)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 30, cor_mu == 0.8) %>% plot_che_iscw(.)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 60, cor_mu == 0.8) %>% plot_che_iscw(.)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% filter(k == 100, cor_mu == 0.8) %>% plot_che_iscw(.)
+```
+
+
+## One-step selection {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 30$
+
+```{r reg-k30-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+
+dat_reg_rho2_onestep <- 
+  res_one_step %>%  
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE"),
+         k_stop %in% c("NA", 7),
+         cor_mu == 0.2) %>% 
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method)
+ )
+
+plot_reg(dat_reg_rho2_onestep %>% filter(k == 30, !method %in% c("PET", "PEESE")))
+```
+
+#### $k = 60$
+
+```{r reg-k60-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_reg(dat_reg_rho2_onestep %>% filter(k == 60, !method %in% c("PET", "PEESE")))
+```
+
+#### $k = 100$
+
+```{r reg-k100-rho2-onestep, fig.height = plot_height, fig.width = plot_width}
+plot_reg(dat_reg_rho2_onestep %>% filter(k == 100, !method %in% c("PET", "PEESE")))
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 30$
+
+```{r reg-k30-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+main_dat_reg_one_step %>% 
+  filter(k_stop %in% c("NA", 7)) %>%
+  filter(k == 30, !method %in% c("PET", "PEESE")) %>% 
+  plot_reg(.)
+```
+
+#### $k = 60$
+
+```{r reg-k60-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+main_dat_reg_one_step %>% 
+  filter(k_stop %in% c("NA", 7)) %>%
+  filter(k == 60, !method %in% c("PET", "PEESE")) %>%
+  plot_reg(.)
+```
+
+#### $k = 100$
+
+```{r reg-k100-rho4-onestep, fig.height = plot_height, fig.width = plot_width}
+main_dat_reg_one_step %>%
+  filter(k_stop %in% c("NA", 7)) %>%
+  filter(k == 100, !method %in% c("PET", "PEESE")) %>%
+  plot_reg(.)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 30$
+
+```{r reg-k30-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+dat_reg_rho8_onestep <- 
+  res_one_step %>%  
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE"),
+         k_stop %in% c("NA", 7),
+         cor_mu == 0.8) %>% 
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method)
+ )
+
+dat_reg_rho8_onestep %>% 
+  filter(k_stop %in% c("NA", 7)) %>% 
+  filter(k == 30, !method %in% c("PET", "PEESE")) %>%  
+  plot_reg(.)
+```
+
+#### $k = 60$
+
+```{r reg-k60-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+dat_reg_rho8_onestep %>% 
+  filter(k_stop %in% c("NA", 7)) %>%
+  filter(k == 60, !method %in% c("PET", "PEESE")) %>% 
+  plot_reg(.)
+```
+
+#### $k = 100$
+
+```{r reg-k100-rho8-onestep, fig.height = plot_height, fig.width = plot_width}
+dat_reg_rho8_onestep %>%
+  filter(k_stop %in% c("NA", 7)) %>%
+  filter(k == 100, !method %in% c("PET", "PEESE")) %>% 
+  plot_reg(.)
+```
+
+## Comparison between one- and two-step selection {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 30, cor_mu == 0.2,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 60, cor_mu == 0.2,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 100, cor_mu == 0.2,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 30, cor_mu == 0.4,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 60, cor_mu == 0.4,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 100, cor_mu == 0.4,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 30, cor_mu == 0.8,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 60, cor_mu == 0.8,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_dat %>% 
+  filter(k == 100, cor_mu == 0.8,
+         method %in% c("MV_PET-PEESE", "MV_EK", "MV_WILS", "MV_WAAP", "CHE-ISCW"),
+         k_stop %in% c("NA", 7)) |> 
+  mutate(method = str_sub(method, start = 4L, end = -1L),
+         method = ifelse(method == "-ISCW", "CHE-ISCW", method)) |> 
+  select(mu, wts, sel_mechanism, bias, rmse, coverage, width, method) |> 
+  pivot_longer(cols = bias:width, names_to = "criteria") |>
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width"))) |> 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ sel_mechanism, scales = "free_y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+## Numerical comparisons
+
+```{r}
+# Bias for one-step
+
+res_one_step %>%
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE")) %>%
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method),
+   bias = abs(bias)
+  ) %>% 
+  filter(k_stop %in% c("NA", 7), ! method %in% c("PET", "PEESE")) %>% 
+  select(k, cor_mu, mu, tau, method, bias, wts, dependence) %>% 
+  group_by(k, cor_mu, mu, tau, wts) %>% 
+  pivot_wider(names_from = dependence, values_from = bias) %>% 
+  mutate(bias_diff = MV - UNI) %>% 
+  group_by(k, cor_mu, method) %>% 
+  summarise(
+    min_abs_bias = min(bias_diff),
+    max_abs_bias = max(bias_diff),
+    median_abs_bias = median(bias_diff)
+  )
+
+x <- 
+  res_one_step %>%
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE")) %>%
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method),
+   bias = abs(bias)
+  ) %>% 
+  filter(k_stop %in% c("NA", 7), ! method %in% c("PET", "PEESE")) %>% 
+  select(k, cor_mu, mu, tau, method, bias, wts, dependence) %>% 
+  group_by(k, cor_mu, mu, tau, wts) %>% 
+  pivot_wider(names_from = dependence, values_from = bias) %>% 
+  mutate(bias_diff = MV - UNI) %>% 
+  filter(k == 30, cor_mu == 0.4)
+
+x %>% 
+  ggplot(aes(x = wts, y = bias_diff, color = method)) +
+  geom_point() +
+  facet_grid(paste0("tau ==", tau) ~ paste0("mu ==", mu), labeller = label_parsed, scales = "free_y") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  labs(x = "Selection weight", y = "MV-UNI", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank())
+  
+
+# RMSE for one-step
+
+res_one_step %>%
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE")) %>%
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method)
+  ) %>% 
+  filter(k_stop %in% c("NA", 7), ! method %in% c("PET", "PEESE")) %>% 
+  select(k, cor_mu, mu, tau, method, rmse, wts, dependence) %>% 
+  group_by(k, cor_mu, mu, tau, wts) %>% 
+  pivot_wider(names_from = dependence, values_from = rmse) %>% 
+  mutate(rmse_ratio = MV/UNI) %>% 
+  group_by(k, cor_mu, method) %>% 
+  summarise(
+    min_ratio = min(rmse_ratio),
+    max_ratio = max(rmse_ratio),
+    median_ratio = median(rmse_ratio)
+  )
+
+y <- 
+  res_one_step %>%
+  filter(! method %in% c("3PSM", "4PSM", "TF", "p-uniform", "p-uniform*", "UNI_FE")) %>%
+  mutate(
+    method = ifelse(method == "CHE", "MV_RE",
+                    ifelse(method == "CHE-ISCW", "MV_RE-ISW",
+                           method)),
+   dependence = str_extract(method, "[^_]+"),
+   method = sub("^[^_]*_", "", method),
+   bias = abs(bias)
+  ) %>% 
+  filter(k_stop %in% c("NA", 7), ! method %in% c("PET", "PEESE")) %>% 
+  select(k, cor_mu, mu, tau, method, rmse, wts, dependence) %>% 
+  group_by(k, cor_mu, mu, tau, wts) %>% 
+  pivot_wider(names_from = dependence, values_from = rmse) %>% 
+  mutate(rmse_ratio = MV/UNI) %>% 
+  filter(k == 30, cor_mu == 0.4)
+
+y %>% 
+  ggplot(aes(x = wts, y = rmse_ratio, color = method)) +
+  geom_point() +
+  facet_grid(paste0("tau ==", tau) ~ paste0("mu ==", mu), labeller = label_parsed, scales = "free_y") +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  labs(x = "Selection weight", y = "RMSE ratio", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank())
+  
+```
+
+
+# RQ3: Comparison of novel adaptations with univariate selection models {.tabset}
+
+## Bias {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step <- 
+  res_dat %>% 
+  filter(
+    sel_mechanism == "One-step selection",
+    method %in% c("3PSM", "CHE-ISCW", "MV_PET-PEESE", "MV_EK")
+  ) %>% 
+  mutate(method = ifelse(method == "MV_EK", "Multivariate EK",
+                         ifelse(method == "MV_PET-PEESE", "Multivariate PET-PEESE",
+                                method))
+  )
+
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+## RMSE {.tabset}
+ 
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+## Coverage {.tabset}
+
+### $\bar{\rho} = 0.2$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.2, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.4$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.4, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+### $\bar{\rho} = 0.8$ {.tabset}
+
+#### $k = 10$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+dat_comp_one_step %>% 
+  filter(cor_mu == 0.8, k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu, scale = TRUE)
+```
+
+# Compare un-adapted univariate methods
+
+## Overall {.tabset}
+
+### $\bar{\rho} = 0.2$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF")) %>% 
+  filter(k != 10, cor_mu == 0.2) %>%
+  select(mu, k, wts, bias, rmse, coverage, width, method) %>%
+  pivot_longer(cols = bias:width, names_to = "criteria") %>%
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width")),
+         k = factor(k, levels = c(10, 30, 60, 100),
+                    labels = c("k = 10", "k = 30", "k = 60", "k = 100"))) %>% 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ k, scales = "free_y", switch = "y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $\bar{\rho} = 0.4$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF")) %>% 
+  filter(k != 10, cor_mu == 0.4) %>%
+  select(mu, k, wts, bias, rmse, coverage, width, method) %>%
+  pivot_longer(cols = bias:width, names_to = "criteria") %>%
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width")),
+         k = factor(k, levels = c(10, 30, 60, 100),
+                    labels = c("k = 10", "k = 30", "k = 60", "k = 100"))) %>% 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ k, scales = "free_y", switch = "y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+### $\bar{\rho} = 0.8$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF")) %>% 
+  filter(k != 10, cor_mu == 0.8) %>%
+  select(mu, k, wts, bias, rmse, coverage, width, method) %>%
+  pivot_longer(cols = bias:width, names_to = "criteria") %>%
+  mutate(criteria = factor(criteria, 
+                           levels = c("bias", "rmse", "coverage", "width"),
+                           labels = c("Bias", "RMSE", "Coverage", "Width")),
+         k = factor(k, levels = c(10, 30, 60, 100),
+                    labels = c("k = 10", "k = 30", "k = 60", "k = 100"))) %>% 
+  ggplot(aes(x = wts, y = value, color = method, fill = method)) +
+  geom_boxplot(alpha = .3, coef = Inf) +
+  facet_grid(criteria ~ k, scales = "free_y", switch = "y") +
+  geom_hline(data = yints, aes(yintercept = yint), col = "black", linetype = "dashed") +
+  labs(x = "Selection weight", y = "", fill = "", color = "") +
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank()) +
+  scale_x_discrete(breaks = c(.05, .125, .25, .5, .8, 1),
+                         labels = dropLeadingZero)
+```
+
+## $\bar{\rho} = 0.4$ {.tabset}
+
+### Bias {.tabset}
+
+#### $k = 10$
+
+```{r bias-sel-one-step, fig.height = plot_height, fig.width = plot_width}
+
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu)
+```
+
+> The 3PSM, 4PSM, and p-uniform* are nearly unbiased. The p-uniform estimator has systematic increasing positive biases for smaller average effects and larger between-study heterogeneity.
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = bias, rowfacet = tau, colfacet = mu)
+```
+
+### RMSE {.tabset}
+
+#### $k = 10$
+
+```{r rmse-sel-one-step, fig.height = plot_height, fig.width = plot_width}
+
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu)
+```
+
+> The 3PSM and p-uniform* are more accurate than 4PSM for small average effects and large between-study heterogeneity.
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = rmse, rowfacet = tau, colfacet = mu)
+```
+
+
+### Coverage {.tabset}
+
+#### $k = 10$
+
+```{r cover-sel-one-step, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 10) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu)
+```
+
+> The 3PSM and p-uniform* are more accurate than 4PSM for small average effects and large between-study heterogeneity.
+
+#### $k = 30$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 30) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 60$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 60) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu)
+```
+
+#### $k = 100$
+
+```{r, fig.height = plot_height, fig.width = plot_width}
+res_one_step %>% 
+  filter(method %in% c("3PSM", "4PSM", "p-uniform*", "TF"),
+         cor_mu == 0.4,
+         k == 100) %>% 
+  plot_SR(dat = ., x = wts, y = coverage, rowfacet = tau, colfacet = mu)
+```

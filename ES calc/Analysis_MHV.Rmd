@@ -294,7 +294,7 @@ gb_dat <-
 ## Entire data
 
 ```{r}
-GBD_effect |> 
+gb_dat |> 
   summarise(
     N_studies = n_distinct(author_year),
     N_ES = n()
@@ -305,7 +305,7 @@ GBD_effect |>
 ## Reintegrational outcomes
 ```{r}
 
-GBD_effect |> 
+gb_dat |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi")) |> 
   summarise(
     n_es = n(),
@@ -326,7 +326,7 @@ GBD_effect |>
 
 ```{r}
 
-GBD_effect |> 
+gb_dat |> 
   filter(str_detect(analysis_plan, "mental")) |> 
   filter(!str_detect(analysis_plan, "Unused")) |> 
   mutate(
@@ -358,7 +358,7 @@ GBD_effect |>
 ## Average group size across group treatment
 
 ```{r}
-GBD_effect |> 
+gb_dat |> 
   filter(str_detect(avg_cl_type, "study")) |> 
   select(avg_cl_size) |> 
   pull(avg_cl_size) |> 
@@ -373,8 +373,10 @@ GBD_effect |>
 # We remove physical health, employment, self-esteem, and loneliness outcome since
 # only few studies reported these outcomes. 
 reintergation_dat <- 
-  GBD_effect |> 
+  gb_dat |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"))
+
+#saveRDS(reintergation_dat, "reintergation_dat.rds")
 
 # overall_mean
 reintegration_che_res <- .CHE_RVE(reintergation_dat) 
@@ -408,7 +410,7 @@ tab_header(
 # We remove physical health, employment, self-esteem, and loneliness outcome since
 # only few studies reported these outcomes. 
 mental_health_dat <- 
-  GBD_effect |> 
+  gb_dat |> 
   filter(str_detect(analysis_plan, "mental")) |> 
   filter(!str_detect(analysis_plan, "Unused")) |> 
   mutate(
@@ -420,6 +422,8 @@ mental_health_dat <-
       .default = "Symptoms of psychosis"
     )
   )
+
+#saveRDS(mental_health_dat, "mental_health_dat.rds")
 
 # overall_mean
 mental_che_res <- .CHE_RVE(mental_health_dat) 
@@ -452,7 +456,7 @@ tab_header(
 ## Difference-in-differences effect sizes
 
 ```{r}
-GBD_effect |> 
+gb_dat |> 
   filter(str_detect(main_es_method, "diff-in-diffs")) |> 
   summarise(n = n(), .by = author_year) |> 
   summarise(n_studies = length(author_year), n_es = sum(n))

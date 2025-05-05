@@ -36,28 +36,28 @@ red_romance_femalep <- dat[dat$gender == "Females", ]
 res_ml_red <- rma(yi = red_romance_femalep$yi, vi = red_romance_femalep$vi, method = "ML")
 res_tau2_red <- confint(res_ml_red)
 
-optimizers <- c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent")
-mod <- "Non-converged"
-i <- 1L
-
-
-while (!inherits(mod, "hybridoutput") & i <= 4L) {
-
-mod <- 
-  hybrid(
-    yi = red_romance_femalep$yi, 
-    vi = red_romance_femalep$vi, 
-    conventional = red_romance_femalep$conventional, 
-    side = "right",
-    control = list(optimizer = optimizers[i])
-  )
-
-i <- i + 1L
-
-}
-
-c(beta = mod$est, tau = sqrt(mod$tau2))
-
+#optimizers <- c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN", "Brent")
+#mod <- "Non-converged"
+#i <- 1L
+#
+#
+#while (!inherits(mod, "hybridoutput") & i <= 4L) {
+#
+#mod <- 
+#  hybrid(
+#    yi = red_romance_femalep$yi, 
+#    vi = red_romance_femalep$vi, 
+#    conventional = red_romance_femalep$conventional, 
+#    side = "right",
+#    control = list(optimizer = optimizers[i])
+#  )
+#
+#i <- i + 1L
+#
+#}
+#
+#c(beta = mod$est, tau = sqrt(mod$tau2))
+#
 hybrid_red <- 
   hybrid(
     yi = red_romance_femalep$yi, 
@@ -125,7 +125,7 @@ red_romance_femalep_nested <- nest_by(red_romance_femalep, study, .key = "data")
 fit_hybrid_model(red_romance_femalep_nested)
 
 # Generate bootstrap
-set.seed(20230321)
+set.seed(05052025)
 
 ncpus <- parallel::detectCores() - 1
 
@@ -135,7 +135,7 @@ tic()
 boots <- boot(
   data = red_romance_femalep_nested,    # nested dataset
   statistic = fit_hybrid_model,         # function for fitting selection model
-  R = 1999,                             # number of bootstraps
+  R = 99,                             # number of bootstraps
   parallel = "multicore", ncpus = ncpus
 )
 
@@ -143,7 +143,7 @@ time_seq <- toc()
 
 est <- boots$t0
 
-boot_se <- apply(boots$t, 2, sd, na.rm = TRUE)  
+boot_SE <- apply(boots$t, 2, sd, na.rm = TRUE)  
 
 model_SE <- with(hybrid_red, c(se[1], se[2] / (2 * sqrt(tau2))))
 
