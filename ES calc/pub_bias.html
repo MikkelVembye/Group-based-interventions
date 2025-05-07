@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-05-05">
+<meta name="dcterms.date" content="2025-05-07">
 
 <title>Publication bias testing in Dalgaard et al.&nbsp;(2025)</title>
 <style>
@@ -87,6 +87,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#data" id="toc-data" class="nav-link active" data-scroll-target="#data">Data</a></li>
   <li><a href="#main-analyses" id="toc-main-analyses" class="nav-link" data-scroll-target="#main-analyses">Main Analyses</a></li>
   <li><a href="#funnel-plots" id="toc-funnel-plots" class="nav-link" data-scroll-target="#funnel-plots">Funnel Plots</a></li>
+  <li><a href="#preregistered-vs.-not-preregistered" id="toc-preregistered-vs.-not-preregistered" class="nav-link" data-scroll-target="#preregistered-vs.-not-preregistered">Preregistered vs.&nbsp;not-preregistered</a></li>
   <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references">References</a></li>
   </ul>
 </nav>
@@ -106,7 +107,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 5, 2025</p>
+      <p class="date">May 7, 2025</p>
     </div>
   </div>
   
@@ -122,8 +123,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h1>Data</h1>
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"ES calc/reintergation_dat.rds"</span>)</span>
+<summary>Mikkel’s code</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"ES calc/reintergation_dat.rds"</span>) </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>reintergation_dat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -140,7 +141,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">gt</th>
 <th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">vgt</th>
 <th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">Wgt</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">Wse</th>
 <th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">p_val</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">Wg_post</th>
 <th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">No protocol</th>
 <th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">Overall RoB</th>
 </tr>
@@ -154,7 +157,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.314</td>
 <td style="text-align: right;">0.196</td>
 <td style="text-align: right;">0.195</td>
-<td style="text-align: right;">0.478</td>
+<td style="text-align: right;">0.442</td>
+<td style="text-align: right;">0.477</td>
+<td style="text-align: right;">0.087</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -166,7 +171,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.103</td>
 <td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.091</td>
+<td style="text-align: right;">0.301</td>
 <td style="text-align: right;">0.733</td>
+<td style="text-align: right;">0.087</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -178,7 +185,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.443</td>
 <td style="text-align: right;">0.162</td>
 <td style="text-align: right;">0.159</td>
-<td style="text-align: right;">0.272</td>
+<td style="text-align: right;">0.399</td>
+<td style="text-align: right;">0.267</td>
+<td style="text-align: right;">0.121</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -190,7 +199,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.069</td>
 <td style="text-align: right;">0.159</td>
 <td style="text-align: right;">0.159</td>
+<td style="text-align: right;">0.399</td>
 <td style="text-align: right;">0.863</td>
+<td style="text-align: right;">0.121</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -202,7 +213,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.548</td>
 <td style="text-align: right;">0.164</td>
 <td style="text-align: right;">0.159</td>
-<td style="text-align: right;">0.176</td>
+<td style="text-align: right;">0.399</td>
+<td style="text-align: right;">0.170</td>
+<td style="text-align: right;">0.121</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -214,7 +227,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.094</td>
 <td style="text-align: right;">0.094</td>
+<td style="text-align: right;">0.306</td>
 <td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.047</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -226,7 +241,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.138</td>
 <td style="text-align: right;">0.082</td>
 <td style="text-align: right;">0.082</td>
+<td style="text-align: right;">0.286</td>
 <td style="text-align: right;">0.631</td>
+<td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -238,7 +255,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.340</td>
 <td style="text-align: right;">0.089</td>
 <td style="text-align: right;">0.088</td>
-<td style="text-align: right;">0.256</td>
+<td style="text-align: right;">0.297</td>
+<td style="text-align: right;">0.253</td>
+<td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -250,7 +269,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.259</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.080</td>
 <td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -262,7 +283,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.428</td>
 <td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.072</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -274,7 +297,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.439</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.082</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -286,7 +311,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.565</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.076</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -298,7 +325,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.593</td>
 <td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -310,7 +339,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.305</td>
 <td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -322,7 +353,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.389</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.083</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -334,7 +367,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.066</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.088</td>
 <td style="text-align: right;">0.450</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -346,7 +381,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.128</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.006</td>
-<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">0.079</td>
+<td style="text-align: right;">0.104</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -358,7 +395,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.224</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.090</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -370,7 +409,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.301</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.083</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -382,7 +423,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.308</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.076</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -394,7 +437,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.211</td>
 <td style="text-align: right;">0.006</td>
 <td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.076</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -406,7 +451,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.194</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.033</td>
+<td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -418,7 +465,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.342</td>
 <td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0.009</td>
+<td style="text-align: right;">0.095</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -430,7 +479,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.357</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.086</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -442,7 +493,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.403</td>
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.098</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -454,7 +507,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.381</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -466,7 +521,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.232</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.082</td>
 <td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -478,7 +535,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.083</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.082</td>
 <td style="text-align: right;">0.313</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -490,7 +549,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.179</td>
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.099</td>
 <td style="text-align: right;">0.072</td>
+<td style="text-align: right;">0.009</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -502,7 +563,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.455</td>
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.101</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -514,7 +577,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.457</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -526,7 +591,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.512</td>
 <td style="text-align: right;">0.011</td>
 <td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.103</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -538,7 +605,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.598</td>
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.009</td>
+<td style="text-align: right;">0.096</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -550,7 +619,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.410</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.087</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -562,7 +633,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.281</td>
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.087</td>
 <td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -574,7 +647,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.245</td>
 <td style="text-align: right;">0.011</td>
 <td style="text-align: right;">0.011</td>
-<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.105</td>
+<td style="text-align: right;">0.019</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -586,7 +661,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.247</td>
 <td style="text-align: right;">0.026</td>
 <td style="text-align: right;">0.026</td>
-<td style="text-align: right;">0.129</td>
+<td style="text-align: right;">0.162</td>
+<td style="text-align: right;">0.128</td>
+<td style="text-align: right;">0.019</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -598,7 +675,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.020</td>
 <td style="text-align: right;">0.025</td>
 <td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.159</td>
 <td style="text-align: right;">0.900</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -610,7 +689,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.046</td>
 <td style="text-align: right;">0.026</td>
 <td style="text-align: right;">0.026</td>
+<td style="text-align: right;">0.160</td>
 <td style="text-align: right;">0.774</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -622,7 +703,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.037</td>
 <td style="text-align: right;">0.020</td>
 <td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.141</td>
 <td style="text-align: right;">0.792</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -634,7 +717,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.083</td>
 <td style="text-align: right;">0.020</td>
 <td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.142</td>
 <td style="text-align: right;">0.558</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -646,7 +731,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.265</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.021</td>
-<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.147</td>
+<td style="text-align: right;">0.070</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -658,7 +745,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.137</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.147</td>
 <td style="text-align: right;">0.352</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -670,7 +759,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.209</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.158</td>
+<td style="text-align: right;">0.147</td>
+<td style="text-align: right;">0.157</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -682,7 +773,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.081</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.149</td>
 <td style="text-align: right;">0.588</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -694,7 +787,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.203</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.021</td>
-<td style="text-align: right;">0.168</td>
+<td style="text-align: right;">0.147</td>
+<td style="text-align: right;">0.167</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -706,7 +801,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.074</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.147</td>
 <td style="text-align: right;">0.616</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -718,7 +815,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.177</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.147</td>
 <td style="text-align: right;">0.229</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -730,7 +829,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.166</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.149</td>
 <td style="text-align: right;">0.266</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -742,7 +843,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.207</td>
 <td style="text-align: right;">0.081</td>
 <td style="text-align: right;">0.080</td>
-<td style="text-align: right;">0.467</td>
+<td style="text-align: right;">0.283</td>
+<td style="text-align: right;">0.466</td>
+<td style="text-align: right;">0.050</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -754,7 +857,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.035</td>
 <td style="text-align: right;">0.632</td>
 <td style="text-align: right;">0.632</td>
+<td style="text-align: right;">0.795</td>
 <td style="text-align: right;">0.965</td>
+<td style="text-align: right;">0.050</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -766,7 +871,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.204</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.074</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -778,7 +885,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.055</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.630</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -790,7 +899,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.019</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.866</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -802,7 +913,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.113</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.321</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -814,7 +927,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.102</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.373</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -826,7 +941,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.169</td>
 <td style="text-align: right;">0.013</td>
 <td style="text-align: right;">0.013</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.140</td>
+<td style="text-align: right;">0.010</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -838,7 +955,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.193</td>
 <td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.103</td>
+<td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">0.016</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -850,7 +969,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.156</td>
 <td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.192</td>
+<td style="text-align: right;">0.120</td>
+<td style="text-align: right;">0.191</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -862,7 +983,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.122</td>
 <td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.117</td>
 <td style="text-align: right;">0.298</td>
+<td style="text-align: right;">0.016</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -874,7 +997,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.348</td>
 <td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0.017</td>
-<td style="text-align: right;">0.008</td>
+<td style="text-align: right;">0.129</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.019</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -886,7 +1011,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.045</td>
 <td style="text-align: right;">0.011</td>
 <td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.106</td>
 <td style="text-align: right;">0.675</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -898,7 +1025,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.039</td>
 <td style="text-align: right;">0.012</td>
 <td style="text-align: right;">0.012</td>
+<td style="text-align: right;">0.111</td>
 <td style="text-align: right;">0.727</td>
+<td style="text-align: right;">0.019</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -910,7 +1039,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.094</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.150</td>
 <td style="text-align: right;">0.531</td>
+<td style="text-align: right;">0.013</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -922,7 +1053,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.204</td>
 <td style="text-align: right;">0.046</td>
 <td style="text-align: right;">0.046</td>
-<td style="text-align: right;">0.341</td>
+<td style="text-align: right;">0.214</td>
+<td style="text-align: right;">0.340</td>
+<td style="text-align: right;">0.013</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -934,7 +1067,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.241</td>
 <td style="text-align: right;">0.019</td>
 <td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.082</td>
+<td style="text-align: right;">0.138</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.013</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -946,7 +1081,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.181</td>
 <td style="text-align: right;">0.190</td>
 <td style="text-align: right;">0.189</td>
-<td style="text-align: right;">0.678</td>
+<td style="text-align: right;">0.434</td>
+<td style="text-align: right;">0.677</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -958,7 +1095,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.258</td>
 <td style="text-align: right;">0.142</td>
 <td style="text-align: right;">0.141</td>
-<td style="text-align: right;">0.494</td>
+<td style="text-align: right;">0.375</td>
+<td style="text-align: right;">0.492</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -970,7 +1109,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.388</td>
 <td style="text-align: right;">0.143</td>
 <td style="text-align: right;">0.141</td>
-<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.375</td>
+<td style="text-align: right;">0.301</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -982,7 +1123,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.183</td>
 <td style="text-align: right;">0.141</td>
 <td style="text-align: right;">0.141</td>
+<td style="text-align: right;">0.375</td>
 <td style="text-align: right;">0.627</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -994,7 +1137,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.501</td>
 <td style="text-align: right;">0.007</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.200</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -1006,7 +1151,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.039</td>
 <td style="text-align: right;">0.174</td>
 <td style="text-align: right;">0.174</td>
+<td style="text-align: right;">0.418</td>
 <td style="text-align: right;">0.925</td>
+<td style="text-align: right;">0.130</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1018,7 +1165,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.070</td>
 <td style="text-align: right;">0.140</td>
 <td style="text-align: right;">0.140</td>
+<td style="text-align: right;">0.375</td>
 <td style="text-align: right;">0.852</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1030,7 +1179,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.283</td>
 <td style="text-align: right;">0.142</td>
 <td style="text-align: right;">0.140</td>
-<td style="text-align: right;">0.452</td>
+<td style="text-align: right;">0.375</td>
+<td style="text-align: right;">0.450</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1042,7 +1193,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.434</td>
 <td style="text-align: right;">0.143</td>
 <td style="text-align: right;">0.140</td>
-<td style="text-align: right;">0.252</td>
+<td style="text-align: right;">0.375</td>
+<td style="text-align: right;">0.247</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1054,7 +1207,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0.140</td>
 <td style="text-align: right;">0.140</td>
+<td style="text-align: right;">0.375</td>
 <td style="text-align: right;">0.924</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1066,7 +1221,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.464</td>
 <td style="text-align: right;">0.085</td>
 <td style="text-align: right;">0.083</td>
-<td style="text-align: right;">0.111</td>
+<td style="text-align: right;">0.288</td>
+<td style="text-align: right;">0.107</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1078,7 +1235,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.819</td>
 <td style="text-align: right;">0.089</td>
 <td style="text-align: right;">0.083</td>
-<td style="text-align: right;">0.006</td>
+<td style="text-align: right;">0.288</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1090,7 +1249,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">1.120</td>
 <td style="text-align: right;">0.104</td>
 <td style="text-align: right;">0.093</td>
-<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1102,7 +1263,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.281</td>
 <td style="text-align: right;">0.071</td>
 <td style="text-align: right;">0.070</td>
-<td style="text-align: right;">0.291</td>
+<td style="text-align: right;">0.265</td>
+<td style="text-align: right;">0.288</td>
+<td style="text-align: right;">0.069</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1114,7 +1277,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.538</td>
 <td style="text-align: right;">0.161</td>
 <td style="text-align: right;">0.158</td>
-<td style="text-align: right;">0.180</td>
+<td style="text-align: right;">0.398</td>
+<td style="text-align: right;">0.176</td>
+<td style="text-align: right;">0.070</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1126,7 +1291,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.151</td>
 <td style="text-align: right;">0.078</td>
 <td style="text-align: right;">0.078</td>
+<td style="text-align: right;">0.279</td>
 <td style="text-align: right;">0.589</td>
+<td style="text-align: right;">0.066</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1138,7 +1305,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.037</td>
 <td style="text-align: right;">0.078</td>
 <td style="text-align: right;">0.078</td>
+<td style="text-align: right;">0.279</td>
 <td style="text-align: right;">0.896</td>
+<td style="text-align: right;">0.066</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1150,7 +1319,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.862</td>
 <td style="text-align: right;">0.148</td>
 <td style="text-align: right;">0.137</td>
-<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.371</td>
+<td style="text-align: right;">0.020</td>
+<td style="text-align: right;">0.103</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -1162,7 +1333,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.214</td>
 <td style="text-align: right;">0.159</td>
 <td style="text-align: right;">0.158</td>
-<td style="text-align: right;">0.591</td>
+<td style="text-align: right;">0.398</td>
+<td style="text-align: right;">0.590</td>
+<td style="text-align: right;">0.140</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1174,7 +1347,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.024</td>
 <td style="text-align: right;">0.097</td>
 <td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.312</td>
 <td style="text-align: right;">0.940</td>
+<td style="text-align: right;">0.083</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1186,7 +1361,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.056</td>
 <td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.091</td>
+<td style="text-align: right;">0.302</td>
 <td style="text-align: right;">0.852</td>
+<td style="text-align: right;">0.078</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1198,7 +1375,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.490</td>
 <td style="text-align: right;">0.113</td>
 <td style="text-align: right;">0.110</td>
-<td style="text-align: right;">0.144</td>
+<td style="text-align: right;">0.332</td>
+<td style="text-align: right;">0.139</td>
+<td style="text-align: right;">0.096</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1210,7 +1389,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.049</td>
 <td style="text-align: right;">0.125</td>
 <td style="text-align: right;">0.125</td>
+<td style="text-align: right;">0.354</td>
 <td style="text-align: right;">0.891</td>
+<td style="text-align: right;">0.107</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1222,7 +1403,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.111</td>
 <td style="text-align: right;">0.111</td>
+<td style="text-align: right;">0.333</td>
 <td style="text-align: right;">0.976</td>
+<td style="text-align: right;">0.095</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1234,7 +1417,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.677</td>
 <td style="text-align: right;">0.119</td>
 <td style="text-align: right;">0.114</td>
-<td style="text-align: right;">0.050</td>
+<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">0.045</td>
+<td style="text-align: right;">0.101</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1246,7 +1431,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.129</td>
 <td style="text-align: right;">0.109</td>
 <td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.329</td>
 <td style="text-align: right;">0.694</td>
+<td style="text-align: right;">0.110</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Serious</td>
 </tr>
@@ -1258,7 +1445,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.509</td>
 <td style="text-align: right;">0.019</td>
 <td style="text-align: right;">0.016</td>
+<td style="text-align: right;">0.126</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1270,7 +1459,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.400</td>
 <td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0.019</td>
-<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">High</td>
 </tr>
@@ -1282,7 +1473,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.299</td>
 <td style="text-align: right;">0.055</td>
 <td style="text-align: right;">0.054</td>
-<td style="text-align: right;">0.203</td>
+<td style="text-align: right;">0.233</td>
+<td style="text-align: right;">0.200</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1294,7 +1487,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.349</td>
 <td style="text-align: right;">0.033</td>
 <td style="text-align: right;">0.032</td>
-<td style="text-align: right;">0.056</td>
+<td style="text-align: right;">0.180</td>
+<td style="text-align: right;">0.052</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1306,7 +1501,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.115</td>
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.031</td>
-<td style="text-align: right;">0.519</td>
+<td style="text-align: right;">0.177</td>
+<td style="text-align: right;">0.518</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1318,7 +1515,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.329</td>
 <td style="text-align: right;">0.037</td>
 <td style="text-align: right;">0.036</td>
-<td style="text-align: right;">0.087</td>
+<td style="text-align: right;">0.190</td>
+<td style="text-align: right;">0.083</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1330,7 +1529,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.472</td>
 <td style="text-align: right;">0.054</td>
 <td style="text-align: right;">0.052</td>
-<td style="text-align: right;">0.043</td>
+<td style="text-align: right;">0.229</td>
+<td style="text-align: right;">0.039</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1342,7 +1543,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.410</td>
 <td style="text-align: right;">0.044</td>
 <td style="text-align: right;">0.043</td>
-<td style="text-align: right;">0.052</td>
+<td style="text-align: right;">0.207</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1354,7 +1557,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.134</td>
 <td style="text-align: right;">0.039</td>
 <td style="text-align: right;">0.038</td>
+<td style="text-align: right;">0.196</td>
 <td style="text-align: right;">0.495</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1366,7 +1571,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.270</td>
 <td style="text-align: right;">0.035</td>
 <td style="text-align: right;">0.035</td>
-<td style="text-align: right;">0.151</td>
+<td style="text-align: right;">0.186</td>
+<td style="text-align: right;">0.148</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1378,7 +1585,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.567</td>
 <td style="text-align: right;">0.055</td>
 <td style="text-align: right;">0.052</td>
-<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.229</td>
+<td style="text-align: right;">0.013</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1390,7 +1599,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.389</td>
 <td style="text-align: right;">0.045</td>
 <td style="text-align: right;">0.044</td>
-<td style="text-align: right;">0.066</td>
+<td style="text-align: right;">0.209</td>
+<td style="text-align: right;">0.063</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1402,7 +1613,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.296</td>
 <td style="text-align: right;">0.028</td>
 <td style="text-align: right;">0.027</td>
-<td style="text-align: right;">0.075</td>
+<td style="text-align: right;">0.166</td>
+<td style="text-align: right;">0.074</td>
+<td style="text-align: right;">0.024</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1414,7 +1627,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.985</td>
 <td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.078</td>
-<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.279</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.098</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1426,7 +1641,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.109</td>
 <td style="text-align: right;">0.163</td>
 <td style="text-align: right;">0.162</td>
-<td style="text-align: right;">0.788</td>
+<td style="text-align: right;">0.403</td>
+<td style="text-align: right;">0.787</td>
+<td style="text-align: right;">0.125</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1438,7 +1655,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.268</td>
 <td style="text-align: right;">0.164</td>
 <td style="text-align: right;">0.162</td>
-<td style="text-align: right;">0.508</td>
+<td style="text-align: right;">0.403</td>
+<td style="text-align: right;">0.506</td>
+<td style="text-align: right;">0.125</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1450,7 +1669,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.415</td>
 <td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0.018</td>
+<td style="text-align: right;">0.133</td>
 <td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.013</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Moderate</td>
 </tr>
@@ -1462,7 +1683,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.129</td>
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.032</td>
+<td style="text-align: right;">0.178</td>
 <td style="text-align: right;">0.468</td>
+<td style="text-align: right;">0.025</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1474,7 +1697,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.325</td>
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.032</td>
-<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.067</td>
+<td style="text-align: right;">0.025</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1486,7 +1711,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.168</td>
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.032</td>
-<td style="text-align: right;">0.345</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.344</td>
+<td style="text-align: right;">0.025</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1498,7 +1725,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.178</td>
 <td style="text-align: right;">0.032</td>
 <td style="text-align: right;">0.032</td>
-<td style="text-align: right;">0.318</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: right;">0.317</td>
+<td style="text-align: right;">0.025</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1510,7 +1739,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.131</td>
 <td style="text-align: right;">0.112</td>
 <td style="text-align: right;">0.112</td>
+<td style="text-align: right;">0.334</td>
 <td style="text-align: right;">0.696</td>
+<td style="text-align: right;">0.084</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1522,7 +1753,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.101</td>
 <td style="text-align: right;">0.112</td>
 <td style="text-align: right;">0.112</td>
+<td style="text-align: right;">0.334</td>
 <td style="text-align: right;">0.762</td>
+<td style="text-align: right;">0.084</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1534,7 +1767,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.117</td>
 <td style="text-align: right;">0.119</td>
 <td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.344</td>
 <td style="text-align: right;">0.733</td>
+<td style="text-align: right;">0.089</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1546,7 +1781,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.181</td>
 <td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0.113</td>
+<td style="text-align: right;">0.337</td>
 <td style="text-align: right;">0.591</td>
+<td style="text-align: right;">0.085</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1558,7 +1795,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.113</td>
 <td style="text-align: right;">0.113</td>
 <td style="text-align: right;">0.113</td>
+<td style="text-align: right;">0.337</td>
 <td style="text-align: right;">0.737</td>
+<td style="text-align: right;">0.085</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1570,7 +1809,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.118</td>
 <td style="text-align: right;">0.118</td>
+<td style="text-align: right;">0.344</td>
 <td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.089</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1582,7 +1823,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.333</td>
 <td style="text-align: right;">0.104</td>
 <td style="text-align: right;">0.102</td>
-<td style="text-align: right;">0.301</td>
+<td style="text-align: right;">0.319</td>
+<td style="text-align: right;">0.297</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1594,7 +1837,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.094</td>
 <td style="text-align: right;">0.057</td>
 <td style="text-align: right;">0.057</td>
+<td style="text-align: right;">0.239</td>
 <td style="text-align: right;">0.694</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1606,7 +1851,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.650</td>
 <td style="text-align: right;">0.125</td>
 <td style="text-align: right;">0.118</td>
-<td style="text-align: right;">0.066</td>
+<td style="text-align: right;">0.344</td>
+<td style="text-align: right;">0.059</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1618,7 +1865,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.522</td>
 <td style="text-align: right;">0.107</td>
 <td style="text-align: right;">0.103</td>
-<td style="text-align: right;">0.111</td>
+<td style="text-align: right;">0.321</td>
+<td style="text-align: right;">0.104</td>
+<td style="text-align: right;">0.114</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1630,7 +1879,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.196</td>
 <td style="text-align: right;">0.155</td>
 <td style="text-align: right;">0.154</td>
-<td style="text-align: right;">0.618</td>
+<td style="text-align: right;">0.393</td>
+<td style="text-align: right;">0.617</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1642,7 +1893,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.258</td>
 <td style="text-align: right;">0.155</td>
 <td style="text-align: right;">0.154</td>
-<td style="text-align: right;">0.512</td>
+<td style="text-align: right;">0.393</td>
+<td style="text-align: right;">0.510</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1654,7 +1907,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.772</td>
 <td style="text-align: right;">0.391</td>
 <td style="text-align: right;">0.381</td>
-<td style="text-align: right;">0.217</td>
+<td style="text-align: right;">0.617</td>
+<td style="text-align: right;">0.211</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1666,7 +1921,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.724</td>
 <td style="text-align: right;">0.274</td>
 <td style="text-align: right;">0.266</td>
-<td style="text-align: right;">0.167</td>
+<td style="text-align: right;">0.515</td>
+<td style="text-align: right;">0.160</td>
+<td style="text-align: right;">0.127</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1678,7 +1935,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.074</td>
 <td style="text-align: right;">0.068</td>
 <td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.262</td>
 <td style="text-align: right;">0.779</td>
+<td style="text-align: right;">0.053</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1690,7 +1949,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.269</td>
 <td style="text-align: right;">0.069</td>
 <td style="text-align: right;">0.068</td>
-<td style="text-align: right;">0.305</td>
+<td style="text-align: right;">0.262</td>
+<td style="text-align: right;">0.303</td>
+<td style="text-align: right;">0.053</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1702,7 +1963,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.953</td>
 <td style="text-align: right;">0.075</td>
 <td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.262</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.053</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1714,7 +1977,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.220</td>
 <td style="text-align: right;">0.041</td>
 <td style="text-align: right;">0.041</td>
-<td style="text-align: right;">0.279</td>
+<td style="text-align: right;">0.202</td>
+<td style="text-align: right;">0.278</td>
+<td style="text-align: right;">0.033</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1726,7 +1991,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.086</td>
 <td style="text-align: right;">0.052</td>
 <td style="text-align: right;">0.052</td>
+<td style="text-align: right;">0.228</td>
 <td style="text-align: right;">0.706</td>
+<td style="text-align: right;">0.041</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1738,7 +2005,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.059</td>
 <td style="text-align: right;">0.063</td>
 <td style="text-align: right;">0.063</td>
-<td style="text-align: right;">0.815</td>
+<td style="text-align: right;">0.251</td>
+<td style="text-align: right;">0.814</td>
+<td style="text-align: right;">0.051</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1750,7 +2019,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.104</td>
 <td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0.017</td>
-<td style="text-align: right;">0.432</td>
+<td style="text-align: right;">0.132</td>
+<td style="text-align: right;">0.431</td>
+<td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1762,7 +2033,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.445</td>
 <td style="text-align: right;">0.112</td>
 <td style="text-align: right;">0.111</td>
-<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.333</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1774,7 +2047,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.341</td>
 <td style="text-align: right;">0.051</td>
 <td style="text-align: right;">0.050</td>
-<td style="text-align: right;">0.130</td>
+<td style="text-align: right;">0.224</td>
+<td style="text-align: right;">0.127</td>
+<td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1786,7 +2061,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.000</td>
-<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1798,7 +2075,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.148</td>
 <td style="text-align: right;">0.014</td>
 <td style="text-align: right;">0.014</td>
-<td style="text-align: right;">0.215</td>
+<td style="text-align: right;">0.119</td>
+<td style="text-align: right;">0.213</td>
+<td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -1810,7 +2089,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.144</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.339</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.338</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1822,7 +2103,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.151</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.321</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.320</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1834,7 +2117,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.346</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1846,7 +2131,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.036</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.152</td>
 <td style="text-align: right;">0.813</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1858,7 +2145,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.223</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.138</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1870,7 +2159,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.148</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.329</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.328</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1882,7 +2173,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.088</td>
 <td style="text-align: right;">0.022</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.150</td>
 <td style="text-align: right;">0.558</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1894,7 +2187,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.000</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.152</td>
 <td style="text-align: right;">1.000</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1906,7 +2201,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.369</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1918,7 +2215,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.184</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.226</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.225</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1930,7 +2229,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.264</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.079</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.078</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1942,7 +2243,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.084</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.152</td>
 <td style="text-align: right;">0.579</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1954,7 +2257,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.306</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1966,7 +2271,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.074</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.152</td>
 <td style="text-align: right;">0.625</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1978,7 +2285,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.495</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.150</td>
 <td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -1990,7 +2299,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.249</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
-<td style="text-align: right;">0.101</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2002,7 +2313,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.249</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.022</td>
-<td style="text-align: right;">0.097</td>
+<td style="text-align: right;">0.150</td>
+<td style="text-align: right;">0.096</td>
+<td style="text-align: right;">0.017</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2014,7 +2327,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.080</td>
 <td style="text-align: right;">0.023</td>
 <td style="text-align: right;">0.023</td>
+<td style="text-align: right;">0.152</td>
 <td style="text-align: right;">0.600</td>
+<td style="text-align: right;">0.018</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2026,7 +2341,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.252</td>
 <td style="text-align: right;">0.034</td>
 <td style="text-align: right;">0.034</td>
-<td style="text-align: right;">0.172</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2038,7 +2355,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.661</td>
 <td style="text-align: right;">0.044</td>
 <td style="text-align: right;">0.043</td>
-<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.208</td>
+<td style="text-align: right;">0.001</td>
+<td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2050,7 +2369,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.143</td>
 <td style="text-align: right;">0.041</td>
 <td style="text-align: right;">0.041</td>
+<td style="text-align: right;">0.203</td>
 <td style="text-align: right;">0.480</td>
+<td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2062,7 +2383,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.250</td>
 <td style="text-align: right;">0.034</td>
 <td style="text-align: right;">0.033</td>
-<td style="text-align: right;">0.172</td>
+<td style="text-align: right;">0.183</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: right;">0.021</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2074,7 +2397,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.353</td>
 <td style="text-align: right;">0.038</td>
 <td style="text-align: right;">0.038</td>
-<td style="text-align: right;">0.071</td>
+<td style="text-align: right;">0.194</td>
+<td style="text-align: right;">0.069</td>
+<td style="text-align: right;">0.029</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2086,7 +2411,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.082</td>
 <td style="text-align: right;">0.038</td>
 <td style="text-align: right;">0.038</td>
-<td style="text-align: right;">0.672</td>
+<td style="text-align: right;">0.194</td>
+<td style="text-align: right;">0.671</td>
+<td style="text-align: right;">0.029</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2098,7 +2425,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.254</td>
 <td style="text-align: right;">0.038</td>
 <td style="text-align: right;">0.038</td>
-<td style="text-align: right;">0.193</td>
+<td style="text-align: right;">0.194</td>
+<td style="text-align: right;">0.191</td>
+<td style="text-align: right;">0.029</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2110,7 +2439,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.532</td>
 <td style="text-align: right;">0.044</td>
 <td style="text-align: right;">0.042</td>
-<td style="text-align: right;">0.011</td>
+<td style="text-align: right;">0.206</td>
+<td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.033</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2122,7 +2453,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.032</td>
 <td style="text-align: right;">0.042</td>
 <td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.206</td>
 <td style="text-align: right;">0.875</td>
+<td style="text-align: right;">0.033</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2134,7 +2467,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.008</td>
 <td style="text-align: right;">0.042</td>
 <td style="text-align: right;">0.042</td>
+<td style="text-align: right;">0.206</td>
 <td style="text-align: right;">0.970</td>
+<td style="text-align: right;">0.033</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2146,7 +2481,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.150</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
+<td style="text-align: right;">0.218</td>
 <td style="text-align: right;">0.492</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2158,7 +2495,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.104</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
+<td style="text-align: right;">0.218</td>
 <td style="text-align: right;">0.632</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2170,7 +2509,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.138</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
+<td style="text-align: right;">0.218</td>
 <td style="text-align: right;">0.526</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2182,7 +2523,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.325</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
-<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.218</td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2194,7 +2537,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.136</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
-<td style="text-align: right;">0.534</td>
+<td style="text-align: right;">0.218</td>
+<td style="text-align: right;">0.533</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2206,7 +2551,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.028</td>
 <td style="text-align: right;">0.047</td>
 <td style="text-align: right;">0.047</td>
+<td style="text-align: right;">0.218</td>
 <td style="text-align: right;">0.897</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2218,7 +2565,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">-0.172</td>
 <td style="text-align: right;">0.048</td>
 <td style="text-align: right;">0.047</td>
-<td style="text-align: right;">0.430</td>
+<td style="text-align: right;">0.218</td>
+<td style="text-align: right;">0.429</td>
+<td style="text-align: right;">0.036</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2230,7 +2579,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.092</td>
 <td style="text-align: right;">0.126</td>
 <td style="text-align: right;">0.126</td>
+<td style="text-align: right;">0.355</td>
 <td style="text-align: right;">0.795</td>
+<td style="text-align: right;">0.098</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2242,7 +2593,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">1.355</td>
 <td style="text-align: right;">0.150</td>
 <td style="text-align: right;">0.126</td>
+<td style="text-align: right;">0.355</td>
 <td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.098</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2254,7 +2607,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.078</td>
 <td style="text-align: right;">0.010</td>
 <td style="text-align: right;">0.010</td>
-<td style="text-align: right;">0.441</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.440</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2266,7 +2621,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.105</td>
 <td style="text-align: right;">0.005</td>
 <td style="text-align: right;">0.005</td>
-<td style="text-align: right;">0.130</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: right;">0.125</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Low</td>
 </tr>
@@ -2278,7 +2635,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0.511</td>
 <td style="text-align: right;">0.091</td>
 <td style="text-align: right;">0.089</td>
-<td style="text-align: right;">0.090</td>
+<td style="text-align: right;">0.298</td>
+<td style="text-align: right;">0.086</td>
+<td style="text-align: right;">NA</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">Some concerns</td>
 </tr>
@@ -2297,7 +2656,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code</summary>
+<summary>Mikkel’s code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="ot">&lt;-</span> <span class="fu">.CHE_RVE</span>(reintergation_dat) </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="sc">|&gt;</span> </span>
@@ -2310,23 +2669,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="upkroblhgw" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#upkroblhgw table {
+<div id="pqmwmbybib" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#pqmwmbybib table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#upkroblhgw thead, #upkroblhgw tbody, #upkroblhgw tfoot, #upkroblhgw tr, #upkroblhgw td, #upkroblhgw th {
+#pqmwmbybib thead, #pqmwmbybib tbody, #pqmwmbybib tfoot, #pqmwmbybib tr, #pqmwmbybib td, #pqmwmbybib th {
   border-style: none;
 }
 
-#upkroblhgw p {
+#pqmwmbybib p {
   margin: 0;
   padding: 0;
 }
 
-#upkroblhgw .gt_table {
+#pqmwmbybib .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2352,12 +2711,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_caption {
+#pqmwmbybib .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#upkroblhgw .gt_title {
+#pqmwmbybib .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2369,7 +2728,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#upkroblhgw .gt_subtitle {
+#pqmwmbybib .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2381,7 +2740,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#upkroblhgw .gt_heading {
+#pqmwmbybib .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2393,13 +2752,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_bottom_border {
+#pqmwmbybib .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_col_headings {
+#pqmwmbybib .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2414,7 +2773,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_col_heading {
+#pqmwmbybib .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2434,7 +2793,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#upkroblhgw .gt_column_spanner_outer {
+#pqmwmbybib .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2446,15 +2805,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#upkroblhgw .gt_column_spanner_outer:first-child {
+#pqmwmbybib .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#upkroblhgw .gt_column_spanner_outer:last-child {
+#pqmwmbybib .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#upkroblhgw .gt_column_spanner {
+#pqmwmbybib .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2466,11 +2825,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#upkroblhgw .gt_spanner_row {
+#pqmwmbybib .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#upkroblhgw .gt_group_heading {
+#pqmwmbybib .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2496,7 +2855,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#upkroblhgw .gt_empty_group_heading {
+#pqmwmbybib .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -2511,15 +2870,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#upkroblhgw .gt_from_md > :first-child {
+#pqmwmbybib .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#upkroblhgw .gt_from_md > :last-child {
+#pqmwmbybib .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#upkroblhgw .gt_row {
+#pqmwmbybib .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2538,7 +2897,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#upkroblhgw .gt_stub {
+#pqmwmbybib .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2551,7 +2910,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#upkroblhgw .gt_stub_row_group {
+#pqmwmbybib .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2565,15 +2924,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#upkroblhgw .gt_row_group_first td {
+#pqmwmbybib .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#upkroblhgw .gt_row_group_first th {
+#pqmwmbybib .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#upkroblhgw .gt_summary_row {
+#pqmwmbybib .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2583,16 +2942,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#upkroblhgw .gt_first_summary_row {
+#pqmwmbybib .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_first_summary_row.thick {
+#pqmwmbybib .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#upkroblhgw .gt_last_summary_row {
+#pqmwmbybib .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2602,7 +2961,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_grand_summary_row {
+#pqmwmbybib .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -2612,7 +2971,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#upkroblhgw .gt_first_grand_summary_row {
+#pqmwmbybib .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2622,7 +2981,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_last_grand_summary_row_top {
+#pqmwmbybib .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -2632,11 +2991,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_striped {
+#pqmwmbybib .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#upkroblhgw .gt_table_body {
+#pqmwmbybib .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2645,7 +3004,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_footnotes {
+#pqmwmbybib .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2659,7 +3018,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_footnote {
+#pqmwmbybib .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -2668,7 +3027,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#upkroblhgw .gt_sourcenotes {
+#pqmwmbybib .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -2682,7 +3041,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#upkroblhgw .gt_sourcenote {
+#pqmwmbybib .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -2690,72 +3049,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#upkroblhgw .gt_left {
+#pqmwmbybib .gt_left {
   text-align: left;
 }
 
-#upkroblhgw .gt_center {
+#pqmwmbybib .gt_center {
   text-align: center;
 }
 
-#upkroblhgw .gt_right {
+#pqmwmbybib .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#upkroblhgw .gt_font_normal {
+#pqmwmbybib .gt_font_normal {
   font-weight: normal;
 }
 
-#upkroblhgw .gt_font_bold {
+#pqmwmbybib .gt_font_bold {
   font-weight: bold;
 }
 
-#upkroblhgw .gt_font_italic {
+#pqmwmbybib .gt_font_italic {
   font-style: italic;
 }
 
-#upkroblhgw .gt_super {
+#pqmwmbybib .gt_super {
   font-size: 65%;
 }
 
-#upkroblhgw .gt_footnote_marks {
+#pqmwmbybib .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#upkroblhgw .gt_asterisk {
+#pqmwmbybib .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#upkroblhgw .gt_indent_1 {
+#pqmwmbybib .gt_indent_1 {
   text-indent: 5px;
 }
 
-#upkroblhgw .gt_indent_2 {
+#pqmwmbybib .gt_indent_2 {
   text-indent: 10px;
 }
 
-#upkroblhgw .gt_indent_3 {
+#pqmwmbybib .gt_indent_3 {
   text-indent: 15px;
 }
 
-#upkroblhgw .gt_indent_4 {
+#pqmwmbybib .gt_indent_4 {
   text-indent: 20px;
 }
 
-#upkroblhgw .gt_indent_5 {
+#pqmwmbybib .gt_indent_5 {
   text-indent: 25px;
 }
 
-#upkroblhgw .katex-display {
+#pqmwmbybib .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#upkroblhgw div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#pqmwmbybib div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -2804,7 +3163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
 <div class="cell">
 <details class="code-fold">
-<summary>Show the code</summary>
+<summary>Mikkel’s code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>reintegration_sce_res <span class="ot">&lt;-</span> </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.SCEp</span>(<span class="at">mod =</span> analysis_plan, <span class="at">data =</span> reintergation_dat) </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2818,23 +3177,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="uaujqhepto" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#uaujqhepto table {
+<div id="afccxzjnjs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#afccxzjnjs table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#uaujqhepto thead, #uaujqhepto tbody, #uaujqhepto tfoot, #uaujqhepto tr, #uaujqhepto td, #uaujqhepto th {
+#afccxzjnjs thead, #afccxzjnjs tbody, #afccxzjnjs tfoot, #afccxzjnjs tr, #afccxzjnjs td, #afccxzjnjs th {
   border-style: none;
 }
 
-#uaujqhepto p {
+#afccxzjnjs p {
   margin: 0;
   padding: 0;
 }
 
-#uaujqhepto .gt_table {
+#afccxzjnjs .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -2860,12 +3219,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-left-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_caption {
+#afccxzjnjs .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#uaujqhepto .gt_title {
+#afccxzjnjs .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -2877,7 +3236,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-width: 0;
 }
 
-#uaujqhepto .gt_subtitle {
+#afccxzjnjs .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -2889,7 +3248,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-width: 0;
 }
 
-#uaujqhepto .gt_heading {
+#afccxzjnjs .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -2901,13 +3260,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_bottom_border {
+#afccxzjnjs .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_col_headings {
+#afccxzjnjs .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -2922,7 +3281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_col_heading {
+#afccxzjnjs .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2942,7 +3301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#uaujqhepto .gt_column_spanner_outer {
+#afccxzjnjs .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -2954,15 +3313,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 4px;
 }
 
-#uaujqhepto .gt_column_spanner_outer:first-child {
+#afccxzjnjs .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#uaujqhepto .gt_column_spanner_outer:last-child {
+#afccxzjnjs .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#uaujqhepto .gt_column_spanner {
+#afccxzjnjs .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -2974,11 +3333,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   width: 100%;
 }
 
-#uaujqhepto .gt_spanner_row {
+#afccxzjnjs .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#uaujqhepto .gt_group_heading {
+#afccxzjnjs .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3004,7 +3363,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   text-align: left;
 }
 
-#uaujqhepto .gt_empty_group_heading {
+#afccxzjnjs .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -3019,15 +3378,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: middle;
 }
 
-#uaujqhepto .gt_from_md > :first-child {
+#afccxzjnjs .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#uaujqhepto .gt_from_md > :last-child {
+#afccxzjnjs .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#uaujqhepto .gt_row {
+#afccxzjnjs .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3046,7 +3405,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   overflow-x: hidden;
 }
 
-#uaujqhepto .gt_stub {
+#afccxzjnjs .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3059,7 +3418,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#uaujqhepto .gt_stub_row_group {
+#afccxzjnjs .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -3073,15 +3432,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   vertical-align: top;
 }
 
-#uaujqhepto .gt_row_group_first td {
+#afccxzjnjs .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#uaujqhepto .gt_row_group_first th {
+#afccxzjnjs .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#uaujqhepto .gt_summary_row {
+#afccxzjnjs .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3091,16 +3450,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#uaujqhepto .gt_first_summary_row {
+#afccxzjnjs .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_first_summary_row.thick {
+#afccxzjnjs .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#uaujqhepto .gt_last_summary_row {
+#afccxzjnjs .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3110,7 +3469,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_grand_summary_row {
+#afccxzjnjs .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -3120,7 +3479,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#uaujqhepto .gt_first_grand_summary_row {
+#afccxzjnjs .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3130,7 +3489,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-top-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_last_grand_summary_row_top {
+#afccxzjnjs .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -3140,11 +3499,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_striped {
+#afccxzjnjs .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#uaujqhepto .gt_table_body {
+#afccxzjnjs .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -3153,7 +3512,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-bottom-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_footnotes {
+#afccxzjnjs .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3167,7 +3526,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_footnote {
+#afccxzjnjs .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -3176,7 +3535,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#uaujqhepto .gt_sourcenotes {
+#afccxzjnjs .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -3190,7 +3549,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   border-right-color: #D3D3D3;
 }
 
-#uaujqhepto .gt_sourcenote {
+#afccxzjnjs .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -3198,72 +3557,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   padding-right: 5px;
 }
 
-#uaujqhepto .gt_left {
+#afccxzjnjs .gt_left {
   text-align: left;
 }
 
-#uaujqhepto .gt_center {
+#afccxzjnjs .gt_center {
   text-align: center;
 }
 
-#uaujqhepto .gt_right {
+#afccxzjnjs .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#uaujqhepto .gt_font_normal {
+#afccxzjnjs .gt_font_normal {
   font-weight: normal;
 }
 
-#uaujqhepto .gt_font_bold {
+#afccxzjnjs .gt_font_bold {
   font-weight: bold;
 }
 
-#uaujqhepto .gt_font_italic {
+#afccxzjnjs .gt_font_italic {
   font-style: italic;
 }
 
-#uaujqhepto .gt_super {
+#afccxzjnjs .gt_super {
   font-size: 65%;
 }
 
-#uaujqhepto .gt_footnote_marks {
+#afccxzjnjs .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#uaujqhepto .gt_asterisk {
+#afccxzjnjs .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#uaujqhepto .gt_indent_1 {
+#afccxzjnjs .gt_indent_1 {
   text-indent: 5px;
 }
 
-#uaujqhepto .gt_indent_2 {
+#afccxzjnjs .gt_indent_2 {
   text-indent: 10px;
 }
 
-#uaujqhepto .gt_indent_3 {
+#afccxzjnjs .gt_indent_3 {
   text-indent: 15px;
 }
 
-#uaujqhepto .gt_indent_4 {
+#afccxzjnjs .gt_indent_4 {
   text-indent: 20px;
 }
 
-#uaujqhepto .gt_indent_5 {
+#afccxzjnjs .gt_indent_5 {
   text-indent: 25px;
 }
 
-#uaujqhepto .katex-display {
+#afccxzjnjs .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#uaujqhepto div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#afccxzjnjs div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -3363,21 +3722,166 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="funnel-plots" class="level1">
 <h1>Funnel Plots</h1>
 <div class="tabset-margin-container"></div><div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Overall</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Alcohol and drug abuse/misuse</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false" href="">Hope, Empowerment &amp; Self-efficacy</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-4" role="tab" aria-controls="tabset-2-4" aria-selected="false" href="">Social functioning (degree of impairment)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-5" role="tab" aria-controls="tabset-2-5" aria-selected="false" href="">Wellbeing and quality of life</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Overall</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Across outcome subgroups</a></li></ul>
 <div class="tab-content">
 <div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
-<p>1</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Mikkel’s code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.7</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># CHE pub bias</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>V_mat <span class="ot">&lt;-</span> <span class="fu">vcalc</span>(Wgt, <span class="at">cluster =</span> author_year, <span class="at">obs =</span> esid, <span class="at">data =</span> reintergation_dat, <span class="at">rho =</span> rho)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">solve</span>(V_mat)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>optimizers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"nlminb"</span>,<span class="st">"nloptr"</span>,<span class="st">"Rvmmin"</span>,<span class="st">"BFGS"</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="st">"Non-converged"</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="dv">1</span>L</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="sc">!</span><span class="fu">inherits</span>(mod, <span class="st">"rma.mv"</span>) <span class="sc">&amp;</span> i <span class="sc">&lt;=</span> <span class="dv">4</span>L) {</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rma.mv</span>(</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">yi =</span> gt,</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>        <span class="at">V =</span> V_mat,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        <span class="at">W =</span> W,</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>        <span class="at">mods =</span> <span class="sc">~</span> Wse,</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>        <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> author_year <span class="sc">/</span> esid,</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> reintergation_dat,</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="at">sparse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="at">control =</span> <span class="fu">list</span>(<span class="at">optimizer=</span>optimizers[i])</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>      <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">"Non-converged"</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>    i <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">1</span>L</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>mod_robu <span class="ot">&lt;-</span> <span class="fu">robust</span>(mod, <span class="at">cluster =</span> author_year, <span class="at">clubSandwich =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>mod_robu</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Multivariate Meta-Analysis Model (k = 178; method: REML)
+
+Variance Components:
+
+            estim    sqrt  nlvls  fixed            factor 
+sigma^2.1  0.0068  0.0822     42     no       author_year 
+sigma^2.2  0.0325  0.1803    178     no  author_year/esid 
+
+Test for Residual Heterogeneity:
+QE(df = 176) = 1176.8739, p-val &lt; .0001
+
+Number of estimates:   178
+Number of clusters:    42
+Estimates per cluster: 1-28 (mean: 4.24, median: 2.5)
+
+Test of Moderators (coefficient 2):¹
+F(df1 = 1, df2 = 1.06) = 0.2287, p-val = 0.7122
+
+Model Results:
+
+         estimate      se¹    tval¹    df¹    pval¹     ci.lb¹    ci.ub¹    
+intrcpt    0.0877  0.3448   0.2545   1.01   0.8411    -4.2109    4.3864     
+Wse        0.8863  1.8534   0.4782   1.06   0.7122   -19.6297   21.4023     
+
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+1) results based on cluster-robust inference (var-cov estimator: CR2,
+   approx t/F-tests and confidence intervals, df: Satterthwaite approx)</code></pre>
+</div>
+<details class="code-fold">
+<summary>Mikkel’s code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>overall_mean <span class="ot">&lt;-</span> reintegration_che_res<span class="sc">$</span>avg_effect</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>y_lim_exp1 <span class="ot">&lt;-</span> <span class="fu">max</span>(reintergation_dat<span class="sc">$</span>Wse) <span class="sc">+</span> <span class="fl">0.02</span> </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>funnel_exp1 <span class="ot">&lt;-</span>  <span class="fu">tribble</span>(</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span> x90, <span class="sc">~</span> x95, <span class="sc">~</span> x99, <span class="sc">~</span> y,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qnorm</span>(<span class="fl">0.05</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.005</span>) <span class="sc">*</span> y_lim_exp1, y_lim_exp1,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qnorm</span>(<span class="fl">0.95</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.995</span>) <span class="sc">*</span> y_lim_exp1, y_lim_exp1,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>line1 <span class="ot">&lt;-</span> <span class="st">"dashed"</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">"Funnel plot overall.png"</span>, <span class="at">height =</span> <span class="fl">4.5</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">unit =</span> <span class="st">"in"</span>, <span class="at">res =</span> <span class="dv">600</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="sc">|&gt;</span> </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x99), <span class="at">fill =</span> <span class="st">"grey"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x95), <span class="at">fill =</span> <span class="st">"grey10"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x90), <span class="at">fill =</span> <span class="st">"lightcyan"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>), <span class="at">intercept =</span> overall_mean, <span class="at">linetype =</span> line1) <span class="sc">+</span> </span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept =</span> overall_mean, <span class="at">linetype =</span> line1 ) <span class="sc">+</span>  </span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fu">qnorm</span>(<span class="fl">0.025</span>), <span class="at">intercept =</span> overall_mean, <span class="at">linetype =</span> line1) <span class="sc">+</span> </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="sc">-</span>mod_robu<span class="sc">$</span>b[<span class="dv">2</span>], <span class="at">intercept =</span> <span class="sc">-</span>mod_robu<span class="sc">$</span>b[<span class="dv">1</span>], <span class="at">linetype =</span> <span class="st">"longdash"</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span> </span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="fu">aes</span>(Wse, gt), <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_brewer</span>(<span class="at">type =</span> <span class="st">"qual"</span>, <span class="at">palette =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_x_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(y_lim_exp1, <span class="fl">0.0</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Standard error (adjusted)"</span>, </span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Standardized mean difference (Hedges' g)"</span>, </span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>     <span class="at">color =</span> <span class="st">""</span>, <span class="at">shape =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>png 
+  2 </code></pre>
+</div>
+</div>
 </div>
 <div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<details class="code-fold">
+<summary>Mikkel’s code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x99), <span class="at">fill =</span> <span class="st">"grey"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x95), <span class="at">fill =</span> <span class="st">"grey10"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x90), <span class="at">fill =</span> <span class="st">"lightcyan"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="fu">aes</span>(Wse, gt, <span class="at">color =</span> <span class="fu">factor</span>(conventional)), <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_brewer</span>(<span class="at">type =</span> <span class="st">"qual"</span>, <span class="at">palette =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="fu">facet_wrap</span>(<span class="sc">~</span>analysis_plan, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_x_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(y_lim_exp1, <span class="fl">0.0</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Standard error (adjusted)"</span>, </span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Standardized mean difference (Hedges' g)"</span>, </span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>     <span class="at">color =</span> <span class="st">""</span>, <span class="at">shape =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="pub_bias_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="preregistered-vs.-not-preregistered" class="level1">
+<h1>Preregistered vs.&nbsp;not-preregistered</h1>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Alcohol and drug abuse/misuse</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">Hope, Empowerment &amp; Self-efficacy</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-3" role="tab" aria-controls="tabset-3-3" aria-selected="false" href="">Social functioning (degree of impairment)</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-4" role="tab" aria-controls="tabset-3-4" aria-selected="false" href="">Wellbeing and quality of life</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
 <p>2</p>
 </div>
-<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
 <p>3</p>
 </div>
-<div id="tabset-2-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-4-tab">
+<div id="tabset-3-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-3-tab">
 <p>4</p>
 </div>
-<div id="tabset-2-5" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-5-tab">
+<div id="tabset-3-4" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-4-tab">
 <p>5</p>
 </div>
 </div>
@@ -3400,7 +3904,7 @@ Session Information
 <section id="session-information" class="level2 callout-body-container callout-body">
 <h2 class="anchored" data-anchor-id="session-information">Session Information</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>─ Session info ───────────────────────────────────────────────────────────────
  setting  value
@@ -3412,7 +3916,7 @@ Session Information
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-05-05
+ date     2025-05-07
  pandoc   3.2 @ C:/RStudio-2024.12.1-563/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────
@@ -3442,6 +3946,7 @@ Session Information
  jsonlite        1.8.9      2024-09-20 [1] CRAN (R 4.4.2)
  kableExtra    * 1.4.0      2024-01-24 [1] CRAN (R 4.4.2)
  knitr           1.49       2024-11-08 [1] CRAN (R 4.4.2)
+ labeling        0.4.3      2023-08-29 [1] CRAN (R 4.4.0)
  lattice         0.22-6     2024-03-20 [1] CRAN (R 4.4.2)
  lifecycle       1.0.4      2023-11-07 [1] CRAN (R 4.4.2)
  lubridate     * 1.9.3      2023-09-27 [1] CRAN (R 4.4.2)
@@ -3461,6 +3966,7 @@ Session Information
  purrr         * 1.0.2      2023-08-10 [1] CRAN (R 4.4.2)
  R6              2.5.1      2021-08-19 [1] CRAN (R 4.4.2)
  rbibutils       2.3        2024-10-04 [1] CRAN (R 4.4.2)
+ RColorBrewer    1.1-3      2022-04-03 [1] CRAN (R 4.4.0)
  Rcpp            1.0.13-1   2024-11-02 [1] CRAN (R 4.4.2)
  Rdpack          2.6.2      2024-11-15 [1] CRAN (R 4.4.2)
  readr         * 2.1.5      2024-01-10 [1] CRAN (R 4.4.2)
@@ -3977,168 +4483,262 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="sourceCode" id="cb6" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Publication bias testing in Dalgaard et al. (2025)"</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "Last updated `r format(Sys.time(), '%Y.%m.%d')`"</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Show the code"</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(echo = TRUE)</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(message = FALSE)</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(warning = FALSE)</span></span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="in">#knitr::opts_chunk$set(eval = FALSE)</span></span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="in">options(pillar.sigfig = 4) # ensure tibble include 4 digits</span></span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="in">options(tibble.width = Inf)</span></span>
-<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="in">options(dplyr.print_min = 310)</span></span>
-<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="in">options(scipen = 10)</span></span>
-<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="in">options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse</span></span>
-<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="in">library(DT)</span></span>
-<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="in">library(kableExtra)</span></span>
-<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
-<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="in">library(tidyverse)</span></span>
-<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="in">library(robvis)</span></span>
-<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="in">library(purrr)</span></span>
-<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="in">library(metafor)</span></span>
-<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="in">library(patchwork)</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="in">library(clubSandwich)</span></span>
-<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a><span class="in">library(wildmeta)</span></span>
-<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a><span class="in">library(gt)</span></span>
-<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a><span class="in">library(metaselection)</span></span>
-<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a><span class="in">library(puniform)</span></span>
-<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a><span class="in">library(tidyverse) # for tidying</span></span>
-<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a><span class="in">library(janitor)   # for tidying variable names</span></span>
-<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a><span class="in">library(boot)      # for bootstrapping</span></span>
-<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a><span class="in">library(tictoc) </span></span>
-<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a><span class="in"># Loading in helper function used to calculate effect size and conduct the analysis</span></span>
-<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a><span class="in">source_path &lt;- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"</span></span>
-<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a><span class="in">source(source_path)</span></span>
-<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, warning = FALSE, message = FALSE, echo = FALSE}</span></span>
-<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a><span class="in"># Loading data set</span></span>
-<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat &lt;- </span></span>
-<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a><span class="in">  if (isTRUE(getOption('knitr.in.progress'))) {</span></span>
-<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="in">    readRDS("reintergation_dat.rds") </span></span>
-<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a><span class="in">  } else {</span></span>
-<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a><span class="in">    readRDS("ES calc/reintergation_dat.rds")</span></span>
-<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
-<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a><span class="fu"># Data</span></span>
-<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
-<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat &lt;- readRDS("ES calc/reintergation_dat.rds")</span></span>
-<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat</span></span>
-<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning = FALSE, message = FALSE, echo = FALSE}</span></span>
-<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat |&gt; </span></span>
-<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate(</span></span>
-<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a><span class="in">    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(vgt) ) )</span></span>
-<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
-<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a><span class="in">  select(</span></span>
-<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a><span class="in">    `Authors (year)` = author_year, N_t, N_c, </span></span>
-<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a><span class="in">    `Outcome construct` = analysis_plan, gt, vgt, Wgt, p_val, </span></span>
-<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a><span class="in">    `No protocol` = conventional, `Overall RoB` = Overall</span></span>
-<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
-<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a><span class="in">  kable(digits=3)  |&gt; </span></span>
-<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a><span class="in">  kable_styling(</span></span>
-<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a><span class="in">    bootstrap_options = c("striped", "hover"),</span></span>
-<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a><span class="in">    font_size = 10</span></span>
-<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
-<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a><span class="in">  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)</span></span>
-<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a><span class="fu"># Main Analyses</span></span>
-<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
-<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overall average effect</span></span>
-<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="ot">&lt;-</span> <span class="fu">.CHE_RVE</span>(reintergation_dat) </span>
-<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="sc">|&gt;</span> </span>
-<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(studies<span class="sc">:</span>UL, tau<span class="sc">:</span>sd_total, I2) <span class="sc">|&gt;</span></span>
-<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">decimals =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_header</span>(</span>
-<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Overall average effect size"</span>,</span>
-<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>  <span class="at">subtitle =</span> <span class="st">"Across all reintegrational outcomes"</span></span>
-<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>) </span>
-<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## Subgroup effects (across type of outcome)</span></span>
-<span id="cb6-111"><a href="#cb6-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb6-112"><a href="#cb6-112" aria-hidden="true" tabindex="-1"></a>reintegration_sce_res <span class="ot">&lt;-</span> </span>
-<span id="cb6-113"><a href="#cb6-113" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.SCEp</span>(<span class="at">mod =</span> analysis_plan, <span class="at">data =</span> reintergation_dat) </span>
-<span id="cb6-114"><a href="#cb6-114" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-115"><a href="#cb6-115" aria-hidden="true" tabindex="-1"></a>reintegration_sce_res <span class="sc">|&gt;</span> </span>
-<span id="cb6-116"><a href="#cb6-116" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(Moderator<span class="sc">:</span>pval) <span class="sc">|&gt;</span> </span>
-<span id="cb6-117"><a href="#cb6-117" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>()<span class="sc">|&gt;</span> </span>
-<span id="cb6-118"><a href="#cb6-118" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">decimals =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb6-119"><a href="#cb6-119" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_header</span>(</span>
-<span id="cb6-120"><a href="#cb6-120" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Overall average effect sizes"</span>,</span>
-<span id="cb6-121"><a href="#cb6-121" aria-hidden="true" tabindex="-1"></a>  <span class="at">subtitle =</span> <span class="st">"Across reintegrational subgroups"</span></span>
-<span id="cb6-122"><a href="#cb6-122" aria-hidden="true" tabindex="-1"></a>) </span>
-<span id="cb6-123"><a href="#cb6-123" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-124"><a href="#cb6-124" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-125"><a href="#cb6-125" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-126"><a href="#cb6-126" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-127"><a href="#cb6-127" aria-hidden="true" tabindex="-1"></a><span class="fu"># Funnel Plots</span></span>
-<span id="cb6-128"><a href="#cb6-128" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-129"><a href="#cb6-129" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
-<span id="cb6-130"><a href="#cb6-130" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-131"><a href="#cb6-131" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overall</span></span>
-<span id="cb6-132"><a href="#cb6-132" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-133"><a href="#cb6-133" aria-hidden="true" tabindex="-1"></a>1</span>
-<span id="cb6-134"><a href="#cb6-134" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-135"><a href="#cb6-135" aria-hidden="true" tabindex="-1"></a><span class="fu">## Alcohol and drug abuse/misuse</span></span>
-<span id="cb6-136"><a href="#cb6-136" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-137"><a href="#cb6-137" aria-hidden="true" tabindex="-1"></a>2</span>
-<span id="cb6-138"><a href="#cb6-138" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-139"><a href="#cb6-139" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hope, Empowerment &amp; Self-efficacy</span></span>
-<span id="cb6-140"><a href="#cb6-140" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-141"><a href="#cb6-141" aria-hidden="true" tabindex="-1"></a>3</span>
-<span id="cb6-142"><a href="#cb6-142" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-143"><a href="#cb6-143" aria-hidden="true" tabindex="-1"></a><span class="fu">## Social functioning (degree of impairment)</span></span>
-<span id="cb6-144"><a href="#cb6-144" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-145"><a href="#cb6-145" aria-hidden="true" tabindex="-1"></a>4</span>
-<span id="cb6-146"><a href="#cb6-146" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-147"><a href="#cb6-147" aria-hidden="true" tabindex="-1"></a><span class="fu">## Wellbeing and quality of life</span></span>
-<span id="cb6-148"><a href="#cb6-148" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-149"><a href="#cb6-149" aria-hidden="true" tabindex="-1"></a>5</span>
-<span id="cb6-150"><a href="#cb6-150" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-151"><a href="#cb6-151" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb6-152"><a href="#cb6-152" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb6-153"><a href="#cb6-153" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb6-154"><a href="#cb6-154" aria-hidden="true" tabindex="-1"></a><span class="fu"># References</span></span>
-<span id="cb6-155"><a href="#cb6-155" aria-hidden="true" tabindex="-1"></a>Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., &amp; Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254</span>
-<span id="cb6-156"><a href="#cb6-156" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-157"><a href="#cb6-157" aria-hidden="true" tabindex="-1"></a>::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}</span>
-<span id="cb6-158"><a href="#cb6-158" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-159"><a href="#cb6-159" aria-hidden="true" tabindex="-1"></a><span class="fu">## Session Information</span></span>
-<span id="cb6-160"><a href="#cb6-160" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-163"><a href="#cb6-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb6-164"><a href="#cb6-164" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
-<span id="cb6-165"><a href="#cb6-165" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
-<span id="cb6-166"><a href="#cb6-166" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb6-167"><a href="#cb6-167" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-168"><a href="#cb6-168" aria-hidden="true" tabindex="-1"></a>:::</span>
+<div class="sourceCode" id="cb11" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Publication bias testing in Dalgaard et al. (2025)"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="an">date:</span><span class="co"> "Last updated `r format(Sys.time(), '%Y.%m.%d')`"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a><span class="co">    code-tools: true</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Mikkel's code"</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="in">```{r setup, include=FALSE}</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(echo = TRUE)</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(message = FALSE)</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="in">knitr::opts_chunk$set(warning = FALSE)</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="in">#knitr::opts_chunk$set(eval = FALSE)</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="in">options(pillar.sigfig = 4) # ensure tibble include 4 digits</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a><span class="in">options(tibble.width = Inf)</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a><span class="in">options(dplyr.print_min = 310)</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a><span class="in">options(scipen = 10)</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a><span class="in">options(dplyr.summarise.inform = FALSE) # Avoids summarize info from tidyverse</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="in">library(DT)</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a><span class="in">library(kableExtra)</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, echo=FALSE}</span></span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a><span class="in">library(tidyverse)</span></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="in">library(robvis)</span></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="in">library(purrr)</span></span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a><span class="in">library(metafor)</span></span>
+<span id="cb11-35"><a href="#cb11-35" aria-hidden="true" tabindex="-1"></a><span class="in">library(patchwork)</span></span>
+<span id="cb11-36"><a href="#cb11-36" aria-hidden="true" tabindex="-1"></a><span class="in">library(clubSandwich)</span></span>
+<span id="cb11-37"><a href="#cb11-37" aria-hidden="true" tabindex="-1"></a><span class="in">library(wildmeta)</span></span>
+<span id="cb11-38"><a href="#cb11-38" aria-hidden="true" tabindex="-1"></a><span class="in">library(gt)</span></span>
+<span id="cb11-39"><a href="#cb11-39" aria-hidden="true" tabindex="-1"></a><span class="in">library(metaselection)</span></span>
+<span id="cb11-40"><a href="#cb11-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-41"><a href="#cb11-41" aria-hidden="true" tabindex="-1"></a><span class="in">library(puniform)</span></span>
+<span id="cb11-42"><a href="#cb11-42" aria-hidden="true" tabindex="-1"></a><span class="in">library(tidyverse) # for tidying</span></span>
+<span id="cb11-43"><a href="#cb11-43" aria-hidden="true" tabindex="-1"></a><span class="in">library(janitor)   # for tidying variable names</span></span>
+<span id="cb11-44"><a href="#cb11-44" aria-hidden="true" tabindex="-1"></a><span class="in">library(boot)      # for bootstrapping</span></span>
+<span id="cb11-45"><a href="#cb11-45" aria-hidden="true" tabindex="-1"></a><span class="in">library(tictoc) </span></span>
+<span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a><span class="in"># Loading in helper function used to calculate effect size and conduct the analysis</span></span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a><span class="in">source_path &lt;- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"</span></span>
+<span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a><span class="in">source(source_path)</span></span>
+<span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-53"><a href="#cb11-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, warning = FALSE, message = FALSE, echo = FALSE}</span></span>
+<span id="cb11-55"><a href="#cb11-55" aria-hidden="true" tabindex="-1"></a><span class="in"># Loading data set</span></span>
+<span id="cb11-56"><a href="#cb11-56" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat &lt;- </span></span>
+<span id="cb11-57"><a href="#cb11-57" aria-hidden="true" tabindex="-1"></a><span class="in">  if (isTRUE(getOption('knitr.in.progress'))) {</span></span>
+<span id="cb11-58"><a href="#cb11-58" aria-hidden="true" tabindex="-1"></a><span class="in">    readRDS("reintergation_dat.rds")</span></span>
+<span id="cb11-59"><a href="#cb11-59" aria-hidden="true" tabindex="-1"></a><span class="in">  } else {</span></span>
+<span id="cb11-60"><a href="#cb11-60" aria-hidden="true" tabindex="-1"></a><span class="in">    readRDS("ES calc/reintergation_dat.rds")</span></span>
+<span id="cb11-61"><a href="#cb11-61" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb11-62"><a href="#cb11-62" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-63"><a href="#cb11-63" aria-hidden="true" tabindex="-1"></a><span class="fu"># Data</span></span>
+<span id="cb11-64"><a href="#cb11-64" aria-hidden="true" tabindex="-1"></a><span class="in">```{r, eval=FALSE}</span></span>
+<span id="cb11-65"><a href="#cb11-65" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat &lt;- readRDS("ES calc/reintergation_dat.rds") </span></span>
+<span id="cb11-66"><a href="#cb11-66" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat</span></span>
+<span id="cb11-67"><a href="#cb11-67" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-68"><a href="#cb11-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-69"><a href="#cb11-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{r warning = FALSE, message = FALSE, echo = FALSE}</span></span>
+<span id="cb11-70"><a href="#cb11-70" aria-hidden="true" tabindex="-1"></a><span class="in">reintergation_dat |&gt; </span></span>
+<span id="cb11-71"><a href="#cb11-71" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate(</span></span>
+<span id="cb11-72"><a href="#cb11-72" aria-hidden="true" tabindex="-1"></a><span class="in">    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )</span></span>
+<span id="cb11-73"><a href="#cb11-73" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb11-74"><a href="#cb11-74" aria-hidden="true" tabindex="-1"></a><span class="in">  select(</span></span>
+<span id="cb11-75"><a href="#cb11-75" aria-hidden="true" tabindex="-1"></a><span class="in">    `Authors (year)` = author_year, N_t, N_c, </span></span>
+<span id="cb11-76"><a href="#cb11-76" aria-hidden="true" tabindex="-1"></a><span class="in">    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, Wg_post, </span></span>
+<span id="cb11-77"><a href="#cb11-77" aria-hidden="true" tabindex="-1"></a><span class="in">    `No protocol` = conventional, `Overall RoB` = Overall</span></span>
+<span id="cb11-78"><a href="#cb11-78" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb11-79"><a href="#cb11-79" aria-hidden="true" tabindex="-1"></a><span class="in">  kable(digits=3)  |&gt; </span></span>
+<span id="cb11-80"><a href="#cb11-80" aria-hidden="true" tabindex="-1"></a><span class="in">  kable_styling(</span></span>
+<span id="cb11-81"><a href="#cb11-81" aria-hidden="true" tabindex="-1"></a><span class="in">    bootstrap_options = c("striped", "hover"),</span></span>
+<span id="cb11-82"><a href="#cb11-82" aria-hidden="true" tabindex="-1"></a><span class="in">    font_size = 10</span></span>
+<span id="cb11-83"><a href="#cb11-83" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb11-84"><a href="#cb11-84" aria-hidden="true" tabindex="-1"></a><span class="in">  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)</span></span>
+<span id="cb11-85"><a href="#cb11-85" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-86"><a href="#cb11-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-87"><a href="#cb11-87" aria-hidden="true" tabindex="-1"></a><span class="fu"># Main Analyses</span></span>
+<span id="cb11-88"><a href="#cb11-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-89"><a href="#cb11-89" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb11-90"><a href="#cb11-90" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-91"><a href="#cb11-91" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overall average effect</span></span>
+<span id="cb11-94"><a href="#cb11-94" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-95"><a href="#cb11-95" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="ot">&lt;-</span> <span class="fu">.CHE_RVE</span>(reintergation_dat) </span>
+<span id="cb11-96"><a href="#cb11-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-97"><a href="#cb11-97" aria-hidden="true" tabindex="-1"></a>reintegration_che_res <span class="sc">|&gt;</span> </span>
+<span id="cb11-98"><a href="#cb11-98" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(studies<span class="sc">:</span>UL, tau<span class="sc">:</span>sd_total, I2) <span class="sc">|&gt;</span></span>
+<span id="cb11-99"><a href="#cb11-99" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-100"><a href="#cb11-100" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="dv">3</span><span class="sc">:</span><span class="dv">9</span>, <span class="at">decimals =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-101"><a href="#cb11-101" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_header</span>(</span>
+<span id="cb11-102"><a href="#cb11-102" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Overall average effect size"</span>,</span>
+<span id="cb11-103"><a href="#cb11-103" aria-hidden="true" tabindex="-1"></a>  <span class="at">subtitle =</span> <span class="st">"Across all reintegrational outcomes"</span></span>
+<span id="cb11-104"><a href="#cb11-104" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb11-105"><a href="#cb11-105" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-106"><a href="#cb11-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-107"><a href="#cb11-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-108"><a href="#cb11-108" aria-hidden="true" tabindex="-1"></a><span class="fu">## Subgroup effects (across type of outcome)</span></span>
+<span id="cb11-111"><a href="#cb11-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-112"><a href="#cb11-112" aria-hidden="true" tabindex="-1"></a>reintegration_sce_res <span class="ot">&lt;-</span> </span>
+<span id="cb11-113"><a href="#cb11-113" aria-hidden="true" tabindex="-1"></a>  <span class="fu">.SCEp</span>(<span class="at">mod =</span> analysis_plan, <span class="at">data =</span> reintergation_dat) </span>
+<span id="cb11-114"><a href="#cb11-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-115"><a href="#cb11-115" aria-hidden="true" tabindex="-1"></a>reintegration_sce_res <span class="sc">|&gt;</span> </span>
+<span id="cb11-116"><a href="#cb11-116" aria-hidden="true" tabindex="-1"></a><span class="fu">select</span>(Moderator<span class="sc">:</span>pval) <span class="sc">|&gt;</span> </span>
+<span id="cb11-117"><a href="#cb11-117" aria-hidden="true" tabindex="-1"></a><span class="fu">gt</span>()<span class="sc">|&gt;</span> </span>
+<span id="cb11-118"><a href="#cb11-118" aria-hidden="true" tabindex="-1"></a><span class="fu">fmt_number</span>(<span class="at">columns =</span> <span class="dv">4</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">decimals =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-119"><a href="#cb11-119" aria-hidden="true" tabindex="-1"></a><span class="fu">tab_header</span>(</span>
+<span id="cb11-120"><a href="#cb11-120" aria-hidden="true" tabindex="-1"></a>  <span class="at">title =</span> <span class="st">"Overall average effect sizes"</span>,</span>
+<span id="cb11-121"><a href="#cb11-121" aria-hidden="true" tabindex="-1"></a>  <span class="at">subtitle =</span> <span class="st">"Across reintegrational subgroups"</span></span>
+<span id="cb11-122"><a href="#cb11-122" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb11-123"><a href="#cb11-123" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-124"><a href="#cb11-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-125"><a href="#cb11-125" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb11-126"><a href="#cb11-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-127"><a href="#cb11-127" aria-hidden="true" tabindex="-1"></a><span class="fu"># Funnel Plots</span></span>
+<span id="cb11-128"><a href="#cb11-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-129"><a href="#cb11-129" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb11-130"><a href="#cb11-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-131"><a href="#cb11-131" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overall</span></span>
+<span id="cb11-132"><a href="#cb11-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-135"><a href="#cb11-135" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-136"><a href="#cb11-136" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.7</span></span>
+<span id="cb11-137"><a href="#cb11-137" aria-hidden="true" tabindex="-1"></a><span class="co"># CHE pub bias</span></span>
+<span id="cb11-138"><a href="#cb11-138" aria-hidden="true" tabindex="-1"></a>V_mat <span class="ot">&lt;-</span> <span class="fu">vcalc</span>(Wgt, <span class="at">cluster =</span> author_year, <span class="at">obs =</span> esid, <span class="at">data =</span> reintergation_dat, <span class="at">rho =</span> rho)</span>
+<span id="cb11-139"><a href="#cb11-139" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-140"><a href="#cb11-140" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">solve</span>(V_mat)</span>
+<span id="cb11-141"><a href="#cb11-141" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-142"><a href="#cb11-142" aria-hidden="true" tabindex="-1"></a>optimizers <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"nlminb"</span>,<span class="st">"nloptr"</span>,<span class="st">"Rvmmin"</span>,<span class="st">"BFGS"</span>)</span>
+<span id="cb11-143"><a href="#cb11-143" aria-hidden="true" tabindex="-1"></a>mod <span class="ot">&lt;-</span> <span class="st">"Non-converged"</span></span>
+<span id="cb11-144"><a href="#cb11-144" aria-hidden="true" tabindex="-1"></a>i <span class="ot">&lt;-</span> <span class="dv">1</span>L</span>
+<span id="cb11-145"><a href="#cb11-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-146"><a href="#cb11-146" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="sc">!</span><span class="fu">inherits</span>(mod, <span class="st">"rma.mv"</span>) <span class="sc">&amp;</span> i <span class="sc">&lt;=</span> <span class="dv">4</span>L) {</span>
+<span id="cb11-147"><a href="#cb11-147" aria-hidden="true" tabindex="-1"></a>    mod <span class="ot">&lt;-</span> <span class="fu">tryCatch</span>(</span>
+<span id="cb11-148"><a href="#cb11-148" aria-hidden="true" tabindex="-1"></a>      <span class="fu">rma.mv</span>(</span>
+<span id="cb11-149"><a href="#cb11-149" aria-hidden="true" tabindex="-1"></a>        <span class="at">yi =</span> gt,</span>
+<span id="cb11-150"><a href="#cb11-150" aria-hidden="true" tabindex="-1"></a>        <span class="at">V =</span> V_mat,</span>
+<span id="cb11-151"><a href="#cb11-151" aria-hidden="true" tabindex="-1"></a>        <span class="at">W =</span> W,</span>
+<span id="cb11-152"><a href="#cb11-152" aria-hidden="true" tabindex="-1"></a>        <span class="at">mods =</span> <span class="sc">~</span> Wse,</span>
+<span id="cb11-153"><a href="#cb11-153" aria-hidden="true" tabindex="-1"></a>        <span class="at">random =</span> <span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> author_year <span class="sc">/</span> esid,</span>
+<span id="cb11-154"><a href="#cb11-154" aria-hidden="true" tabindex="-1"></a>        <span class="at">data =</span> reintergation_dat,</span>
+<span id="cb11-155"><a href="#cb11-155" aria-hidden="true" tabindex="-1"></a>        <span class="at">sparse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb11-156"><a href="#cb11-156" aria-hidden="true" tabindex="-1"></a>        <span class="at">control =</span> <span class="fu">list</span>(<span class="at">optimizer=</span>optimizers[i])</span>
+<span id="cb11-157"><a href="#cb11-157" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb11-158"><a href="#cb11-158" aria-hidden="true" tabindex="-1"></a>      <span class="at">error =</span> <span class="cf">function</span>(e) <span class="st">"Non-converged"</span></span>
+<span id="cb11-159"><a href="#cb11-159" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-160"><a href="#cb11-160" aria-hidden="true" tabindex="-1"></a>    i <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">1</span>L</span>
+<span id="cb11-161"><a href="#cb11-161" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-162"><a href="#cb11-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-163"><a href="#cb11-163" aria-hidden="true" tabindex="-1"></a>mod_robu <span class="ot">&lt;-</span> <span class="fu">robust</span>(mod, <span class="at">cluster =</span> author_year, <span class="at">clubSandwich =</span> <span class="cn">TRUE</span>) </span>
+<span id="cb11-164"><a href="#cb11-164" aria-hidden="true" tabindex="-1"></a>mod_robu</span>
+<span id="cb11-165"><a href="#cb11-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-166"><a href="#cb11-166" aria-hidden="true" tabindex="-1"></a>overall_mean <span class="ot">&lt;-</span> reintegration_che_res<span class="sc">$</span>avg_effect</span>
+<span id="cb11-167"><a href="#cb11-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-168"><a href="#cb11-168" aria-hidden="true" tabindex="-1"></a>y_lim_exp1 <span class="ot">&lt;-</span> <span class="fu">max</span>(reintergation_dat<span class="sc">$</span>Wse) <span class="sc">+</span> <span class="fl">0.02</span> </span>
+<span id="cb11-169"><a href="#cb11-169" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-170"><a href="#cb11-170" aria-hidden="true" tabindex="-1"></a>funnel_exp1 <span class="ot">&lt;-</span>  <span class="fu">tribble</span>(</span>
+<span id="cb11-171"><a href="#cb11-171" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span> x90, <span class="sc">~</span> x95, <span class="sc">~</span> x99, <span class="sc">~</span> y,</span>
+<span id="cb11-172"><a href="#cb11-172" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,</span>
+<span id="cb11-173"><a href="#cb11-173" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qnorm</span>(<span class="fl">0.05</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.025</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.005</span>) <span class="sc">*</span> y_lim_exp1, y_lim_exp1,</span>
+<span id="cb11-174"><a href="#cb11-174" aria-hidden="true" tabindex="-1"></a>  <span class="fu">qnorm</span>(<span class="fl">0.95</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.975</span>) <span class="sc">*</span> y_lim_exp1, <span class="fu">qnorm</span>(<span class="fl">0.995</span>) <span class="sc">*</span> y_lim_exp1, y_lim_exp1,</span>
+<span id="cb11-175"><a href="#cb11-175" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span>,     <span class="dv">0</span></span>
+<span id="cb11-176"><a href="#cb11-176" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb11-177"><a href="#cb11-177" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-178"><a href="#cb11-178" aria-hidden="true" tabindex="-1"></a>line1 <span class="ot">&lt;-</span> <span class="st">"dashed"</span></span>
+<span id="cb11-179"><a href="#cb11-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-180"><a href="#cb11-180" aria-hidden="true" tabindex="-1"></a><span class="fu">png</span>(<span class="st">"Funnel plot overall.png"</span>, <span class="at">height =</span> <span class="fl">4.5</span>, <span class="at">width =</span> <span class="dv">7</span>, <span class="at">unit =</span> <span class="st">"in"</span>, <span class="at">res =</span> <span class="dv">600</span>)</span>
+<span id="cb11-181"><a href="#cb11-181" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="sc">|&gt;</span> </span>
+<span id="cb11-182"><a href="#cb11-182" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb11-183"><a href="#cb11-183" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x99), <span class="at">fill =</span> <span class="st">"grey"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb11-184"><a href="#cb11-184" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x95), <span class="at">fill =</span> <span class="st">"grey10"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb11-185"><a href="#cb11-185" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x90), <span class="at">fill =</span> <span class="st">"lightcyan"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb11-186"><a href="#cb11-186" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fu">qnorm</span>(<span class="fl">0.975</span>), <span class="at">intercept =</span> overall_mean, <span class="at">linetype =</span> line1) <span class="sc">+</span> </span>
+<span id="cb11-187"><a href="#cb11-187" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_hline</span>(<span class="at">yintercept =</span> overall_mean, <span class="at">linetype =</span> line1 ) <span class="sc">+</span>  </span>
+<span id="cb11-188"><a href="#cb11-188" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="fu">qnorm</span>(<span class="fl">0.025</span>), <span class="at">intercept =</span> overall_mean, <span class="at">linetype =</span> line1) <span class="sc">+</span> </span>
+<span id="cb11-189"><a href="#cb11-189" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="sc">-</span>mod_robu<span class="sc">$</span>b[<span class="dv">2</span>], <span class="at">intercept =</span> <span class="sc">-</span>mod_robu<span class="sc">$</span>b[<span class="dv">1</span>], <span class="at">linetype =</span> <span class="st">"longdash"</span>, <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span> </span>
+<span id="cb11-190"><a href="#cb11-190" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="fu">aes</span>(Wse, gt), <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb11-191"><a href="#cb11-191" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_brewer</span>(<span class="at">type =</span> <span class="st">"qual"</span>, <span class="at">palette =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb11-192"><a href="#cb11-192" aria-hidden="true" tabindex="-1"></a><span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb11-193"><a href="#cb11-193" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_x_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(y_lim_exp1, <span class="fl">0.0</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb11-194"><a href="#cb11-194" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb11-195"><a href="#cb11-195" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb11-196"><a href="#cb11-196" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Standard error (adjusted)"</span>, </span>
+<span id="cb11-197"><a href="#cb11-197" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Standardized mean difference (Hedges' g)"</span>, </span>
+<span id="cb11-198"><a href="#cb11-198" aria-hidden="true" tabindex="-1"></a>     <span class="at">color =</span> <span class="st">""</span>, <span class="at">shape =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb11-199"><a href="#cb11-199" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb11-200"><a href="#cb11-200" aria-hidden="true" tabindex="-1"></a><span class="fu">dev.off</span>()</span>
+<span id="cb11-201"><a href="#cb11-201" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-202"><a href="#cb11-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-203"><a href="#cb11-203" aria-hidden="true" tabindex="-1"></a><span class="fu">## Across outcome subgroups</span></span>
+<span id="cb11-204"><a href="#cb11-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-207"><a href="#cb11-207" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-208"><a href="#cb11-208" aria-hidden="true" tabindex="-1"></a>reintergation_dat <span class="sc">|&gt;</span> </span>
+<span id="cb11-209"><a href="#cb11-209" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb11-210"><a href="#cb11-210" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x99), <span class="at">fill =</span> <span class="st">"grey"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb11-211"><a href="#cb11-211" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x95), <span class="at">fill =</span> <span class="st">"grey10"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> </span>
+<span id="cb11-212"><a href="#cb11-212" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_polygon</span>(<span class="at">data =</span> funnel_exp1, <span class="fu">aes</span>(<span class="at">x =</span> y, <span class="at">y =</span> x90), <span class="at">fill =</span> <span class="st">"lightcyan"</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span> </span>
+<span id="cb11-213"><a href="#cb11-213" aria-hidden="true" tabindex="-1"></a><span class="fu">geom_point</span>(<span class="fu">aes</span>(Wse, gt, <span class="at">color =</span> <span class="fu">factor</span>(conventional)), <span class="at">alpha =</span> <span class="dv">1</span>, <span class="at">size =</span> <span class="fl">1.2</span>) <span class="sc">+</span></span>
+<span id="cb11-214"><a href="#cb11-214" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_color_brewer</span>(<span class="at">type =</span> <span class="st">"qual"</span>, <span class="at">palette =</span> <span class="dv">2</span>) <span class="sc">+</span> </span>
+<span id="cb11-215"><a href="#cb11-215" aria-hidden="true" tabindex="-1"></a><span class="fu">coord_flip</span>() <span class="sc">+</span> </span>
+<span id="cb11-216"><a href="#cb11-216" aria-hidden="true" tabindex="-1"></a><span class="fu">facet_wrap</span>(<span class="sc">~</span>analysis_plan, <span class="at">scales =</span> <span class="st">"free"</span>) <span class="sc">+</span></span>
+<span id="cb11-217"><a href="#cb11-217" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_x_reverse</span>(<span class="at">limits =</span> <span class="fu">c</span>(y_lim_exp1, <span class="fl">0.0</span>), <span class="at">expand =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">0</span>)) <span class="sc">+</span> </span>
+<span id="cb11-218"><a href="#cb11-218" aria-hidden="true" tabindex="-1"></a><span class="fu">scale_y_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="dv">3</span>, <span class="dv">1</span>)) <span class="sc">+</span> </span>
+<span id="cb11-219"><a href="#cb11-219" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb11-220"><a href="#cb11-220" aria-hidden="true" tabindex="-1"></a><span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Standard error (adjusted)"</span>, </span>
+<span id="cb11-221"><a href="#cb11-221" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> <span class="st">"Standardized mean difference (Hedges' g)"</span>, </span>
+<span id="cb11-222"><a href="#cb11-222" aria-hidden="true" tabindex="-1"></a>     <span class="at">color =</span> <span class="st">""</span>, <span class="at">shape =</span> <span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb11-223"><a href="#cb11-223" aria-hidden="true" tabindex="-1"></a><span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span>
+<span id="cb11-224"><a href="#cb11-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-225"><a href="#cb11-225" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-226"><a href="#cb11-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-227"><a href="#cb11-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-228"><a href="#cb11-228" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb11-229"><a href="#cb11-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-230"><a href="#cb11-230" aria-hidden="true" tabindex="-1"></a><span class="fu"># Preregistered vs. not-preregistered</span></span>
+<span id="cb11-231"><a href="#cb11-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-232"><a href="#cb11-232" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb11-233"><a href="#cb11-233" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-234"><a href="#cb11-234" aria-hidden="true" tabindex="-1"></a><span class="fu">## Alcohol and drug abuse/misuse</span></span>
+<span id="cb11-235"><a href="#cb11-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-236"><a href="#cb11-236" aria-hidden="true" tabindex="-1"></a>2</span>
+<span id="cb11-237"><a href="#cb11-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-238"><a href="#cb11-238" aria-hidden="true" tabindex="-1"></a><span class="fu">## Hope, Empowerment &amp; Self-efficacy</span></span>
+<span id="cb11-239"><a href="#cb11-239" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-240"><a href="#cb11-240" aria-hidden="true" tabindex="-1"></a>3</span>
+<span id="cb11-241"><a href="#cb11-241" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-242"><a href="#cb11-242" aria-hidden="true" tabindex="-1"></a><span class="fu">## Social functioning (degree of impairment)</span></span>
+<span id="cb11-243"><a href="#cb11-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-244"><a href="#cb11-244" aria-hidden="true" tabindex="-1"></a>4</span>
+<span id="cb11-245"><a href="#cb11-245" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-246"><a href="#cb11-246" aria-hidden="true" tabindex="-1"></a><span class="fu">## Wellbeing and quality of life</span></span>
+<span id="cb11-247"><a href="#cb11-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-248"><a href="#cb11-248" aria-hidden="true" tabindex="-1"></a>5</span>
+<span id="cb11-249"><a href="#cb11-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-250"><a href="#cb11-250" aria-hidden="true" tabindex="-1"></a>::: </span>
+<span id="cb11-251"><a href="#cb11-251" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb11-252"><a href="#cb11-252" aria-hidden="true" tabindex="-1"></a><span class="fu"># References</span></span>
+<span id="cb11-253"><a href="#cb11-253" aria-hidden="true" tabindex="-1"></a>Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., &amp; Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254</span>
+<span id="cb11-254"><a href="#cb11-254" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-255"><a href="#cb11-255" aria-hidden="true" tabindex="-1"></a>::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}</span>
+<span id="cb11-256"><a href="#cb11-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-257"><a href="#cb11-257" aria-hidden="true" tabindex="-1"></a><span class="fu">## Session Information</span></span>
+<span id="cb11-258"><a href="#cb11-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-261"><a href="#cb11-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb11-262"><a href="#cb11-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| code-fold: false</span></span>
+<span id="cb11-263"><a href="#cb11-263" aria-hidden="true" tabindex="-1"></a>sessioninfo<span class="sc">::</span><span class="fu">session_info</span>()</span>
+<span id="cb11-264"><a href="#cb11-264" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb11-265"><a href="#cb11-265" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-266"><a href="#cb11-266" aria-hidden="true" tabindex="-1"></a>:::</span>
 </code><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></pre></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

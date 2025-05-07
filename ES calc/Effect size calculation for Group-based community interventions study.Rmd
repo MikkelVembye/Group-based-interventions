@@ -1878,8 +1878,8 @@ Crawford2012_est <-
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    m_diff_t = if_else(outcome != "medication_adherence", m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
-    m_diff_c = if_else(outcome != "medication_adherence", m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
+    m_diff_t = if_else(!str_detect(outcome, "Positive"), m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
+    m_diff_c = if_else(!str_detect(outcome, "Positive"), m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
     vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
@@ -2074,7 +2074,12 @@ Druss2010_est <-
       #0.03, 0.4, 0.22, 
       0.41, 0.96
       ),
+    
+    # Not used - seems flawed
     F_val = qf(p_val_f, df1 = 1, df2 = N_total - 2, lower.tail = FALSE),
+    
+    ppcor = ppcor_imp,  
+    ppcor_method = "Imputed",
     
     effect_size = "SMD",
     sd_used = "Pooled posttest SD",
@@ -2082,8 +2087,6 @@ Druss2010_est <-
     study = "Druss et al. 2010",
     main_es_method = "Raw diff-in-diffs",
    
-   
-    
     df_ind = N_total,
     
     m_post = if_else(outcome != "medication_adherence", m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
@@ -2103,12 +2106,13 @@ Druss2010_est <-
     m_diff_c = if_else(outcome != "medication_adherence", m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/F_val,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/F_val,
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c)
+    
   ) |> 
   rowwise() |> 
   mutate(
@@ -2160,7 +2164,7 @@ Druss2010_est <-
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      F_val = F_val,
+      prepost_cor = ppcor,
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
@@ -5103,14 +5107,15 @@ James2004_est <- James2004_wide |>
       .default = NA_character_
     ),
     
-    # F-values taken from table 2, p. 988.
+    # F-values taken from table 2, p. 988. (Not used. Yields larger varainces)
     F_val = c(
       7.364, 0.865, 16.221, 1.352, 2.205
     ),
     
-    ppcor_method = "F-values are used",
+    ppcor = ppcor_imp,  
+    ppcor_method = "Imputed",
     
-     N_total = N_t + N_c,
+    N_total = N_t + N_c,
     df_ind = N_total,
     
     
@@ -5128,18 +5133,16 @@ James2004_est <- James2004_wide |>
     vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
     Wg_post = Wd_post,
     
-    
-   
     m_diff_t = (m_post_t - m_pre_t)*-1,
     m_diff_c = (m_post_c - m_pre_c)*-1,
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-   vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/F_val,
-  
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
+    
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/F_val
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c)
     
   ) |> 
 rowwise() |> 
@@ -5190,11 +5193,12 @@ rowwise() |>
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      F_val = F_val,
+      prepost_cor = ppcor,
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
       ),
+    
     vary_id = outcome
     
   ) |> 
@@ -9049,24 +9053,24 @@ Rüsch2019_est <-
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
     vd_DD = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
       d_DD^2/F_val + d_DD^2/(2*df_ind)
     ),
     Wd_DD = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       2*(1-ppcor) * (1/N_t + 1/N_c),
       d_DD^2/F_val
     ),
     
     g_DD = J * d_DD, 
     vg_DD = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
       g_DD^2/F_val + g_DD^2/(2*df_ind)
     ),
     Wg_DD = if_else(
-      timing == "12w" & str_detect(outcome, "Help|Job"),
+      timing == "6 months" & str_detect(outcome, "Help|Job"),
       2*(1-ppcor) * (1/N_t + 1/N_c),
       g_DD^2/F_val
     )

@@ -55,25 +55,25 @@ source(source_path)
 # Loading data set
 reintergation_dat <- 
   if (isTRUE(getOption('knitr.in.progress'))) {
-    readRDS("reintergation_dat.rds") 
+    readRDS("reintergation_dat.rds")
   } else {
     readRDS("ES calc/reintergation_dat.rds")
   }
 ```
 # Data
 ```{r, eval=FALSE}
-reintergation_dat <- readRDS("ES calc/reintergation_dat.rds")
+reintergation_dat <- readRDS("ES calc/reintergation_dat.rds") 
 reintergation_dat
 ```
 
 ```{r warning = FALSE, message = FALSE, echo = FALSE}
 reintergation_dat |> 
   mutate(
-    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(vgt) ) )
+    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
   select(
     `Authors (year)` = author_year, N_t, N_c, 
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, p_val, 
+    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, Wg_post, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -126,7 +126,104 @@ tab_header(
 
 ## Overall
 
-1
+```{r}
+
+rho <- 0.7
+# CHE pub bias
+V_mat <- vcalc(Wgt, cluster = author_year, obs = esid, data = reintergation_dat, rho = rho)
+
+W <- solve(V_mat)
+
+optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+mod <- "Non-converged"
+i <- 1L
+
+while (!inherits(mod, "rma.mv") & i <= 4L) {
+    mod <- tryCatch(
+      rma.mv(
+        yi = gt,
+        V = V_mat,
+        W = W,
+        mods = ~ Wse,
+        random = ~ 1 | author_year / esid,
+        data = reintergation_dat,
+        sparse = TRUE,
+        control = list(optimizer=optimizers[i])
+      ),
+      error = function(e) "Non-converged"
+    )
+    i <- i + 1L
+}
+
+mod_robu <- robust(mod, cluster = author_year, clubSandwich = TRUE) 
+mod_robu
+
+overall_mean <- reintegration_che_res$avg_effect
+
+y_lim_exp1 <- max(reintergation_dat$Wse) + 0.02 
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+line1 <- "dashed"
+
+png("Funnel plot overall.png", height = 4.5, width = 7, unit = "in", res = 600)
+reintergation_dat |> 
+ggplot() + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = line1) + 
+geom_hline(yintercept = overall_mean, linetype = line1 ) +  
+geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = line1) + 
+geom_abline(slope = -mod_robu$b[2], intercept = -mod_robu$b[1], linetype = "longdash", color = "blue") + 
+geom_point(aes(Wse, gt), alpha = 1, size = 1.2) +
+scale_color_brewer(type = "qual", palette = 2) + 
+coord_flip() + 
+scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+theme_bw() + 
+labs(x = "Standard error (adjusted)", 
+     y = "Standardized mean difference (Hedges' g)", 
+     color = "", shape = "") +
+theme(legend.position = "bottom")
+dev.off()
+```
+
+## Across outcome subgroups
+
+```{r}
+
+reintergation_dat |> 
+ggplot() + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
+geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
+geom_point(aes(Wse, gt, color = factor(conventional)), alpha = 1, size = 1.2) +
+scale_color_brewer(type = "qual", palette = 2) + 
+coord_flip() + 
+facet_wrap(~analysis_plan, scales = "free") +
+scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+scale_y_continuous(breaks = seq(-3, 3, 1)) + 
+theme_bw() + 
+labs(x = "Standard error (adjusted)", 
+     y = "Standardized mean difference (Hedges' g)", 
+     color = "", shape = "") +
+theme(legend.position = "bottom")
+
+```
+
+
+:::
+
+# Preregistered vs. not-preregistered
+
+::: {.panel-tabset}
 
 ## Alcohol and drug abuse/misuse
 
@@ -144,8 +241,7 @@ tab_header(
 
 5
 
-:::
- 
+::: 
  
 # References
 Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254

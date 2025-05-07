@@ -1,12 +1,20 @@
 # Function designed to perform a robust variance estimation meta-analysis. 
 # For overall average effect modeling
-.CHE_RVE <- function(data, rho = 0.7, study_out, pred_int = 80){
+.CHE_RVE <- function(data, studyid = author_year, rho = 0.7, study_out, pred_int = 80){
   
   if (missing(study_out)) {
     dat <- data
   } else{
     dat <- data |> 
       filter(Author != study_out)
+  }
+  
+  studyid_class <- substitute(studyid)
+  
+  if (!is.character(studyid_class)) {
+    dat$studyid <- data |> dplyr::pull({{ studyid }})
+  } else {
+    dat$studyid <- data[[studyid]]
   }
   
   V_mat <- vcalc(vi = vgt, cluster = studyid, obs = es_id, data = dat, rho = rho) 
