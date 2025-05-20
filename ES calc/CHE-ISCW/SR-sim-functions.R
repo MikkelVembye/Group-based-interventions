@@ -80,7 +80,7 @@ r_study <- function(delta_k, # study-level effect size(s)
   p_onesided <- pt(t_i, df = df, lower.tail = FALSE) 
   
   # Keep only necessary values
-  data.frame(n, n_ES, g, var_g, sd_g, Va, sda, t_i, p_onesided, esid = 1:n_ES)
+  data.frame(n, n_ES, g, var_g, sd_g, Va, sda, t_i, p_onesided, esid = 1:n_ES, studyid = sample(1:1000, 1))
 }
 
 
@@ -960,3 +960,12 @@ runSim <- function(iterations,
   }
   
 }
+
+# Own play
+
+params <- expand_grid(
+  delta_k = c(0.1, 0.2),
+  n_ES = 2:5
+)
+
+x_dat <- pmap(.l = params, .f = r_study, r_k = 0.7, n = 100) |> list_rbind() |> mutate(esid = 1:n())

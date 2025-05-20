@@ -37,7 +37,7 @@ reps <- extract_int_arg(arg_string, "-reps", 2L)
 #-------------------------------------
 
 source("SR-sim-functions.R") # condor
-source("simulations/SR-sim-functions.R") # local
+
 
 source_obj <- ls()
 
@@ -126,7 +126,6 @@ params
 range(params$seed)
 
 n_ES_data <- readRDS("empirical-sample-sizes.rds") # condor
-n_ES_data <- readRDS("simulations/empirical-sample-sizes.rds") # local
 n_ES_sim <- n_ES_empirical(n_ES_data)
 
 #--------------------------------------------------------

@@ -155,18 +155,47 @@ GBD_effect <-
     Wgt = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt),
     Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt),
     
-    # Posttest only, adjusted for clustering
+    # Hedges g posttest only, adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
     gt_post = if_else(is.na(gt_post) & !is.na(gt_reg), gt_reg, gt_post),
     gt_post = if_else(is.na(gt_post) & !is.na(gt_adj), gt_adj, gt_post),
-    gt_post = if_else(is.na(gt_post) & !is.na(gt_DD), g_DD, gt_post),
+    gt_post = if_else(is.na(gt_post) & !is.na(gt_DD), gt_DD, gt_post),
     
     vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_reg), vgt_reg, vgt_post),
     vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_adj), vgt_adj, vgt_post),
-    vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_DD), vg_DD, vgt_post),
+    vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_DD), vgt_DD, vgt_post),
     
     Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_reg), Wgt_reg, Wgt_post),
     Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_adj), Wgt_adj, Wgt_post),
-    Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_DD), Wg_DD, Wgt_post),
+    Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_DD), Wgt_DD, Wgt_post),
+    
+    # Hedges' g posttest only, not-adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
+    g_post = if_else(is.na(g_post) & !is.na(g_reg), g_reg, g_post),
+    g_post = if_else(is.na(g_post) & !is.na(g_adj), g_adj, g_post),
+    g_post = if_else(is.na(g_post) & !is.na(g_DD), g_DD, g_post),
+    
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_reg), vg_reg, vg_post),
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_adj), vg_adj, vg_post),
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_DD), vg_DD, vg_post),
+    
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_reg), Wg_reg, Wg_post),
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_adj), Wg_adj, Wg_post),
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_DD), Wg_DD, Wg_post),
+    
+    # Cohen's d posttest only, not-adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
+    d_post = if_else(is.na(d_post) & !is.na(d_reg), d_reg, d_post),
+    d_post = if_else(is.na(d_post) & !is.na(d_adj), d_adj, d_post),
+    d_post = if_else(is.na(d_post) & !is.na(d_DD), d_DD, d_post),
+    
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_reg), vd_reg, vd_post),
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_adj), vd_adj, vd_post),
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_DD), vd_DD, vd_post),
+    
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_reg), Wd_reg, Wd_post),
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_adj), Wd_adj, Wd_post),
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_DD), Wd_DD, Wd_post),
     
     
     # Covariate adjusted Hedges' g, not cluster adjusted 
@@ -201,8 +230,9 @@ GBD_effect <-
     Wd = if_else(!is.na(Wd_adj), Wd_adj, Wd),
     Wd = if_else(!is.na(Wd_reg), Wd_reg, Wd),
     
+    inv_sample_size = (1/N_t + 1/N_c),
     
-   # ESS = round(4/vgt), # Using cluster bias corrected sampling variance
+    # ESS = round(4/vgt), # Using cluster bias corrected sampling variance
     
     studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
     
@@ -220,7 +250,7 @@ GBD_effect <-
     randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
                            "Stratified randomization", randomization),
    
-   randomization = if_else(randomization == "Stratified?",
+    randomization = if_else(randomization == "Stratified?",
                            "Stratified randomization", randomization),
    
     randomization = if_else(is.na(randomization) & studyid == 102, 
@@ -229,16 +259,16 @@ GBD_effect <-
     randomization = if_else(randomization == "Ratio and block randomized",
                            "Block randomized", randomization),
    
-   randomization = if_else(randomization == "Block randomized stratified by site",
+    randomization = if_else(randomization == "Block randomized stratified by site",
                            "Block randomized", randomization),
     
-   randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
+    randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
                            "Stratified randomization", randomization),
    
-   randomization = if_else(randomization == "Unequal simple randomization",
+    randomization = if_else(randomization == "Unequal simple randomization",
                            "Block randomized", randomization),
    
-   randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
+    randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
                            "Stratified randomization", randomization),
     
     trt_type = if_else(trt_type == "Group-based  Cognitive Behavioral Therapy", 
@@ -275,54 +305,55 @@ GBD_effect <-
     
     measure_type = if_else(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
    
-   cluster_treatment = if_else(cluster_treatment == "Hierarchical mixed models", "Mixed-model", cluster_treatment),
+    cluster_treatment = if_else(cluster_treatment == "Hierarchical mixed models", "Mixed-model", cluster_treatment),
    
-   cluster_treatment = if_else(cluster_treatment == "Multilevel analysis and clustered standard errors", 
+    cluster_treatment = if_else(cluster_treatment == "Multilevel analysis and clustered standard errors", 
                         "Multilevel analysis", cluster_treatment),
    
-   rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
-   rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool),
+    rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
+    rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool),
    
-   timing = if_else(study == "Acarturk et al. 2022" & timing == "Followup", "3m", timing),
-   timing = if_else(Author == "Barbic et al. 2009", "post", timing), 
-   timing = if_else(Author == "Bond et al. 2015", "post", timing),
-   timing = if_else(Author == "Craigie & Nathan 2009", "post", timing),
-   timing = if_else(Author == "Gatz et al. 2007", "post", timing),
-   timing = if_else(Author == "Gordon et al. 2018", "post", timing), 
-   timing = if_else(Author == "Gutman et al. 2019", "post", timing),
-   timing = if_else(Author == "Bond et al. 2015", "post", timing), 
-   timing = if_else(Author == "Hagen et al. 2005", "post", timing),
-   timing = if_else(Author == "Haslam et al. 2019", "post", timing),
-   timing = if_else(Author == "Hilden et al. 2021", "post", timing),
-   timing = if_else(Author == "James et al. 2004", "post", timing),
-   timing = if_else(Author == "Lim et al. 2020", "post", timing),
-   timing = if_else(Author == "Lloyd-Evans et al. 2020", "post", timing),
-   timing = if_else(Author == "McCay et al. 2006", "post", timing),
-   timing = if_else(Author == "McCay et al. 2007", "post", timing),
-   timing = if_else(Author == "Michalak et al. 2015", "post", timing),
-   timing = if_else(Author == "Morley et al. 2024", "post", timing),
-   timing = if_else(Author == "Morton et al. 2012", "post", timing),
-   timing = if_else(Author == "Popolo et al. 2019", "post", timing),
-   timing = if_else(Author == "Rabenstein et al. 2015", "post", timing),
-   timing = if_else(Author == "Rosenblum et al. 2014", "3", timing),
-   timing = if_else(Author == "Sacks et al. 2011", "post", timing), 
-   timing = if_else(Author == "Schrank et al. 2016", "post", timing),
-   timing = if_else(Author == "Somers et al. 2017", "post", timing),
-   timing = if_else(Author == "Valiente et al. 2022", "post", timing),
-   timing = if_else(Author == "Volpe et al. 2015", "post", timing),
-   timing = if_else(Author == "Wojtalik et al. 2022", "post", timing),
-   timing = if_else(Author == "Wuthrich et al. 2013/2021", "post", timing),
-   timing = if_else(Author == "Druss et al. 2010", "post", timing),
-   timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
-   timing = if_else(Author == "Dyck et al. 2000", "post", timing),
+    timing = if_else(study == "Acarturk et al. 2022" & timing == "Followup", "3m", timing),
+    timing = if_else(Author == "Barbic et al. 2009", "post", timing), 
+    timing = if_else(Author == "Bond et al. 2015", "post", timing),
+    timing = if_else(Author == "Craigie & Nathan 2009", "post", timing),
+    timing = if_else(Author == "Gatz et al. 2007", "post", timing),
+    timing = if_else(Author == "Gordon et al. 2018", "post", timing), 
+    timing = if_else(Author == "Gutman et al. 2019", "post", timing),
+    timing = if_else(Author == "Bond et al. 2015", "post", timing), 
+    timing = if_else(Author == "Hagen et al. 2005", "post", timing),
+    timing = if_else(Author == "Haslam et al. 2019", "post", timing),
+    timing = if_else(Author == "Hilden et al. 2021", "post", timing),
+    timing = if_else(Author == "James et al. 2004", "post", timing),
+    timing = if_else(Author == "Lim et al. 2020", "post", timing),
+    timing = if_else(Author == "Lloyd-Evans et al. 2020", "post", timing),
+    timing = if_else(Author == "McCay et al. 2006", "post", timing),
+    timing = if_else(Author == "McCay et al. 2007", "post", timing),
+    timing = if_else(Author == "Michalak et al. 2015", "post", timing),
+    timing = if_else(Author == "Morley et al. 2024", "post", timing),
+    timing = if_else(Author == "Morton et al. 2012", "post", timing),
+    timing = if_else(Author == "Popolo et al. 2019", "post", timing),
+    timing = if_else(Author == "Rabenstein et al. 2015", "post", timing),
+    timing = if_else(Author == "Rosenblum et al. 2014", "3", timing),
+    timing = if_else(Author == "Sacks et al. 2011", "post", timing), 
+    timing = if_else(Author == "Schrank et al. 2016", "post", timing),
+    timing = if_else(Author == "Somers et al. 2017", "post", timing),
+    timing = if_else(Author == "Valiente et al. 2022", "post", timing),
+    timing = if_else(Author == "Volpe et al. 2015", "post", timing),
+    timing = if_else(Author == "Wojtalik et al. 2022", "post", timing),
+    timing = if_else(Author == "Wuthrich et al. 2013/2021", "post", timing),
+    timing = if_else(Author == "Druss et al. 2010", "post", timing),
+    timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
+    timing = if_else(Author == "Dyck et al. 2000", "post", timing),
    
-   analysis_strategy = if_else(str_detect(author_year, "Michalak"), "ITT", analysis_strategy),
+    analysis_strategy = if_else(str_detect(author_year, "Michalak"), "ITT", analysis_strategy),
    
-   conventional = if_else(protocol != "Yes", 1, 0),
+    conventional = if_else(protocol != "Yes", 1, 0),
+    prereg_text = if_else(conventional == 0, "Preregistered", "Not preregistered"),
    
    # For publication/selection/small study bias testing
-   Wse = sqrt(Wgt),
-   t_i = gt/sqrt(Wgt)
+    Wse = sqrt(Wgt),
+    t_i = gt/sqrt(Wgt)
    
  ) |> 
   mutate(
@@ -331,7 +362,7 @@ GBD_effect <-
     .by = author_year
   )
 
-GBD_effect |> mutate(invsample = (1/N_t + 1/N_c), prop_wgt = Wgt/invsample) |> filter(prop_wgt > 1.5, Wgt >= 0.1) |> select(author_year, Wgt, Wd, invsample, prop_wgt)
+#GBD_effect |> mutate(invsample = (1/N_t + 1/N_c), prop_wgt = Wgt/invsample) |> filter(prop_wgt > 1.5, Wgt >= 0.1) |> #select(author_year, Wgt, Wd, invsample, prop_wgt, contains("adj_val"))
 ```
 
 
@@ -340,7 +371,25 @@ GBD_effect |> mutate(invsample = (1/N_t + 1/N_c), prop_wgt = Wgt/invsample) |> f
 
 gb_dat <- 
   GBD_effect |> 
-  filter(!c(str_detect(author_year, "Cano|Craigie") & analysis_strategy == "ITT")) 
+  filter(!c(str_detect(author_year, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
+```
+
+# Preregistered studies
+
+```{r}
+
+gb_dat |> 
+  summarise(
+    prereg_text = unique(prereg_text),
+    n_es = n(),
+    .by = author_year
+  ) |> 
+  summarise(
+    N_studies = n_distinct(author_year),
+    N_es = sum(n_es),
+    .by = prereg_text
+  )
+
 
 ```
 
@@ -411,6 +460,19 @@ gb_dat |>
 
 ```
 
+## Number of individual in the total data
+
+```{r}
+gb_dat |> 
+  summarise(
+    N = max(N_total),
+    .by = author_year
+  ) |> 
+  pull(N) |> 
+  sum()
+```
+
+
 ## Average group size across group treatment
 
 ```{r}
@@ -432,7 +494,7 @@ reintergation_dat <-
   gb_dat |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"))
 
-#saveRDS(reintergation_dat, "reintergation_dat.rds")
+saveRDS(reintergation_dat, "reintergation_dat.rds")
 
 # overall_mean
 reintegration_che_res <- .CHE_RVE(reintergation_dat) 

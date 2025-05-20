@@ -3518,7 +3518,7 @@ Gutman2019_est <-
     
     d_reg = summary(lm(post_test_std ~ group + pre_test_std, data = pick(everything())))$coefficients[2],
     var_term1_reg = summary(lm(post_test_std ~ group + pre_test_std, data = pick(everything())))$coefficients[5]^2,
-    
+    SE_std = sqrt(var_term1_reg),
     .by = outcome
   
   ) |> 
@@ -3610,7 +3610,7 @@ Gutman2019_est <-
     g = gt_reg, 
     model = "std_reg_coef",
     cluster_adj = FALSE,
-    SE_std = var_term1_reg,
+    SE_std = SE_std,
     add_name_to_vars = "_reg"
   ),
   
@@ -3621,7 +3621,7 @@ Gutman2019_est <-
       str_detect(outcome, "WHO") ~ "Wellbeing and Quality of Life"),
     
   ) |> 
-  select(-var_term1_reg); Gutman2019_est
+  select(-c(SE_std, var_term1_reg)); Gutman2019_est
 
 
 ```
@@ -9967,6 +9967,8 @@ Schrank2016_est <-
     ),
     
     # ANCOVA results from table 3, p. 242
+    # We don't use as these produce larger variance estimate relative to the
+    # DiD variance estimator
     F_val = c(
       0.8,
       2.3,
@@ -10003,7 +10005,8 @@ Schrank2016_est <-
     N_total = N_t + N_c,
     df_ind = N_total,
     
-    ppcor_method = "Not computable - F value used for variance estimation",
+    ppcor = ppcor_imp,  
+    ppcor_method = "Imputed",
     
     # The outcome BPRS is reverted because lower score is beneficial
     m_post = if_else(outcome != "BPRS", 
@@ -10032,12 +10035,12 @@ Schrank2016_est <-
                        (m_post_c - m_pre_c)*-1),
     
     d_DD = (m_diff_t - m_diff_c)/sd_pool,
-    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
-    Wd_DD = d_DD^2/F_val,
+    vd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + d_DD^2/(2*df_ind),
+    Wd_DD = 2*(1-ppcor) * (1/N_t + 1/N_c),
     
     g_DD = J * d_DD, 
-    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
-    Wg_DD = g_DD^2/F_val
+    vg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c) + g_DD^2/(2*df_ind),
+    Wg_DD = 2*(1-ppcor) * (1/N_t + 1/N_c)
     
   ) |> 
   rowwise() |> 
@@ -10088,11 +10091,11 @@ Schrank2016_est <-
       g = gt_DD, 
       model = "DiD",
       cluster_adj = FALSE,
-      F_val = F_val,
+      prepost_cor = ppcor,
       q = n_covariates,
       add_name_to_vars = "_DD",
       vars = -var_term1_DD
-    ),
+      ),
     
     vary_id = outcome
   ) |> 
@@ -11312,7 +11315,7 @@ dat <-
 
 ### **Wojtalik et al. [-@Wojtalik2019] (Quality-checked)**
 
-Entering data from Table 2 and 3 (p. 505)
+Entering data from Table 2 and 3 (p. 505). We did not estimate the variance using the t-value for the social adjustment composite completer outcome, as it seemed to yield a too small variance estimate. 
 
 ```{r}
 # Data from table 2 and table (p. 505)  containing marginal means with standard error
@@ -11335,7 +11338,7 @@ Wojtalik2019 <- tibble(
     "Symptoms composite"), 
     each = 2,2)),
   
-   N_start = rep(c(
+  N_start = rep(c(
     58, 44), each = 1,4),
  
   N = c(rep(c(58, 44), each = 1,2),
@@ -11467,7 +11470,18 @@ Wojtalik2019_est <-
     main_es_method = "Raw diff-in-diffs",
     
     # ppcor imputed
-    ppcor_method = "Not computable - t values used"
+    ppcor = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      R2_imp, # Using ppcor as subsitute for R2 as only one covariate is used
+      NA_real_
+    ),
+    
+    ppcor_method = 
+      if_else(
+        analysis == "Completers" & str_detect(outcome, "Social"), 
+        "Imputed as R2 (too small variance estimate when using the t-val)", 
+        "Not computable - t values used"
+    )
     
   ) |> 
   mutate(
@@ -11478,14 +11492,32 @@ Wojtalik2019_est <-
     sd_pool = sqrt(((N_t-1)*sd_pre_t^2 + (N_c-1)*sd_pre_c^2)/(N_t + N_c - 2)),
       
     d_adj = mean_diff/sd_pool,
-    vd_adj = d_adj^2/t_val^2 + d_adj^2/(2*df_ind),
-    Wd_adj = d_adj^2/t_val^2,
+    vd_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c) + d_adj^2/(2*df_ind),
+      d_adj^2/t_val^2 + d_adj^2/(2*df_ind)
+    ),
+    
+    Wd_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c),
+      d_adj^2/t_val^2
+    ),
     
     J = 1 - 3/(4*df_ind-1),
     
     g_adj = J * d_adj,
-    vd_adj = g_adj^2/t_val^2 + g_adj^2/(2*df_ind),
-    Wg_adj = g_adj^2/t_val^2
+    vg_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c) + g_adj^2/(2*df_ind),
+      g_adj^2/t_val^2 + g_adj^2/(2*df_ind)
+    ),
+    
+    Wg_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c),
+      g_adj^2/t_val^2
+    )
     
     
   ) |> 
@@ -11519,9 +11551,35 @@ Wojtalik2019_est <-
       vars = -c("var_term1_adj")
       ),
     
+    vgt_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c) * adj_value_adj + gt_adj^2/(2*h_adj),
+      vgt_adj
+    ),
+    
+    Wgt_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      (1-ppcor^2) * (1/N_t + 1/N_c) * adj_value_adj,
+      Wgt_adj
+    ),
+    
+    a = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+      sqrt(2*Wgt_adj*df_adj),
+      NA_real_
+    ),
+    
+    # Cleaning the transformation value
+    hg_adj = if_else(
+      analysis == "Completers" & str_detect(outcome, "Social"),
+       sqrt(2) * sign(gt_adj) * (log(abs(gt_adj) + sqrt(gt_adj^2 + a^2)) - log(a)),
+      hg_adj
+    ),
+    
     vary_id = paste0(outcome, "/", analysis)
   ) |>  
-  ungroup(); Wojtalik2019_est
+  ungroup() |> 
+  select(-a); Wojtalik2019_est
 ```
 
 ```{r, echo=FALSE}

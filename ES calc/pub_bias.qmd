@@ -47,8 +47,10 @@ library(tictoc)
 
 # Loading in helper function used to calculate effect size and conduct the analysis
 source_path <- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"
+source_path2 <- if (isTRUE(getOption('knitr.in.progress'))) "pub-bias-test-helpers.R" else "ES calc/pub-bias-test-helpers.R"
 
 source(source_path)
+source(source_path2)
 ```
 
 ```{r, warning = FALSE, message = FALSE, echo = FALSE}
@@ -72,8 +74,8 @@ reintergation_dat |>
     p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
   select(
-    `Authors (year)` = author_year, N_t, N_c, 
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, Wg_post, 
+    `Authors (year)` = author_year, N_t, N_c, `1/N_t + 1/N_c` = inv_sample_size,
+    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -83,6 +85,23 @@ reintergation_dat |>
   ) |> 
   scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
 ```
+
+# Number of preregistered studies
+
+```{r}
+reintergation_dat |> 
+  summarise(
+    prereg_text = unique(prereg_text),
+    n_es = n(),
+    .by = author_year
+  ) |> 
+  summarise(
+    N_studies = n_distinct(author_year),
+    N_es = sum(n_es),
+    .by = prereg_text
+  )
+```
+
 
 # Main Analyses
 
@@ -155,8 +174,14 @@ while (!inherits(mod, "rma.mv") & i <= 4L) {
     i <- i + 1L
 }
 
+RE <- rma(yi = gt, vi = Wgt, data = reintergation_dat)
+
+egg_res <- regtest(RE)
+egg_res
+
 mod_robu <- robust(mod, cluster = author_year, clubSandwich = TRUE) 
-mod_robu
+#mod_robu
+
 
 overall_mean <- reintegration_che_res$avg_effect
 
@@ -171,33 +196,18 @@ funnel_exp1 <-  tribble(
 ) 
 
 line1 <- "dashed"
+alpha_line <- 0.5
 
-png("Funnel plot overall.png", height = 4.5, width = 7, unit = "in", res = 600)
-reintergation_dat |> 
-ggplot() + 
-geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
-geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
-geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = "lightcyan", alpha = 0.7) + 
-geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = line1) + 
-geom_hline(yintercept = overall_mean, linetype = line1 ) +  
-geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = line1) + 
-geom_abline(slope = -mod_robu$b[2], intercept = -mod_robu$b[1], linetype = "longdash", color = "blue") + 
-geom_point(aes(Wse, gt), alpha = 1, size = 1.2) +
-scale_color_brewer(type = "qual", palette = 2) + 
-coord_flip() + 
-scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
-scale_y_continuous(breaks = seq(-3, 3, 1)) + 
-theme_bw() + 
-labs(x = "Standard error (adjusted)", 
-     y = "Standardized mean difference (Hedges' g)", 
-     color = "", shape = "") +
-theme(legend.position = "bottom")
-dev.off()
+#png("Funnel plot overall.png", height = 4.5, width = 7, unit = "in", res = 600)
+
+.fp_plot(outcome_name = "Reintegrational")
+
+#dev.off()
 ```
 
 ## Across outcome subgroups
 
-```{r}
+```{r, eval = FALSE}
 
 reintergation_dat |> 
 ggplot() + 
@@ -247,6 +257,337 @@ theme(legend.position = "bottom")
 Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+
+
+```{r}
+scatter <- 
+  reintergation_dat |> 
+  ggplot(aes(inv_sample_size, Wgt)) + 
+  geom_point() +
+  geom_abline(intercept = 0, slope = 1)
+
+summary(reintergation_dat$inv_sample_size)
+summary(reintergation_dat$Wgt)
+  
+  
+```
+
+## Play 
+
+### Overall average effect
+```{r}
+# CHE-ISCW
+V_mat <- metafor::vcalc(vi = Wgt, cluster = author_year, obs = es_id, data = reintergation_dat, rho = 0.7)
+
+W <- solve(V_mat)
+
+# CHE
+che <- 
+  rma.mv(
+    yi = gt,
+    V = V_mat,
+    random = ~ 1 | author_year / es_id,
+    data = reintergation_dat,
+    sparse = TRUE
+) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+
+# ISCW
+
+
+# CHE-ISCW-RVE
+che_iscw <- rma.mv(
+  yi = gt,
+  V = V_mat,
+  W = W,
+  mods = ~ Wse,
+  random = ~ 1 | author_year / es_id,
+  data = reintergation_dat,
+  sparse = TRUE
+) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+```
+
+### Preregistered vs. not preregistered 
+```{r}
+
+prereg_dat <-  
+  reintergation_dat |> 
+  filter(conventional == 0)
+
+V_mat_prereg <- metafor::vcalc(vi = Wgt, cluster = author_year, obs = es_id, data = prereg_dat, rho = 0.7)
+
+W_prereg <- solve(V_mat_prereg)
+
+egg_prereg <-
+  rma.mv(
+  yi = gt,
+  V = V_mat_prereg,
+  W = W_prereg,
+  mods = ~ Wse,
+  random = ~ 1 | author_year / es_id,
+  data = prereg_dat,
+  sparse = TRUE
+) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+
+egg_prereg_res <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg$b[1]),
+    egg_slope = as.numeric(egg_prereg$b[2])
+  )
+
+notprereg_dat <-  
+  reintergation_dat |> 
+  filter(conventional == 1)
+
+
+V_mat_notprereg <- metafor::vcalc(vi = Wgt, cluster = author_year, obs = es_id, data = notprereg_dat, rho = 0.7)
+
+W_notprereg <- solve(V_mat_notprereg)
+
+egg_notprereg <-
+  rma.mv(
+  yi = gt,
+  V = V_mat_notprereg,
+  W = W_notprereg,
+  mods = ~ Wse,
+  random = ~ 1 | author_year / es_id,
+  data = notprereg_dat,
+  sparse = TRUE
+) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+
+
+egg_notprereg_res <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg$b[1]),
+    egg_slope = as.numeric(egg_notprereg$b[2])
+  )
+
+egg_res_subgrouped <- bind_rows(egg_prereg_res, egg_notprereg_res)
+egg_res_subgrouped
+
+# SCEp+ 
+subgroup_means <- .SCEp(mod = prereg_text, data = reintergation_dat)
+
+subgroup_dat <- 
+  reintergation_dat |> 
+  summarise(
+    gt = mean(gt),
+    Wse = mean(Wse),
+    analysis_plan = analysis_plan[1],
+    .by = prereg_text
+  ) |> 
+  bind_cols(subgroup_means[2:3,], egg_res_subgrouped) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
+  
+
+
+y_lim_exp1 <- max(reintergation_dat$Wse) + 0.02 
+y_lim_exp1  
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+
+  
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+es_level_fp <- 
+  reintergation_dat |> 
+  mutate(level = "Effect size level") |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse, gt, col = analysis_plan), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(level~prereg_text) +
+  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Standard error (modified)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "bottom") +
+  labs(color = "Outcome") +
+  guides(col = guide_legend(nrow = 2))
+
+# Make aggregate plot
+
+reintergation_dat_agg <- 
+  reintergation_dat |> 
+  escalc(measure = "SMD", yi = gt, vi = Wgt, data = _) |> 
+  aggregate.escalc(cluster = author_year, rho = 0.7) |> 
+  mutate(
+    Wse = sqrt(vi)
+  )
+
+prereg_dat_agg <-  
+  reintergation_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 0)
+
+egg_prereg_agg <- 
+  rma(yi = yi, vi = vi, data = prereg_dat_agg) |> 
+  regtest()
+
+egg_prereg_agg_res <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_agg$fit$b[1]),
+    egg_slope = as.numeric(egg_prereg_agg$fit$b[2])
+  )
+
+notprereg_dat_agg <-  
+  reintergation_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 1)
+
+egg_notprereg_agg <- 
+  rma(yi = yi, vi = vi, data = notprereg_dat_agg) |> 
+  regtest()
+
+egg_notprereg_agg_res <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg_agg$fit$b[1]),
+    egg_slope = as.numeric(egg_notprereg_agg$fit$b[2])
+  )
+
+egg_res_agg_subgrouped <- bind_rows(egg_notprereg_agg_res, egg_prereg_agg_res)
+egg_res_agg_subgrouped
+
+means_agg <- 
+  rma(yi, vi, mods = ~ -1 +prereg_text, data = reintergation_dat_agg) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+
+subgroup_means_agg <- 
+  tibble(
+    Moderator = c("Not preregistered", "Preregistered"),
+    avg_effect = as.numeric(means_agg$b), 
+    LL = as.numeric(means_agg$ci.lb), 
+    UL = as.numeric(means_agg$ci.ub)
+  )
+
+subgroup_dat_agg <- 
+  reintergation_dat_agg |> 
+  summarise(
+    gt = mean(gt),
+    Wse = mean(Wse),
+    analysis_plan = analysis_plan[1],
+    .by = prereg_text
+  ) |> 
+  bind_cols(subgroup_means_agg, egg_res_agg_subgrouped) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Study level") 
+
+
+#subgroup_dat <- 
+#  reintergation_dat |> 
+#  summarise(
+#    gt = mean(gt),
+#    Wse = mean(Wse),
+#    analysis_plan = analysis_plan[1],
+#    .by = prereg_text
+#  ) |> 
+#  bind_cols(subgroup_means[2:3,], egg_res_subgrouped) |> 
+#  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
+  
+
+
+y_lim_exp2 <- max(reintergation_dat_agg$Wse) + 0.02 
+y_lim_exp2  
+
+funnel_exp2 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp2, qnorm(0.025) * y_lim_exp2, qnorm(0.005) * y_lim_exp2, y_lim_exp2,
+  qnorm(0.95) * y_lim_exp2, qnorm(0.975) * y_lim_exp2, qnorm(0.995) * y_lim_exp2, y_lim_exp2,
+  0,     0,     0,     0
+) 
+
+study_level_fp <- 
+  reintergation_dat_agg |> 
+  mutate(level = "Study level") |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_agg, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_agg, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_agg, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_agg, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse, gt), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(level~prereg_text) +
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Standard error (modified)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "bottom") +
+  labs(color = "Outcome") +
+  guides(col = guide_legend(nrow = 2))
+
+
+```
+
+
+### Checking variance estimate vs. sample size
+```{r}
+ 
+reintergation_dat |> 
+mutate(
+  gt_above_05 = if_else(gt > 0.5, "g > 0.5", "g < 0.5"),
+  gt_above_05 = factor(gt_above_05, levels = c("g > 0.5", "g < 0.5"))
+  ) |> 
+ggplot(aes(Wgt, vgt, color = gt_above_05)) + 
+geom_point() +
+geom_abline(intercept = 0, slope = 1) +
+theme_bw() +
+theme(
+  plot.caption=element_text(hjust = 0, size = 10),
+  legend.position= "bottom",
+  legend.title = element_blank(),
+  panel.spacing.x = unit(5, "mm"), 
+  panel.spacing.y = unit(5, "mm"),
+  #panel.grid.major = element_blank(),
+  #panel.grid.minor = element_blank()
+ ) +
+scale_x_continuous(expand=c(0,0), breaks = seq(0L, 1L, 0.1)) + 
+scale_y_continuous(expand=c(0,0), breaks = seq(0L, 1L, 0.1)) + 
+expand_limits(x = c(0L, 0.5), y = c(0L, 0.5))
+
+
+reintergation_dat |> 
+ggplot(aes(N_total, Wse)) + 
+geom_point() + 
+theme_bw()
+
+```
+
 
 ## Session Information
 
