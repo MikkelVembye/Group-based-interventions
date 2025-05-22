@@ -165,7 +165,7 @@ ci_tau <- boot.ci(boots, type = "perc", index = 2) # For heterogeneity
 ci_tau$percent[4:5]
 
 #-------------------------------------------------------------------------------
-
+# Across outcomes
 
 
 

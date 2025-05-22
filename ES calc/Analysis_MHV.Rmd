@@ -296,6 +296,12 @@ GBD_effect <-
                             "Shared Social problem(s)/challenge(s)", sample_factors),
     
     analysis_plan = if_else(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
+    analysis_plan = case_match(
+      analysis_plan,
+      "Hope, Empowerment & Self-efficacy" ~ "Hope, empowerment & self-efficacy",
+      "Wellbeing and Quality of Life" ~ "Wellbeing and quality of life",
+      .default = analysis_plan
+    ),
     
     test_type = if_else(test_type == "Clinical administered", "Clinician-rated measure", test_type),
     test_type = if_else(test_type == "Clinical interviews", "Clinician-rated measure", test_type),

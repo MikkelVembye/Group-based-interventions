@@ -44,7 +44,6 @@ library(janitor)   # for tidying variable names
 library(boot)      # for bootstrapping
 library(tictoc) 
 
-
 # Loading in helper function used to calculate effect size and conduct the analysis
 source_path <- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"
 source_path2 <- if (isTRUE(getOption('knitr.in.progress'))) "pub-bias-test-helpers.R" else "ES calc/pub-bias-test-helpers.R"
@@ -252,29 +251,10 @@ theme(legend.position = "bottom")
 5
 
 ::: 
- 
-# References
-Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
 
-::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+# Play 
 
-
-```{r}
-scatter <- 
-  reintergation_dat |> 
-  ggplot(aes(inv_sample_size, Wgt)) + 
-  geom_point() +
-  geom_abline(intercept = 0, slope = 1)
-
-summary(reintergation_dat$inv_sample_size)
-summary(reintergation_dat$Wgt)
-  
-  
-```
-
-## Play 
-
-### Overall average effect
+## Overall average effect
 ```{r}
 # CHE-ISCW
 V_mat <- metafor::vcalc(vi = Wgt, cluster = author_year, obs = es_id, data = reintergation_dat, rho = 0.7)
@@ -308,7 +288,7 @@ che_iscw <- rma.mv(
   robust(cluster = author_year, clubSandwich = TRUE)
 ```
 
-### Preregistered vs. not preregistered 
+## Preregistered vs. not preregistered 
 ```{r}
 
 prereg_dat <-  
@@ -429,7 +409,10 @@ es_level_fp <-
   labs(x = "Standard error (modified)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "bottom") +
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+    ) +
   labs(color = "Outcome") +
   guides(col = guide_legend(nrow = 2))
 
@@ -498,6 +481,7 @@ subgroup_dat_agg <-
     analysis_plan = analysis_plan[1],
     .by = prereg_text
   ) |> 
+  arrange(prereg_text) |> 
   bind_cols(subgroup_means_agg, egg_res_agg_subgrouped) |> 
   mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Study level") 
 
@@ -543,19 +527,137 @@ study_level_fp <-
   facet_grid(level~prereg_text) +
   scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() +
+  theme(
+    axis.title = element_blank()
+  )
+
+ylab <- es_level_fp$labels$x
+
+study_level_fp$labels$x <- es_level_fp$labels$x <- "" 
+
+#png("plots/funnel plots (overall effect) across prereg.png", width = 8, height = 5.5, res = 300, unit = "in")
+study_level_fp / es_level_fp
+grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
+#dev.off()
+```
+
+### Investigating the impact of Cano-Vindel et al.
+
+```{r}
+prereg_dat_cano <-  
+  reintergation_dat |> 
+  filter(conventional == 0) |>
+  mutate(
+    cano_vindel = if_else(str_detect(author_year, "Cano"), 1, 0),
+    cano_vindel = factor(cano_vindel)
+  )
+
+V_mat_prereg_cano <- metafor::vcalc(vi = Wgt, cluster = author_year, obs = es_id, data = prereg_dat_cano, rho = 0.7)
+
+W_prereg_cano <- solve(V_mat_prereg_cano)
+
+egg_prereg_cano <-
+  rma.mv(
+  yi = gt,
+  V = V_mat_prereg_cano,
+  W = W_prereg_cano,
+  mods = ~ Wse + cano_vindel,
+  random = ~ 1 | author_year / es_id,
+  data = prereg_dat_cano,
+  sparse = TRUE
+) |> 
+  robust(cluster = author_year, clubSandwich = TRUE)
+
+egg_prereg_res_cano <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_cano $b[1]),
+    egg_slope = as.numeric(egg_prereg_cano$b[2])
+  )
+
+subgroup_means <- .SCEp(mod = prereg_text, data = reintergation_dat)
+
+subgroup_dat_cano <- 
+  prereg_dat_cano |> 
+  summarise(
+    gt = mean(gt),
+    Wse = mean(Wse),
+    analysis_plan = analysis_plan[1],
+    .by = prereg_text
+  ) |> 
+  bind_cols(subgroup_means[3,], egg_prereg_res_cano) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975)) 
+  
+
+
+y_lim_exp_cano <- max(prereg_dat_cano$Wse) + 0.02 
+y_lim_exp_cano  
+
+funnel_exp_cano <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp_cano, qnorm(0.025) * y_lim_exp_cano, qnorm(0.005) * y_lim_exp_cano, y_lim_exp_cano,
+  qnorm(0.95) * y_lim_exp_cano, qnorm(0.975) * y_lim_exp_cano, qnorm(0.995) * y_lim_exp_cano, y_lim_exp_cano,
+  0,     0,     0,     0
+) 
+
+
+  
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+cano_fp <- 
+  prereg_dat_cano |> 
+  mutate(alpha_val = if_else(cano_vindel == 1, 0.9, 1)) |>
+  ggplot() + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_cano, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse, gt, col = cano_vindel, alpha = alpha_val), size = 1.5) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(~prereg_text) +
+  scale_x_reverse(limits = c(y_lim_exp_cano, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
   theme_bw() + 
   labs(x = "Standard error (modified)", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "bottom") +
-  labs(color = "Outcome") +
-  guides(col = guide_legend(nrow = 2))
+  theme(
+    legend.position = "bottom"
+    ) +
+  labs(color = "Cano-vindel") +
+  guides(col = "none", alpha = "none")
 
+png("plots/funnel plots (overall effect) without Cano-Vindel.png", width = 8, height = 5.5, res = 300, unit = "in")
+cano_fp
+dev.off()
+```
+
+# van Aert methods
+See van Aert [(2025)](https://psycnet.apa.org/fulltext/2025-81751-001.html)
+## Overall effect correcting for publication bias in not-preregistered studies only
+
+```{r}
 
 ```
 
 
-### Checking variance estimate vs. sample size
+## Subgroup effects correcting for publication bias in not-preregistered studies only
+
+
+# Checking variance estimate vs. sample size
 ```{r}
  
 reintergation_dat |> 
@@ -588,6 +690,12 @@ theme_bw()
 
 ```
 
+
+ 
+# References
+Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
+
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
 
 ## Session Information
 
