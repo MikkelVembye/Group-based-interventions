@@ -46,6 +46,18 @@ library(clubSandwich)
 library(wildmeta)
 library(gt)
 
+library(knitr)
+library(kableExtra)
+library(skimr)
+library(janitor)
+library(tidyverse)
+library(fastDummies)  
+library(ggrepel)
+library(ggExtra)
+library(ggridges)
+library(MetBrewer)
+library(GGally)
+
 
 # Loading in helper function used to calculate effect size and conduct the analysis
 source_path <- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"
@@ -62,7 +74,8 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
   # Barbic et al. 2009 we therefore we exclude it from the analysis
   #filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
   mutate(
-    author_year = paste(authors, year)
+    author_year = paste(authors, year),
+    study = paste(authors, year)
   ) |> 
  # Remove unused outcomes
  filter(!str_detect(analysis_plan, "Unused"))
@@ -76,7 +89,7 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
 group_based_dat |> 
   summarise(
     n = n(), 
-    .by = c(author_year, effect_size)
+    .by = c(study, effect_size)
   ) |> 
   summarise(
     n_studies = length(effect_size), 
@@ -104,26 +117,35 @@ group_based_dat <-
 
 ```{r, eval=TRUE, fig.cap='FIGURE 1:  Number of studies included in meta-analysis by year'}
 # Figure 1: Number of included studies in the meta-analysis by year
-G_timepllot <- group_based_dat |> 
-  summarise(year = unique(year), .by =  author_year)
+G_timepllot <- 
+  group_based_dat |> 
+  mutate(
+    prereg = if_else(
+      str_detect(protocol, regex("yes", ignore_case = TRUE)), 
+      "Preregistered", "Not preregistered"
+    )
+  ) |> 
+  reframe(year = unique(year), prereg = unique(prereg), .by =  study)
 
 # DONE
-timeline_plot <-  ggplot(G_timepllot, aes(x = year)) + 
-  geom_bar(colour = "black", fill = "cornflowerblue", alpha = 1, width = 1) +
+timeline_plot <-  ggplot(G_timepllot, aes(x = year, fill = prereg)) + 
+  geom_bar(col = "black", alpha = 1, width = 1) +
   scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
   scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
   theme_bw() + 
+  scale_fill_brewer(palette="Paired")+
   theme(
     axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
-    panel.border = element_blank(),
-    legend.position = "none",
+    #panel.border = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_blank(),
     panel.grid.minor = element_blank(),
     panel.grid.major.x = element_blank(),
     axis.line = element_line(colour = "black")
   ) +
   labs(
-    x = "Year of Publication",
-    y = "Number of Studies"
+    x = "Year of publication",
+    y = "Number of studies",
   )
 
 timeline_plot
@@ -132,12 +154,27 @@ timeline_plot
 
 
 ```{r, echo = FALSE}
-GBD_effect <- 
+gb_dat <- 
   group_based_dat |> 
   filter(variable_type != "Binary") |>
   mutate(
     es_id = 1:n(),
     esid = es_id,
+    
+     # Main covariate adjusted effect cluster adjusted 
+    gt_pop = if_else(!is.na(gt_post), gt_post, NA_real_),
+    gt_pop = if_else(!is.na(gt_DD), gt_DD, gt_pop),
+    gt_pop = if_else(!is.na(gt_adj), gt_adj, gt_pop),
+    gt_pop = if_else(!is.na(gt_reg), gt_reg, gt_pop),
+    gt_pop = if_else(!is.na(gt_DD_pop), gt_DD_pop, gt_pop),
+    gt_pop = if_else(!is.na(gt_adj_pop), gt_adj_pop, gt_pop),
+    
+    vgt_pop = if_else(!is.na(vgt_post), vgt_post, NA_real_),
+    vgt_pop = if_else(!is.na(vgt_DD), vgt_DD, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_adj), vgt_adj, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_reg), vgt_reg, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_DD_pop), vgt_DD_pop, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_adj_pop), vgt_adj_pop, vgt_pop),
     
     # Main covariate adjusted effect cluster adjusted 
     gt = if_else(!is.na(gt_post), gt_post, NA_real_),
@@ -352,10 +389,10 @@ GBD_effect <-
     timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
     timing = if_else(Author == "Dyck et al. 2000", "post", timing),
    
-    analysis_strategy = if_else(str_detect(author_year, "Michalak"), "ITT", analysis_strategy),
+    analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
    
     conventional = if_else(protocol != "Yes", 1, 0),
-    prereg_text = if_else(conventional == 0, "Preregistered", "Not preregistered"),
+    prereg_chr = if_else(conventional == 0, "Preregistered", "Not preregistered"),
    
    # For publication/selection/small study bias testing
     Wse = sqrt(Wgt),
@@ -365,35 +402,26 @@ GBD_effect <-
   mutate(
     # Used to remove ITT outcomes from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
     n_analysis_strategies = n_distinct(analysis_strategy),
-    .by = author_year
-  )
-
-#GBD_effect |> mutate(invsample = (1/N_t + 1/N_c), prop_wgt = Wgt/invsample) |> filter(prop_wgt > 1.5, Wgt >= 0.1) |> #select(author_year, Wgt, Wd, invsample, prop_wgt, contains("adj_val"))
+    .by = study
+  ) |> 
+  # Removing ITT analyses from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
+  filter(!c(str_detect(study, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
 ```
 
-
-```{r, echo = FALSE}
-# Removing ITT analyses from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
-
-gb_dat <- 
-  GBD_effect |> 
-  filter(!c(str_detect(author_year, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
-```
-
-# Preregistered studies
+# Number of preregistered vs not preregistered studies
 
 ```{r}
 
 gb_dat |> 
   summarise(
-    prereg_text = unique(prereg_text),
+    prereg_chr = unique(prereg_chr),
     n_es = n(),
-    .by = author_year
+    .by = study
   ) |> 
   summarise(
-    N_studies = n_distinct(author_year),
+    N_studies = n_distinct(study),
     N_es = sum(n_es),
-    .by = prereg_text
+    .by = prereg_chr
   )
 
 
@@ -407,7 +435,7 @@ gb_dat |>
 ```{r}
 gb_dat |> 
   summarise(
-    N_studies = n_distinct(author_year),
+    N_studies = n_distinct(study),
     N_ES = n()
   )
 ```
@@ -466,13 +494,13 @@ gb_dat |>
 
 ```
 
-## Number of individual in the total data
+## Number of individuals in the total data
 
 ```{r}
 gb_dat |> 
   summarise(
     N = max(N_total),
-    .by = author_year
+    .by = study
   ) |> 
   pull(N) |> 
   sum()
@@ -489,19 +517,163 @@ gb_dat |>
   mean()
 ```
 
+## Difference-in-differences effect sizes
 
-# Overall means and contrast test using SCE+ models {.tabset}
-
-## Reintegrational outcomes
 ```{r}
-# We remove physical health, employment, self-esteem, and loneliness outcome since
-# only few studies reported these outcomes. 
+gb_dat |> 
+  filter(str_detect(main_es_method, "diff-in-diffs")) |> 
+  summarise(n = n(), .by = study) |> 
+  summarise(n_studies = length(study), n_es = sum(n))
+```
+
+# Effect size distributions {.tabset}
+
+## Reintegrational outcomes {.tabset}
+
+### Overall
+
+```{r}
 reintergation_dat <- 
   gb_dat |> 
   filter(!str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"))
 
-saveRDS(reintergation_dat, "reintergation_dat.rds")
+#saveRDS(reintergation_dat, "reintergation_dat.rds")
 
+reint_fig_dat <- 
+  reintergation_dat |> 
+  reframe(
+    quantile = scales::percent(c(0.25, 0.75)),
+    qrtl = quantile(gt_pop, c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1, 1)
+  )
+
+density_reint_overall <- 
+  reintergation_dat |> 
+  mutate(es_group = "Overall - Reintegrational Outcomes") |> 
+  ggplot(aes(gt_pop)) + 
+  geom_density(fill = "cornflowerblue") + 
+  geom_vline(data = reint_fig_dat, aes(xintercept = qrtl), linetype = "solid") + 
+  geom_vline(data = reint_fig_dat, aes(xintercept = fence), linetype = "dashed") + 
+  geom_rug(alpha = 0.25) + 
+  facet_grid(~es_group) +
+  theme_bw() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate (including population-based SDs)")
+
+density_reint_overall 
+```
+
+### Across reintegrational outcomes
+
+```{r}
+
+reint_sub_fig_dat <- 
+  reintergation_dat |> 
+  reframe(
+    qrtl = quantile(gt_pop,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .by = analysis_plan
+  )
+
+reintegration_outcome_plot <- 
+  reintergation_dat |> 
+  ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = reint_sub_fig_dat, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = reint_sub_fig_dat, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan, ncol = 2, scales = "free") +
+  theme_bw() +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate (including population-based SDs)")
+
+reintegration_outcome_plot
+
+```
+
+## All mental health outcomes {.tabset}
+
+### Overall
+
+```{r}
+# We remove physical health, employment, self-esteem, and loneliness outcome since
+# only few studies reported these outcomes. 
+mental_health_dat <- 
+  gb_dat |> 
+  filter(str_detect(analysis_plan, "mental")) |> 
+  filter(!str_detect(analysis_plan, "Unused")) |> 
+  mutate(
+    analysis_plan = case_match(
+      analysis_plan,
+      "All mental health outcomes" ~ "General mental health",
+      "All mental health outcomes/Anxiety" ~ "Anxiety",
+      "All mental health outcomes/Depression" ~ "Depression",
+      .default = "Symptoms of psychosis"
+    )
+  )
+
+#saveRDS(mental_health_dat, "mental_health_dat.rds")
+
+mental_fig_dat <- 
+  mental_health_dat |> 
+  reframe(
+    quantile = scales::percent(c(0.25, 0.75)),
+    qrtl = quantile(gt_pop, c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1, 1)
+  )
+
+density_mental_overall <- 
+  mental_health_dat |> 
+  mutate(es_group = "Overall - Mental Health Outcomes") |> 
+  ggplot(aes(gt_pop)) + 
+  geom_density(fill = "Light Pink") + 
+  geom_vline(data = mental_fig_dat, aes(xintercept = qrtl), linetype = "solid") + 
+  geom_vline(data = mental_fig_dat, aes(xintercept = fence), linetype = "dashed") + 
+  geom_rug(alpha = 0.25) + 
+  facet_grid(~es_group) +
+  theme_bw() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate (including population-based SDs)")
+
+density_mental_overall 
+
+```
+
+### Across reintegrational outcomes
+
+```{r}
+
+mental_sub_fig_dat <- 
+  mental_health_dat |> 
+  reframe(
+    qrtl = quantile(gt_pop,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .by = analysis_plan
+  )
+
+mental_outcome_plot <- 
+  mental_health_dat |> 
+  ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = mental_sub_fig_dat, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = mental_sub_fig_dat, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan, ncol = 2, scales = "free") +
+  theme_bw() +
+  theme(legend.position = "none", axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate (including population-based SDs)")
+
+mental_outcome_plot
+
+```
+
+
+# Overall means and contrast test using SCE+ models {.tabset}
+
+## Reintegrational outcomes 
+```{r}
 # overall_mean
 reintegration_che_res <- .CHE_RVE(reintergation_dat) 
 
@@ -531,24 +703,6 @@ tab_header(
 
 ## All mental health outcomes
 ```{r}
-# We remove physical health, employment, self-esteem, and loneliness outcome since
-# only few studies reported these outcomes. 
-mental_health_dat <- 
-  gb_dat |> 
-  filter(str_detect(analysis_plan, "mental")) |> 
-  filter(!str_detect(analysis_plan, "Unused")) |> 
-  mutate(
-    analysis_plan = case_match(
-      analysis_plan,
-      "All mental health outcomes" ~ "General mental health",
-      "All mental health outcomes/Anxiety" ~ "Anxiety",
-      "All mental health outcomes/Depression" ~ "Depression",
-      .default = "Symptoms of psychosis"
-    )
-  )
-
-#saveRDS(mental_health_dat, "mental_health_dat.rds")
-
 # overall_mean
 mental_che_res <- .CHE_RVE(mental_health_dat) 
   
@@ -576,16 +730,6 @@ tab_header(
 ) 
 
 ```
-
-## Difference-in-differences effect sizes
-
-```{r}
-gb_dat |> 
-  filter(str_detect(main_es_method, "diff-in-diffs")) |> 
-  summarise(n = n(), .by = author_year) |> 
-  summarise(n_studies = length(author_year), n_es = sum(n))
-```
-
 
 
 # Forest plots {.tabset}

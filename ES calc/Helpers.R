@@ -1,6 +1,6 @@
 # Function designed to perform a robust variance estimation meta-analysis. 
 # For overall average effect modeling
-.CHE_RVE <- function(data, studyid = author_year, rho = 0.7, study_out, pred_int = 80){
+.CHE_RVE <- function(data, studyid = study, rho = 0.8, study_out, pred_int = 80){
   
   if (missing(study_out)) {
     dat <- data
@@ -17,7 +17,7 @@
     dat$studyid <- data[[studyid]]
   }
   
-  V_mat <- vcalc(vi = vgt, cluster = studyid, obs = es_id, data = dat, rho = rho) 
+  V_mat <- vcalc(vi = vgt, cluster = studyid, obs = esid, data = dat, rho = rho) 
   
   optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
   overall_res <- "Non-converged"
@@ -30,7 +30,7 @@
         rma.mv(
           gt, 
           V = V_mat,
-          random = ~ 1 | studyid / es_id,
+          random = ~ 1 | studyid / esid,
           data = dat
         ) |> 
           robust(cluster = studyid, clubSandwich = TRUE) 
@@ -88,8 +88,8 @@
     data,
     yi = gt,
     vi = vgt,
-    studyid = eppi_id,
-    rho = 0.7
+    studyid = study,
+    rho = 0.8
 ){
   
   
@@ -232,7 +232,7 @@
 }
 
 forest_plot_de <- 
-  function(outcome_group, data, sce_data, che_data, rho = 0.7){
+  function(outcome_group, data, sce_data, che_data, rho = 0.8){
     
     if (!missing(che_data) && missing(outcome_group) && missing(sce_data)) {
       
@@ -258,23 +258,23 @@ forest_plot_de <-
     cil <- round(che_res$LL, 2)
     ciu <- round(che_res$UL, 2)
     
-    studies <- dat |> pull(author_year) |> n_distinct()
+    studies <- dat |> pull(study) |> n_distinct()
     n_es <- nrow(dat)
     
     metafor_dat <- 
       escalc(yi = gt, vi = vgt, data = dat) |> 
-      mutate(n = n(), .by = author_year)
+      mutate(n = n(), .by = study)
     
     reframed_dat <-   
       escalc(yi = gt, vi = vgt, data = dat) |> 
-      mutate(n = n(), .by = author_year) |> 
-      aggregate(cluster = author_year, rho = rho) |> 
+      mutate(n = n(), .by = study) |> 
+      aggregate(cluster = study, rho = rho) |> 
       reframe(
         yi = rep(yi, n),
         vi = rep(vi, n),
-        .by = author_year
+        .by = study
       ) |> 
-      select(-author_year)
+      select(-study)
     
     
     dat <- bind_cols(dat, reframed_dat)
@@ -299,12 +299,12 @@ forest_plot_de <-
         
         es_weight = ((kj*tau2 + omega2 + ((kj-1)*rho)*sigma2j) + sigma2j )^-1,
         
-        .by = author_year
+        .by = study
         
       ) |> 
-      arrange(rma_mean, author_year) |> 
+      arrange(rma_mean, study) |> 
       mutate(
-        author_year = factor(author_year, levels = rev(unique(author_year))),
+        study = factor(study, levels = rev(unique(study))),
         weight_prop = round((es_weight/sum(es_weight)) * 100, 2),
       )
     
@@ -312,10 +312,10 @@ forest_plot_de <-
     forest_dat2 <- 
       forest_dat |> 
       add_row(rma_mean = max(forest_dat$gt) + 0.01) |> 
-      add_row(author_year = tabel_label) |> 
+      add_row(study = tabel_label) |> 
       mutate(
-        author_year = replace_na(author_year, ""),
-        author_year = factor(author_year, levels = rev(unique(author_year))),
+        study = replace_na(study, ""),
+        study = factor(study, levels = rev(unique(study))),
         analysis_plan = if_else(is.na(analysis_plan), outcome_group, analysis_plan)
       ) 
     
@@ -329,16 +329,16 @@ forest_plot_de <-
         mean_label = paste0(rma_mean[1], " [", rma_cil[1], ", ", rma_ciu[1], "], " ),
         
         label = paste0(mean_label, "(", kj[1], ") ", weight_prop[1], "%"),
-        .by = c(analysis_plan, author_year)
+        .by = c(analysis_plan, study)
       ) |> 
       mutate(
         label = case_when(
-          author_year == "" ~ "",
-          author_year == tabel_label ~ paste0(beta, " [", cil, ", ", ciu, "], ", studies, " (", n_es, ")"),
+          study == "" ~ "",
+          study == tabel_label ~ paste0(beta, " [", cil, ", ", ciu, "], ", studies, " (", n_es, ")"),
           .default = label
         )
       ) |> 
-      arrange(author_year)
+      arrange(study)
     
     mean_label_dat <- 
       forest_dat2 |> 
@@ -355,8 +355,8 @@ forest_plot_de <-
     
     plot <- forest_dat2 |>
       ggplot(
-        aes(x = Est, y = author_year, xmin = CI_L, xmax = CI_U,
-            color = author_year, alpha = 0.5)
+        aes(x = Est, y = study, xmin = CI_L, xmax = CI_U,
+            color = study, alpha = 0.5)
       ) + 
       geom_pointrange(position = position_dodge2(width = 0.5, padding = 0.5)) +
       geom_vline(xintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +

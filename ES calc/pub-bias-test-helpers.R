@@ -3,7 +3,7 @@
     g = gt,
     Va = Wgt, 
     var_g = vgt,
-    studyid = author_year,
+    studyid = study,
     rho = .8,
     rand = ~ 1 | studyid /esid,
     method,
@@ -104,7 +104,7 @@
   
 }
 
-#test_dat <- reintergation_dat |> filter(!str_detect(author_year, "Cano")) |> mutate(Wgt = (1/N_t + 1/N_c), Wse = sqrt(Va))
+#test_dat <- reintergation_dat |> filter(!str_detect(study, "Cano")) |> mutate(Wgt = (1/N_t + 1/N_c), Wse = sqrt(Va))
 #.estimate_meta(data = reintergation_dat, method = "CHE-ISCW")
 
 
@@ -114,7 +114,7 @@
     g = gt,
     Va = Va, 
     var_g = vgt,
-    studyid = author_year,
+    studyid = study,
     rho = 0.8, 
     modified = TRUE, 
     k_stop = 5
@@ -322,9 +322,9 @@
     data = reintergation_dat, 
     yi = gt,
     vi = Wgt,
-    studyid = author_year,
+    studyid = study,
     outcome_name = NULL,
-    rho = 0.7,
+    rho = 0.8,
     alpha_line = 0.5,
     polygon_fill = c("grey", "grey10", "lightcyan"),
     mean_line = "dashed",
@@ -465,13 +465,13 @@
 #  
 #  data$vi <- data |> dplyr::pull({{vi}})
 # 
-#  V_mat <- metafor::vcalc(vi = vi, cluster = author_year, obs = es_id, data = data, rho = 0.7)
+#  V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = 0.8)
 #  
 #  W <- solve(V_mat)
 #  
 #  dat <- data |> 
 #    mutate(id = 1:n()) |> 
-#    filter(author_year == !!study) 
+#    filter(study == !!study) 
 #  
 #  start <- min(dat$id)
 #  end <- max(dat$id)
