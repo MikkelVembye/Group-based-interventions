@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-13"
+date: "2025-06-16"
 format:
   html: 
     keep-md: true
@@ -37,14 +37,11 @@ bibliography: bibliography.bib
 
 # Introduction 
 
-This document contains all preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2022a]. Below one can inspect the R packages we use for this analysis as well as the data set behind our analyses. 
+This document contains all preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. Below one can inspect the R packages we use for this analysis as well as the data set behind our analyses. 
 
-# Data manipulation
-
-In the following section, we construct all the main variables that are used in the main analysis of the review. 
 
 ## R packages
-For the exact R package version, see colophon at the bottom of this document. 
+For exact R package versions, see colophon at the bottom of this document. 
 
 
 
@@ -75,9 +72,312 @@ library(GGally)
 
 
 
+# Data manipulation - prepare data sets
+
+In the following section, we construct all the main variables that are used in the main analysis of the review. Unfold the below code to see this exact manipulations. 
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r load-data}}
+# Loading the needed data for analysis
+group_based_dat <- readRDS("Group-based interventions data.RDS") |> 
+  # The post-measurement of Empowerment Scale seems flawed for the study by 
+  # Barbic et al. 2009 we therefore we exclude it from the analysis
+  filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
+  mutate(
+    author_year = paste(authors, year),
+    study = paste(authors, year)
+  ) |> 
+ # Remove unused outcomes
+ filter(!str_detect(analysis_plan, "Unused"))
+```
+````
+:::
+
+
+
+Primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r primary-data-manipultion}}
+gb_dat <- 
+  group_based_dat |> 
+  # Exclude the two binary outcomes
+  filter(variable_type != "Binary") |>
+  mutate(
+    es_id = 1:n(),
+    esid = es_id,
+    
+     # Main covariate adjusted effect cluster adjusted 
+    gt_pop = if_else(!is.na(gt_post), gt_post, NA_real_),
+    gt_pop = if_else(!is.na(gt_DD), gt_DD, gt_pop),
+    gt_pop = if_else(!is.na(gt_adj), gt_adj, gt_pop),
+    gt_pop = if_else(!is.na(gt_reg), gt_reg, gt_pop),
+    gt_pop = if_else(!is.na(gt_DD_pop), gt_DD_pop, gt_pop),
+    gt_pop = if_else(!is.na(gt_adj_pop), gt_adj_pop, gt_pop),
+    
+    vgt_pop = if_else(!is.na(vgt_post), vgt_post, NA_real_),
+    vgt_pop = if_else(!is.na(vgt_DD), vgt_DD, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_adj), vgt_adj, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_reg), vgt_reg, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_DD_pop), vgt_DD_pop, vgt_pop),
+    vgt_pop = if_else(!is.na(vgt_adj_pop), vgt_adj_pop, vgt_pop),
+    
+    # Main covariate adjusted effect cluster adjusted 
+    gt = if_else(!is.na(gt_post), gt_post, NA_real_),
+    gt = if_else(!is.na(gt_DD), gt_DD, gt),
+    gt = if_else(!is.na(gt_adj), gt_adj, gt),
+    gt = if_else(!is.na(gt_reg), gt_reg, gt),
+    
+    vgt = if_else(!is.na(vgt_post), vgt_post, NA_real_),
+    vgt = if_else(!is.na(vgt_DD), vgt_DD, vgt),
+    vgt = if_else(!is.na(vgt_adj), vgt_adj, vgt),
+    vgt = if_else(!is.na(vgt_reg), vgt_reg, vgt),
+    
+    Wgt = if_else(!is.na(Wgt_post), Wgt_post, NA_real_),
+    Wgt = if_else(!is.na(Wgt_DD), Wgt_DD, Wgt),
+    Wgt = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt),
+    Wgt = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt),
+    
+    # Hedges g posttest only, adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
+    gt_post = if_else(is.na(gt_post) & !is.na(gt_reg), gt_reg, gt_post),
+    gt_post = if_else(is.na(gt_post) & !is.na(gt_adj), gt_adj, gt_post),
+    gt_post = if_else(is.na(gt_post) & !is.na(gt_DD), gt_DD, gt_post),
+    
+    vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_reg), vgt_reg, vgt_post),
+    vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_adj), vgt_adj, vgt_post),
+    vgt_post = if_else(is.na(vgt_post) & !is.na(vgt_DD), vgt_DD, vgt_post),
+    
+    Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_reg), Wgt_reg, Wgt_post),
+    Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_adj), Wgt_adj, Wgt_post),
+    Wgt_post = if_else(is.na(Wgt_post) & !is.na(Wgt_DD), Wgt_DD, Wgt_post),
+    
+    # Hedges' g posttest only, not-adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
+    g_post = if_else(is.na(g_post) & !is.na(g_reg), g_reg, g_post),
+    g_post = if_else(is.na(g_post) & !is.na(g_adj), g_adj, g_post),
+    g_post = if_else(is.na(g_post) & !is.na(g_DD), g_DD, g_post),
+    
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_reg), vg_reg, vg_post),
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_adj), vg_adj, vg_post),
+    vg_post = if_else(is.na(vg_post) & !is.na(vg_DD), vg_DD, vg_post),
+    
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_reg), Wg_reg, Wg_post),
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_adj), Wg_adj, Wg_post),
+    Wg_post = if_else(is.na(Wg_post) & !is.na(Wg_DD), Wg_DD, Wg_post),
+    
+    # Cohen's d posttest only, not-adjusted for clustering
+    # Imputing covariate-adjusted estimate when posttest calculation was not possible
+    d_post = if_else(is.na(d_post) & !is.na(d_reg), d_reg, d_post),
+    d_post = if_else(is.na(d_post) & !is.na(d_adj), d_adj, d_post),
+    d_post = if_else(is.na(d_post) & !is.na(d_DD), d_DD, d_post),
+    
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_reg), vd_reg, vd_post),
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_adj), vd_adj, vd_post),
+    vd_post = if_else(is.na(vd_post) & !is.na(vd_DD), vd_DD, vd_post),
+    
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_reg), Wd_reg, Wd_post),
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_adj), Wd_adj, Wd_post),
+    Wd_post = if_else(is.na(Wd_post) & !is.na(Wd_DD), Wd_DD, Wd_post),
+    
+    
+    # Covariate adjusted Hedges' g, not cluster adjusted 
+    g = if_else(!is.na(g_post), g_post, NA_real_),
+    g = if_else(!is.na(g_DD), g_DD, g),
+    g = if_else(!is.na(g_adj), g_adj, g),
+    g = if_else(!is.na(g_reg), g_reg, g),
+    
+    vg = if_else(!is.na(vg_post), vg_post, NA_real_),
+    vg = if_else(!is.na(vg_DD), vg_DD, vg),
+    vg = if_else(!is.na(vg_adj), vg_adj, vg),
+    vg = if_else(!is.na(vg_reg), vg_reg, vg),
+    
+    Wg = if_else(!is.na(Wg_post), Wg_post, NA_real_),
+    Wg = if_else(!is.na(Wg_DD), Wg_DD, Wg),
+    Wg = if_else(!is.na(Wg_adj), Wg_adj, Wg),
+    Wg = if_else(!is.na(Wg_reg), Wg_reg, Wg),
+    
+    # Covariate-adjusted version of Cohen's d, neither cluster nor small sample adjusted
+    d = if_else(!is.na(d_post), d_post, NA_real_),
+    d = if_else(!is.na(d_DD), d_DD, d),
+    d = if_else(!is.na(d_adj), d_adj, d),
+    d = if_else(!is.na(d_reg), d_reg, d),
+    
+    vd = if_else(!is.na(vd_post), vd_post, NA_real_),
+    vd = if_else(!is.na(vd_DD), vd_DD, vd),
+    vd = if_else(!is.na(vd_adj), vd_adj, vd),
+    vd = if_else(!is.na(vd_reg), vd_reg, vd),
+    
+    Wd = if_else(!is.na(Wd_post), Wd_post, NA_real_),
+    Wd = if_else(!is.na(Wd_DD), Wd_DD, Wd),
+    Wd = if_else(!is.na(Wd_adj), Wd_adj, Wd),
+    Wd = if_else(!is.na(Wd_reg), Wd_reg, Wd),
+    
+    inv_sample_size = (1/N_t + 1/N_c),
+    
+    # ESS = round(4/vgt), # Using cluster bias corrected sampling variance
+    
+    studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
+    
+    cnt = if_else(cnt == "USA", "US", cnt),
+    
+    design = if_else(design  == "QES-pretest", "QES", design),
+    
+    # MHV: Jeg synes ikke det er en god ide at ændre CRCT til RCT. Jeg vil gerne kunne se forskel.  
+    # design = ifelse(design  == "CRCT", "RCT", design), 
+    
+    assessment = if_else(assessment == "Self  assesment", "Self assesment", assessment),
+    
+    randomization = if_else(randomization == "Simple Block Randomization", "Block randomized",
+                           randomization),
+    randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
+                           "Stratified randomization", randomization),
+   
+    randomization = if_else(randomization == "Stratified?",
+                           "Stratified randomization", randomization),
+   
+    randomization = if_else(is.na(randomization) & studyid == 102, 
+                            "Stratified randomization", randomization),
+   
+    randomization = if_else(randomization == "Ratio and block randomized",
+                           "Block randomized", randomization),
+   
+    randomization = if_else(randomization == "Block randomized stratified by site",
+                           "Block randomized", randomization),
+    
+    randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
+                           "Stratified randomization", randomization),
+   
+    randomization = if_else(randomization == "Unequal simple randomization",
+                           "Block randomized", randomization),
+   
+    randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
+                           "Stratified randomization", randomization),
+    
+    trt_type = if_else(trt_type == "Group-based  Cognitive Behavioral Therapy", 
+                      "Group based Cognitive Behavioural Therapy", trt_type),
+    trt_type = if_else(trt_type == "Group-based Cognitive Behavioral Therapy", 
+                      "Group based Cognitive Behavioural Therapy", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation & Social skill training", 
+                      "Group psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation", 
+                      "Group Psychoeducation", trt_type),
+    trt_type = if_else(trt_type =="Group psychoeducation & Social Skill Training", 
+                      "Group Psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Education and Illness Management", 
+                      "Group Psychoeducation & Social Skill Training", trt_type),
+    trt_type = if_else(trt_type =="Illness management", 
+                      "Illness Management", trt_type),
+    
+    sample_factors = if_else(sample_factors =="Older with depression and anxiety", 
+                            "Mixed", sample_factors), 
+    sample_factors = if_else(sample_factors =="All suffered from severe mental illness", 
+                            "Shared Social problem(s)/challenge(s)", sample_factors),
+    sample_factors = if_else(sample_factors =="Shared origin and psychological distress", 
+                            "Mixed", sample_factors),
+    sample_factors = if_else(sample_factors =="persons with major psychiatric problems", 
+                            "Shared Social problem(s)/challenge(s)", sample_factors),
+    
+    analysis_plan = if_else(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
+    analysis_plan = case_match(
+      analysis_plan,
+      "Hope, Empowerment & Self-efficacy" ~ "Hope, empowerment & self-efficacy",
+      "Wellbeing and Quality of Life" ~ "Wellbeing and quality of life",
+      .default = analysis_plan
+    ),
+    
+    test_type = if_else(test_type == "Clinical administered", "Clinician-rated measure", test_type),
+    test_type = if_else(test_type == "Clinical interviews", "Clinician-rated measure", test_type),
+    test_type = if_else(test_type == "Self report", "Self-reported", test_type),
+    test_type = if_else(test_type == "Self report through clinical interview", "Self-reported", test_type),
+    test_type = if_else(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
+    
+    measure_type = if_else(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
+   
+    cluster_treatment = if_else(cluster_treatment == "Hierarchical mixed models", "Mixed-model", cluster_treatment),
+   
+    cluster_treatment = if_else(cluster_treatment == "Multilevel analysis and clustered standard errors", 
+                        "Multilevel analysis", cluster_treatment),
+   
+    rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
+    rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool),
+   
+    timing = if_else(study == "Acarturk et al. 2022" & timing == "Followup", "3m", timing),
+    timing = if_else(Author == "Barbic et al. 2009", "post", timing), 
+    timing = if_else(Author == "Bond et al. 2015", "post", timing),
+    timing = if_else(Author == "Craigie & Nathan 2009", "post", timing),
+    timing = if_else(Author == "Gatz et al. 2007", "post", timing),
+    timing = if_else(Author == "Gordon et al. 2018", "post", timing), 
+    timing = if_else(Author == "Gutman et al. 2019", "post", timing),
+    timing = if_else(Author == "Bond et al. 2015", "post", timing), 
+    timing = if_else(Author == "Hagen et al. 2005", "post", timing),
+    timing = if_else(Author == "Haslam et al. 2019", "post", timing),
+    timing = if_else(Author == "Hilden et al. 2021", "post", timing),
+    timing = if_else(Author == "James et al. 2004", "post", timing),
+    timing = if_else(Author == "Lim et al. 2020", "post", timing),
+    timing = if_else(Author == "Lloyd-Evans et al. 2020", "post", timing),
+    timing = if_else(Author == "McCay et al. 2006", "post", timing),
+    timing = if_else(Author == "McCay et al. 2007", "post", timing),
+    timing = if_else(Author == "Michalak et al. 2015", "post", timing),
+    timing = if_else(Author == "Morley et al. 2024", "post", timing),
+    timing = if_else(Author == "Morton et al. 2012", "post", timing),
+    timing = if_else(Author == "Popolo et al. 2019", "post", timing),
+    timing = if_else(Author == "Rabenstein et al. 2015", "post", timing),
+    timing = if_else(Author == "Rosenblum et al. 2014", "3", timing),
+    timing = if_else(Author == "Sacks et al. 2011", "post", timing), 
+    timing = if_else(Author == "Schrank et al. 2016", "post", timing),
+    timing = if_else(Author == "Somers et al. 2017", "post", timing),
+    timing = if_else(Author == "Valiente et al. 2022", "post", timing),
+    timing = if_else(Author == "Volpe et al. 2015", "post", timing),
+    timing = if_else(Author == "Wojtalik et al. 2022", "post", timing),
+    timing = if_else(Author == "Wuthrich et al. 2013/2021", "post", timing),
+    timing = if_else(Author == "Druss et al. 2010", "post", timing),
+    timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
+    timing = if_else(Author == "Dyck et al. 2000", "post", timing),
+   
+    analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
+   
+    conventional = if_else(protocol != "Yes", 1, 0),
+    prereg_chr = if_else(conventional == 0, "Preregistered", "Not preregistered"),
+   
+   # For publication/selection/small study bias testing
+    Wse = sqrt(Wgt),
+    t_i = gt/sqrt(Wgt),
+   
+   outcome_construct = if_else(
+     str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"),
+     "Mental health outcome",
+     "Reintegational outcome"
+   )
+   
+ ) |> 
+  mutate(
+    # Used to remove ITT outcomes from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
+    n_analysis_strategies = n_distinct(analysis_strategy),
+    .by = study
+  ) |> 
+  # Removing ITT analyses from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
+  filter(!c(str_detect(study, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
+```
+````
+:::
+
+
+
+
+
 ::: {.panel-tabset}
 ## Reintegration data
 
+The main data, we use for analyses of reintegrational outcomes can be found below.
 
 
 
@@ -2444,6 +2744,8 @@ reintergation_dat |>
 
 ## Mental health data
 
+The main data, we use for analyses of mental health outcomes can be found below.
+
 
 
 ::: {.cell}
@@ -4342,10 +4644,189 @@ mental_health_dat |>
 
 :::
 
-
 # Step 1 - Describe the Amount of Data and Dependence Structure
-Number of effect size estimates per study
 
+## Timeline
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, time-plot}}
+#| label: fig-time-plot
+#| fig-cap: "Number of studies included in meta-analysis by year."
+#| fig-width: 12
+#| fig-height: 8
+#| message: false
+
+# Figure 1: Number of included studies in the meta-analysis by year
+G_timeplot <- 
+  group_based_dat |> 
+  mutate(
+    prereg = if_else(
+      str_detect(protocol, regex("yes", ignore_case = TRUE)), 
+      "Preregistered", "Not preregistered"
+    )
+  ) |> 
+  reframe(year = unique(year), prereg = unique(prereg), .by =  study)
+
+# DONE
+timeline_plot <-  ggplot(G_timeplot, aes(x = year, fill = prereg)) + 
+  geom_bar(col = "black", alpha = 1, width = 1) +
+  scale_x_continuous(breaks = seq(2000, 2022, 1)) + 
+  scale_y_continuous(breaks = seq(0, 6.5, 1), limits = c(0, 7), expand = c(0,0)) + 
+  theme_bw() + 
+  scale_fill_brewer(palette="Paired")+
+  theme(
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1),
+    #panel.border = element_blank(),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.line = element_line(colour = "black")
+  ) +
+  labs(
+    x = "Year of publication",
+    y = "Number of studies",
+  )
+
+timeline_plot
+```
+````
+
+::: {.cell-output-display}
+![Number of studies included in meta-analysis by year.](PRIMED-workflow--group-based-_files/figure-html/fig-time-plot-1.png){#fig-time-plot fig-pos='H' width=1152}
+:::
+:::
+
+
+
+## Number of preregistered vs. not preregistered studies
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+gb_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            24   225
+2 Not preregistered        24   118
+```
+
+
+:::
+:::
+
+
+
+## Number effects across effect size metrics 
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+# Number of studies reporting OR
+group_based_dat |> 
+  summarise(
+    n = n(), 
+    .by = c(study, effect_size)
+  ) |> 
+  summarise(
+    N_studies = length(effect_size), 
+    N_es = sum(n),
+    .by = effect_size
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  effect_size N_studies  N_es
+  <chr>           <int> <int>
+1 SMD                48   388
+2 OR                  1     2
+```
+
+
+:::
+:::
+
+
+
+## Number of effect size estimates per study
+
+### Overall
+
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-plot}}
+#| label: fig-es-hist
+#| fig-cap: "Distribution of number of effect size estimates per study"
+#| fig.width: 9
+#| fig.height: 10
+#| message: false
+
+es_plot_per_study <- 
+  gb_dat |>
+  arrange(desc(study)) |>
+  mutate(study = factor(study, unique(study))) |> 
+  ggplot(aes(x = study)) +
+  geom_bar(aes(fill = outcome_construct)) +
+  scale_y_continuous(breaks = seq(5, 40, by = 5)) + 
+  theme_minimal() +
+  theme(
+    legend.position = "bottom"
+  ) +
+  coord_flip() +
+  labs(
+    x = paste0("Study (", n_distinct(gb_dat$study), " studies in total)"), 
+    y = "Number of Effect Size Estimates",
+    fill = "Outcome construct"
+  ) 
+
+es_plot_per_study
+```
+````
+
+::: {.cell-output-display}
+![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-1.png){#fig-es-hist fig-pos='H' width=864}
+:::
+:::
+
+
+
+
+### Across subgroups
 
 ::: {.columns}
 
@@ -4356,7 +4837,7 @@ Number of effect size estimates per study
 
 ````{.cell-code}
 ```{{r es-plot-reint}}
-#| label: fig-es-hist
+#| label: fig-es-hist-reint
 #| fig-cap: "Distribution of number of effect size estimates per study for reintegrational outcomes."
 #| fig-width: 12
 #| fig-height: 8
@@ -4382,7 +4863,7 @@ es_plot_per_study_reint
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-1.png){#fig-es-hist fig-pos='H' width=1152}
+![Distribution of number of effect size estimates per study for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=1152}
 :::
 :::
 
@@ -4396,7 +4877,7 @@ es_plot_per_study_reint
 
 ````{.cell-code}
 ```{{r es-plot-mental}}
-#| label: fig-es-hist2
+#| label: fig-es-hist-mental
 #| fig-cap: "Distribution of number of effect size estimates per study for mental health outcomes."
 #| fig-height: 8
 #| message: false
@@ -4412,7 +4893,7 @@ es_plot_per_study_mental <-
   coord_flip() +
   labs(
     title = "Mental Health",
-    x = "Study ID (41 studies in total)", 
+    x = "Study (41 studies in total)", 
     y = "Number of Effect Size Estimates"
   )
 
@@ -4421,7 +4902,7 @@ es_plot_per_study_mental
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist2-1.png){#fig-es-hist2 fig-pos='H' width=672}
+![Distribution of number of effect size estimates per study for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-mental-1.png){#fig-es-hist-mental fig-pos='H' width=672}
 :::
 :::
 
@@ -4434,4 +4915,123 @@ es_plot_per_study_mental
 
 
 
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+
+
+
+
+::: {.cell}
+::: {.cell-output .cell-output-stdout}
+
+```
+─ Session info ───────────────────────────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.4.2 (2024-10-31 ucrt)
+ os       Windows 11 x64 (build 22631)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  Danish_Denmark.utf8
+ ctype    Danish_Denmark.utf8
+ tz       Europe/Copenhagen
+ date     2025-06-16
+ pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+
+─ Packages ───────────────────────────────────────────────────────────────────────────────────────
+ package      * version    date (UTC) lib source
+ base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.4.0)
+ cli            3.6.3      2024-06-21 [1] CRAN (R 4.4.2)
+ clubSandwich * 0.5.11     2024-06-20 [1] CRAN (R 4.4.2)
+ colorspace     2.1-1      2024-07-26 [1] CRAN (R 4.4.2)
+ digest         0.6.37     2024-08-19 [1] CRAN (R 4.4.2)
+ dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.4.2)
+ evaluate       1.0.1      2024-10-10 [1] CRAN (R 4.4.2)
+ fansi          1.0.6      2023-12-08 [1] CRAN (R 4.4.2)
+ farver         2.1.2      2024-05-13 [1] CRAN (R 4.4.2)
+ fastDummies  * 1.7.4      2024-08-16 [1] CRAN (R 4.4.2)
+ fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.4.2)
+ forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.4.2)
+ generics       0.1.3      2022-07-05 [1] CRAN (R 4.4.2)
+ GGally       * 2.2.1      2024-02-14 [1] CRAN (R 4.4.3)
+ ggExtra      * 0.10.1     2023-08-21 [1] CRAN (R 4.4.3)
+ ggplot2      * 3.5.1      2024-04-23 [1] CRAN (R 4.4.2)
+ ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.4.2)
+ ggridges     * 0.5.6      2024-01-23 [1] CRAN (R 4.4.3)
+ ggstats        0.9.0      2025-03-10 [1] CRAN (R 4.4.3)
+ glue           1.8.0      2024-09-30 [1] CRAN (R 4.4.2)
+ gtable         0.3.6      2024-10-25 [1] CRAN (R 4.4.2)
+ hms            1.1.3      2023-03-21 [1] CRAN (R 4.4.2)
+ htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.4.2)
+ htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.4.2)
+ httpuv         1.6.15     2024-03-26 [1] CRAN (R 4.4.2)
+ janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.4.3)
+ jsonlite       1.8.9      2024-09-20 [1] CRAN (R 4.4.2)
+ kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.4.2)
+ knitr        * 1.49       2024-11-08 [1] CRAN (R 4.4.2)
+ later          1.3.2      2023-12-06 [1] CRAN (R 4.4.2)
+ lattice        0.22-6     2024-03-20 [1] CRAN (R 4.4.2)
+ lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.4.2)
+ lubridate    * 1.9.3      2023-09-27 [1] CRAN (R 4.4.2)
+ magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.4.2)
+ mathjaxr       1.6-0      2022-02-28 [1] CRAN (R 4.4.2)
+ Matrix       * 1.7-1      2024-10-18 [1] CRAN (R 4.4.2)
+ metadat      * 1.2-0      2022-04-06 [1] CRAN (R 4.4.2)
+ metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.4.2)
+ MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.4.3)
+ mime           0.12       2021-09-28 [1] CRAN (R 4.4.0)
+ miniUI         0.1.1.1    2018-05-18 [1] CRAN (R 4.4.2)
+ munsell        0.5.1      2024-04-01 [1] CRAN (R 4.4.2)
+ nlme           3.1-166    2024-08-14 [1] CRAN (R 4.4.2)
+ numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.4.0)
+ pillar         1.9.0      2023-03-22 [1] CRAN (R 4.4.2)
+ pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.2)
+ plyr           1.8.9      2023-10-02 [1] CRAN (R 4.4.2)
+ promises       1.3.0      2024-04-05 [1] CRAN (R 4.4.2)
+ purrr        * 1.0.2      2023-08-10 [1] CRAN (R 4.4.2)
+ R6             2.5.1      2021-08-19 [1] CRAN (R 4.4.2)
+ RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.4.0)
+ Rcpp           1.0.13-1   2024-11-02 [1] CRAN (R 4.4.2)
+ readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.4.2)
+ repr           1.1.7      2024-03-22 [1] CRAN (R 4.4.2)
+ rlang          1.1.4      2024-06-04 [1] CRAN (R 4.4.2)
+ rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.4.2)
+ rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.4.2)
+ sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.4.2)
+ scales         1.3.0      2023-11-28 [1] CRAN (R 4.4.2)
+ sessioninfo    1.2.2      2021-12-06 [1] CRAN (R 4.4.2)
+ shiny          1.9.1      2024-08-01 [1] CRAN (R 4.4.2)
+ skimr        * 2.1.5      2022-12-23 [1] CRAN (R 4.4.2)
+ snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.4.3)
+ stringi        1.8.4      2024-05-06 [1] CRAN (R 4.4.0)
+ stringr      * 1.5.1      2023-11-14 [1] CRAN (R 4.4.2)
+ svglite        2.1.3      2023-12-08 [1] CRAN (R 4.4.2)
+ systemfonts    1.1.0      2024-05-15 [1] CRAN (R 4.4.2)
+ tibble       * 3.2.1      2023-03-20 [1] CRAN (R 4.4.2)
+ tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.4.2)
+ tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.4.2)
+ tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.4.2)
+ timechange     0.3.0      2024-01-18 [1] CRAN (R 4.4.2)
+ tzdb           0.4.0      2023-05-12 [1] CRAN (R 4.4.2)
+ utf8           1.2.4      2023-10-22 [1] CRAN (R 4.4.2)
+ vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.4.2)
+ viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.4.2)
+ withr          3.0.2      2024-10-28 [1] CRAN (R 4.4.2)
+ xfun           0.49       2024-10-31 [1] CRAN (R 4.4.2)
+ xml2           1.3.6      2023-12-04 [1] CRAN (R 4.4.2)
+ xtable         1.8-4      2019-04-21 [1] CRAN (R 4.4.2)
+ yaml           2.3.10     2024-07-26 [1] CRAN (R 4.4.1)
+ zoo            1.8-12     2023-04-13 [1] CRAN (R 4.4.2)
+
+ [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.4.2/library
+
+──────────────────────────────────────────────────────────────────────────────────────────────────
+```
+
+
+:::
+:::
+
+
+
+:::
 
