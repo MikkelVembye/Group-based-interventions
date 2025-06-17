@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-16"
+date: "2025-06-17"
 format:
   html: 
     keep-md: true
@@ -41,7 +41,7 @@ This document contains all preliminary data analysis for the meta-analyses with 
 
 
 ## R packages
-For exact R package versions, see colophon at the bottom of this document. 
+For exact R package versions, see the colophon by unfolding the [Session Information](#session-info) at the bottom of this document. 
 
 
 
@@ -291,6 +291,11 @@ gb_dat <-
       analysis_plan,
       "Hope, Empowerment & Self-efficacy" ~ "Hope, empowerment & self-efficacy",
       "Wellbeing and Quality of Life" ~ "Wellbeing and quality of life",
+      "All mental health outcomes" ~ "General mental health",
+      "All mental health outcomes/Anxiety" ~ "Anxiety",
+      "All mental health outcomes/Depression" ~ "Depression",
+      "All mental health outcomes/Symptoms of psychosis" ~ "Symptoms of psychosis",
+      "All mental health outcomes/Negative symptoms" ~ "Symptoms of psychosis",
       .default = analysis_plan
     ),
     
@@ -352,10 +357,24 @@ gb_dat <-
     Wse = sqrt(Wgt),
     t_i = gt/sqrt(Wgt),
    
-   outcome_construct = if_else(
-     str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"),
-     "Mental health outcome",
-     "Reintegational outcome"
+   outcome_construct = case_match(
+     analysis_plan,
+     # Mental health outcomes
+     "General mental health" ~ "Mental health outcome",
+     "Anxiety" ~ "Mental health outcome",
+     "Depression" ~ "Mental health outcome",
+     "Symptoms of psychosis" ~ "Mental health outcome",
+     
+     # Reintegrational health outcomes
+     "Wellbeing and quality of life" ~ "Reintegational outcome", 
+     "Hope, empowerment & self-efficacy" ~ "Reintegational outcome",
+     "Psychiatric hospitalization" ~ "Reintegational outcome",
+     "Social functioning (degree of impairment)" ~ "Reintegational outcome",
+     "Loneliness" ~ "Reintegational outcome",
+     "Alcohol and drug abuse/misuse" ~ "Reintegational outcome",
+     "Physical health" ~ "Reintegational outcome",
+     "Self-esteem" ~ "Reintegational outcome",
+     "Employment" ~ "Reintegational outcome"
    )
    
  ) |> 
@@ -386,14 +405,18 @@ The main data, we use for analyses of reintegrational outcomes can be found belo
 ````{.cell-code}
 ```{{r load-reint-data}}
 reintergation_dat <- 
-  readRDS("reintergation_dat.rds") |> 
-  mutate(esid = 1:n()) |> 
+  gb_dat |> 
+  filter(outcome_construct == "Reintegational outcome") 
+
+
+reint_overview <- 
+  reintergation_dat |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
-reintergation_dat |> 
+reint_overview |> 
   mutate(
     p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
@@ -506,6 +529,19 @@ reintergation_dat |>
    <td style="text-align:right;"> 0.094 </td>
    <td style="text-align:right;"> 0.306 </td>
    <td style="text-align:right;"> 1.000 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Bond et al. 2015 </td>
+   <td style="text-align:right;"> 43 </td>
+   <td style="text-align:right;"> 41 </td>
+   <td style="text-align:left;"> Psychiatric hospitalization </td>
+   <td style="text-align:right;"> 0.309 </td>
+   <td style="text-align:right;"> 0.095 </td>
+   <td style="text-align:right;"> 0.094 </td>
+   <td style="text-align:right;"> 0.307 </td>
+   <td style="text-align:right;"> 0.314 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1226,6 +1262,32 @@ reintergation_dat |>
   </tr>
   <tr>
    <td style="text-align:left;"> Gestel-Timmermans et al. 2012 </td>
+   <td style="text-align:right;"> 138 </td>
+   <td style="text-align:right;"> 122 </td>
+   <td style="text-align:left;"> Loneliness </td>
+   <td style="text-align:right;"> -0.196 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.092 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> High </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Gestel-Timmermans et al. 2012 </td>
+   <td style="text-align:right;"> 125 </td>
+   <td style="text-align:right;"> 102 </td>
+   <td style="text-align:left;"> Loneliness </td>
+   <td style="text-align:right;"> -0.039 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 0.740 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> High </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Gestel-Timmermans et al. 2012 </td>
    <td style="text-align:right;"> 124 </td>
    <td style="text-align:right;"> 114 </td>
    <td style="text-align:left;"> Wellbeing and quality of life </td>
@@ -1368,6 +1430,32 @@ reintergation_dat |>
    <td style="text-align:left;"> High </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Haslam et al. 2019 </td>
+   <td style="text-align:right;"> 66 </td>
+   <td style="text-align:right;"> 54 </td>
+   <td style="text-align:left;"> Loneliness </td>
+   <td style="text-align:right;"> -0.246 </td>
+   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 0.005 </td>
+   <td style="text-align:right;"> 0.073 </td>
+   <td style="text-align:right;"> 0.001 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> High </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Hilden et al. 2021 </td>
+   <td style="text-align:right;"> 23 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> Physical health </td>
+   <td style="text-align:right;"> 0.175 </td>
+   <td style="text-align:right;"> 0.141 </td>
+   <td style="text-align:right;"> 0.140 </td>
+   <td style="text-align:right;"> 0.375 </td>
+   <td style="text-align:right;"> 0.640 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> High </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Hilden et al. 2021 </td>
    <td style="text-align:right;"> 23 </td>
    <td style="text-align:right;"> 12 </td>
@@ -1423,12 +1511,38 @@ reintergation_dat |>
    <td style="text-align:left;"> Himle et al. 2014 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 29 </td>
+   <td style="text-align:left;"> Physical health </td>
+   <td style="text-align:right;"> 0.492 </td>
+   <td style="text-align:right;"> 0.085 </td>
+   <td style="text-align:right;"> 0.083 </td>
+   <td style="text-align:right;"> 0.288 </td>
+   <td style="text-align:right;"> 0.087 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Himle et al. 2014 </td>
+   <td style="text-align:right;"> 29 </td>
+   <td style="text-align:right;"> 29 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
    <td style="text-align:right;"> 0.464 </td>
    <td style="text-align:right;"> 0.085 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
    <td style="text-align:right;"> 0.107 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Himle et al. 2014 </td>
+   <td style="text-align:right;"> 29 </td>
+   <td style="text-align:right;"> 29 </td>
+   <td style="text-align:left;"> Physical health </td>
+   <td style="text-align:right;"> 0.508 </td>
+   <td style="text-align:right;"> 0.085 </td>
+   <td style="text-align:right;"> 0.083 </td>
+   <td style="text-align:right;"> 0.288 </td>
+   <td style="text-align:right;"> 0.077 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1444,6 +1558,110 @@ reintergation_dat |>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.495 </td>
+   <td style="text-align:right;"> 0.120 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.147 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.442 </td>
+   <td style="text-align:right;"> 0.119 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.195 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.133 </td>
+   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.696 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.053 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.876 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.392 </td>
+   <td style="text-align:right;"> 0.118 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.251 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.433 </td>
+   <td style="text-align:right;"> 0.119 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.205 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.222 </td>
+   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.515 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Jacob et al. 2010 </td>
+   <td style="text-align:right;"> 19 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> -0.121 </td>
+   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 0.116 </td>
+   <td style="text-align:right;"> 0.341 </td>
+   <td style="text-align:right;"> 0.723 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
   </tr>
   <tr>
    <td style="text-align:left;"> James et al. 2004 </td>
@@ -1522,6 +1740,19 @@ reintergation_dat |>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Lloyd-Evans et al. 2020 </td>
+   <td style="text-align:right;"> 25 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:left;"> Loneliness </td>
+   <td style="text-align:right;"> 0.103 </td>
+   <td style="text-align:right;"> 0.158 </td>
+   <td style="text-align:right;"> 0.158 </td>
+   <td style="text-align:right;"> 0.398 </td>
+   <td style="text-align:right;"> 0.796 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
    <td style="text-align:left;"> Lloyd-Evans et al. 2020 </td>
@@ -1618,6 +1849,19 @@ reintergation_dat |>
    <td style="text-align:left;"> McCay et al. 2006 </td>
    <td style="text-align:right;"> 26 </td>
    <td style="text-align:right;"> 14 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.521 </td>
+   <td style="text-align:right;"> 0.052 </td>
+   <td style="text-align:right;"> 0.048 </td>
+   <td style="text-align:right;"> 0.219 </td>
+   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> McCay et al. 2006 </td>
+   <td style="text-align:right;"> 26 </td>
+   <td style="text-align:right;"> 14 </td>
    <td style="text-align:left;"> Wellbeing and quality of life </td>
    <td style="text-align:right;"> 0.129 </td>
    <td style="text-align:right;"> 0.109 </td>
@@ -1626,6 +1870,19 @@ reintergation_dat |>
    <td style="text-align:right;"> 0.694 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> McCay et al. 2007 </td>
+   <td style="text-align:right;"> 29 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.386 </td>
+   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.016 </td>
+   <td style="text-align:right;"> 0.128 </td>
+   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> High </td>
   </tr>
   <tr>
    <td style="text-align:left;"> McCay et al. 2007 </td>
@@ -1917,12 +2174,38 @@ reintergation_dat |>
    <td style="text-align:left;"> Russinova et al. 2018 </td>
    <td style="text-align:right;"> 22 </td>
    <td style="text-align:right;"> 26 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.716 </td>
+   <td style="text-align:right;"> 0.118 </td>
+   <td style="text-align:right;"> 0.112 </td>
+   <td style="text-align:right;"> 0.334 </td>
+   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Russinova et al. 2018 </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 26 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
    <td style="text-align:right;"> 0.101 </td>
    <td style="text-align:right;"> 0.112 </td>
    <td style="text-align:right;"> 0.112 </td>
    <td style="text-align:right;"> 0.334 </td>
    <td style="text-align:right;"> 0.762 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Russinova et al. 2018 </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 26 </td>
+   <td style="text-align:left;"> Employment </td>
+   <td style="text-align:right;"> 0.296 </td>
+   <td style="text-align:right;"> 0.113 </td>
+   <td style="text-align:right;"> 0.112 </td>
+   <td style="text-align:right;"> 0.334 </td>
+   <td style="text-align:right;"> 0.376 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1956,12 +2239,38 @@ reintergation_dat |>
    <td style="text-align:left;"> Russinova et al. 2018 </td>
    <td style="text-align:right;"> 22 </td>
    <td style="text-align:right;"> 25 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.225 </td>
+   <td style="text-align:right;"> 0.114 </td>
+   <td style="text-align:right;"> 0.113 </td>
+   <td style="text-align:right;"> 0.337 </td>
+   <td style="text-align:right;"> 0.504 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Russinova et al. 2018 </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 25 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
    <td style="text-align:right;"> -0.113 </td>
    <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.337 </td>
    <td style="text-align:right;"> 0.737 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Russinova et al. 2018 </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 25 </td>
+   <td style="text-align:left;"> Employment </td>
+   <td style="text-align:right;"> 0.030 </td>
+   <td style="text-align:right;"> 0.113 </td>
+   <td style="text-align:right;"> 0.113 </td>
+   <td style="text-align:right;"> 0.337 </td>
+   <td style="text-align:right;"> 0.930 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2021,6 +2330,19 @@ reintergation_dat |>
    <td style="text-align:left;"> Rüsch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.511 </td>
+   <td style="text-align:right;"> 0.035 </td>
+   <td style="text-align:right;"> 0.031 </td>
+   <td style="text-align:right;"> 0.177 </td>
+   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
    <td style="text-align:right;"> 0.522 </td>
    <td style="text-align:right;"> 0.107 </td>
@@ -2066,6 +2388,19 @@ reintergation_dat |>
    <td style="text-align:right;"> 0.381 </td>
    <td style="text-align:right;"> 0.617 </td>
    <td style="text-align:right;"> 0.211 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> Some concerns </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:right;"> 20 </td>
+   <td style="text-align:right;"> 13 </td>
+   <td style="text-align:left;"> Self-esteem </td>
+   <td style="text-align:right;"> 0.338 </td>
+   <td style="text-align:right;"> 0.094 </td>
+   <td style="text-align:right;"> 0.092 </td>
+   <td style="text-align:right;"> 0.304 </td>
+   <td style="text-align:right;"> 0.267 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2720,6 +3055,19 @@ reintergation_dat |>
    <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
+   <td style="text-align:left;"> Smith et al. 2021 </td>
+   <td style="text-align:right;"> 27 </td>
+   <td style="text-align:right;"> 35 </td>
+   <td style="text-align:left;"> Loneliness </td>
+   <td style="text-align:right;"> 0.679 </td>
+   <td style="text-align:right;"> 0.093 </td>
+   <td style="text-align:right;"> 0.089 </td>
+   <td style="text-align:right;"> 0.298 </td>
+   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:left;"> High </td>
+  </tr>
+  <tr>
    <td style="text-align:left;"> Wuthrich &amp; Rapee 2013 </td>
    <td style="text-align:right;"> 27 </td>
    <td style="text-align:right;"> 35 </td>
@@ -2753,14 +3101,17 @@ The main data, we use for analyses of mental health outcomes can be found below.
 ````{.cell-code}
 ```{{r}}
 mental_health_dat <- 
-  readRDS("mental_health_dat.rds") |> 
-  mutate(esid = 1:n()) |> 
+  gb_dat |> 
+  filter(outcome_construct == "Mental health outcome") 
+
+mental_overview_dat <- 
+  mental_health_dat |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
-mental_health_dat |> 
+mental_overview_dat |> 
   mutate(
     p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
@@ -4703,7 +5054,7 @@ timeline_plot
 
 
 
-## Number of preregistered vs. not preregistered studies
+## Number of preregistered vs. not preregistered studies {.tabset}
 
 
 
@@ -4740,6 +5091,83 @@ gb_dat |>
 :::
 
 
+
+::: {.panel-tabset}
+### Reintegration 
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            23   141
+2 Not preregistered        22    61
+```
+
+
+:::
+:::
+
+
+
+### Mental health
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            21    84
+2 Not preregistered        20    57
+```
+
+
+:::
+:::
+
+
+
+:::
 
 ## Number effects across effect size metrics 
 
@@ -4779,9 +5207,10 @@ group_based_dat |>
 
 
 
+
 ## Number of effect size estimates per study
 
-### Overall
+### Overall per study
 
 
 
@@ -4790,7 +5219,7 @@ group_based_dat |>
 
 ````{.cell-code}
 ```{{r es-plot}}
-#| label: fig-es-hist
+#| label: fig-es-hist-per-stud
 #| fig-cap: "Distribution of number of effect size estimates per study"
 #| fig.width: 9
 #| fig.height: 10
@@ -4812,21 +5241,22 @@ es_plot_per_study <-
     x = paste0("Study (", n_distinct(gb_dat$study), " studies in total)"), 
     y = "Number of Effect Size Estimates",
     fill = "Outcome construct"
-  ) 
+  ) +
+  guides(fill = guide_legend(reverse=TRUE))
 
 es_plot_per_study
 ```
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-1.png){#fig-es-hist fig-pos='H' width=864}
+![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-1.png){#fig-es-hist-per-stud fig-pos='H' width=864}
 :::
 :::
 
 
 
 
-### Across subgroups
+### Across outcome subgroups per study
 
 ::: {.columns}
 
@@ -4837,33 +5267,160 @@ es_plot_per_study
 
 ````{.cell-code}
 ```{{r es-plot-reint}}
-#| label: fig-es-hist-reint
-#| fig-cap: "Distribution of number of effect size estimates per study for reintegrational outcomes."
+#| label: fig-es-hist-per-stud-reint
+#| fig-cap: "Distribution of number of effects per study, by direction of the effects for reintegrational outcomes."
 #| fig-width: 12
 #| fig-height: 8
 #| message: false
 
-es_plot_per_study_reint <- 
-  reintergation_dat |>
-  arrange(desc(study)) |>
-  mutate(study = factor(study, unique(study))) |> 
-  ggplot(aes(x = study)) +
-  geom_bar() +
-  scale_y_continuous(breaks = seq(5, 30, by = 5)) + 
-  theme_minimal() +
-  coord_flip() +
-  labs(
-    title = "Reintegration",
-    x = "Study (42 studies in total)", 
-    y = "Number of Effect Size Estimates"
+reintergation_dat |>
+ggplot(aes(y = study, fill = gt_pop >= 0)) + 
+geom_bar(data = subset(reintergation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintergation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+theme_minimal() +
+scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-10, 30)) +
+scale_y_discrete(limits=rev) +
+scale_fill_manual(
+  values = c(met.brewer("Navajo")[2], met.brewer("Navajo")[4]), 
+  labels = c("Negative ES", "Non-negative ES"), 
+  name = "Effect Size"
+) +
+labs(x = "Number of Effect Size Estimates", y = "", title = "Reintegration") +
+theme(
+    legend.position = "bottom",
+    #legend.position.inside = c(0.95, 0.05),
+    #legend.justification = c(1, 0),
+    legend.background = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
   )
-
-es_plot_per_study_reint
 ```
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=1152}
+![Distribution of number of effects per study, by direction of the effects for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-reint-1.png){#fig-es-hist-per-stud-reint fig-pos='H' width=1152}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-plot-mental}}
+#| label: fig-es-hist-per-stud-mental
+#| fig-cap: "Distribution of number of effects per study, by direction of the effects for mental health outcomes."
+#| fig-height: 8.5
+#| message: false
+
+mental_health_dat |>
+ggplot(aes(y = study, fill = gt_pop >= 0)) + 
+geom_bar(data = subset(mental_health_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(mental_health_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+theme_minimal() +
+scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-5, 15)) +
+scale_y_discrete(limits=rev) +
+scale_fill_manual(
+  values = c(met.brewer("Navajo")[2], met.brewer("Navajo")[4]), 
+  labels = c("Negative ES", "Non-negative ES"), 
+  name = "Effect Size"
+) +
+labs(x = "Number of Effect Size Estimates", y = "", title = "Mental Health") +
+theme(
+    legend.position = "bottom",
+    #legend.position.inside = c(0.95, 0.2),
+    #legend.justification = c(1, 0),
+    legend.background = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
+  )
+```
+````
+
+::: {.cell-output-display}
+![Distribution of number of effects per study, by direction of the effects for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-mental-1.png){#fig-es-hist-per-stud-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Overall 
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, sum-es-per-study-plot}}
+#| label: fig-es-hist
+#| fig-cap: "Distribution of number of effect size estimates per study"
+#| fig.width: 9
+#| fig.height: 7
+#| message: false
+
+gb_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = met.brewer("Navajo")[4]) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 10, 2)) +
+  theme_minimal() +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies")
+```
+````
+
+::: {.cell-output-display}
+![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-1.png){#fig-es-hist fig-pos='H' width=864}
+:::
+:::
+
+
+
+### Across outcome subgroups 
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r sum-es-plot-reint}}
+#| label: fig-es-hist-reint
+#| fig-cap: "Distribution of number of effects per study for mental for reintegrational outcomes."
+#| fig-width: 9
+#| fig-height: 6
+#| message: false
+
+reintergation_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = "cornflowerblue") +
+  scale_x_continuous(breaks = seq(0, 30, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 14, 2), limits = c(0, 14)) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Reintegration") +
+  expand_limits(x = 30)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of number of effects per study for mental for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=864}
 :::
 :::
 
@@ -4878,31 +5435,29 @@ es_plot_per_study_reint
 ````{.cell-code}
 ```{{r es-plot-mental}}
 #| label: fig-es-hist-mental
-#| fig-cap: "Distribution of number of effect size estimates per study for mental health outcomes."
-#| fig-height: 8
+#| fig-cap: "Distribution of number of effects per study for mental health outcomes."
+#| fig-height: 8.5
 #| message: false
 
-es_plot_per_study_mental <- 
-  mental_health_dat |> 
-  arrange(desc(study)) |>
-  mutate(study = factor(study, unique(study))) |> 
-  ggplot(aes(x = study)) +
-  geom_bar() +
-  scale_y_continuous(breaks = seq(5, 30, by = 5)) + 
+mental_health_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = "pink") +
+  scale_x_continuous(breaks = seq(0, 20, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0, 11)) +
   theme_minimal() +
-  coord_flip() +
-  labs(
-    title = "Mental Health",
-    x = "Study (41 studies in total)", 
-    y = "Number of Effect Size Estimates"
-  )
-
-es_plot_per_study_mental
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Mental Health") +
+  expand_limits(x = 20)
 ```
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-mental-1.png){#fig-es-hist-mental fig-pos='H' width=672}
+![Distribution of number of effects per study for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-mental-1.png){#fig-es-hist-mental fig-pos='H' width=672}
 :::
 :::
 
@@ -4910,12 +5465,130 @@ es_plot_per_study_mental
 :::
 
 :::
+
+# Data structure by outcome constructs
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r labeled-cat-hist-ridge-function}}
+label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  require(ggplot2)
+  require(forcats)
+  
+  n_es_exp <- enquo(n_es)
+  var_exp <- enquo(variable)
+  
+  data <- data |> 
+    mutate(
+      !!var_exp := fct_recode(!!var_exp, !!!label_map),
+      !!var_exp := fct_relevel(!!var_exp, !!!level_order),
+      !!var_exp := fct_rev(!!var_exp)
+    ) 
+  
+  ggplot(data, aes(
+    x = !!n_es_exp,
+    y = !!var_exp,
+    fill = !!var_exp
+  )) +
+    geom_density_ridges(
+      alpha = 1,
+      stat = "binline",
+      bins = 30,
+      scale = 0.7,
+      linewidth = 0.1,
+      draw_baseline = FALSE
+    ) +
+    theme_minimal() +
+    labs(y = "", x = "Effect Size Estimates per Study") +
+    theme(legend.position = "none")
+}
+```
+````
+:::
+
+
+
+The following plot shows the effect size estimates distribution within each outcome construct.
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r motivation-construct-ridge-hist}}
+#| label: fig-motivation-construct-ridge-hist
+#| fig-cap: "Distribution of effect size estimates, by outcome constructs"
+#| fig.width: 7
+#| fig.height: 8
+#| fig.retina: 2
+#| message: false
+
+n_es_by_construct <- gb_dat |> 
+  summarise(effects = n(), .by = c(study, analysis_plan))
+
+# Used to construct out_label 
+#label_dat <- 
+#  n_es_by_construct |> 
+#  summarise(J = n(), N_es = sum(effects), .by = analysis_plan)
+
+out_label <- c(
+  "General mental health (J = 28, K = 70)" = "General mental health",
+  "Wellbeing and quality of life (J = 24, K = 67)" = "Wellbeing and quality of life",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)" = "Hope, empowerment & self-efficacy",
+  "Psychiatric hospitalization (J = 1, K = 1)" = "Psychiatric hospitalization",
+  "Social functioning (degree of impairment) (J =16, K = 47)" = "Social functioning (degree of impairment)",
+  "Anxiety (J = 9, K = 14)" = "Anxiety",
+  "Depression (J = 19, K = 36)" = "Depression",
+  "Symptoms of psychosis (J = 7, K = 21)" = "Symptoms of psychosis",
+  "Loneliness (J = 4, K = 5)" = "Loneliness",
+  "Alcohol and drug abuse/misuse (J = 7, K = 31)" = "Alcohol and drug abuse/misuse",
+  "Physical health (J = 2, K = 3)" = "Physical health",
+  "Self-esteem (J = 5, K = 14)" = "Self-esteem",
+  "Employment (J = 1, K = 2)" = "Employment"
+)
+
+out_level <- c(
+  "General mental health (J = 28, K = 70)",
+  "Wellbeing and quality of life (J = 24, K = 67)",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)",
+  "Psychiatric hospitalization (J = 1, K = 1)",
+  "Social functioning (degree of impairment) (J =16, K = 47)",
+  "Anxiety (J = 9, K = 14)",
+  "Depression (J = 19, K = 36)",
+  "Symptoms of psychosis (J = 7, K = 21)",
+  "Loneliness (J = 4, K = 5)",
+  "Alcohol and drug abuse/misuse (J = 7, K = 31)",
+  "Physical health (J = 2, K = 3)",
+  "Self-esteem (J = 5, K = 14)",
+  "Employment (J = 1, K = 2)"
+)
+
+label_cat_hist_ridge(data = n_es_by_construct, n_es = effects, variable = analysis_plan, label_map = out_label, level_order = out_level)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by outcome constructs](PRIMED-workflow--group-based-_files/figure-html/fig-motivation-construct-ridge-hist-1.png){#fig-motivation-construct-ridge-hist fig-pos='H' width=672}
+:::
+:::
+
+
+
+
 
 # Step 2 - Explore Study Characteristics and Potential Moderators
 
+# Step 3 - Inspect Standard Errors and Other Auxiliary Data
 
+# Step 4 - Visualize the Distribution of Effect Size Estimates
 
-::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true #session-info}
 
 
 
@@ -4934,7 +5607,7 @@ es_plot_per_study_mental
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-06-16
+ date     2025-06-17
  pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
@@ -4968,6 +5641,7 @@ es_plot_per_study_mental
  jsonlite       1.8.9      2024-09-20 [1] CRAN (R 4.4.2)
  kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.4.2)
  knitr        * 1.49       2024-11-08 [1] CRAN (R 4.4.2)
+ labeling       0.4.3      2023-08-29 [1] CRAN (R 4.4.0)
  later          1.3.2      2023-12-06 [1] CRAN (R 4.4.2)
  lattice        0.22-6     2024-03-20 [1] CRAN (R 4.4.2)
  lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.4.2)
@@ -4993,7 +5667,7 @@ es_plot_per_study_mental
  Rcpp           1.0.13-1   2024-11-02 [1] CRAN (R 4.4.2)
  readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.4.2)
  repr           1.1.7      2024-03-22 [1] CRAN (R 4.4.2)
- rlang          1.1.4      2024-06-04 [1] CRAN (R 4.4.2)
+ rlang        * 1.1.4      2024-06-04 [1] CRAN (R 4.4.2)
  rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.4.2)
  rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.4.2)
  sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.4.2)

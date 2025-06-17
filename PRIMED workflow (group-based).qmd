@@ -38,7 +38,7 @@ This document contains all preliminary data analysis for the meta-analyses with 
 
 
 ## R packages
-For exact R package versions, see colophon at the bottom of this document. 
+For exact R package versions, see the colophon by unfolding the [Session Information](#session-info) at the bottom of this document. 
 
 ```{r set-up}
 #| cache: false
@@ -267,6 +267,11 @@ gb_dat <-
       analysis_plan,
       "Hope, Empowerment & Self-efficacy" ~ "Hope, empowerment & self-efficacy",
       "Wellbeing and Quality of Life" ~ "Wellbeing and quality of life",
+      "All mental health outcomes" ~ "General mental health",
+      "All mental health outcomes/Anxiety" ~ "Anxiety",
+      "All mental health outcomes/Depression" ~ "Depression",
+      "All mental health outcomes/Symptoms of psychosis" ~ "Symptoms of psychosis",
+      "All mental health outcomes/Negative symptoms" ~ "Symptoms of psychosis",
       .default = analysis_plan
     ),
     
@@ -328,10 +333,24 @@ gb_dat <-
     Wse = sqrt(Wgt),
     t_i = gt/sqrt(Wgt),
    
-   outcome_construct = if_else(
-     str_detect(analysis_plan, "mental|used|hospi|esteem|Physical|Employ|Loneli"),
-     "Mental health outcome",
-     "Reintegational outcome"
+   outcome_construct = case_match(
+     analysis_plan,
+     # Mental health outcomes
+     "General mental health" ~ "Mental health outcome",
+     "Anxiety" ~ "Mental health outcome",
+     "Depression" ~ "Mental health outcome",
+     "Symptoms of psychosis" ~ "Mental health outcome",
+     
+     # Reintegrational health outcomes
+     "Wellbeing and quality of life" ~ "Reintegational outcome", 
+     "Hope, empowerment & self-efficacy" ~ "Reintegational outcome",
+     "Psychiatric hospitalization" ~ "Reintegational outcome",
+     "Social functioning (degree of impairment)" ~ "Reintegational outcome",
+     "Loneliness" ~ "Reintegational outcome",
+     "Alcohol and drug abuse/misuse" ~ "Reintegational outcome",
+     "Physical health" ~ "Reintegational outcome",
+     "Self-esteem" ~ "Reintegational outcome",
+     "Employment" ~ "Reintegational outcome"
    )
    
  ) |> 
@@ -355,14 +374,18 @@ The main data, we use for analyses of reintegrational outcomes can be found belo
 ```{r load-reint-data}
 
 reintergation_dat <- 
-  readRDS("reintergation_dat.rds") |> 
-  mutate(esid = 1:n()) |> 
+  gb_dat |> 
+  filter(outcome_construct == "Reintegational outcome") 
+
+
+reint_overview <- 
+  reintergation_dat |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
-reintergation_dat |> 
+reint_overview |> 
   mutate(
     p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
@@ -385,14 +408,17 @@ The main data, we use for analyses of mental health outcomes can be found below.
 
 ```{r}
 mental_health_dat <- 
-  readRDS("mental_health_dat.rds") |> 
-  mutate(esid = 1:n()) |> 
+  gb_dat |> 
+  filter(outcome_construct == "Mental health outcome") 
+
+mental_overview_dat <- 
+  mental_health_dat |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
-mental_health_dat |> 
+mental_overview_dat |> 
   mutate(
     p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
   ) |> 
@@ -459,7 +485,7 @@ timeline_plot
 
 ```
 
-## Number of preregistered vs. not preregistered studies
+## Number of preregistered vs. not preregistered studies {.tabset}
 
 ```{r}
 
@@ -478,6 +504,39 @@ gb_dat |>
 
 ```
 
+::: {.panel-tabset}
+### Reintegration 
+```{r}
+reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+
+### Mental health
+```{r}
+mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+
+:::
+
 ## Number effects across effect size metrics 
 
 ```{r}
@@ -494,13 +553,14 @@ group_based_dat |>
   )
 ```
 
+
 ## Number of effect size estimates per study
 
-### Overall
+### Overall per study
 
 
 ```{r es-plot}
-#| label: fig-es-hist
+#| label: fig-es-hist-per-stud
 #| fig-cap: "Distribution of number of effect size estimates per study"
 #| fig.width: 9
 #| fig.height: 10
@@ -522,76 +582,262 @@ es_plot_per_study <-
     x = paste0("Study (", n_distinct(gb_dat$study), " studies in total)"), 
     y = "Number of Effect Size Estimates",
     fill = "Outcome construct"
-  ) 
+  ) +
+  guides(fill = guide_legend(reverse=TRUE))
 
 es_plot_per_study
 ```
 
 
-### Across subgroups
+### Across outcome subgroups per study
 
 ::: {.columns}
 
 ::: {.column width="95%"}
 ```{r es-plot-reint}
-#| label: fig-es-hist-reint
-#| fig-cap: "Distribution of number of effect size estimates per study for reintegrational outcomes."
+#| label: fig-es-hist-per-stud-reint
+#| fig-cap: "Distribution of number of effects per study, by direction of the effects for reintegrational outcomes."
 #| fig-width: 12
 #| fig-height: 8
 #| message: false
 
-es_plot_per_study_reint <- 
-  reintergation_dat |>
-  arrange(desc(study)) |>
-  mutate(study = factor(study, unique(study))) |> 
-  ggplot(aes(x = study)) +
-  geom_bar() +
-  scale_y_continuous(breaks = seq(5, 30, by = 5)) + 
-  theme_minimal() +
-  coord_flip() +
-  labs(
-    title = "Reintegration",
-    x = "Study (42 studies in total)", 
-    y = "Number of Effect Size Estimates"
+reintergation_dat |>
+ggplot(aes(y = study, fill = gt_pop >= 0)) + 
+geom_bar(data = subset(reintergation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintergation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+theme_minimal() +
+scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-10, 30)) +
+scale_y_discrete(limits=rev) +
+scale_fill_manual(
+  values = c(met.brewer("Navajo")[2], met.brewer("Navajo")[4]), 
+  labels = c("Negative ES", "Non-negative ES"), 
+  name = "Effect Size"
+) +
+labs(x = "Number of Effect Size Estimates", y = "", title = "Reintegration") +
+theme(
+    legend.position = "bottom",
+    #legend.position.inside = c(0.95, 0.05),
+    #legend.justification = c(1, 0),
+    legend.background = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
   )
+```
+:::
 
-es_plot_per_study_reint
+::: {.column-margin}
+```{r es-plot-mental}
+#| label: fig-es-hist-per-stud-mental
+#| fig-cap: "Distribution of number of effects per study, by direction of the effects for mental health outcomes."
+#| fig-height: 8.5
+#| message: false
+
+mental_health_dat |>
+ggplot(aes(y = study, fill = gt_pop >= 0)) + 
+geom_bar(data = subset(mental_health_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(mental_health_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+theme_minimal() +
+scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-5, 15)) +
+scale_y_discrete(limits=rev) +
+scale_fill_manual(
+  values = c(met.brewer("Navajo")[2], met.brewer("Navajo")[4]), 
+  labels = c("Negative ES", "Non-negative ES"), 
+  name = "Effect Size"
+) +
+labs(x = "Number of Effect Size Estimates", y = "", title = "Mental Health") +
+theme(
+    legend.position = "bottom",
+    #legend.position.inside = c(0.95, 0.2),
+    #legend.justification = c(1, 0),
+    legend.background = element_blank(),
+    plot.title = element_text(hjust = 0.5) 
+  )
+```
+:::
+
+:::
+
+### Overall 
+
+```{r, sum-es-per-study-plot}
+#| label: fig-es-hist
+#| fig-cap: "Distribution of number of effect size estimates per study"
+#| fig.width: 9
+#| fig.height: 7
+#| message: false
+
+gb_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = met.brewer("Navajo")[4]) +
+  scale_x_continuous(breaks = seq(0, 40, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 10, 2)) +
+  theme_minimal() +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies")
+
+```
+
+### Across outcome subgroups 
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sum-es-plot-reint}
+#| label: fig-es-hist-reint
+#| fig-cap: "Distribution of number of effects per study for mental for reintegrational outcomes."
+#| fig-width: 9
+#| fig-height: 6
+#| message: false
+
+reintergation_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = "cornflowerblue") +
+  scale_x_continuous(breaks = seq(0, 30, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 14, 2), limits = c(0, 14)) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Reintegration") +
+  expand_limits(x = 30)
 ```
 :::
 
 ::: {.column-margin}
 ```{r es-plot-mental}
 #| label: fig-es-hist-mental
-#| fig-cap: "Distribution of number of effect size estimates per study for mental health outcomes."
-#| fig-height: 8
+#| fig-cap: "Distribution of number of effects per study for mental health outcomes."
+#| fig-height: 8.5
 #| message: false
 
-es_plot_per_study_mental <- 
-  mental_health_dat |> 
-  arrange(desc(study)) |>
-  mutate(study = factor(study, unique(study))) |> 
-  ggplot(aes(x = study)) +
-  geom_bar() +
-  scale_y_continuous(breaks = seq(5, 30, by = 5)) + 
+mental_health_dat |> 
+  summarise(
+    es_count = n(),
+    .by = study
+  ) |>  
+  arrange(es_count) |> 
+  ggplot(aes(x = es_count)) +
+  geom_histogram(binwidth = 0.5, fill = "pink") +
+  scale_x_continuous(breaks = seq(0, 20, by = 5)) +
+  scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0, 11)) +
   theme_minimal() +
-  coord_flip() +
-  labs(
-    title = "Mental Health",
-    x = "Study (41 studies in total)", 
-    y = "Number of Effect Size Estimates"
-  )
-
-es_plot_per_study_mental
+  theme(plot.title = element_text(hjust = 0.5)) +
+  labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Mental Health") +
+  expand_limits(x = 20)
 ```
 :::
 
 :::
 
+# Data structure by outcome constructs
+
+```{r labeled-cat-hist-ridge-function}
+label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  require(ggplot2)
+  require(forcats)
+  
+  n_es_exp <- enquo(n_es)
+  var_exp <- enquo(variable)
+  
+  data <- data |> 
+    mutate(
+      !!var_exp := fct_recode(!!var_exp, !!!label_map),
+      !!var_exp := fct_relevel(!!var_exp, !!!level_order),
+      !!var_exp := fct_rev(!!var_exp)
+    ) 
+  
+  ggplot(data, aes(
+    x = !!n_es_exp,
+    y = !!var_exp,
+    fill = !!var_exp
+  )) +
+    geom_density_ridges(
+      alpha = 1,
+      stat = "binline",
+      bins = 30,
+      scale = 0.7,
+      linewidth = 0.1,
+      draw_baseline = FALSE
+    ) +
+    theme_minimal() +
+    labs(y = "", x = "Effect Size Estimates per Study") +
+    theme(legend.position = "none")
+}
+
+```
+
+The following plot shows the effect size estimates distribution within each outcome construct.
+
+```{r motivation-construct-ridge-hist}
+#| label: fig-motivation-construct-ridge-hist
+#| fig-cap: "Distribution of effect size estimates, by outcome constructs"
+#| fig.width: 7
+#| fig.height: 8
+#| fig.retina: 2
+#| message: false
+
+n_es_by_construct <- gb_dat |> 
+  summarise(effects = n(), .by = c(study, analysis_plan))
+
+# Used to construct out_label 
+#label_dat <- 
+#  n_es_by_construct |> 
+#  summarise(J = n(), N_es = sum(effects), .by = analysis_plan)
+
+out_label <- c(
+  "General mental health (J = 28, K = 70)" = "General mental health",
+  "Wellbeing and quality of life (J = 24, K = 67)" = "Wellbeing and quality of life",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)" = "Hope, empowerment & self-efficacy",
+  "Psychiatric hospitalization (J = 1, K = 1)" = "Psychiatric hospitalization",
+  "Social functioning (degree of impairment) (J =16, K = 47)" = "Social functioning (degree of impairment)",
+  "Anxiety (J = 9, K = 14)" = "Anxiety",
+  "Depression (J = 19, K = 36)" = "Depression",
+  "Symptoms of psychosis (J = 7, K = 21)" = "Symptoms of psychosis",
+  "Loneliness (J = 4, K = 5)" = "Loneliness",
+  "Alcohol and drug abuse/misuse (J = 7, K = 31)" = "Alcohol and drug abuse/misuse",
+  "Physical health (J = 2, K = 3)" = "Physical health",
+  "Self-esteem (J = 5, K = 14)" = "Self-esteem",
+  "Employment (J = 1, K = 2)" = "Employment"
+)
+
+out_level <- c(
+  "General mental health (J = 28, K = 70)",
+  "Wellbeing and quality of life (J = 24, K = 67)",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)",
+  "Psychiatric hospitalization (J = 1, K = 1)",
+  "Social functioning (degree of impairment) (J =16, K = 47)",
+  "Anxiety (J = 9, K = 14)",
+  "Depression (J = 19, K = 36)",
+  "Symptoms of psychosis (J = 7, K = 21)",
+  "Loneliness (J = 4, K = 5)",
+  "Alcohol and drug abuse/misuse (J = 7, K = 31)",
+  "Physical health (J = 2, K = 3)",
+  "Self-esteem (J = 5, K = 14)",
+  "Employment (J = 1, K = 2)"
+)
+
+label_cat_hist_ridge(data = n_es_by_construct, n_es = effects, variable = analysis_plan, label_map = out_label, level_order = out_level)
+
+```
+
+
+
 # Step 2 - Explore Study Characteristics and Potential Moderators
 
+# Step 3 - Inspect Standard Errors and Other Auxiliary Data
 
+# Step 4 - Visualize the Distribution of Effect Size Estimates
 
-::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true #session-info}
 
 
 ```{r}
