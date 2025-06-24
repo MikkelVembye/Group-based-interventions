@@ -5365,7 +5365,7 @@ theme(
 
 :::
 
-### Overall across all studies 
+### Overall across all studies and outcomes
 
 
 
@@ -6417,9 +6417,389 @@ ggMarginal(plot, type = "density")
 
 
 
-
-
 # Step 2 - Study Characteristics and Potential Moderators
+
+## Continuous moderators - average age and percent males in sample
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, continuous-mod-reint}}
+var_labels <- c(
+  "Mean age" = "age",
+  "Percentage of Male" = "male_pct"
+  #"Study-level Average Weeks from Baseline" = "weeks_from_baseline",
+  #"Sessions" = "sessions"
+)
+
+continuous_descriptives <- 
+ reintergation_dat |> 
+  group_by(study) |> 
+  summarise(
+    age = mean(age_mean),
+    male_pct = mean(male_pct)
+    #weeks_from_baseline = mean(weeks_from_baseline, na.rm = TRUE),
+    #sessions = mean(sessions)
+  ) 
+
+continuous_descriptives_tab <- 
+  continuous_descriptives |> 
+  #pivot_longer(
+  #  cols = age:male_pct,
+  #  names_to = "var",
+  #  values_to = "val"
+  #) |> 
+  #arrange(var)
+  gather(var, val, age, male_pct) |> 
+  group_by(var) |>
+  summarise(
+    `% Missing` = 100 * mean(is.na(val)),
+    Mean = mean(val, na.rm = TRUE),
+    SD = sd(val, na.rm = TRUE),
+    Min = min(val, na.rm = TRUE),
+    LQ = quantile(val, na.rm = TRUE)[2],
+    Median = median(val, na.rm = TRUE),
+    UQ = quantile(val, na.rm = TRUE)[4],
+    Max = max(val, na.rm = TRUE)
+  ) |> 
+  mutate(
+    var = factor(var, levels = var_labels, labels = names(var_labels))
+  )
+
+#| tbl-cap-location: top
+#| label: tab-continuous-characteristics-reint
+knitr::kable(
+  continuous_descriptives_tab, 
+  caption = "Distribution of continuous moderators (reintegration)",
+  col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
+  digits = 1,
+  booktabs = TRUE
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE) |>
+  collapse_rows(1, valign = "top")
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Distribution of continuous moderators (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Variable </th>
+   <th style="text-align:right;"> % Missing </th>
+   <th style="text-align:right;"> Mean </th>
+   <th style="text-align:right;"> SD </th>
+   <th style="text-align:right;"> Min </th>
+   <th style="text-align:right;"> LQ </th>
+   <th style="text-align:right;"> Median </th>
+   <th style="text-align:right;"> UQ </th>
+   <th style="text-align:right;"> Max </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Mean age </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 40.7 </td>
+   <td style="text-align:right;"> 9.1 </td>
+   <td style="text-align:right;"> 24.9 </td>
+   <td style="text-align:right;"> 35.6 </td>
+   <td style="text-align:right;"> 40.8 </td>
+   <td style="text-align:right;"> 43.8 </td>
+   <td style="text-align:right;"> 67.4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Percentage of Male </td>
+   <td style="text-align:right;"> 2.2 </td>
+   <td style="text-align:right;"> 45.8 </td>
+   <td style="text-align:right;"> 23.0 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 31.5 </td>
+   <td style="text-align:right;"> 45.7 </td>
+   <td style="text-align:right;"> 67.4 </td>
+   <td style="text-align:right;"> 79.5 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, continuous-mod-mental}}
+var_labels_mental <- c(
+  "Mean age" = "age",
+  "Percentage of Male" = "male_pct"
+  #"Study-level Average Weeks from Baseline" = "weeks_from_baseline",
+  #"Sessions" = "sessions"
+)
+
+continuous_descriptives_mental <- 
+ mental_health_dat |> 
+  group_by(study) |> 
+  summarise(
+    age = mean(age_mean),
+    male_pct = mean(male_pct)
+    #weeks_from_baseline = mean(weeks_from_baseline, na.rm = TRUE),
+    #sessions = mean(sessions)
+  ) 
+
+continuous_descriptives_tab_mental <- 
+  continuous_descriptives_mental |> 
+  #pivot_longer(
+  #  cols = age:male_pct,
+  #  names_to = "var",
+  #  values_to = "val"
+  #) |> 
+  #arrange(var)
+  gather(var, val, age, male_pct) |> 
+  group_by(var) |>
+  summarise(
+    `% Missing` = 100 * mean(is.na(val)),
+    Mean = mean(val, na.rm = TRUE),
+    SD = sd(val, na.rm = TRUE),
+    Min = min(val, na.rm = TRUE),
+    LQ = quantile(val, na.rm = TRUE)[2],
+    Median = median(val, na.rm = TRUE),
+    UQ = quantile(val, na.rm = TRUE)[4],
+    Max = max(val, na.rm = TRUE)
+  ) |> 
+  mutate(
+    var = factor(var, levels = var_labels_mental, labels = names(var_labels_mental))
+  )
+
+#| tbl-cap-location: top
+#| label: tab-continuous-characteristics-mental
+knitr::kable(
+  continuous_descriptives_tab, 
+  caption = "Distribution of continuous moderators (mental health)",
+  col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
+  digits = 1,
+  booktabs = TRUE
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE) |>
+  collapse_rows(1, valign = "top")
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Distribution of continuous moderators (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Variable </th>
+   <th style="text-align:right;"> % Missing </th>
+   <th style="text-align:right;"> Mean </th>
+   <th style="text-align:right;"> SD </th>
+   <th style="text-align:right;"> Min </th>
+   <th style="text-align:right;"> LQ </th>
+   <th style="text-align:right;"> Median </th>
+   <th style="text-align:right;"> UQ </th>
+   <th style="text-align:right;"> Max </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Mean age </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 40.7 </td>
+   <td style="text-align:right;"> 9.1 </td>
+   <td style="text-align:right;"> 24.9 </td>
+   <td style="text-align:right;"> 35.6 </td>
+   <td style="text-align:right;"> 40.8 </td>
+   <td style="text-align:right;"> 43.8 </td>
+   <td style="text-align:right;"> 67.4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Percentage of Male </td>
+   <td style="text-align:right;"> 2.2 </td>
+   <td style="text-align:right;"> 45.8 </td>
+   <td style="text-align:right;"> 23.0 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 31.5 </td>
+   <td style="text-align:right;"> 45.7 </td>
+   <td style="text-align:right;"> 67.4 </td>
+   <td style="text-align:right;"> 79.5 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+### Age distribution across studies
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r density-plot-function}}
+density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
+  require(dplyr)
+  require(tidyr)
+  require(ggplot2)
+  require(rlang)
+  require(MetBrewer)
+  
+  var_exp <- enquo(variable)
+  var_str <- as_label(var_exp)
+  
+  data |>
+    ggplot(aes(x = !!var_exp)) +
+    geom_density(fill = color, alpha = 0.8) +
+    geom_rug(alpha = 0.7, length = unit(0.04, "npc")) +
+    scale_y_continuous(labels = scales::label_number(accuracy = 10^(-3))) +
+    theme_minimal() +
+    labs(x = x_title, y = "")
+}
+```
+````
+:::
+
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r age-density-reint}}
+#| label: fig-age-density-reint
+#| fig-cap: "Distribution of average age in a study (reintegrational)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+age_density <- density_plot(age, "Mean Age", continuous_descriptives)
+
+age_density + expand_limits(x = 70)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of average age in a study (reintegrational).](PRIMED-workflow--group-based-_files/figure-html/fig-age-density-reint-1.png){#fig-age-density-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r age-density-mental}}
+#| label: fig-age-density-mental
+#| fig-cap: "Distribution of average age in a study (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+age_density_mental <- density_plot(age, "Mean Age", continuous_descriptives_mental, color = "pink")
+
+age_density_mental + expand_limits(x = 70)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of average age in a study (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-age-density-mental-1.png){#fig-age-density-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Percent males in sample distribution across studies
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r males-density-reint}}
+#| label: fig-males-density-reint
+#| fig-cap: "Distribution proportion of males in each study (reintegration)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+male_density <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives))
+male_density 
+```
+````
+
+::: {.cell-output-display}
+![Distribution proportion of males in each study (reintegration).](PRIMED-workflow--group-based-_files/figure-html/fig-males-density-reint-1.png){#fig-males-density-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r males-density-mental}}
+#| label: fig-males-density-mental
+#| fig-cap: "Distribution proportion of males in each study (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+male_density_mental <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives_mental, color = "pink"))
+male_density_mental 
+```
+````
+
+::: {.cell-output-display}
+![Distribution proportion of males in each study (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-males-density-mental-1.png){#fig-males-density-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
 
 # Step 3 - Standard Errors and Other Auxiliary Data
 
