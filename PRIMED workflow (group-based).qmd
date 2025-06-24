@@ -351,6 +351,22 @@ gb_dat <-
      "Physical health" ~ "Reintegational outcome",
      "Self-esteem" ~ "Reintegational outcome",
      "Employment" ~ "Reintegational outcome"
+   ),
+   
+   # Changing to numeric vectors
+   across(c(age_mean_sample:male_pct_t, sessions_per_week), ~as.numeric(.x)),
+   
+   # Make weighted mean weighted by the group sample size 
+   age_mean = if_else(
+     is.na(age_mean_sample), 
+     (age_mean_t*N_t + age_mean_c*N_c)/(N_t + N_c), 
+     age_mean_sample
+    ),
+   
+   male_pct = if_else(
+     is.na(male_pct_sample),
+     (male_pct_t*N_t + male_pct_c*N_c)/(N_t + N_c),
+     male_pct_sample
    )
    
  ) |> 
@@ -364,12 +380,12 @@ gb_dat <-
 
 ```
 
-
+Below, we separate the data by reintegrational (primary analysis) and mental health outcomes (secondary analyses)
 
 ::: {.panel-tabset}
 ## Reintegration data
 
-The main data, we use for analyses of reintegrational outcomes can be found below.
+A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
 
 ```{r load-reint-data}
 
@@ -404,7 +420,7 @@ reint_overview |>
 
 ## Mental health data
 
-The main data, we use for analyses of mental health outcomes can be found below.
+A general overview of the main data, we use for analyses of mental health outcomes can be found below.
 
 ```{r}
 mental_health_dat <- 
@@ -438,7 +454,7 @@ mental_overview_dat |>
 
 :::
 
-# Step 1 - Describe the Amount of Data and Dependence Structure
+# Step 1 - Descriptives and Dependence Structures
 
 ## Timeline
 
@@ -656,7 +672,7 @@ theme(
 
 :::
 
-### Overall 
+### Overall across all studies 
 
 ```{r, sum-es-per-study-plot}
 #| label: fig-es-hist
@@ -735,7 +751,7 @@ mental_health_dat |>
 
 :::
 
-# Data structure by outcome constructs
+## Data structure by outcome constructs
 
 ```{r labeled-cat-hist-ridge-function}
 label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
@@ -777,65 +793,507 @@ label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
 
 The following plot shows the effect size estimates distribution within each outcome construct.
 
-```{r motivation-construct-ridge-hist}
-#| label: fig-motivation-construct-ridge-hist
-#| fig-cap: "Distribution of effect size estimates, by outcome constructs"
-#| fig.width: 7
-#| fig.height: 8
+::: {.columns}
+
+::: {.column width="95%"}
+```{r outcome-construct-ridge-hist}
+#| label: fig-outcome-construct-ridge-hist
+#| fig-cap: "Distribution of effect size estimates, by reintegrational outcome constructs."
+#| fig.width: 9
+#| fig.height: 6.5
 #| fig.retina: 2
 #| message: false
 
-n_es_by_construct <- gb_dat |> 
-  summarise(effects = n(), .by = c(study, analysis_plan))
+n_es_by_construct <- 
+  gb_dat |> 
+  filter(str_detect(outcome_construct, "Re")) |> 
+  summarise(effects = n(), .by = c(study, analysis_plan)) |> 
+  mutate(J = n(), .by = c(analysis_plan)) |> 
+  arrange(desc(J)) 
 
 # Used to construct out_label 
 #label_dat <- 
 #  n_es_by_construct |> 
 #  summarise(J = n(), N_es = sum(effects), .by = analysis_plan)
 
+
 out_label <- c(
-  "General mental health (J = 28, K = 70)" = "General mental health",
   "Wellbeing and quality of life (J = 24, K = 67)" = "Wellbeing and quality of life",
-  "Hope, empowerment & self-efficacy (J = 12, K = 32)" = "Hope, empowerment & self-efficacy",
-  "Psychiatric hospitalization (J = 1, K = 1)" = "Psychiatric hospitalization",
   "Social functioning (degree of impairment) (J =16, K = 47)" = "Social functioning (degree of impairment)",
-  "Anxiety (J = 9, K = 14)" = "Anxiety",
-  "Depression (J = 19, K = 36)" = "Depression",
-  "Symptoms of psychosis (J = 7, K = 21)" = "Symptoms of psychosis",
-  "Loneliness (J = 4, K = 5)" = "Loneliness",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)" = "Hope, empowerment & self-efficacy",
   "Alcohol and drug abuse/misuse (J = 7, K = 31)" = "Alcohol and drug abuse/misuse",
-  "Physical health (J = 2, K = 3)" = "Physical health",
   "Self-esteem (J = 5, K = 14)" = "Self-esteem",
+  "Loneliness (J = 4, K = 5)" = "Loneliness",
+  "Physical health (J = 2, K = 3)" = "Physical health",
+  "Psychiatric hospitalization (J = 1, K = 1)" = "Psychiatric hospitalization",
   "Employment (J = 1, K = 2)" = "Employment"
 )
 
 out_level <- c(
-  "General mental health (J = 28, K = 70)",
-  "Wellbeing and quality of life (J = 24, K = 67)",
-  "Hope, empowerment & self-efficacy (J = 12, K = 32)",
-  "Psychiatric hospitalization (J = 1, K = 1)",
+ "Wellbeing and quality of life (J = 24, K = 67)",
   "Social functioning (degree of impairment) (J =16, K = 47)",
-  "Anxiety (J = 9, K = 14)",
-  "Depression (J = 19, K = 36)",
-  "Symptoms of psychosis (J = 7, K = 21)",
-  "Loneliness (J = 4, K = 5)",
+  "Hope, empowerment & self-efficacy (J = 12, K = 32)",
   "Alcohol and drug abuse/misuse (J = 7, K = 31)",
-  "Physical health (J = 2, K = 3)",
   "Self-esteem (J = 5, K = 14)",
+  "Loneliness (J = 4, K = 5)",
+  "Physical health (J = 2, K = 3)",
+  "Psychiatric hospitalization (J = 1, K = 1)",
   "Employment (J = 1, K = 2)"
 )
 
-label_cat_hist_ridge(data = n_es_by_construct, n_es = effects, variable = analysis_plan, label_map = out_label, level_order = out_level)
+label_cat_hist_ridge(
+  data = n_es_by_construct, 
+  n_es = effects, 
+  variable = analysis_plan, 
+  label_map = out_label, 
+  level_order = out_level
+) + 
+  expand_limits(x = 20) + 
+  labs(title = "Reintegrational outcomes") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+:::
+
+::: {.column-margin}
+```{r outcome-construct-ridge-hist-mental}
+#| label: fig-outcome-construct-ridge-hist-mental
+#| fig-cap: "Distribution of effect size estimates, by mental health outcome constructs."
+#| fig.height: 8.5
+#| fig.retina: 2
+#| message: false
+
+n_es_by_construct_mental <- 
+  gb_dat |> 
+  filter(str_detect(outcome_construct, "Men")) |> 
+  summarise(effects = n(), .by = c(study, analysis_plan)) |> 
+  mutate(J = n(), .by = c(analysis_plan)) |> 
+  arrange(desc(J)) 
+
+# Used to construct out_label_mental 
+#label_dat_mental <- 
+#  n_es_by_construct_mental |> 
+#  summarise(J = n(), N_es = sum(effects), .by = analysis_plan)
+
+out_label_mental <- c(
+  "General mental health (J = 28, K = 70)" = "General mental health",
+  "Depression (J = 19, K = 36)" = "Depression",
+  "Anxiety (J = 9, K = 14)" = "Anxiety",
+  "Symptoms of psychosis (J = 7, K = 21)" = "Symptoms of psychosis"
+)
+
+out_level_mental <- c(
+  "General mental health (J = 28, K = 70)",
+  "Depression (J = 19, K = 36)",
+  "Anxiety (J = 9, K = 14)",
+  "Symptoms of psychosis (J = 7, K = 21)"
+)
+
+label_cat_hist_ridge(
+  data = n_es_by_construct_mental, 
+  n_es = effects, 
+  variable = analysis_plan, 
+  label_map = out_label_mental, 
+  level_order = out_level_mental
+) + 
+  expand_limits(x = 15) + 
+  labs(title = "Mental heath outcomes") + 
+  theme(plot.title = element_text(hjust = 0.5))
+
+```
+:::
+
+:::
+
+## Primary study sample size
+
+
+### Total sample sizes
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-overall-reint}
+#| tbl-cap-location: top
+#| label: tab-sample-size
+
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid <- 
+  reintergation_dat |> 
+  reframe(N_treat = max(N_t), .by = c(study, trt_id)) 
+
+N_t_total <- 
+  N_t_stud_trtid |> 
+  summarise(N_t_total = sum(N_treat), .by = study)
+
+N_c_total <- 
+  reintergation_dat |> 
+  summarise(N_c_total = max(N_c), .by = study)
+
+N_total_dat <- 
+  left_join(N_t_total, N_c_total, by = join_by(study)) |> 
+  mutate(N_total = N_t_total + N_c_total)
+
+
+primary_sample_size_descriptive <- 
+  N_total_dat$N_total |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_sample_size_descriptive |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of primary study sample sizes at post test for reintegrational outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+::: {.column-margin} 
+```{r sample-size-overall-mental}
+#| tbl-cap-location: top
+#| label: tab-sample-size-mental
+
+
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid_mental <- 
+  mental_health_dat |> 
+  reframe(N_treat = max(N_t), .by = c(study, trt_id)) 
+
+N_t_total_mental <- 
+  N_t_stud_trtid_mental |> 
+  summarise(N_t_total = sum(N_treat), .by = study)
+
+N_c_total_mental <- 
+  mental_health_dat |> 
+  summarise(N_c_total = max(N_c), .by = study)
+
+N_total_dat_mental <- 
+  left_join(N_t_total_mental, N_c_total_mental, by = join_by(study)) |> 
+  mutate(N_total = N_t_total + N_c_total)
+
+
+primary_sample_size_descriptive_mental <- 
+  N_total_dat_mental$N_total |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_sample_size_descriptive_mental |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of primary study sample sizes at post test for mental health outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+:::
+
+The following plot displays the distribution of study sample sizes at post-test.
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-plot-reint}
+#| label: fig-sample-size-reint
+#| fig-cap: "Distribution of primary study sample sizes at post test for reintegrational outcomes."
+#| fig.height: 2.5
+#| fig.width: 8
+#| fig.retina: 2
+#| message: false
+study_sizes_plot_reint <- 
+  ggplot(N_total_dat, aes(N_total)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Sample Size", y = "")
+study_sizes_plot_reint
+```
+:::
+
+::: {.column-margin}
+```{r sample-size-plot-mental}
+#| label: fig-sample-size-mental
+#| fig-cap: "Distribution of primary study sample sizes at post test for mental health outcomes."
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+study_sizes_plot_mental <- 
+  ggplot(N_total_dat_mental, aes(N_total)) + 
+  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Sample Size", y = "")
+study_sizes_plot_mental
+
+```
+:::
+
+:::
+
+### Treatment group
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-treatment-reint}
+#| tbl-cap-location: top
+#| label: tab-sample-size-treatment
+
+
+treatment_sample_size_descriptive <- 
+  N_t_stud_trtid$N_treat |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+treatment_sample_size_descriptive |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of treatment sample sizes at post test for reintegrational outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+::: {.column-margin} 
+```{r sample-size-treatment-mental}
+#| tbl-cap-location: top
+#| label: tab-sample-size-treatment-mental
+
+
+treatment_sample_size_descriptive_mental <- 
+  N_t_stud_trtid_mental$N_treat |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+treatment_sample_size_descriptive_mental |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of treatment sample sizes at post test for mental health outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+:::
+
+The following plot displays the distribution of treatment sample sizes at post-test.
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-treatment-plot-reint}
+#| label: fig-sample-size-treatment-reint
+#| fig-cap: "Distribution of treatment sample sizes at post test for reintegrational outcomes."
+#| fig.height: 2.5
+#| fig.width: 8
+#| fig.retina: 2
+#| message: false
+treatment_sizes_plot_reint <- 
+  ggplot(N_t_stud_trtid, aes(N_treat)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Treatment Sample Size", y = "")
+treatment_sizes_plot_reint
+```
+:::
+
+::: {.column-margin}
+```{r sample-size-treatment-plot-mental}
+#| label: fig-sample-size-treatment-mental
+#| fig-cap: "Distribution of treatment sample sizes at post test for mental health outcomes."
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+treatment_sizes_plot_mental <- 
+  ggplot(N_t_stud_trtid_mental, aes(N_treat)) + 
+  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Treatment Sample Size", y = "")
+treatment_sizes_plot_mental
+
+```
+:::
+
+:::
+
+### Control group
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-control-reint}
+#| tbl-cap-location: top
+#| label: tab-sample-size-control
+
+
+control_sample_size_descriptive <- 
+  N_total_dat$N_c_total |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+control_sample_size_descriptive |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of control group sample sizes at post test for reintegrational outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+::: {.column-margin} 
+```{r sample-size-control-mental}
+#| tbl-cap-location: top
+#| label: tab-sample-size-control-mental
+
+
+control_sample_size_descriptive_mental <- 
+  N_total_dat_mental$N_c_total |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+control_sample_size_descriptive_mental |>
+  knitr::kable(
+    digits = 2,
+    caption = "Distribution of control group sample sizes at post test for mental health outcomes",
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+:::
+
+The following plot displays the distribution of control sample sizes at post-test.
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-control-plot-reint}
+#| label: fig-sample-size-control-reint
+#| fig-cap: "Distribution of control group sample sizes at post test for reintegrational outcomes."
+#| fig.height: 2.5
+#| fig.width: 8
+#| fig.retina: 2
+#| message: false
+control_sizes_plot_reint <- 
+  ggplot(N_total_dat, aes(N_c_total)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Control Group Sample Size", y = "")
+control_sizes_plot_reint
+```
+:::
+
+::: {.column-margin}
+```{r sample-size-control-plot-mental}
+#| label: fig-sample-size-control-mental
+#| fig-cap: "Distribution of control group sample sizes at post test for mental health outcomes."
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+control_sizes_plot_mental <- 
+  ggplot(N_total_dat_mental, aes(N_c_total)) + 
+  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Control Group Sample Size", y = "")
+control_sizes_plot_mental
+
+```
+:::
+
+:::
+
+## Studies with multiple treatments
+
+```{r study-multi-treatment}
+reintergation_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study)) 
+```
+
+## Total number of participant
+
+```{r number-of-participants}
+sum(N_total_dat$N_total)
+```
+
+## Study sample sizes versus number of effect size estimates per study
+
+```{r bivariate-es-plot}
+#| label: fig-es-distribution-bivariate
+#| fig-cap: "Study sample sizes versus number of effect size estimates for reintegrational outcomes"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+plot <- 
+  reintergation_dat |> 
+  summarise(effects = n(), .by = study) |> 
+  left_join(N_total_dat, by = join_by(study)) |> 
+  relocate(effects, .after = N_total) |> 
+  ggplot(aes(x = N_total, y = effects)) +
+  geom_point(alpha = 0.5) +
+  scale_x_continuous(breaks = seq(0, 650, by = 50)) +
+  guides(size = "none") + 
+  theme_minimal() +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.9, 0.05),
+    legend.justification = c(1, 0),
+    legend.background = element_blank()
+  ) +
+  labs(x = "Total sample size", y = "Number of effect size estimates per study", color = "") +
+  expand_limits(y = 30)
+
+ggMarginal(plot, type = "density")
 
 ```
 
 
 
-# Step 2 - Explore Study Characteristics and Potential Moderators
 
-# Step 3 - Inspect Standard Errors and Other Auxiliary Data
+# Step 2 - Study Characteristics and Potential Moderators
 
-# Step 4 - Visualize the Distribution of Effect Size Estimates
+# Step 3 - Standard Errors and Other Auxiliary Data
+
+# Step 4 - Visualization of the Distribution of Effect Size Estimates
+
+# Colophon
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true #session-info}
 
