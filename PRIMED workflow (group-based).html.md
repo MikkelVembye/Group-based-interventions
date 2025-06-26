@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-24"
+date: "2025-06-26"
 format:
   html: 
     keep-md: true
@@ -66,6 +66,7 @@ library(ggExtra)
 library(ggridges)
 library(MetBrewer)
 library(GGally)
+library(igraph)
 ```
 ````
 :::
@@ -391,7 +392,11 @@ gb_dat <-
      is.na(male_pct_sample),
      (male_pct_t*N_t + male_pct_c*N_c)/(N_t + N_c),
      male_pct_sample
-   )
+   ),
+   
+   # duration_weeks has extract errors
+   duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
+   total_number_of_sessions = round(sessions_per_week * duration_in_weeks)
    
  ) |> 
   mutate(
@@ -413,6 +418,8 @@ Below, we separate the data by reintegrational (primary analysis) and mental hea
 ## Reintegration data
 
 A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
+
+DESCRIPTIVE DATA AS FOR SPIRTUAL STUDY
 
 
 
@@ -5011,7 +5018,7 @@ mental_overview_dat |>
 
 :::
 
-# Step 1 - Descriptives and Dependence Structures
+# Descriptives and Dependence Structures
 
 ## Timeline
 
@@ -5237,8 +5244,8 @@ group_based_dat |>
 ```{{r es-plot}}
 #| label: fig-es-hist-per-stud
 #| fig-cap: "Distribution of number of effect size estimates per study"
-#| fig.width: 9
-#| fig.height: 10
+#| fig.width: 6.5
+#| fig.height: 7
 #| message: false
 
 es_plot_per_study <- 
@@ -5265,7 +5272,7 @@ es_plot_per_study
 ````
 
 ::: {.cell-output-display}
-![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-1.png){#fig-es-hist-per-stud fig-pos='H' width=864}
+![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-1.png){#fig-es-hist-per-stud fig-pos='H' width=624}
 :::
 :::
 
@@ -5452,7 +5459,7 @@ reintergation_dat |>
 ```{{r es-plot-mental}}
 #| label: fig-es-hist-mental
 #| fig-cap: "Distribution of number of effects per study for mental health outcomes."
-#| fig-height: 8.5
+#| fig-height: 8
 #| message: false
 
 mental_health_dat |> 
@@ -5462,7 +5469,7 @@ mental_health_dat |>
   ) |>  
   arrange(es_count) |> 
   ggplot(aes(x = es_count)) +
-  geom_histogram(binwidth = 0.5, fill = "pink") +
+  geom_histogram(binwidth = 0.5, fill = "gray") +
   scale_x_continuous(breaks = seq(0, 20, by = 5)) +
   scale_y_continuous(breaks = seq(0, 10, 2), limits = c(0, 11)) +
   theme_minimal() +
@@ -5890,7 +5897,7 @@ study_sizes_plot_reint
 #| message: false
 study_sizes_plot_mental <- 
   ggplot(N_total_dat_mental, aes(N_total)) + 
-  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
   geom_blank(aes(x = 0, y = 0)) + 
   geom_rug(alpha = 0.8) +
   scale_y_continuous(NULL, breaks = NULL) + 
@@ -6093,7 +6100,7 @@ treatment_sizes_plot_reint
 #| message: false
 treatment_sizes_plot_mental <- 
   ggplot(N_t_stud_trtid_mental, aes(N_treat)) + 
-  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
   geom_blank(aes(x = 0, y = 0)) + 
   geom_rug(alpha = 0.8) +
   scale_y_continuous(NULL, breaks = NULL) + 
@@ -6296,7 +6303,7 @@ control_sizes_plot_reint
 #| message: false
 control_sizes_plot_mental <- 
   ggplot(N_total_dat_mental, aes(N_c_total)) + 
-  geom_density(fill = "pink", alpha = 0.8) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
   geom_blank(aes(x = 0, y = 0)) + 
   geom_rug(alpha = 0.8) +
   scale_y_continuous(NULL, breaks = NULL) + 
@@ -6417,9 +6424,318 @@ ggMarginal(plot, type = "density")
 
 
 
-# Step 2 - Study Characteristics and Potential Moderators
+# Moderators
 
-## Continuous moderators - average age and percent males in sample
+## Categorical moderators
+
+### Substantial 
+
+#### Outcome measure
+
+##### Ridge plot of effect size estimates
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cat-ridge-function}}
+cat_ridge <- function(data, es, v, variable) {
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  require(ggplot2)
+  
+  es_exp <- enquo(es)
+  var_exp <- enquo(variable)
+  v_exp <- enquo(v)
+  
+  data |> 
+    mutate(!!var_exp := fct_rev(!!var_exp)) |> 
+  ggplot(aes(
+    x = !!es_exp,
+    y = !!var_exp,
+    fill = !!var_exp
+  )) +
+    geom_density_ridges(
+      aes(
+        point_colour = !!var_exp,
+        point_size = 1 / !!v_exp
+      ),
+      alpha = .2,
+      point_alpha = 0.5,
+      jittered_points = TRUE
+    ) +
+    theme_minimal() +
+    labs(y = "", x = "Standardized Mean Difference (Hedges' g)") +
+    theme(legend.position = "none")
+}
+```
+````
+:::
+
+
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+::: {.panel-tabset}
+###### Subgroup analyzed
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r type-ridge-reint-analyzed}}
+#| label: fig-type-ridge-reint-analyzed
+#| fig-cap: "Distribution of effect size estimates, by reintegrational outcomes"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+analyzed_outcomes <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
+
+cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by reintegrational outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-reint-analyzed-1.png){#fig-type-ridge-reint-analyzed fig-pos='H' width=576}
+:::
+:::
+
+
+
+###### Not subgroup analyzed
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r type-ridge-reint-not-analyzed}}
+#| label: fig-type-ridge-reint-not-analyzed
+#| fig-cap: "Distribution of effect size estimates, by reintegrational outcomes."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+not_analyzed_outcomes <- 
+  reintergation_dat |> 
+  filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
+
+cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-reint-not-analyzed-1.png){#fig-type-ridge-reint-not-analyzed fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r type-ridge-mental-analyzed}}
+#| label: fig-type-ridge-mental-analyzed
+#| fig-cap: "Distribution of effect size estimates, by mental health outcomes."
+#| fig.height: 7
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_plan, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-mental-analyzed-1.png){#fig-type-ridge-mental-analyzed fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+##### Network plot for outcome construct
+The following plot shows the network structure of outcomes constructs. Each node represent an outcome construct, the edge between a pair of nodes indicates that there is at least one study that examined the contracts between that pair of constructs The width of the edges indicates the number of studies that compare that pair of constructs. The size of the node corresponds to the number of studies measure that construct.  
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r incidents}}
+incidents_matrix <- function(variable, study_id, data) {
+  
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  
+  var_exp <- enquo(variable)
+  study_id_exp <- enquo(study_id)
+  study_id_name <- as_name(study_id_exp)
+  
+  
+  res_dat <- data %>%
+    group_by(!!study_id_exp) %>%
+    reframe(var_exp_mirror = unique(!!var_exp))  %>%
+    full_join(data,
+              by = c(study_id_name),
+              relationship = "many-to-many") %>%
+    group_by(!!var_exp, var_exp_mirror) %>%
+    reframe(
+      m = n_distinct(!!study_id_exp),
+      k = n()
+    ) %>%
+    mutate(size = m) %>%
+    select(-m, -k) |>
+    pivot_wider(names_from = var_exp_mirror, values_from = "size")
+ 
+  
+  names(res_dat)[1] <- "level" 
+  
+  return(res_dat)
+}
+```
+````
+:::
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+outcome_construct_incidents_matrix <- incidents_matrix(
+  variable = analysis_plan,
+  study_id = study,
+  data = gb_dat
+)  |> 
+  as.data.frame() |> 
+  relocate(Employment, .after = Depression) |> 
+  relocate(Loneliness, .before = `Physical health`) |> 
+  relocate(`Psychiatric hospitalization`, .after = `Physical health`) |> 
+  relocate(`Self-esteem`, .after = `Psychiatric hospitalization`)
+
+edges <- outcome_construct_incidents_matrix %>%
+  rename(from = "level") |> 
+  pivot_longer(-from, names_to = "to", values_to = "weight") %>%
+  filter(from != to, !is.na(weight)) |> 
+  mutate(
+    from_chr = as.character(from),
+    to_chr = as.character(to),
+    tmp = paste0(pmin(from_chr, to_chr), "_", pmax(from_chr, to_chr))
+  ) %>% 
+  distinct(tmp, .keep_all = TRUE) %>%
+  select(from, to, weight)
+
+g <- graph_from_data_frame(edges, directed = FALSE)
+```
+````
+:::
+
+::: {.cell}
+
+:::
+::: {.cell}
+
+````{.cell-code}
+```{{r network-plot}}
+#| label: fig-network
+#| fig-cap: "Network structure of contrasts between primary and secondary outcome constructs"
+#| fig.width: 7
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+network_plot <- 
+  function(
+    layout_g, incidents_matrix 
+    ) {
+
+  layout <- layout_in_circle(layout_g)
+
+  # Adjust label position outward
+  label_coords <- layout
+  label_coords[, 1] <- c(
+    label_coords[1, 1] * 1.35, #1.5,
+    label_coords[2:6, 1] * 1.4, #1.63,
+    label_coords[7, 1] * 1.35, #1.68,
+    label_coords[8:13, 1] * 1.4 #1.63
+  )
+
+  label_coords[, 2] <- c(
+    label_coords[c(1:3), 2],
+    label_coords[4, 2] * 1.13,
+    label_coords[5, 2] * 1.27,
+    label_coords[6, 2] * 1.13,
+    label_coords[c(7:10), 2],
+    label_coords[11, 2] * 1.2,
+    label_coords[12:13, 2] * 1.13
+  )
+
+  node_sizes <- diag(as.matrix(incidents_matrix[, -1]))
+
+  plot(
+    g,
+    layout = layout,
+    edge.width = E(layout_g)$weight,
+    edge.color = met.brewer("Navajo")[5],
+    vertex.size = node_sizes,
+    vertex.label = NA,
+    vertex.color = met.brewer("Navajo")[4],
+    vertex.frame.width = 0
+  )
+
+  text(
+    x = label_coords[, 1],
+    y = label_coords[, 2],
+    labels = paste0(str_wrap(V(layout_g)$name, width = 15), "\n(J = ", node_sizes, ")"),
+    cex = 0.6,
+    col = "black",
+    xpd = NA
+  )
+
+}
+
+network_plot(g, outcome_construct_incidents_matrix)
+```
+````
+
+::: {.cell-output-display}
+![Network structure of contrasts between primary and secondary outcome constructs](PRIMED-workflow--group-based-_files/figure-html/fig-network-1.png){#fig-network fig-pos='H' width=672}
+:::
+:::
+
+
+
+
+
+
+- Outcome measure
+- Diagnosis 
+- CBT vs. rest
+
+### Methodological 
+- ITT vs. TOT
+- RCT vs. QES
+- Type of control
+- Low vs. high rob
+- Preregistration vs. not preregistered
+
+
+## Continuous moderators
 
 ::: {.columns}
 
@@ -6432,19 +6748,25 @@ ggMarginal(plot, type = "density")
 ```{{r, continuous-mod-reint}}
 var_labels <- c(
   "Mean age" = "age",
-  "Percentage of Male" = "male_pct"
-  #"Study-level Average Weeks from Baseline" = "weeks_from_baseline",
-  #"Sessions" = "sessions"
+  "Percent Male" = "male_pct",
+  "Total Number of Sessions" = "sessions",
+  "Sessions per Week" = "intensity",
+  "Length of Intervention (in Weeks)" = "duration",
+  "Weeks After End of Intervention" = "timing",
+  "Weeks from Baseline" = "weeks_from_baseline"
 )
 
 continuous_descriptives <- 
  reintergation_dat |> 
-  group_by(study) |> 
   summarise(
     age = mean(age_mean),
-    male_pct = mean(male_pct)
-    #weeks_from_baseline = mean(weeks_from_baseline, na.rm = TRUE),
-    #sessions = mean(sessions)
+    male_pct = mean(male_pct),
+    sessions = mean(total_number_of_sessions),
+    intensity = mean(sessions_per_week),
+    duration = mean(duration_in_weeks),
+    timing = mean(time_after_end_intervention_weeks),
+    weeks_from_baseline = mean(time_from_baseline_weeks),
+    .by = study
   ) 
 
 continuous_descriptives_tab <- 
@@ -6455,8 +6777,7 @@ continuous_descriptives_tab <-
   #  values_to = "val"
   #) |> 
   #arrange(var)
-  gather(var, val, age, male_pct) |> 
-  group_by(var) |>
+  gather(var, val, age, male_pct, sessions, intensity, duration, timing, weeks_from_baseline) |>
   summarise(
     `% Missing` = 100 * mean(is.na(val)),
     Mean = mean(val, na.rm = TRUE),
@@ -6465,7 +6786,8 @@ continuous_descriptives_tab <-
     LQ = quantile(val, na.rm = TRUE)[2],
     Median = median(val, na.rm = TRUE),
     UQ = quantile(val, na.rm = TRUE)[4],
-    Max = max(val, na.rm = TRUE)
+    Max = max(val, na.rm = TRUE),
+    .by = var
   ) |> 
   mutate(
     var = factor(var, levels = var_labels, labels = names(var_labels))
@@ -6516,7 +6838,7 @@ knitr::kable(
    <td style="text-align:right;"> 67.4 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Percentage of Male </td>
+   <td style="text-align:left;"> Percent Male </td>
    <td style="text-align:right;"> 2.2 </td>
    <td style="text-align:right;"> 45.8 </td>
    <td style="text-align:right;"> 23.0 </td>
@@ -6525,6 +6847,61 @@ knitr::kable(
    <td style="text-align:right;"> 45.7 </td>
    <td style="text-align:right;"> 67.4 </td>
    <td style="text-align:right;"> 79.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Total Number of Sessions </td>
+   <td style="text-align:right;"> 2.2 </td>
+   <td style="text-align:right;"> 21.2 </td>
+   <td style="text-align:right;"> 22.0 </td>
+   <td style="text-align:right;"> 3.0 </td>
+   <td style="text-align:right;"> 8.0 </td>
+   <td style="text-align:right;"> 12.0 </td>
+   <td style="text-align:right;"> 24.0 </td>
+   <td style="text-align:right;"> 104.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sessions per Week </td>
+   <td style="text-align:right;"> 2.2 </td>
+   <td style="text-align:right;"> 1.3 </td>
+   <td style="text-align:right;"> 1.5 </td>
+   <td style="text-align:right;"> 0.1 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 10.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Length of Intervention (in Weeks) </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 18.6 </td>
+   <td style="text-align:right;"> 17.0 </td>
+   <td style="text-align:right;"> 4.0 </td>
+   <td style="text-align:right;"> 8.0 </td>
+   <td style="text-align:right;"> 12.0 </td>
+   <td style="text-align:right;"> 24.0 </td>
+   <td style="text-align:right;"> 78.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Weeks After End of Intervention </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 6.0 </td>
+   <td style="text-align:right;"> 10.2 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 6.5 </td>
+   <td style="text-align:right;"> 52.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Weeks from Baseline </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 24.6 </td>
+   <td style="text-align:right;"> 22.8 </td>
+   <td style="text-align:right;"> 6.0 </td>
+   <td style="text-align:right;"> 12.0 </td>
+   <td style="text-align:right;"> 18.0 </td>
+   <td style="text-align:right;"> 26.0 </td>
+   <td style="text-align:right;"> 130.0 </td>
   </tr>
 </tbody>
 </table>
@@ -6546,19 +6923,25 @@ knitr::kable(
 ```{{r, continuous-mod-mental}}
 var_labels_mental <- c(
   "Mean age" = "age",
-  "Percentage of Male" = "male_pct"
-  #"Study-level Average Weeks from Baseline" = "weeks_from_baseline",
-  #"Sessions" = "sessions"
+  "Percent Male" = "male_pct",
+  "N Sessions" = "sessions",
+  "Sessions Week" = "intensity",
+  "Length" = "duration",
+  "Weeks After Intervention" = "timing",
+  "Weeks Baseline" = "weeks_from_baseline"
 )
 
 continuous_descriptives_mental <- 
  mental_health_dat |> 
-  group_by(study) |> 
   summarise(
     age = mean(age_mean),
-    male_pct = mean(male_pct)
-    #weeks_from_baseline = mean(weeks_from_baseline, na.rm = TRUE),
-    #sessions = mean(sessions)
+    male_pct = mean(male_pct),
+    sessions = mean(total_number_of_sessions),
+    intensity = mean(sessions_per_week),
+    duration = mean(duration_in_weeks),
+    timing = mean(time_after_end_intervention_weeks),
+    weeks_from_baseline = mean(time_from_baseline_weeks),
+    .by = study
   ) 
 
 continuous_descriptives_tab_mental <- 
@@ -6569,8 +6952,7 @@ continuous_descriptives_tab_mental <-
   #  values_to = "val"
   #) |> 
   #arrange(var)
-  gather(var, val, age, male_pct) |> 
-  group_by(var) |>
+  gather(var, val, age, male_pct, sessions, intensity, duration, timing, weeks_from_baseline) |>
   summarise(
     `% Missing` = 100 * mean(is.na(val)),
     Mean = mean(val, na.rm = TRUE),
@@ -6579,7 +6961,8 @@ continuous_descriptives_tab_mental <-
     LQ = quantile(val, na.rm = TRUE)[2],
     Median = median(val, na.rm = TRUE),
     UQ = quantile(val, na.rm = TRUE)[4],
-    Max = max(val, na.rm = TRUE)
+    Max = max(val, na.rm = TRUE),
+    .by = var
   ) |> 
   mutate(
     var = factor(var, levels = var_labels_mental, labels = names(var_labels_mental))
@@ -6588,7 +6971,7 @@ continuous_descriptives_tab_mental <-
 #| tbl-cap-location: top
 #| label: tab-continuous-characteristics-mental
 knitr::kable(
-  continuous_descriptives_tab, 
+  continuous_descriptives_tab_mental, 
   caption = "Distribution of continuous moderators (mental health)",
   col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
   digits = 1,
@@ -6621,24 +7004,79 @@ knitr::kable(
   <tr>
    <td style="text-align:left;"> Mean age </td>
    <td style="text-align:right;"> 0.0 </td>
-   <td style="text-align:right;"> 40.7 </td>
-   <td style="text-align:right;"> 9.1 </td>
-   <td style="text-align:right;"> 24.9 </td>
-   <td style="text-align:right;"> 35.6 </td>
-   <td style="text-align:right;"> 40.8 </td>
-   <td style="text-align:right;"> 43.8 </td>
+   <td style="text-align:right;"> 39.6 </td>
+   <td style="text-align:right;"> 9.4 </td>
+   <td style="text-align:right;"> 21.6 </td>
+   <td style="text-align:right;"> 34.8 </td>
+   <td style="text-align:right;"> 39.8 </td>
+   <td style="text-align:right;"> 43.1 </td>
    <td style="text-align:right;"> 67.4 </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Percentage of Male </td>
-   <td style="text-align:right;"> 2.2 </td>
-   <td style="text-align:right;"> 45.8 </td>
-   <td style="text-align:right;"> 23.0 </td>
+   <td style="text-align:left;"> Percent Male </td>
+   <td style="text-align:right;"> 2.4 </td>
+   <td style="text-align:right;"> 44.3 </td>
+   <td style="text-align:right;"> 23.1 </td>
    <td style="text-align:right;"> 0.0 </td>
-   <td style="text-align:right;"> 31.5 </td>
+   <td style="text-align:right;"> 28.7 </td>
    <td style="text-align:right;"> 45.7 </td>
-   <td style="text-align:right;"> 67.4 </td>
-   <td style="text-align:right;"> 79.5 </td>
+   <td style="text-align:right;"> 64.1 </td>
+   <td style="text-align:right;"> 77.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> N Sessions </td>
+   <td style="text-align:right;"> 2.4 </td>
+   <td style="text-align:right;"> 22.0 </td>
+   <td style="text-align:right;"> 22.7 </td>
+   <td style="text-align:right;"> 3.0 </td>
+   <td style="text-align:right;"> 9.5 </td>
+   <td style="text-align:right;"> 13.0 </td>
+   <td style="text-align:right;"> 24.0 </td>
+   <td style="text-align:right;"> 104.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Sessions Week </td>
+   <td style="text-align:right;"> 2.4 </td>
+   <td style="text-align:right;"> 1.3 </td>
+   <td style="text-align:right;"> 1.6 </td>
+   <td style="text-align:right;"> 0.1 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 10.5 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Length </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 19.6 </td>
+   <td style="text-align:right;"> 17.6 </td>
+   <td style="text-align:right;"> 4.0 </td>
+   <td style="text-align:right;"> 10.0 </td>
+   <td style="text-align:right;"> 12.0 </td>
+   <td style="text-align:right;"> 26.0 </td>
+   <td style="text-align:right;"> 78.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Weeks After Intervention </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 7.0 </td>
+   <td style="text-align:right;"> 11.1 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 1.0 </td>
+   <td style="text-align:right;"> 8.0 </td>
+   <td style="text-align:right;"> 52.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Weeks Baseline </td>
+   <td style="text-align:right;"> 0.0 </td>
+   <td style="text-align:right;"> 26.6 </td>
+   <td style="text-align:right;"> 24.3 </td>
+   <td style="text-align:right;"> 6.0 </td>
+   <td style="text-align:right;"> 12.0 </td>
+   <td style="text-align:right;"> 18.0 </td>
+   <td style="text-align:right;"> 29.0 </td>
+   <td style="text-align:right;"> 130.0 </td>
   </tr>
 </tbody>
 </table>
@@ -6653,7 +7091,9 @@ knitr::kable(
 
 :::
 
-### Age distribution across studies
+### Density Plots
+
+#### Age distribution across studies
 
 
 ::: {.cell}
@@ -6727,7 +7167,7 @@ age_density + expand_limits(x = 70)
 #| fig.retina: 2
 #| message: false
 
-age_density_mental <- density_plot(age, "Mean Age", continuous_descriptives_mental, color = "pink")
+age_density_mental <- density_plot(age, "Mean Age", continuous_descriptives_mental, color = "gray")
 
 age_density_mental + expand_limits(x = 70)
 ```
@@ -6743,7 +7183,7 @@ age_density_mental + expand_limits(x = 70)
 
 :::
 
-### Percent males in sample distribution across studies
+#### Percent males in sample distribution across studies
 ::: {.columns}
 
 ::: {.column width="95%"}
@@ -6786,7 +7226,7 @@ male_density
 #| fig.retina: 2
 #| message: false
 
-male_density_mental <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives_mental, color = "pink"))
+male_density_mental <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives_mental, color = "gray"))
 male_density_mental 
 ```
 ````
@@ -6800,6 +7240,409 @@ male_density_mental
 :::
 
 :::
+
+
+### Histogram
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r hist-plot-function}}
+hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
+  require(dplyr)
+  require(tidyr)
+  require(ggplot2)
+  require(rlang)
+  require(MetBrewer)
+  
+  var_exp <- enquo(variable)
+  var_str <- as_label(var_exp)
+  
+  x_vals <- data[[var_str]]
+  min_val <- floor(min(x_vals, na.rm = TRUE))
+  max_val <- ceiling(max(x_vals, na.rm = TRUE))
+  
+  data |>
+    ggplot(aes(x = !!var_exp)) +
+    geom_histogram(binwidth = 1, boundary = 0, fill = color, alpha = 0.8) +
+    scale_x_continuous(breaks = pretty(seq(min_val, max_val, by = 1), n = 5)) +
+    scale_y_continuous(breaks = seq(0, 10, 2)) +
+    theme_minimal() +
+    labs(x = x_title, y = "")
+}
+```
+````
+:::
+
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r sessions-hist-reint}}
+#| label: fig-sessions-hist-reint
+#| fig-cap: "Distribution of study sessions (reintegration)."
+#| fig.width: 7
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+sessions_hist <- hist_plot(sessions, "Total Number of Sessions in Intervention", continuous_descriptives)
+sessions_hist + labs(title = "Reintegration") + theme(plot.title = element_text(hjust = 0.5))
+```
+````
+
+::: {.cell-output-display}
+![Distribution of study sessions (reintegration).](PRIMED-workflow--group-based-_files/figure-html/fig-sessions-hist-reint-1.png){#fig-sessions-hist-reint fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r sessions-hist-mental}}
+#| label: fig-sessions-hist-mental
+#| fig-cap: "Distribution of study sessions (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+sessions_hist_mental <- hist_plot(sessions, "Total Number of Sessions in Intervention", continuous_descriptives_mental, color = "gray")
+sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = element_text(hjust = 0.5))
+```
+````
+
+::: {.cell-output-display}
+![Distribution of study sessions (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-sessions-hist-mental-1.png){#fig-sessions-hist-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Lollipop Plot
+
+#### Duration and intensity (number of sessions per week)
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r duration-plot-reint}}
+#| label: fig-duration-reint
+#| fig-cap: "Length of intervention in weeks (reintegration)"
+#| fig.width: 6.8
+#| fig.height: 7
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+reintergation_dat |>
+  select(study, duration_in_weeks, sessions_per_week, N_total) |> 
+  filter(!is.na(sessions_per_week)) |>  
+  arrange(desc(duration_in_weeks)) |> 
+  mutate(
+    study = factor(study, levels = unique(study)),
+    sessions = case_when(
+      sessions_per_week < 1 ~ "1<",
+      sessions_per_week == 1 ~ "1",
+      sessions_per_week == 1.5 ~ "1.5",
+      sessions_per_week == 2 ~ "2",
+      sessions_per_week == 2.5 ~ "2.5",
+      sessions_per_week > 2 ~ ">10"
+    ),
+    sessions = factor(sessions, levels = unique(sessions))
+  ) |> 
+  ggplot(aes(y = study, x = duration_in_weeks, color = study)) +
+  geom_segment(aes(x = 0, xend = duration_in_weeks, y = study, yend = study)) +
+  geom_vline(xintercept = c(13, 26, 52, 78), linetype = "dashed", alpha = 0.5) +
+  geom_point(
+    aes(size = N_total)
+  ) +
+  scale_x_continuous(breaks = seq(0, 80, 10)) +
+  facet_grid(vars(sessions_per_week), scales = "free_y", space = "free_y", switch = "y") + 
+  #scale_size(breaks = c(0.5, 1, 1.5, 2, 10.5), limits = c(0, 10.5)) +
+  labs(
+    x = "Lenght of intervention in weeks", 
+    y = "", 
+    caption = paste0(
+      "The light gray facet grids indicate the average number of sessions per week.\n", 
+      "The dashed lines indicate 3 months, 6 months, 1 year, and 1.5 years, respectively.\n",
+      "The point sizes are weighted by the study sample sizes."
+      )
+  ) +
+  theme_minimal() + 
+  scale_colour_discrete(guide = "none") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black"),
+    strip.background.y = element_rect(fill = "gray93", color = "white"),
+    strip.text.y.left = element_text(angle = 0),
+    plot.caption = element_text(hjust = 0)
+  ) 
+```
+````
+
+::: {.cell-output-display}
+![Length of intervention in weeks (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-duration-reint-1.png){#fig-duration-reint fig-pos='H' width=652.8}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r duration-plot-mental}}
+#| label: fig-duration-mental
+#| fig-cap: "Length of intervention in weeks (mental health)"
+#| fig.height: 11
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+mental_health_dat |>
+  select(study, duration_in_weeks, sessions_per_week, N_total) |> 
+  filter(!is.na(sessions_per_week)) |>  
+  arrange(desc(duration_in_weeks)) |> 
+  mutate(
+    study = factor(study, levels = unique(study)),
+    sessions = case_when(
+      sessions_per_week < 1 ~ "Less than 1",
+      sessions_per_week == 1 ~ "1 per week",
+      sessions_per_week == 2 ~ "2 per week",
+      sessions_per_week > 2 ~ ">10"
+    ),
+    sessions = factor(sessions, levels = unique(sessions))
+  ) |> 
+  ggplot(aes(y = study, x = duration_in_weeks, color = study)) +
+  geom_segment(aes(x = 0, xend = duration_in_weeks, y = study, yend = study)) +
+  geom_vline(xintercept = c(13, 26, 52, 78), linetype = "dashed", alpha = 0.5) +
+  geom_point(
+    aes(size = N_total)
+  ) +
+  scale_x_continuous(breaks = seq(0, 80, 10)) +
+  facet_grid(vars(sessions_per_week), scales = "free_y", space = "free_y", switch = "y") + 
+  #scale_size(breaks = c(0.5, 1, 1.5, 2, 10.5), limits = c(0, 10.5)) +
+  labs(
+    x = "Lenght of intervention in weeks", 
+    y = "", 
+    caption = 
+      paste0(
+      "The light gray facet grids indicate the average number of sessions per week.\n", 
+      "The dashed lines indicate 3 months, 6 months, 1 year, and 1.5 years, respectively.\n",
+      "The point sizes are weighted by the study sample sizes."
+      )
+  ) +
+  theme_minimal() + 
+  scale_colour_discrete(guide = "none") +
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black"),
+    strip.background.y = element_rect(fill = "gray93", color = "white"),
+    strip.text.y.left = element_text(angle = 0),
+    plot.caption = element_text(hjust = 0)
+  )  
+```
+````
+
+::: {.cell-output-display}
+![Length of intervention in weeks (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-duration-mental-1.png){#fig-duration-mental fig-pos='H' width=672}
+:::
+:::
+
+
+::: 
+
+:::
+
+### Buble Plot
+
+#### Weeks after end of intervention
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r follow-up-plot-connected-reint}}
+#| label: fig-follow-up-connected-reint
+#| fig-cap: "Weeks after end of interventions for all studies (reintegration)"
+#| fig.width: 6.5
+#| fig.height: 7
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+reintergation_dat |>
+  select(study, time_after_end_intervention_weeks, N_total) |> 
+  arrange(desc(study)) |> 
+  mutate(study = factor(study, levels = unique(study))) |> 
+  ggplot(aes(y = study, x = time_after_end_intervention_weeks, color = study)) +
+  geom_point(aes(size = N_total),
+             alpha = 0.5) +
+  geom_line() +
+  labs(x = "Weeks after end of intervention all studies", y = "")+
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
+````
+
+::: {.cell-output-display}
+![Weeks after end of interventions for all studies (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-follow-up-connected-reint-1.png){#fig-follow-up-connected-reint fig-pos='H' width=624}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r follow-up-plot-connected-mental}}
+#| label: fig-follow-up-connected-mental
+#| fig-cap: "Weeks after end of interventions for all studies (mental health)"
+#| fig.height: 11
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+mental_health_dat |>
+  select(study, time_after_end_intervention_weeks, N_total) |> 
+  arrange(desc(study)) |> 
+  mutate(study = factor(study, levels = unique(study))) |> 
+  ggplot(aes(y = study, x = time_after_end_intervention_weeks, color = study)) +
+  geom_point(aes(size = N_total),
+             alpha = 0.5) +
+  geom_line() +
+  labs(x = "Weeks after end of intervention all studies", y = "")+
+  theme_minimal() + 
+  theme(legend.position = "none")
+```
+````
+
+::: {.cell-output-display}
+![Weeks after end of interventions for all studies (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-follow-up-connected-mental-1.png){#fig-follow-up-connected-mental fig-pos='H' width=672}
+:::
+:::
+
+
+::: 
+
+:::
+
+#### Correlation between effect size estimates and measurement timing
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r es-time-plot-reint}}
+#| label: fig-es-time-reint
+#| fig-cap: "Length of intervention in weeks (reintegration)"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+reintergation_dat |> 
+  select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
+  ggplot() +
+  aes(x = time_after_end_intervention_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 55, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Follow-up duration (months)", y = "Hedges' g")
+```
+````
+
+::: {.cell-output-display}
+![Length of intervention in weeks (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-es-time-reint-1.png){#fig-es-time-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r es-time-plot-mental}}
+#| label: fig-es-time-mental
+#| fig-cap: "Length of intervention in weeks (mental health)"
+#| fig.height: 6
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+mental_health_dat |> 
+  select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
+  ggplot() +
+  aes(x = time_after_end_intervention_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+ geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 55, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Follow-up duration (months)", y = "Hedges' g")
+```
+````
+
+::: {.cell-output-display}
+![Length of intervention in weeks (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-es-time-mental-1.png){#fig-es-time-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+
+## Multivariate structure
+
+See spirtual study
 
 # Step 3 - Standard Errors and Other Auxiliary Data
 
@@ -6826,7 +7669,7 @@ male_density_mental
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-06-24
+ date     2025-06-26
  pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
@@ -6856,6 +7699,7 @@ male_density_mental
  htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.4.2)
  htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.4.2)
  httpuv         1.6.15     2024-03-26 [1] CRAN (R 4.4.2)
+ igraph       * 2.1.4      2025-01-23 [1] CRAN (R 4.4.3)
  janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.4.3)
  jsonlite       1.8.9      2024-09-20 [1] CRAN (R 4.4.2)
  kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.4.2)
@@ -6871,6 +7715,7 @@ male_density_mental
  metadat      * 1.2-0      2022-04-06 [1] CRAN (R 4.4.2)
  metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.4.2)
  MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.4.3)
+ mgcv           1.9-1      2023-12-21 [1] CRAN (R 4.4.2)
  mime           0.12       2021-09-28 [1] CRAN (R 4.4.0)
  miniUI         0.1.1.1    2018-05-18 [1] CRAN (R 4.4.2)
  munsell        0.5.1      2024-04-01 [1] CRAN (R 4.4.2)
