@@ -508,57 +508,6 @@ timeline_plot
 
 ```
 
-## Number of preregistered vs. not preregistered studies {.tabset}
-
-```{r}
-
-gb_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-
-
-```
-
-::: {.panel-tabset}
-### Reintegration 
-```{r}
-reintergation_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-
-### Mental health
-```{r}
-mental_health_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-
-:::
 
 ## Number effects across effect size metrics 
 
@@ -617,6 +566,7 @@ es_plot_per_study
 ::: {.columns}
 
 ::: {.column width="95%"}
+
 ```{r es-plot-reint}
 #| label: fig-es-hist-per-stud-reint
 #| fig-cap: "Distribution of number of effects per study, by direction of the effects for reintegrational outcomes."
@@ -681,6 +631,109 @@ theme(
 
 ### Overall across all studies and outcomes
 
+```{r structure}
+# Multi-arms studies
+multi_arm_studies <- 
+  gb_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies <- 
+  gb_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies <- 
+  gb_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes <- 
+  gb_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary <-
+  study_sample_sizes |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies$N_studies[1])
+
+n_studies <- sample_size_summary$studies
+```
+
+```{r structure-table}
+#| tbl-cap-location: top
+#| label: tab-es-structure
+
+kable(
+  sample_size_summary,
+  caption = "Data structure for the all data",
+  col.names = c(
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
+    mean_effects = "Mean",
+    min_effects = "Minimum",
+    median_effects = "Median",
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+
+
 ```{r, sum-es-per-study-plot}
 #| label: fig-es-hist
 #| fig-cap: "Distribution of number of effect size estimates per study"
@@ -704,6 +757,219 @@ gb_dat |>
 ```
 
 ### Across outcome subgroups 
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+```{r structure-reint}
+# Multi-arms studies
+multi_arm_studies_reint <- 
+  reintergation_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies_reint <- 
+  reintergation_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies_reint <- 
+  reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes_reint <- 
+  reintergation_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary_reint <-
+  study_sample_sizes_reint |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies_reint$N_studies[1])
+
+n_studies_reint <- sample_size_summary_reint$studies
+```
+
+```{r structure-table-reint}
+#| tbl-cap-location: top
+#| label: tab-es-structure-reint
+
+kable(
+  sample_size_summary_reint,
+  caption = "Data structure for the reintegrational data",
+  col.names = c(
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
+    mean_effects = "Mean",
+    min_effects = "Minimum",
+    median_effects = "Median",
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+:::
+
+::: {.column-margin}
+```{r structure-mental}
+# Multi-arms studies
+multi_arm_studies_mental <- 
+  mental_health_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies_mental <- 
+  mental_health_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies_mental <- 
+  mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes_mental <- 
+  mental_health_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary_mental <-
+  study_sample_sizes_mental |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies_mental$N_studies[1])
+
+n_studies_mental <- sample_size_summary_mental$studies
+```
+
+```{r structure-table-mental}
+#| tbl-cap-location: top
+#| label: tab-es-structure-mental
+
+kable(
+  sample_size_summary_mental,
+  caption = "Data structure for the mental health data",
+  col.names = c(
+    studies = "J",
+    studies_multiple_tx = "M-t",
+    studies_multiple_ctl = "M-c",
+    n_effects = "ES",
+    mean_effects = "Mean",
+    min_effects = "Min",
+    median_effects = "Median",
+    max_effects = "Max",
+    participants = "N",
+    prereg = "Prereg"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+:::
+
+:::
 
 ::: {.columns}
 
@@ -1244,20 +1510,6 @@ control_sizes_plot_mental
 
 :::
 
-## Studies with multiple treatments
-
-```{r study-multi-treatment}
-reintergation_dat |> 
-  filter(trt_id > 1) |> 
-  reframe(study = unique(study)) 
-```
-
-## Total number of participant
-
-```{r number-of-participants}
-sum(N_total_dat$N_total)
-```
-
 ## Study sample sizes versus number of effect size estimates per study
 
 ```{r bivariate-es-plot}
@@ -1293,12 +1545,103 @@ ggMarginal(plot, type = "density")
 
 
 # Moderators
+```{r cross-tab-function}
+cat_dat_cross <- function(variable, study_id, data) {
+  
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  
+  var_exp <- enquo(variable)
+  study_id_exp <- enquo(study_id)
+  study_id_name <- as_name(study_id_exp)
+  
+  
+    res_dat <- data %>%
+      group_by(!!study_id_exp) %>%
+      reframe(var_exp_mirror = unique(!!var_exp))  %>%
+      full_join(data,
+                by = c(study_id_name),
+                relationship = "many-to-many") %>%
+      group_by(!!var_exp, var_exp_mirror) %>%
+      reframe(
+        m = n_distinct(!!study_id_exp),
+        k = n()
+      ) %>%
+      mutate(size = paste0(m, " (", k, ")")) %>%
+      select(-m, -k) |>
+      pivot_wider(names_from = var_exp_mirror, values_from = "size")
+  
+  names(res_dat)[1] <- "level" 
+  #res_dat <- res_dat[c("level", levels(res_dat$level)[res_dat$level])]
+
+  return(res_dat)
+}
+
+```
 
 ## Categorical moderators
 
 ### Substantial 
 
 #### Outcome measure
+
+```{r outcome-dependency-table-reint}
+
+outcome_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = analysis_plan,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-outcome
+
+outcome_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_dat_cross)[-1]
+    ),
+    caption = "Dependency table for preregistration status (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+
+```{r outcome-subgroup-dependency-table-reint}
+
+outcome_subgroup_dat_cross <- cat_dat_cross(
+  data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
+  variable = analysis_plan,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-outcome-subgroup
+
+outcome_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for outcome used for subgroup analysis (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
 
 ##### Ridge plot of effect size estimates
 
@@ -1454,7 +1797,6 @@ edges <- outcome_construct_incidents_matrix %>%
 g <- graph_from_data_frame(edges, directed = FALSE)
 ```
 
-```{r}
 ```{r network-plot}
 #| label: fig-network
 #| fig-cap: "Network structure of contrasts between primary and secondary outcome constructs"
@@ -1484,7 +1826,7 @@ network_plot <-
     label_coords[4, 2] * 1.13,
     label_coords[5, 2] * 1.27,
     label_coords[6, 2] * 1.13,
-    label_coords[c(7:10), 2],
+    label_coords[c(7:10), 2] * 1.13,
     label_coords[11, 2] * 1.2,
     label_coords[12:13, 2] * 1.13
   )
@@ -1516,10 +1858,13 @@ network_plot <-
 network_plot(g, outcome_construct_incidents_matrix)
 ```
 
+#### Diagnosis
+
+#### Type of intervention
 
 
 
-- Outcome measure
+
 - Diagnosis 
 - CBT vs. rest
 
@@ -1530,6 +1875,85 @@ network_plot(g, outcome_construct_incidents_matrix)
 - Low vs. high rob
 - Preregistration vs. not preregistered
 
+#### Preregistered vs. not preregistered studies {.tabset}
+
+```{r prereg-status-dependency-table}
+
+prereg_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = prereg_chr,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-published
+
+prereg_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Preregistration status",
+      colnames(prereg_dat_cross)[-1]
+    ),
+    caption = "Dependency table for preregistration status (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+
+```{r}
+
+gb_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+
+```
+
+::: {.panel-tabset}
+### Reintegration 
+```{r}
+reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+
+### Mental health
+```{r}
+mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+
+:::
 
 ## Continuous moderators
 

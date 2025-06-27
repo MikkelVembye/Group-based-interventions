@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-26"
+date: "2025-06-27"
 format:
   html: 
     keep-md: true
@@ -5077,120 +5077,6 @@ timeline_plot
 
 
 
-## Number of preregistered vs. not preregistered studies {.tabset}
-
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r}}
-gb_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            24   225
-2 Not preregistered        24   118
-```
-
-
-:::
-:::
-
-
-
-::: {.panel-tabset}
-### Reintegration 
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r}}
-reintergation_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            23   141
-2 Not preregistered        22    61
-```
-
-
-:::
-:::
-
-
-
-### Mental health
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r}}
-mental_health_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            21    84
-2 Not preregistered        20    57
-```
-
-
-:::
-:::
-
-
-
-:::
 
 ## Number effects across effect size metrics 
 
@@ -5286,6 +5172,7 @@ es_plot_per_study
 ::: {.column width="95%"}
 
 
+
 ::: {.cell}
 
 ````{.cell-code}
@@ -5379,6 +5266,157 @@ theme(
 ::: {.cell}
 
 ````{.cell-code}
+```{{r structure}}
+# Multi-arms studies
+multi_arm_studies <- 
+  gb_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies <- 
+  gb_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies <- 
+  gb_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes <- 
+  gb_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary <-
+  study_sample_sizes |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies$N_studies[1])
+
+n_studies <- sample_size_summary$studies
+```
+````
+:::
+
+::: {.cell .tbl-cap-location-top}
+
+````{.cell-code}
+```{{r structure-table}}
+#| tbl-cap-location: top
+#| label: tab-es-structure
+
+kable(
+  sample_size_summary,
+  caption = "Data structure for the all data",
+  col.names = c(
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
+    mean_effects = "Mean",
+    min_effects = "Minimum",
+    median_effects = "Median",
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Data structure for the all data</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> Studies </th>
+   <th style="text-align:right;"> Multi-treatment studies </th>
+   <th style="text-align:right;"> Multi-control studies </th>
+   <th style="text-align:right;"> Effects </th>
+   <th style="text-align:right;"> Mean </th>
+   <th style="text-align:right;"> Minimum </th>
+   <th style="text-align:right;"> Median </th>
+   <th style="text-align:right;"> Maximum </th>
+   <th style="text-align:right;"> Participants </th>
+   <th style="text-align:right;"> Preregistered studies </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 48 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 343 </td>
+   <td style="text-align:right;"> 7.1 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 4.5 </td>
+   <td style="text-align:right;"> 40 </td>
+   <td style="text-align:right;"> 5527 </td>
+   <td style="text-align:right;"> 24 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+::: {.cell}
+
+````{.cell-code}
 ```{{r, sum-es-per-study-plot}}
 #| label: fig-es-hist
 #| fig-cap: "Distribution of number of effect size estimates per study"
@@ -5409,6 +5447,325 @@ gb_dat |>
 
 
 ### Across outcome subgroups 
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r structure-reint}}
+# Multi-arms studies
+multi_arm_studies_reint <- 
+  reintergation_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies_reint <- 
+  reintergation_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies_reint <- 
+  reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes_reint <- 
+  reintergation_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary_reint <-
+  study_sample_sizes_reint |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies_reint$N_studies[1])
+
+n_studies_reint <- sample_size_summary_reint$studies
+```
+````
+:::
+
+::: {.cell .tbl-cap-location-top}
+
+````{.cell-code}
+```{{r structure-table-reint}}
+#| tbl-cap-location: top
+#| label: tab-es-structure-reint
+
+kable(
+  sample_size_summary_reint,
+  caption = "Data structure for the reintegrational data",
+  col.names = c(
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
+    mean_effects = "Mean",
+    min_effects = "Minimum",
+    median_effects = "Median",
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Data structure for the reintegrational data</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> Studies </th>
+   <th style="text-align:right;"> Multi-treatment studies </th>
+   <th style="text-align:right;"> Multi-control studies </th>
+   <th style="text-align:right;"> Effects </th>
+   <th style="text-align:right;"> Mean </th>
+   <th style="text-align:right;"> Minimum </th>
+   <th style="text-align:right;"> Median </th>
+   <th style="text-align:right;"> Maximum </th>
+   <th style="text-align:right;"> Participants </th>
+   <th style="text-align:right;"> Preregistered studies </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 45 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 202 </td>
+   <td style="text-align:right;"> 4.5 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 28 </td>
+   <td style="text-align:right;"> 5390 </td>
+   <td style="text-align:right;"> 23 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r structure-mental}}
+# Multi-arms studies
+multi_arm_studies_mental <- 
+  mental_health_dat |> 
+  filter(trt_id > 1) |> 
+  reframe(study = unique(study))
+  
+
+# Multi-time-points studies
+follow_up_studies_mental <- 
+  mental_health_dat |>
+  summarise(
+    time_points = length(unique(time_after_end_intervention_weeks)),
+    .by = c(study, trt_id, ctr_id)
+  ) |>
+  filter(time_points > 1)
+
+# Preregistered studies
+prereg_studies_mental <- 
+  mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+
+study_sample_sizes_mental <- 
+  mental_health_dat |>
+  group_by(study, trt_id, ctr_id) |>
+  summarise(
+    effects = n(),
+    participants = max(N_total)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants),
+    ctl_comparisons = n(),
+    ctl_arms = paste(ctr_id, collapse = "; ")
+  ) |>
+  group_by(study, ctl_arms) |>
+  summarise(
+    effects = sum(effects),
+    participants = mean(participants * (1 + ctl_comparisons * (n() - 1) / 2)),
+    trt_comparisons = n(),
+    trt_arms = paste(trt_id, collapse = "; "),
+    ctl_comparisons = mean(ctl_comparisons)
+  ) |>
+  summarise(
+    effects = sum(effects),
+    participants = sum(participants),
+    trt_comparisons = mean(trt_comparisons),
+    ctl_comparisons = sum(ctl_comparisons)
+  )
+
+sample_size_summary_mental <-
+  study_sample_sizes_mental |>
+  summarise(
+    studies = n(),
+    studies_multiple_tx = sum(trt_comparisons > 1),
+    studies_multiple_ctl = sum(ctl_comparisons > 1),
+    n_effects = sum(effects),
+    mean_effects = mean(effects),
+    min_effects = min(effects),
+    median_effects = median(effects),
+    max_effects = max(effects),
+    participants = round(sum(participants))
+  ) |> 
+  mutate(prereg = prereg_studies_mental$N_studies[1])
+
+n_studies_mental <- sample_size_summary_mental$studies
+```
+````
+:::
+
+::: {.cell .tbl-cap-location-top}
+
+````{.cell-code}
+```{{r structure-table-mental}}
+#| tbl-cap-location: top
+#| label: tab-es-structure-mental
+
+kable(
+  sample_size_summary_mental,
+  caption = "Data structure for the mental health data",
+  col.names = c(
+    studies = "J",
+    studies_multiple_tx = "M-t",
+    studies_multiple_ctl = "M-c",
+    n_effects = "ES",
+    mean_effects = "Mean",
+    min_effects = "Min",
+    median_effects = "Median",
+    max_effects = "Max",
+    participants = "N",
+    prereg = "Prereg"
+  ),
+  digits = 1
+) |>
+  kable_styling(bootstrap_options = c("striped", "condensed"),
+                full_width = FALSE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Data structure for the mental health data</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> J </th>
+   <th style="text-align:right;"> M-t </th>
+   <th style="text-align:right;"> M-c </th>
+   <th style="text-align:right;"> ES </th>
+   <th style="text-align:right;"> Mean </th>
+   <th style="text-align:right;"> Min </th>
+   <th style="text-align:right;"> Median </th>
+   <th style="text-align:right;"> Max </th>
+   <th style="text-align:right;"> N </th>
+   <th style="text-align:right;"> Prereg </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 41 </td>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 141 </td>
+   <td style="text-align:right;"> 3.4 </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 18 </td>
+   <td style="text-align:right;"> 4663 </td>
+   <td style="text-align:right;"> 21 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
 
 ::: {.columns}
 
@@ -6323,61 +6680,6 @@ control_sizes_plot_mental
 
 :::
 
-## Studies with multiple treatments
-
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r study-multi-treatment}}
-reintergation_dat |> 
-  filter(trt_id > 1) |> 
-  reframe(study = unique(study)) 
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 3 × 1
-  study               
-  <chr>               
-1 Crawford et al. 2012
-2 Michalak et al. 2015
-3 Schäfer et al. 2019 
-```
-
-
-:::
-:::
-
-
-
-## Total number of participant
-
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r number-of-participants}}
-sum(N_total_dat$N_total)
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-[1] 5390
-```
-
-
-:::
-:::
-
-
-
 ## Study sample sizes versus number of effect size estimates per study
 
 
@@ -6426,11 +6728,311 @@ ggMarginal(plot, type = "density")
 
 # Moderators
 
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cross-tab-function}}
+cat_dat_cross <- function(variable, study_id, data) {
+  
+  require(dplyr)
+  require(rlang)
+  require(tidyr)
+  
+  var_exp <- enquo(variable)
+  study_id_exp <- enquo(study_id)
+  study_id_name <- as_name(study_id_exp)
+  
+  
+    res_dat <- data %>%
+      group_by(!!study_id_exp) %>%
+      reframe(var_exp_mirror = unique(!!var_exp))  %>%
+      full_join(data,
+                by = c(study_id_name),
+                relationship = "many-to-many") %>%
+      group_by(!!var_exp, var_exp_mirror) %>%
+      reframe(
+        m = n_distinct(!!study_id_exp),
+        k = n()
+      ) %>%
+      mutate(size = paste0(m, " (", k, ")")) %>%
+      select(-m, -k) |>
+      pivot_wider(names_from = var_exp_mirror, values_from = "size")
+  
+  names(res_dat)[1] <- "level" 
+  #res_dat <- res_dat[c("level", levels(res_dat$level)[res_dat$level])]
+
+  return(res_dat)
+}
+```
+````
+:::
+
+
+
 ## Categorical moderators
 
 ### Substantial 
 
 #### Outcome measure
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r outcome-dependency-table-reint}}
+outcome_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = analysis_plan,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-outcome
+
+outcome_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_dat_cross)[-1]
+    ),
+    caption = "Dependency table for preregistration status (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for preregistration status (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Alcohol and drug abuse/misuse </th>
+   <th style="text-align:left;"> Hope, empowerment &amp; self-efficacy </th>
+   <th style="text-align:left;"> Physical health </th>
+   <th style="text-align:left;"> Social functioning (degree of impairment) </th>
+   <th style="text-align:left;"> Wellbeing and quality of life </th>
+   <th style="text-align:left;"> Employment </th>
+   <th style="text-align:left;"> Self-esteem </th>
+   <th style="text-align:left;"> Loneliness </th>
+   <th style="text-align:left;"> Psychiatric hospitalization </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Alcohol and drug abuse/misuse </td>
+   <td style="text-align:left;"> 7 (31) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> 3 (4) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Employment </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Hope, empowerment &amp; self-efficacy </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> 12 (32) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 6 (14) </td>
+   <td style="text-align:left;"> 1 (6) </td>
+   <td style="text-align:left;"> 3 (15) </td>
+   <td style="text-align:left;"> 1 (4) </td>
+   <td style="text-align:left;"> 1 (1) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Loneliness </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 4 (5) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Physical health </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Psychiatric hospitalization </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (1) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Self-esteem </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 3 (5) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (2) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 5 (14) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Social functioning (degree of impairment) </td>
+   <td style="text-align:left;"> 3 (7) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 2 (5) </td>
+   <td style="text-align:left;"> 16 (47) </td>
+   <td style="text-align:left;"> 7 (30) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Wellbeing and quality of life </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> 6 (12) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 7 (34) </td>
+   <td style="text-align:left;"> 24 (67) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (2) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+::: {.cell}
+
+````{.cell-code}
+```{{r outcome-subgroup-dependency-table-reint}}
+outcome_subgroup_dat_cross <- cat_dat_cross(
+  data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
+  variable = analysis_plan,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-outcome-subgroup
+
+outcome_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for outcome used for subgroup analysis (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for outcome used for subgroup analysis (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Alcohol and drug abuse/misuse </th>
+   <th style="text-align:left;"> Hope, empowerment &amp; self-efficacy </th>
+   <th style="text-align:left;"> Social functioning (degree of impairment) </th>
+   <th style="text-align:left;"> Wellbeing and quality of life </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Alcohol and drug abuse/misuse </td>
+   <td style="text-align:left;"> 7 (31) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 3 (4) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Hope, empowerment &amp; self-efficacy </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> 12 (32) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 6 (14) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Social functioning (degree of impairment) </td>
+   <td style="text-align:left;"> 3 (7) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 16 (47) </td>
+   <td style="text-align:left;"> 7 (30) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Wellbeing and quality of life </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> 6 (12) </td>
+   <td style="text-align:left;"> 7 (34) </td>
+   <td style="text-align:left;"> 24 (67) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
 
 ##### Ridge plot of effect size estimates
 
@@ -6647,9 +7249,6 @@ g <- graph_from_data_frame(edges, directed = FALSE)
 
 ::: {.cell}
 
-:::
-::: {.cell}
-
 ````{.cell-code}
 ```{{r network-plot}}
 #| label: fig-network
@@ -6680,7 +7279,7 @@ network_plot <-
     label_coords[4, 2] * 1.13,
     label_coords[5, 2] * 1.27,
     label_coords[6, 2] * 1.13,
-    label_coords[c(7:10), 2],
+    label_coords[c(7:10), 2] * 1.13,
     label_coords[11, 2] * 1.2,
     label_coords[12:13, 2] * 1.13
   )
@@ -6720,10 +7319,13 @@ network_plot(g, outcome_construct_incidents_matrix)
 
 
 
+#### Diagnosis
+
+#### Type of intervention
 
 
 
-- Outcome measure
+
 - Diagnosis 
 - CBT vs. rest
 
@@ -6734,6 +7336,184 @@ network_plot(g, outcome_construct_incidents_matrix)
 - Low vs. high rob
 - Preregistration vs. not preregistered
 
+#### Preregistered vs. not preregistered studies {.tabset}
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r prereg-status-dependency-table}}
+prereg_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = prereg_chr,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-published
+
+prereg_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Preregistration status",
+      colnames(prereg_dat_cross)[-1]
+    ),
+    caption = "Dependency table for preregistration status (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for preregistration status (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Preregistration status </th>
+   <th style="text-align:left;"> Not preregistered </th>
+   <th style="text-align:left;"> Preregistered </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Not preregistered </td>
+   <td style="text-align:left;"> 22 (61) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Preregistered </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 23 (141) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+gb_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            24   225
+2 Not preregistered        24   118
+```
+
+
+:::
+:::
+
+
+
+::: {.panel-tabset}
+### Reintegration 
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+reintergation_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            23   141
+2 Not preregistered        22    61
+```
+
+
+:::
+:::
+
+
+
+### Mental health
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+mental_health_dat |> 
+  summarise(
+    prereg_chr = unique(prereg_chr),
+    n_es = n(),
+    .by = study
+  ) |> 
+  summarise(
+    N_studies = n_distinct(study),
+    N_es = sum(n_es),
+    .by = prereg_chr
+  )
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 2 × 3
+  prereg_chr        N_studies  N_es
+  <chr>                 <int> <int>
+1 Preregistered            21    84
+2 Not preregistered        20    57
+```
+
+
+:::
+:::
+
+
+
+:::
 
 ## Continuous moderators
 
@@ -7669,7 +8449,7 @@ See spirtual study
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-06-26
+ date     2025-06-27
  pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
