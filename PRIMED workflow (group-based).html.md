@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-27"
+date: "2025-06-30"
 format:
   html: 
     keep-md: true
@@ -316,39 +316,6 @@ gb_dat <-
     rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
     rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool),
    
-    timing = if_else(study == "Acarturk et al. 2022" & timing == "Followup", "3m", timing),
-    timing = if_else(Author == "Barbic et al. 2009", "post", timing), 
-    timing = if_else(Author == "Bond et al. 2015", "post", timing),
-    timing = if_else(Author == "Craigie & Nathan 2009", "post", timing),
-    timing = if_else(Author == "Gatz et al. 2007", "post", timing),
-    timing = if_else(Author == "Gordon et al. 2018", "post", timing), 
-    timing = if_else(Author == "Gutman et al. 2019", "post", timing),
-    timing = if_else(Author == "Bond et al. 2015", "post", timing), 
-    timing = if_else(Author == "Hagen et al. 2005", "post", timing),
-    timing = if_else(Author == "Haslam et al. 2019", "post", timing),
-    timing = if_else(Author == "Hilden et al. 2021", "post", timing),
-    timing = if_else(Author == "James et al. 2004", "post", timing),
-    timing = if_else(Author == "Lim et al. 2020", "post", timing),
-    timing = if_else(Author == "Lloyd-Evans et al. 2020", "post", timing),
-    timing = if_else(Author == "McCay et al. 2006", "post", timing),
-    timing = if_else(Author == "McCay et al. 2007", "post", timing),
-    timing = if_else(Author == "Michalak et al. 2015", "post", timing),
-    timing = if_else(Author == "Morley et al. 2024", "post", timing),
-    timing = if_else(Author == "Morton et al. 2012", "post", timing),
-    timing = if_else(Author == "Popolo et al. 2019", "post", timing),
-    timing = if_else(Author == "Rabenstein et al. 2015", "post", timing),
-    timing = if_else(Author == "Rosenblum et al. 2014", "3", timing),
-    timing = if_else(Author == "Sacks et al. 2011", "post", timing), 
-    timing = if_else(Author == "Schrank et al. 2016", "post", timing),
-    timing = if_else(Author == "Somers et al. 2017", "post", timing),
-    timing = if_else(Author == "Valiente et al. 2022", "post", timing),
-    timing = if_else(Author == "Volpe et al. 2015", "post", timing),
-    timing = if_else(Author == "Wojtalik et al. 2022", "post", timing),
-    timing = if_else(Author == "Wuthrich et al. 2013/2021", "post", timing),
-    timing = if_else(Author == "Druss et al. 2010", "post", timing),
-    timing = if_else(Author == "Gonzales & Prihoda 2007", "post", timing),
-    timing = if_else(Author == "Dyck et al. 2000", "post", timing),
-   
     analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
    
     conventional = if_else(protocol != "Yes", 1, 0),
@@ -361,21 +328,9 @@ gb_dat <-
    outcome_construct = case_match(
      analysis_plan,
      # Mental health outcomes
-     "General mental health" ~ "Mental health outcome",
-     "Anxiety" ~ "Mental health outcome",
-     "Depression" ~ "Mental health outcome",
-     "Symptoms of psychosis" ~ "Mental health outcome",
-     
-     # Reintegrational health outcomes
-     "Wellbeing and quality of life" ~ "Reintegational outcome", 
-     "Hope, empowerment & self-efficacy" ~ "Reintegational outcome",
-     "Psychiatric hospitalization" ~ "Reintegational outcome",
-     "Social functioning (degree of impairment)" ~ "Reintegational outcome",
-     "Loneliness" ~ "Reintegational outcome",
-     "Alcohol and drug abuse/misuse" ~ "Reintegational outcome",
-     "Physical health" ~ "Reintegational outcome",
-     "Self-esteem" ~ "Reintegational outcome",
-     "Employment" ~ "Reintegational outcome"
+     c("General mental health", "Anxiety",
+       "Depression", "Symptoms of psychosis") ~ "Mental health outcome",
+     .default = "Reintegational outcome"
    ),
    
    # Changing to numeric vectors
@@ -396,9 +351,29 @@ gb_dat <-
    
    # duration_weeks has extract errors
    duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
-   total_number_of_sessions = round(sessions_per_week * duration_in_weeks)
+   total_number_of_sessions = round(sessions_per_week * duration_in_weeks),
    
+  CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
+   
+  across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
  ) |> 
+  rowwise() |> 
+  mutate(
+    diagnosis = {
+      col_ones <- names(
+        across(.cols = schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder)
+        )[unlist(
+          c_across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder)
+          ) == 1]
+      n_ones <- length(col_ones)
+      if (n_ones == 1) col_ones
+      else if (n_ones > 1) "mixed"
+    }
+  ) |> 
+  ungroup() |> 
+  mutate(
+    schizophrenia = if_else(str_detect(diagnosis, "schizophrenia"), "Schizophrenia", "Other")
+  ) |> 
   mutate(
     # Used to remove ITT outcomes from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
     n_analysis_strategies = n_distinct(analysis_strategy),
@@ -418,8 +393,6 @@ Below, we separate the data by reintegrational (primary analysis) and mental hea
 ## Reintegration data
 
 A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
-
-DESCRIPTIVE DATA AS FOR SPIRTUAL STUDY
 
 
 
@@ -6760,7 +6733,13 @@ cat_dat_cross <- function(variable, study_id, data) {
       pivot_wider(names_from = var_exp_mirror, values_from = "size")
   
   names(res_dat)[1] <- "level" 
-  #res_dat <- res_dat[c("level", levels(res_dat$level)[res_dat$level])]
+  
+  res_dat <- 
+    res_dat |> 
+    mutate(
+      level = factor(level, levels = unique(names(res_dat[-1])))
+    ) |> 
+    arrange(level)
 
   return(res_dat)
 }
@@ -6772,9 +6751,7 @@ cat_dat_cross <- function(variable, study_id, data) {
 
 ## Categorical moderators
 
-### Substantial 
-
-#### Outcome measure
+### Outcome measure
 
 
 
@@ -6802,7 +6779,8 @@ outcome_dat_cross |>
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
-    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general_title = "Note: ",
     footnote_as_chunk = T
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
@@ -6842,18 +6820,6 @@ outcome_dat_cross |>
    <td style="text-align:left;"> - </td>
   </tr>
   <tr>
-   <td style="text-align:left;font-weight: bold;"> Employment </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 1 (2) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 1 (2) </td>
-   <td style="text-align:left;"> 1 (2) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-  </tr>
-  <tr>
    <td style="text-align:left;font-weight: bold;"> Hope, empowerment &amp; self-efficacy </td>
    <td style="text-align:left;"> 1 (1) </td>
    <td style="text-align:left;"> 12 (32) </td>
@@ -6866,18 +6832,6 @@ outcome_dat_cross |>
    <td style="text-align:left;"> 1 (1) </td>
   </tr>
   <tr>
-   <td style="text-align:left;font-weight: bold;"> Loneliness </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 1 (2) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 2 (3) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 4 (5) </td>
-   <td style="text-align:left;"> - </td>
-  </tr>
-  <tr>
    <td style="text-align:left;font-weight: bold;"> Physical health </td>
    <td style="text-align:left;"> 1 (1) </td>
    <td style="text-align:left;"> - </td>
@@ -6886,30 +6840,6 @@ outcome_dat_cross |>
    <td style="text-align:left;"> - </td>
    <td style="text-align:left;"> - </td>
    <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> Psychiatric hospitalization </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 1 (1) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 1 (1) </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;font-weight: bold;"> Self-esteem </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 3 (5) </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 2 (2) </td>
-   <td style="text-align:left;"> 1 (2) </td>
-   <td style="text-align:left;"> 5 (14) </td>
    <td style="text-align:left;"> - </td>
    <td style="text-align:left;"> - </td>
   </tr>
@@ -6937,6 +6867,54 @@ outcome_dat_cross |>
    <td style="text-align:left;"> 2 (3) </td>
    <td style="text-align:left;"> - </td>
   </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Employment </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Self-esteem </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 3 (5) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (2) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 5 (14) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Loneliness </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 4 (5) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Psychiatric hospitalization </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (1) </td>
+  </tr>
 </tbody>
 <tfoot><tr><td style="padding: 0; " colspan="100%">
 <span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
@@ -6946,6 +6924,14 @@ outcome_dat_cross |>
 
 :::
 :::
+
+
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
 
 ::: {.cell}
 
@@ -7032,6 +7018,101 @@ outcome_subgroup_dat_cross |>
 :::
 :::
 
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r outcome-subgroup-dependency-table-mental}}
+outcome_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = analysis_plan,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-outcome-subgroup-mental
+
+outcome_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for outcome used for subgroup analysis (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for outcome used for subgroup analysis (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Anxiety </th>
+   <th style="text-align:left;"> Depression </th>
+   <th style="text-align:left;"> General mental health </th>
+   <th style="text-align:left;"> Symptoms of psychosis </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Anxiety </td>
+   <td style="text-align:left;"> 9 (14) </td>
+   <td style="text-align:left;"> 7 (11) </td>
+   <td style="text-align:left;"> 5 (9) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Depression </td>
+   <td style="text-align:left;"> 7 (10) </td>
+   <td style="text-align:left;"> 19 (36) </td>
+   <td style="text-align:left;"> 10 (21) </td>
+   <td style="text-align:left;"> 2 (4) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> General mental health </td>
+   <td style="text-align:left;"> 5 (13) </td>
+   <td style="text-align:left;"> 10 (27) </td>
+   <td style="text-align:left;"> 28 (70) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Symptoms of psychosis </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 2 (8) </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> 7 (21) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
 
 
 ##### Ridge plot of effect size estimates
@@ -7219,6 +7300,27 @@ incidents_matrix <- function(variable, study_id, data) {
 
 ````{.cell-code}
 ```{{r}}
+gb_dat_reduced <- gb_dat |> select(study, analysis_plan)
+
+res_dat <- gb_dat_reduced %>%
+    group_by(study) %>%
+    reframe(var_exp_mirror = unique(analysis_plan))  %>%
+    full_join(gb_dat_reduced ,
+              by = join_by(study),
+              relationship = "many-to-many") %>%
+    group_by(analysis_plan, var_exp_mirror) %>%
+    reframe(
+      m = n_distinct(study),
+      k = n()
+    ) %>%
+    mutate(size = m) %>%
+    select(-m, -k) |>
+    pivot_wider(names_from = var_exp_mirror, values_from = "size")
+ 
+  
+  names(res_dat)[1] <- "level"
+
+
 outcome_construct_incidents_matrix <- incidents_matrix(
   variable = analysis_plan,
   study_id = study,
@@ -7319,24 +7421,677 @@ network_plot(g, outcome_construct_incidents_matrix)
 
 
 
-#### Diagnosis
+### Diagnosis (schizophrenia vs. rest of the effects)
 
-#### Type of intervention
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r diagnosis-dependency-table-reint}}
+diagnosis_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = schizophrenia,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-diagnosis-subgroup
+
+diagnosis_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(diagnosis_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for diagnosis (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for diagnosis (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Other </th>
+   <th style="text-align:left;"> Schizophrenia </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Other </td>
+   <td style="text-align:left;"> 37 (172) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Schizophrenia </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 8 (30) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r diagnosis-dependency-table-mental}}
+diagnosis_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = schizophrenia,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-diagnosis-subgroup
+
+diagnosis_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(diagnosis_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for diagnosis (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for diagnosis (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Other </th>
+   <th style="text-align:left;"> Schizophrenia </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Other </td>
+   <td style="text-align:left;"> 35 (130) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Schizophrenia </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 6 (11) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r diagnosis-ridge-reint}}
+#| label: fig-diagnosis-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by diagnosis (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by diagnosis (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-diagnosis-ridge-reint-1.png){#fig-diagnosis-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r type-ridge-mental}}
+#| label: fig-type-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by diagnosis (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by diagnosis (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-mental-1.png){#fig-type-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Type of intervention
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cbt-dependency-table-reint}}
+cbt_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = CBT_int,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-cbt-subgroup
+
+cbt_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(cbt_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of intervention (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of intervention (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> CBT </th>
+   <th style="text-align:left;"> Other </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> CBT </td>
+   <td style="text-align:left;"> 11 (52) </td>
+   <td style="text-align:left;"> 1 (5) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Other </td>
+   <td style="text-align:left;"> 1 (5) </td>
+   <td style="text-align:left;"> 35 (150) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cbt-dependency-table-mental}}
+cbt_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = CBT_int,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-cbt-subgroup-mental
+
+cbt_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(cbt_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of intervention (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of intervention (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> CBT </th>
+   <th style="text-align:left;"> Other </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> CBT </td>
+   <td style="text-align:left;"> 11 (46) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Other </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 31 (95) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cbt-ridge-reint}}
+#| label: fig-cbt-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of intervention (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of intervention (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-cbt-ridge-reint-1.png){#fig-cbt-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r cbt-ridge-mental}}
+#| label: fig-cbt-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of intervention (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of intervention (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-cbt-ridge-mental-1.png){#fig-cbt-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Type of test
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r test-type-dependency-table-reint}}
+test_type_dat <- 
+  reintergation_dat |> 
+  filter(test_type != "Raw events")
+
+test_type_dat_cross <- cat_dat_cross(
+  data = test_type_dat,
+  variable = test_type,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-test-type-subgroup
+
+test_type_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(test_type_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of test (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of test (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Clinician-rated measure </th>
+   <th style="text-align:left;"> Self-reported </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Clinician-rated measure </td>
+   <td style="text-align:left;"> 12 (36) </td>
+   <td style="text-align:left;"> 5 (8) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Self-reported </td>
+   <td style="text-align:left;"> 5 (8) </td>
+   <td style="text-align:left;"> 38 (165) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r test-type-dependency-table-mental}}
+test_type_dat_mental <- 
+  mental_health_dat |> 
+  filter(test_type != "Raw events")
+
+
+test_type_dat_cross_mental <- cat_dat_cross(
+  data = test_type_dat_mental,
+  variable = test_type,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-test-type-subgroup-mental
+
+test_type_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(test_type_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of test (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of test (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Clinician-rated measure </th>
+   <th style="text-align:left;"> Self-reported </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Clinician-rated measure </td>
+   <td style="text-align:left;"> 14 (41) </td>
+   <td style="text-align:left;"> 5 (11) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Self-reported </td>
+   <td style="text-align:left;"> 5 (18) </td>
+   <td style="text-align:left;"> 32 (100) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r test-type-ridge-reint}}
+#| label: fig-test-type-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of test (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = test_type_dat, es = gt_pop, variable = test_type, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of test (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-test-type-ridge-reint-1.png){#fig-test-type-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r test-type-ridge-mental}}
+#| label: fig-test-type-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of test (mental health)."
+#| fig.height: 6.2
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of test (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-test-type-ridge-mental-1.png){#fig-test-type-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-pval-plot-reint}}
+#| label: fig-es-pval-reint
+#| fig-cap: "Distributions of effect size by p values and outcome measure type."
+#| fig.width: 8
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+test_type_dat_all <- 
+  gb_dat |> 
+  filter(test_type != "Raw events") |> 
+  mutate(
+    p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) ),
+  )
+
+ggplot(test_type_dat_all, aes(y = gt_pop, x = p_val, color = test_type)) +
+geom_point() + 
+geom_hline(yintercept = 0) + 
+geom_vline(xintercept = .05, color = "gray") +
+facet_grid(outcome_construct~test_type) +
+theme_bw() +
+theme(legend.position="none") +
+labs(x = "p values", y = "Effect sizes (Hedges' g)")
+```
+````
+
+::: {.cell-output-display}
+![](PRIMED-workflow--group-based-_files/figure-html/es-pval-plot-reint-1.png){fig-pos='H' width=672}
+:::
+:::
 
 
 
 
-- Diagnosis 
-- CBT vs. rest
 
-### Methodological 
-- ITT vs. TOT
-- RCT vs. QES
-- Type of control
-- Low vs. high rob
-- Preregistration vs. not preregistered
 
-#### Preregistered vs. not preregistered studies {.tabset}
+### ITT vs. TOT
+
+### RCT vs. QES
+
+### Type of control
+
+### Low vs. high risk of bias (RoB)
+
+
+### Preregistered vs. not preregistered studies {.tabset}
 
 
 
@@ -8449,7 +9204,7 @@ See spirtual study
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-06-27
+ date     2025-06-30
  pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
