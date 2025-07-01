@@ -59,6 +59,7 @@ library(ggridges)
 library(MetBrewer)
 library(GGally)
 library(igraph)
+library(fastDummies)
 ```
 
 # Data manipulation - prepare data sets
@@ -329,9 +330,21 @@ gb_dat <-
    duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
    total_number_of_sessions = round(sessions_per_week * duration_in_weeks),
    
-  CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
+   CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
    
-  across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
+   QES_design = if_else(design == "QES", "QES", "RCT"),
+   
+   overall_rob = case_match(
+     Overall, 
+     c("Serious", "High") ~ "Serious/High",
+     c("Some concerns", "Moderate") ~ "Some concerns/Moderate",
+     .default = "Low"
+    ),
+   
+   overall_rob = factor(overall_rob, levels = c("Low", "Some concerns/Moderate", "Serious/High")),
+   
+   across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
+   
  ) |> 
   rowwise() |> 
   mutate(
@@ -923,16 +936,16 @@ kable(
   sample_size_summary_mental,
   caption = "Data structure for the mental health data",
   col.names = c(
-    studies = "J",
-    studies_multiple_tx = "M-t",
-    studies_multiple_ctl = "M-c",
-    n_effects = "ES",
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
     mean_effects = "Mean",
-    min_effects = "Min",
+    min_effects = "Minimum",
     median_effects = "Median",
-    max_effects = "Max",
-    participants = "N",
-    prereg = "Prereg"
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
   ),
   digits = 1
 ) |>
@@ -1914,7 +1927,7 @@ diagnosis_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross)[-1]
     ),
     caption = "Dependency table for diagnosis (reintegration)"
@@ -1945,7 +1958,7 @@ diagnosis_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for diagnosis (mental health)"
@@ -2013,7 +2026,7 @@ cbt_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Intervention",
       colnames(cbt_subgroup_dat_cross)[-1]
     ),
     caption = "Dependency table for type of intervention (reintegration)"
@@ -2044,7 +2057,7 @@ cbt_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Intervention",
       colnames(cbt_subgroup_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for type of intervention (mental health)"
@@ -2114,7 +2127,7 @@ test_type_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Type of test",
       colnames(test_type_dat_cross)[-1]
     ),
     caption = "Dependency table for type of test (reintegration)"
@@ -2150,7 +2163,7 @@ test_type_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Type of test",
       colnames(test_type_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for type of test (mental health)"
@@ -2197,7 +2210,6 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 :::
 
 ```{r es-pval-plot-reint}
-
 #| label: fig-es-pval-reint
 #| fig-cap: "Distributions of effect size by p values and outcome measure type."
 #| fig.width: 8
@@ -2212,6 +2224,7 @@ test_type_dat_all <-
     p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) ),
   )
 
+
 ggplot(test_type_dat_all, aes(y = gt_pop, x = p_val, color = test_type)) +
 geom_point() + 
 geom_hline(yintercept = 0) + 
@@ -2221,100 +2234,526 @@ theme_bw() +
 theme(legend.position="none") +
 labs(x = "p values", y = "Effect sizes (Hedges' g)")
 
-
 ```
 
 
-
-
 ### ITT vs. TOT
+::: {.columns}
+
+::: {.column width="95%"}
+```{r strategy-dependency-table-reint}
+
+strategy_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = analysis_strategy,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-strategy-subgroup
+
+strategy_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Strategy",
+      colnames(strategy_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for estimation strategy (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses. ",
+                     "TOT = treatment on the treated, ITT = Intention to treat."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+::: {.column-margin}
+```{r strategy-dependency-table-mental}
+
+strategy_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = analysis_strategy,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-strategy-subgroup-mental
+
+strategy_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Strategy",
+      colnames(strategy_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for estimation strategy (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses. ",
+                     "TOT = treatment on the treated, ITT = Intention to treat."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r strategy-ridge-reint}
+#| label: fig-strategy-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+```
+:::
+
+::: {.column-margin}
+```{r strategy-ridge-mental}
+#| label: fig-strategy-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+```
+:::
+
+:::
 
 ### RCT vs. QES
+::: {.columns}
+
+::: {.column width="95%"}
+```{r design-dependency-table-reint}
+
+design_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = QES_design,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-design-subgroup
+
+design_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Design",
+      colnames(design_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of research design (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+::: {.column-margin}
+```{r design-dependency-table-mental}
+
+design_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = QES_design,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-design-subgroup-mental
+
+design_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Design",
+      colnames(design_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of research design (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r design-ridge-reint}
+#| label: fig-design-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by research design (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+```
+:::
+
+::: {.column-margin}
+```{r design-ridge-mental}
+#| label: fig-design-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by research design (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+```
+:::
+
+:::
 
 ### Type of control
+::: {.columns}
 
-### Low vs. high risk of bias (RoB)
+::: {.column width="95%"}
+```{r control-dependency-table-reint}
 
+control_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = control,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-control-subgroup
+
+control_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Control",
+      colnames(control_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of control group (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    paste0(
+      "Values outside the parentheses are number of studies,", "
+       with the number of samples and effect size estimates shown in the parentheses."
+    ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+::: {.column-margin}
+```{r control-dependency-table-mental}
+
+control_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = control,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-control-subgroup-mental
+
+control_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Control",
+      colnames(control_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of control group (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "See note in the reintegration table to the left.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r control-ridge-reint}
+#| label: fig-control-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of control group (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = control, v = vgt_pop)
+```
+:::
+
+::: {.column-margin}
+```{r control-ridge-mental}
+#| label: fig-control-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of control group (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop)
+```
+:::
+
+:::
+
+
+### Risk of bias (RoB)
+::: {.columns}
+
+::: {.column width="95%"}
+```{r rob-dependency-table-reint}
+
+rob_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = overall_rob,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-rob-subgroup
+
+rob_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(rob_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table across overall risk of bias assessments (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+::: {.column-margin}
+```{r rob-dependency-table-mental}
+
+rob_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = overall_rob,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-rob-subgroup-mental
+
+rob_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(rob_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table across overall risk of bias assessments (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r rob-ridge-reint}
+#| label: fig-rob-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
+```
+:::
+
+::: {.column-margin}
+```{r rob-ridge-mental}
+#| label: fig-rob-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) 
+```
+:::
+
+:::
 
 ### Preregistered vs. not preregistered studies {.tabset}
+::: {.columns}
 
-```{r prereg-status-dependency-table}
+::: {.column width="95%"}
+```{r prereg-dependency-table-reint}
 
-prereg_dat_cross <- cat_dat_cross(
+prereg_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = prereg_chr,
   study_id = study
 )
 
 #| tbl-cap-location: top
-#| label: tab-published
+#| label: tab-prereg-subgroup
 
-prereg_dat_cross |>
+prereg_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Preregistration status",
-      colnames(prereg_dat_cross)[-1]
+      "Registration",
+      colnames(prereg_subgroup_dat_cross)[-1]
     ),
-    caption = "Dependency table for preregistration status (reintegration)"
+    caption = "Dependency table by type of registration (reintegration)"
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
-    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
     footnote_as_chunk = T
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
+:::
 
-```{r}
+::: {.column-margin}
+```{r prereg-dependency-table-mental}
 
-gb_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
+prereg_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = prereg_chr,
+  study_id = study
+)
 
+#| tbl-cap-location: top
+#| label: tab-prereg-subgroup-mental
 
+prereg_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(prereg_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table by type of registration (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-
-::: {.panel-tabset}
-### Reintegration 
-```{r}
-reintergation_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-
-### Mental health
-```{r}
-mental_health_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
+:::
 
 :::
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r prereg-ridge-reint}
+#| label: fig-prereg-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of registration (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
+```
+:::
+
+::: {.column-margin}
+```{r prereg-ridge-mental}
+#| label: fig-prereg-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of registration (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop) 
+```
+:::
+
+:::
+
+
+```{r prereg-rob-ridge-mental}
+#| label: fig-prereg-rob-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health)."
+#| fig.height: 6
+#| fig.width: 9
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) + 
+  facet_grid(outcome_construct~prereg_chr) + 
+  theme(
+    strip.background = element_rect(color = "black", fill = "gray92")
+  )
+```
 
 ## Continuous moderators
 
@@ -2452,9 +2891,7 @@ knitr::kable(
 
 :::
 
-### Density Plots
-
-#### Age distribution across studies
+### Age distribution across studies
 ```{r density-plot-function}
 density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
   require(dplyr)
@@ -2509,7 +2946,7 @@ age_density_mental + expand_limits(x = 70)
 
 :::
 
-#### Percent males in sample distribution across studies
+### Percent males in sample distribution across studies
 ::: {.columns}
 
 ::: {.column width="95%"}
@@ -2541,8 +2978,8 @@ male_density_mental
 
 :::
 
+### Total number of sessions
 
-### Histogram
 
 ```{r hist-plot-function}
 hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
@@ -2568,6 +3005,7 @@ hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
     labs(x = x_title, y = "")
 }
 ```
+
 
 ::: {.columns}
 
@@ -2600,9 +3038,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 
 :::
 
-### Lollipop Plot
-
-#### Duration and intensity (number of sessions per week)
+### Duration and intensity (number of sessions per week)
 ::: {.columns}
 
 ::: {.column width="95%"}
@@ -2717,9 +3153,7 @@ mental_health_dat |>
 
 :::
 
-### Buble Plot
-
-#### Weeks after end of intervention
+### Weeks after end of intervention
 
 ::: {.columns}
 
@@ -2831,11 +3265,577 @@ mental_health_dat |>
 
 ## Multivariate structure
 
-See spirtual study
+### Covariance plots
+::: {.columns}
 
-# Step 3 - Standard Errors and Other Auxiliary Data
+::: {.column width="160%"}
 
-# Step 4 - Visualization of the Distribution of Effect Size Estimates
+::: {.panel-tabset}
+### Substantial categorical and continuous moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+```{r, multivaraite-dat-reint}
+#| label: fig-multivariate-plot-reint
+#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_reint <- ggpairs(multivariate_dat_reint) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 10) 
+  ) 
+
+multivariate_pairs_reint
+```
+
+#### Mental health
+```{r, multivaraite-dat-mental}
+#| label: fig-multivariate-plot-mental
+#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental <- 
+  mental_health_dat |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental <- ggpairs(multivariate_dat_mental) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 10) 
+  )
+
+multivariate_pairs_mental
+```
+
+:::
+
+
+### Methodological categorical and continuous moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+```{r, multivaraite-dat-reint-method}
+#| label: fig-multivariate-plot-reint-method
+#| fig-cap: "Multivariate structure between methodological categorical and continuous covariates (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint_method <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_reint_method <- ggpairs(multivariate_dat_reint_method) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  ) 
+
+multivariate_pairs_reint_method
+```
+
+#### Mental health
+```{r, multivaraite-dat-mental-method}
+#| label: fig-multivariate-plot-mental-method
+#| fig-cap: "Multivariate structure between methodological categorical and continuous (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental_method <- 
+  mental_health_dat |> 
+  select(
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental_method <- ggpairs(multivariate_dat_mental_method) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  )
+
+multivariate_pairs_mental_method 
+```
+
+:::
+
+
+### Substantial and methodological categorical moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+```{r, multivaraite-dat-reint-method-theoretical}
+#| label: fig-multivariate-plot-reint-method-theoretical
+#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint_method_theo <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr
+  )
+
+multivariate_pairs_reint_method_theo <- ggpairs(multivariate_dat_reint_method_theo) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  ) 
+
+multivariate_pairs_reint_method_theo
+```
+
+#### Mental health
+```{r, multivaraite-dat-mental-method-theoretical}
+#| label: fig-multivariate-plot-mental-method-theoretical
+#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental_method_theo <- 
+  mental_health_dat |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental_method_theo <- ggpairs(multivariate_dat_mental_method_theo) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  )
+
+multivariate_pairs_mental_method_theo
+```
+
+:::
+
+:::
+
+:::
+
+:::
+
+### Covariance matrices
+::: {.columns}
+
+::: {.column width="160%"}
+
+::: {.panel-tabset}
+### Reintegrational outcomes
+
+::: {.panel-tabset}
+#### Across all outcomes
+```{r correlation-matrix-reint}
+#| tbl-cap: "Correlation matrix across all reintegration outcomes."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-reint
+
+cor_mat_dat_cat <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
+  select(
+    plan = analysis_plan,
+    samp = schizophrenia,
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat <- 
+  bind_cols(cat_dummy_dat, cor_mat_dat_con) |> 
+  select(
+    alcho = `plan_Alcohol and drug abuse/misuse`,
+    hope = `plan_Hope, empowerment & self-efficacy`,
+    sfunc = `plan_Social functioning (degree of impairment)`,
+    wellb = `plan_Wellbeing and quality of life`,
+    s_schizo = samp_Schizophrenia,
+    s_oth = samp_Other,
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    wait = `ctr_Waiting-list only`,
+    ind_trt = `ctr_Individual treatment` ,
+    rob_low = rob_Low,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    everything()
+  ) |> 
+  na.omit()
+
+cor_mat <- 
+  cor(
+  model.matrix(
+    reformulate(names(cor_mat_dat[,1:ncol(cor_mat_dat)])), 
+    data = cor_mat_dat
+    )
+  ) %>% 
+  as.data.frame() %>% 
+  select(-c(`(Intercept)`)) %>% 
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted <- 
+  cor_mat |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+kbl(
+  cor_mat_formatted, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+
+```
+
+#### Alcohol and drug abuse/misuse
+Excluded factors due to no variation: type of sample (schizophania vs. rest), low risk of bias
+```{r correlation-matrix-alcohol}
+#| tbl-cap: "Correlation matrix based on alcohol outcome only."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-alcohol
+
+cor_mat_dat_cat_alcohol <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
+  select(
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat_alcohol <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat_alcohol) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con_alcohol <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat_alcohol <- 
+  bind_cols(cat_dummy_dat_alcohol, cor_mat_dat_con_alcohol) |> 
+  select(
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    age:sess
+  ) |> 
+  na.omit()
+
+cor_mat_alcohol <- 
+  cor(
+    model.matrix(
+      reformulate(names(cor_mat_dat_alcohol[,1:ncol(cor_mat_dat_alcohol)])), 
+      data = cor_mat_dat_alcohol
+    )
+  ) |> 
+  as.data.frame() |> 
+  select(-c(`(Intercept)`)) |>   
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted_alcohol <- 
+  cor_mat_alcohol |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+
+kbl(
+  cor_mat_formatted_alcohol, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat_alcohol))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+
+```
+
+
+#### Hope, empowerment & self-efficacy
+
+```{r}
+2
+```
+
+#### Social functioning (degree of impairment)
+
+```{r}
+3
+```
+
+#### Wellbeing and quality of life
+```{r}
+4
+```
+
+:::
+
+### Mental health outcomes
+
+```{r correlation-matrix-mental}
+#| tbl-cap: "Correlation matrix across all mental health outcomes."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-mental
+
+cor_mat_dat_cat_mental <- 
+  mental_health_dat |> 
+  filter(test_type != "Raw events") |> 
+  select(
+    plan = analysis_plan,
+    samp = schizophrenia,
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat_mental <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat_mental) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con_mental <- 
+  mental_health_dat |>  
+  filter(test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat_mental <- 
+  bind_cols(cat_dummy_dat_mental, cor_mat_dat_con_mental) |> 
+  select(
+    anxiety = plan_Anxiety,
+    depress = plan_Depression,
+    g_mental = `plan_General mental health`,
+    symptoms = `plan_Symptoms of psychosis`,
+    s_schizo = samp_Schizophrenia,
+    s_oth = samp_Other,
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    wait = `ctr_Waiting-list only`,
+    ind_trt = `ctr_Individual treatment` ,
+    rob_low = rob_Low,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    everything()
+  ) |> 
+  na.omit()
+
+cor_mat_mental <- 
+  cor(
+    model.matrix(
+      reformulate(names(cor_mat_dat_mental[,1:ncol(cor_mat_dat_mental)])), 
+      data = cor_mat_dat_mental
+      )
+  ) %>% 
+  as.data.frame() %>% 
+  select(-c(`(Intercept)`)) %>% 
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted_mental <- 
+  cor_mat_mental |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+
+kbl(
+  cor_mat_formatted_mental, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat_mental))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+
+```
+
+:::
+
+:::
+
+:::
+
+# Standard Errors and Other Auxiliary Data
+
+# Visualization of the Distribution of Effect Size Estimates
 
 # Colophon
 

@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-06-30"
+date: "2025-07-01"
 format:
   html: 
     keep-md: true
@@ -67,6 +67,7 @@ library(ggridges)
 library(MetBrewer)
 library(GGally)
 library(igraph)
+library(fastDummies)
 ```
 ````
 :::
@@ -353,9 +354,21 @@ gb_dat <-
    duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
    total_number_of_sessions = round(sessions_per_week * duration_in_weeks),
    
-  CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
+   CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
    
-  across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
+   QES_design = if_else(design == "QES", "QES", "RCT"),
+   
+   overall_rob = case_match(
+     Overall, 
+     c("Serious", "High") ~ "Serious/High",
+     c("Some concerns", "Moderate") ~ "Some concerns/Moderate",
+     .default = "Low"
+    ),
+   
+   overall_rob = factor(overall_rob, levels = c("Low", "Some concerns/Moderate", "Serious/High")),
+   
+   across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
+   
  ) |> 
   rowwise() |> 
   mutate(
@@ -5677,16 +5690,16 @@ kable(
   sample_size_summary_mental,
   caption = "Data structure for the mental health data",
   col.names = c(
-    studies = "J",
-    studies_multiple_tx = "M-t",
-    studies_multiple_ctl = "M-c",
-    n_effects = "ES",
+    studies = "Studies",
+    studies_multiple_tx = "Multi-treatment studies",
+    studies_multiple_ctl = "Multi-control studies",
+    n_effects = "Effects",
     mean_effects = "Mean",
-    min_effects = "Min",
+    min_effects = "Minimum",
     median_effects = "Median",
-    max_effects = "Max",
-    participants = "N",
-    prereg = "Prereg"
+    max_effects = "Maximum",
+    participants = "Participants",
+    prereg = "Preregistered studies"
   ),
   digits = 1
 ) |>
@@ -5702,16 +5715,16 @@ kable(
 <caption>Data structure for the mental health data</caption>
  <thead>
   <tr>
-   <th style="text-align:right;"> J </th>
-   <th style="text-align:right;"> M-t </th>
-   <th style="text-align:right;"> M-c </th>
-   <th style="text-align:right;"> ES </th>
+   <th style="text-align:right;"> Studies </th>
+   <th style="text-align:right;"> Multi-treatment studies </th>
+   <th style="text-align:right;"> Multi-control studies </th>
+   <th style="text-align:right;"> Effects </th>
    <th style="text-align:right;"> Mean </th>
-   <th style="text-align:right;"> Min </th>
+   <th style="text-align:right;"> Minimum </th>
    <th style="text-align:right;"> Median </th>
-   <th style="text-align:right;"> Max </th>
-   <th style="text-align:right;"> N </th>
-   <th style="text-align:right;"> Prereg </th>
+   <th style="text-align:right;"> Maximum </th>
+   <th style="text-align:right;"> Participants </th>
+   <th style="text-align:right;"> Preregistered studies </th>
   </tr>
  </thead>
 <tbody>
@@ -7445,7 +7458,7 @@ diagnosis_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross)[-1]
     ),
     caption = "Dependency table for diagnosis (reintegration)"
@@ -7467,7 +7480,7 @@ diagnosis_subgroup_dat_cross |>
 <caption>Dependency table for diagnosis (reintegration)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Diagnosis </th>
    <th style="text-align:left;"> Other </th>
    <th style="text-align:left;"> Schizophrenia </th>
   </tr>
@@ -7516,7 +7529,7 @@ diagnosis_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for diagnosis (mental health)"
@@ -7538,7 +7551,7 @@ diagnosis_subgroup_dat_cross_mental |>
 <caption>Dependency table for diagnosis (mental health)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Diagnosis </th>
    <th style="text-align:left;"> Other </th>
    <th style="text-align:left;"> Schizophrenia </th>
   </tr>
@@ -7650,7 +7663,7 @@ cbt_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Intervention",
       colnames(cbt_subgroup_dat_cross)[-1]
     ),
     caption = "Dependency table for type of intervention (reintegration)"
@@ -7672,7 +7685,7 @@ cbt_subgroup_dat_cross |>
 <caption>Dependency table for type of intervention (reintegration)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Intervention </th>
    <th style="text-align:left;"> CBT </th>
    <th style="text-align:left;"> Other </th>
   </tr>
@@ -7721,7 +7734,7 @@ cbt_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Intervention",
       colnames(cbt_subgroup_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for type of intervention (mental health)"
@@ -7743,7 +7756,7 @@ cbt_subgroup_dat_cross_mental |>
 <caption>Dependency table for type of intervention (mental health)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Intervention </th>
    <th style="text-align:left;"> CBT </th>
    <th style="text-align:left;"> Other </th>
   </tr>
@@ -7857,7 +7870,7 @@ test_type_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Type of test",
       colnames(test_type_dat_cross)[-1]
     ),
     caption = "Dependency table for type of test (reintegration)"
@@ -7879,7 +7892,7 @@ test_type_dat_cross |>
 <caption>Dependency table for type of test (reintegration)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Type of test </th>
    <th style="text-align:left;"> Clinician-rated measure </th>
    <th style="text-align:left;"> Self-reported </th>
   </tr>
@@ -7933,7 +7946,7 @@ test_type_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
-      "Outcome",
+      "Type of test",
       colnames(test_type_dat_cross_mental)[-1]
     ),
     caption = "Dependency table for type of test (mental health)"
@@ -7955,7 +7968,7 @@ test_type_dat_cross_mental |>
 <caption>Dependency table for type of test (mental health)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Type of test </th>
    <th style="text-align:left;"> Clinician-rated measure </th>
    <th style="text-align:left;"> Self-reported </th>
   </tr>
@@ -8061,6 +8074,7 @@ test_type_dat_all <-
     p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) ),
   )
 
+
 ggplot(test_type_dat_all, aes(y = gt_pop, x = p_val, color = test_type)) +
 geom_point() + 
 geom_hline(yintercept = 0) + 
@@ -8073,53 +8087,48 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 ````
 
 ::: {.cell-output-display}
-![](PRIMED-workflow--group-based-_files/figure-html/es-pval-plot-reint-1.png){fig-pos='H' width=672}
+![Distributions of effect size by p values and outcome measure type.](PRIMED-workflow--group-based-_files/figure-html/fig-es-pval-reint-1.png){#fig-es-pval-reint fig-pos='H' width=768}
 :::
 :::
-
-
 
 
 
 
 ### ITT vs. TOT
+::: {.columns}
 
-### RCT vs. QES
-
-### Type of control
-
-### Low vs. high risk of bias (RoB)
-
-
-### Preregistered vs. not preregistered studies {.tabset}
-
+::: {.column width="95%"}
 
 
 ::: {.cell}
 
 ````{.cell-code}
-```{{r prereg-status-dependency-table}}
-prereg_dat_cross <- cat_dat_cross(
+```{{r strategy-dependency-table-reint}}
+strategy_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
-  variable = prereg_chr,
+  variable = analysis_strategy,
   study_id = study
 )
 
 #| tbl-cap-location: top
-#| label: tab-published
+#| label: tab-strategy-subgroup
 
-prereg_dat_cross |>
+strategy_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
-      "Preregistration status",
-      colnames(prereg_dat_cross)[-1]
+      "Strategy",
+      colnames(strategy_subgroup_dat_cross)[-1]
     ),
-    caption = "Dependency table for preregistration status (reintegration)"
+    caption = "Dependency table for estimation strategy (reintegration)"
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
-    "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses. ",
+                     "TOT = treatment on the treated, ITT = Intention to treat."
+                     ), 
+    general_title = "Note: ",
     footnote_as_chunk = T
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
@@ -8130,10 +8139,893 @@ prereg_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for preregistration status (reintegration)</caption>
+<caption>Dependency table for estimation strategy (reintegration)</caption>
  <thead>
   <tr>
-   <th style="text-align:left;"> Preregistration status </th>
+   <th style="text-align:left;"> Strategy </th>
+   <th style="text-align:left;"> ITT </th>
+   <th style="text-align:left;"> TOT </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> ITT </td>
+   <td style="text-align:left;"> 22 (108) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TOT </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 23 (94) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses. TOT = treatment on the treated, ITT = Intention to treat.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r strategy-dependency-table-mental}}
+strategy_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = analysis_strategy,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-strategy-subgroup-mental
+
+strategy_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Strategy",
+      colnames(strategy_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for estimation strategy (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses. ",
+                     "TOT = treatment on the treated, ITT = Intention to treat."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for estimation strategy (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Strategy </th>
+   <th style="text-align:left;"> ITT </th>
+   <th style="text-align:left;"> TOT </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> ITT </td>
+   <td style="text-align:left;"> 18 (69) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TOT </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 23 (72) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses. TOT = treatment on the treated, ITT = Intention to treat.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r strategy-ridge-reint}}
+#| label: fig-strategy-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by estiamtion strategy (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-strategy-ridge-reint-1.png){#fig-strategy-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r strategy-ridge-mental}}
+#| label: fig-strategy-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by estiamtion strategy (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-strategy-ridge-mental-1.png){#fig-strategy-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### RCT vs. QES
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r design-dependency-table-reint}}
+design_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = QES_design,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-design-subgroup
+
+design_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Design",
+      colnames(design_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of research design (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of research design (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Design </th>
+   <th style="text-align:left;"> QES </th>
+   <th style="text-align:left;"> RCT </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> QES </td>
+   <td style="text-align:left;"> 8 (18) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> RCT </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 37 (184) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r design-dependency-table-mental}}
+design_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = QES_design,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-design-subgroup-mental
+
+design_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Design",
+      colnames(design_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of research design (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of research design (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Design </th>
+   <th style="text-align:left;"> QES </th>
+   <th style="text-align:left;"> RCT </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> QES </td>
+   <td style="text-align:left;"> 8 (17) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> RCT </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 33 (124) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r design-ridge-reint}}
+#| label: fig-design-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by research design (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by research design (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-design-ridge-reint-1.png){#fig-design-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r design-ridge-mental}}
+#| label: fig-design-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by research design (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by research design (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-design-ridge-mental-1.png){#fig-design-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Type of control
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r control-dependency-table-reint}}
+control_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = control,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-control-subgroup
+
+control_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Control",
+      colnames(control_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table for type of control group (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    paste0(
+      "Values outside the parentheses are number of studies,", "
+       with the number of samples and effect size estimates shown in the parentheses."
+    ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of control group (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Control </th>
+   <th style="text-align:left;"> Individual treatment </th>
+   <th style="text-align:left;"> TAU </th>
+   <th style="text-align:left;"> TAU with Waiting-list </th>
+   <th style="text-align:left;"> Waiting-list only </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Individual treatment </td>
+   <td style="text-align:left;"> 3 (4) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TAU </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 30 (154) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TAU with Waiting-list </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 8 (31) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Waiting-list only </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 4 (13) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>       with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r control-dependency-table-mental}}
+control_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = control,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-control-subgroup-mental
+
+control_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Control",
+      colnames(control_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table for type of control group (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "See note in the reintegration table to the left.", 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table for type of control group (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Control </th>
+   <th style="text-align:left;"> Individual treatment </th>
+   <th style="text-align:left;"> TAU </th>
+   <th style="text-align:left;"> TAU with Waiting-list </th>
+   <th style="text-align:left;"> Waiting-list only </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Individual treatment </td>
+   <td style="text-align:left;"> 2 (3) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TAU </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 28 (108) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> TAU with Waiting-list </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 8 (23) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Waiting-list only </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 3 (7) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> See note in the reintegration table to the left.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r control-ridge-reint}}
+#| label: fig-control-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of control group (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = control, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of control group (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-control-ridge-reint-1.png){#fig-control-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r control-ridge-mental}}
+#| label: fig-control-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of control group (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of control group (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-control-ridge-mental-1.png){#fig-control-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+
+### Risk of bias (RoB)
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob-dependency-table-reint}}
+rob_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = overall_rob,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-rob-subgroup
+
+rob_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(rob_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table across overall risk of bias assessments (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table across overall risk of bias assessments (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Risk of bias judgment </th>
+   <th style="text-align:left;"> Low </th>
+   <th style="text-align:left;"> Some concerns/Moderate </th>
+   <th style="text-align:left;"> Serious/High </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Low </td>
+   <td style="text-align:left;"> 10 (69) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Some concerns/Moderate </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 21 (94) </td>
+   <td style="text-align:left;"> 1 (1) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Serious/High </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (1) </td>
+   <td style="text-align:left;"> 15 (39) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob-dependency-table-mental}}
+rob_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = overall_rob,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-rob-subgroup-mental
+
+rob_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(rob_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table across overall risk of bias assessments (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table across overall risk of bias assessments (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Risk of bias judgment </th>
+   <th style="text-align:left;"> Low </th>
+   <th style="text-align:left;"> Some concerns/Moderate </th>
+   <th style="text-align:left;"> Serious/High </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Low </td>
+   <td style="text-align:left;"> 10 (36) </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Some concerns/Moderate </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 20 (79) </td>
+   <td style="text-align:left;"> 1 (2) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Serious/High </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 1 (2) </td>
+   <td style="text-align:left;"> 12 (26) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob-ridge-reint}}
+#| label: fig-rob-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by overall risk of bias assessment (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-rob-ridge-reint-1.png){#fig-rob-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob-ridge-mental}}
+#| label: fig-rob-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) 
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by overall risk of bias assessment (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-rob-ridge-mental-1.png){#fig-rob-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+### Preregistered vs. not preregistered studies {.tabset}
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r prereg-dependency-table-reint}}
+prereg_subgroup_dat_cross <- cat_dat_cross(
+  data = reintergation_dat,
+  variable = prereg_chr,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-prereg-subgroup
+
+prereg_subgroup_dat_cross |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Registration",
+      colnames(prereg_subgroup_dat_cross)[-1]
+    ),
+    caption = "Dependency table by type of registration (reintegration)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table by type of registration (reintegration)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Registration </th>
    <th style="text-align:left;"> Not preregistered </th>
    <th style="text-align:left;"> Preregistered </th>
   </tr>
@@ -8151,7 +9043,7 @@ prereg_dat_cross |>
   </tr>
 </tbody>
 <tfoot><tr><td style="padding: 0; " colspan="100%">
-<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
 </table>
 
 `````
@@ -8159,116 +9051,167 @@ prereg_dat_cross |>
 :::
 :::
 
-::: {.cell}
-
-````{.cell-code}
-```{{r}}
-gb_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
-```
-````
-
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            24   225
-2 Not preregistered        24   118
-```
-
 
 :::
-:::
 
-
-
-::: {.panel-tabset}
-### Reintegration 
+::: {.column-margin}
 
 
 ::: {.cell}
 
 ````{.cell-code}
-```{{r}}
-reintergation_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
-  )
+```{{r prereg-dependency-table-mental}}
+prereg_subgroup_dat_cross_mental <- cat_dat_cross(
+  data = mental_health_dat,
+  variable = prereg_chr,
+  study_id = study
+)
+
+#| tbl-cap-location: top
+#| label: tab-prereg-subgroup-mental
+
+prereg_subgroup_dat_cross_mental |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Risk of bias judgment",
+      colnames(prereg_subgroup_dat_cross_mental)[-1]
+    ),
+    caption = "Dependency table by type of registration (mental health)"
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = paste0("Values outside the parentheses are number of studies,", "
+                     with the number of samples and effect size estimates shown in the parentheses."
+                     ), 
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  )  |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
 ````
 
-::: {.cell-output .cell-output-stdout}
+::: {.cell-output-display}
 
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            23   141
-2 Not preregistered        22    61
-```
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+<caption>Dependency table by type of registration (mental health)</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Risk of bias judgment </th>
+   <th style="text-align:left;"> Not preregistered </th>
+   <th style="text-align:left;"> Preregistered </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Not preregistered </td>
+   <td style="text-align:left;"> 20 (57) </td>
+   <td style="text-align:left;"> - </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Preregistered </td>
+   <td style="text-align:left;"> - </td>
+   <td style="text-align:left;"> 21 (84) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies,<br>                     with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
 
+`````
 
 :::
 :::
 
 
+:::
 
-### Mental health
+:::
+
+::: {.columns}
+
+::: {.column width="95%"}
 
 
 ::: {.cell}
 
 ````{.cell-code}
-```{{r}}
-mental_health_dat |> 
-  summarise(
-    prereg_chr = unique(prereg_chr),
-    n_es = n(),
-    .by = study
-  ) |> 
-  summarise(
-    N_studies = n_distinct(study),
-    N_es = sum(n_es),
-    .by = prereg_chr
+```{{r prereg-ridge-reint}}
+#| label: fig-prereg-ridge-reint
+#| fig-cap: "Distribution of effect size estimates, by type of registration (reintegrational outcome)."
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = reintergation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of registration (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-ridge-reint-1.png){#fig-prereg-ridge-reint fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r prereg-ridge-mental}}
+#| label: fig-prereg-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by type of registration (mental health)."
+#| fig.height: 6.5
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop) 
+```
+````
+
+::: {.cell-output-display}
+![Distribution of effect size estimates, by type of registration (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-ridge-mental-1.png){#fig-prereg-ridge-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r prereg-rob-ridge-mental}}
+#| label: fig-prereg-rob-ridge-mental
+#| fig-cap: "Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health)."
+#| fig.height: 6
+#| fig.width: 9
+#| fig.retina: 2
+#| message: false
+
+cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) + 
+  facet_grid(outcome_construct~prereg_chr) + 
+  theme(
+    strip.background = element_rect(color = "black", fill = "gray92")
   )
 ```
 ````
 
-::: {.cell-output .cell-output-stdout}
-
-```
-# A tibble: 2 × 3
-  prereg_chr        N_studies  N_es
-  <chr>                 <int> <int>
-1 Preregistered            21    84
-2 Not preregistered        20    57
-```
-
-
+::: {.cell-output-display}
+![Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-rob-ridge-mental-1.png){#fig-prereg-rob-ridge-mental fig-pos='H' width=864}
 :::
 :::
 
 
-
-:::
 
 ## Continuous moderators
 
@@ -8626,9 +9569,7 @@ knitr::kable(
 
 :::
 
-### Density Plots
-
-#### Age distribution across studies
+### Age distribution across studies
 
 
 ::: {.cell}
@@ -8718,7 +9659,7 @@ age_density_mental + expand_limits(x = 70)
 
 :::
 
-#### Percent males in sample distribution across studies
+### Percent males in sample distribution across studies
 ::: {.columns}
 
 ::: {.column width="95%"}
@@ -8776,8 +9717,8 @@ male_density_mental
 
 :::
 
+### Total number of sessions
 
-### Histogram
 
 
 
@@ -8810,6 +9751,7 @@ hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
 ```
 ````
 :::
+
 
 
 
@@ -8870,9 +9812,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 
 :::
 
-### Lollipop Plot
-
-#### Duration and intensity (number of sessions per week)
+### Duration and intensity (number of sessions per week)
 ::: {.columns}
 
 ::: {.column width="95%"}
@@ -9013,9 +9953,7 @@ mental_health_dat |>
 
 :::
 
-### Buble Plot
-
-#### Weeks after end of intervention
+### Weeks after end of intervention
 
 ::: {.columns}
 
@@ -9177,11 +10115,3178 @@ mental_health_dat |>
 
 ## Multivariate structure
 
-See spirtual study
+### Covariance plots
+::: {.columns}
 
-# Step 3 - Standard Errors and Other Auxiliary Data
+::: {.column width="160%"}
 
-# Step 4 - Visualization of the Distribution of Effect Size Estimates
+::: {.panel-tabset}
+### Substantial categorical and continuous moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-reint}}
+#| label: fig-multivariate-plot-reint
+#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_reint <- ggpairs(multivariate_dat_reint) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 10) 
+  ) 
+
+multivariate_pairs_reint
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-1.png){#fig-multivariate-plot-reint fig-pos='H' width=2304}
+:::
+:::
+
+
+
+#### Mental health
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-mental}}
+#| label: fig-multivariate-plot-mental
+#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental <- 
+  mental_health_dat |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental <- ggpairs(multivariate_dat_mental) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 10, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 10) 
+  )
+
+multivariate_pairs_mental
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-1.png){#fig-multivariate-plot-mental fig-pos='H' width=2304}
+:::
+:::
+
+
+
+:::
+
+
+### Methodological categorical and continuous moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-reint-method}}
+#| label: fig-multivariate-plot-reint-method
+#| fig-cap: "Multivariate structure between methodological categorical and continuous covariates (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint_method <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_reint_method <- ggpairs(multivariate_dat_reint_method) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  ) 
+
+multivariate_pairs_reint_method
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between methodological categorical and continuous covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-1.png){#fig-multivariate-plot-reint-method fig-pos='H' width=2304}
+:::
+:::
+
+
+
+#### Mental health
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-mental-method}}
+#| label: fig-multivariate-plot-mental-method
+#| fig-cap: "Multivariate structure between methodological categorical and continuous (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental_method <- 
+  mental_health_dat |> 
+  select(
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental_method <- ggpairs(multivariate_dat_mental_method) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  )
+
+multivariate_pairs_mental_method 
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between methodological categorical and continuous (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-1.png){#fig-multivariate-plot-mental-method fig-pos='H' width=2304}
+:::
+:::
+
+
+
+:::
+
+
+### Substantial and methodological categorical moderators
+
+::: {.panel-tabset}
+#### Reintegration (across subgroup analyzed outcomes)
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-reint-method-theoretical}}
+#| label: fig-multivariate-plot-reint-method-theoretical
+#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (reintegration)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_reint_method_theo <- 
+  reintergation_dat |>
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr
+  )
+
+multivariate_pairs_reint_method_theo <- ggpairs(multivariate_dat_reint_method_theo) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  ) 
+
+multivariate_pairs_reint_method_theo
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between substantial and methodological categorical covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-theoretical-1.png){#fig-multivariate-plot-reint-method-theoretical fig-pos='H' width=2304}
+:::
+:::
+
+
+
+#### Mental health
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r, multivaraite-dat-mental-method-theoretical}}
+#| label: fig-multivariate-plot-mental-method-theoretical
+#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (mental health)"
+#| fig.width: 24
+#| fig.height: 24
+#| fig.retina: 2
+#| message: false
+
+multivariate_dat_mental_method_theo <- 
+  mental_health_dat |> 
+  select(
+    `Outcome` = analysis_plan,
+    `Sample diagnosis` = schizophrenia,
+    `Intervention` = CBT_int,
+    `Type of test` = test_type,
+    `Strategy` = analysis_strategy,
+    `Design` = QES_design,
+    `Control grp` = control,
+    `RoB` = overall_rob,
+    `Preregistration` = prereg_chr,
+    `Mean age` = age_mean,
+    `% male` = male_pct,
+    `Duration` = duration_in_weeks,
+    `Intensity` = sessions_per_week,
+    `Follow-up` = time_after_end_intervention_weeks
+  )
+
+multivariate_pairs_mental_method_theo <- ggpairs(multivariate_dat_mental_method_theo) + theme(
+    text = element_text(size = 18),
+    axis.text.x = element_text(size = 9, angle = 45, vjust = 1, hjust=1),  
+    axis.text.y = element_text(size = 9) 
+  )
+
+multivariate_pairs_mental_method_theo
+```
+````
+
+::: {.cell-output-display}
+![Multivariate structure between substantial and methodological categorical covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-theoretical-1.png){#fig-multivariate-plot-mental-method-theoretical fig-pos='H' width=2304}
+:::
+:::
+
+
+
+:::
+
+:::
+
+:::
+
+:::
+
+### Covariance matrices
+::: {.columns}
+
+::: {.column width="160%"}
+
+::: {.panel-tabset}
+### Reintegrational outcomes
+
+::: {.panel-tabset}
+#### Across all outcomes
+
+
+::: {#tbl-cor-matix-reint .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all reintegration outcomes.'}
+
+````{.cell-code}
+```{{r correlation-matrix-reint}}
+#| tbl-cap: "Correlation matrix across all reintegration outcomes."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-reint
+
+cor_mat_dat_cat <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
+  select(
+    plan = analysis_plan,
+    samp = schizophrenia,
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat <- 
+  bind_cols(cat_dummy_dat, cor_mat_dat_con) |> 
+  select(
+    alcho = `plan_Alcohol and drug abuse/misuse`,
+    hope = `plan_Hope, empowerment & self-efficacy`,
+    sfunc = `plan_Social functioning (degree of impairment)`,
+    wellb = `plan_Wellbeing and quality of life`,
+    s_schizo = samp_Schizophrenia,
+    s_oth = samp_Other,
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    wait = `ctr_Waiting-list only`,
+    ind_trt = `ctr_Individual treatment` ,
+    rob_low = rob_Low,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    everything()
+  ) |> 
+  na.omit()
+
+cor_mat <- 
+  cor(
+  model.matrix(
+    reformulate(names(cor_mat_dat[,1:ncol(cor_mat_dat)])), 
+    data = cor_mat_dat
+    )
+  ) %>% 
+  as.data.frame() %>% 
+  select(-c(`(Intercept)`)) %>% 
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted <- 
+  cor_mat |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+kbl(
+  cor_mat_formatted, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Category </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> alcho </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> hope </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> sfunc </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> wellb </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> s_schizo </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> s_oth </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> cbt_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> oth_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_clin </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_self </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> itt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tot </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> qes </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rct </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau_wait </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> wait </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ind_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_low </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_mod </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> prereg </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> conventional </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> age </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> male </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> dur </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> int </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> FU </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> sess </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> alcho </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> hope </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sfunc </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wellb </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.46</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s_schizo </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s_oth </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> cbt_trt </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> oth_trt </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_clin </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_self </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> itt </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tot </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> qes </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.51</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.47</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rct </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.51</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.47</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau_wait </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wait </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ind_trt </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_low </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.75</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_mod </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.75</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_high </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.51</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.51</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> prereg </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> conventional </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> age </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> male </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> dur </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.36</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.77</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> int </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> FU </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sess </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.47</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.47</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.77</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+  </tr>
+</tbody>
+</table></div>
+
+`````
+
+:::
+:::
+
+
+
+#### Alcohol and drug abuse/misuse
+Excluded factors due to no variation: type of sample (schizophania vs. rest), low risk of bias
+
+
+::: {#tbl-cor-matix-alcohol .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on alcohol outcome only.'}
+
+````{.cell-code}
+```{{r correlation-matrix-alcohol}}
+#| tbl-cap: "Correlation matrix based on alcohol outcome only."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-alcohol
+
+cor_mat_dat_cat_alcohol <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
+  select(
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat_alcohol <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat_alcohol) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con_alcohol <- 
+  reintergation_dat |> 
+  filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat_alcohol <- 
+  bind_cols(cat_dummy_dat_alcohol, cor_mat_dat_con_alcohol) |> 
+  select(
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    age:sess
+  ) |> 
+  na.omit()
+
+cor_mat_alcohol <- 
+  cor(
+    model.matrix(
+      reformulate(names(cor_mat_dat_alcohol[,1:ncol(cor_mat_dat_alcohol)])), 
+      data = cor_mat_dat_alcohol
+    )
+  ) |> 
+  as.data.frame() |> 
+  select(-c(`(Intercept)`)) |>   
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted_alcohol <- 
+  cor_mat_alcohol |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+
+kbl(
+  cor_mat_formatted_alcohol, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat_alcohol))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Category </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> cbt_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> oth_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_clin </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_self </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> itt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tot </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> qes </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rct </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau_wait </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_mod </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> prereg </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> conventional </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> age </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> male </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> dur </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> int </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> FU </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> sess </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> cbt_trt </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> oth_trt </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_clin </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.63</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.79</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.57</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.4</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_self </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.55</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.63</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.79</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.57</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.4</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> itt </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.64</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.59</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tot </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.64</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.59</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> qes </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.8</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.89</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.81</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.94</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rct </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.8</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.89</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.81</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.94</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.56</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau_wait </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.55</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.56</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_mod </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.8</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.76</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.62</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.76</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_high </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.8</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.8</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.76</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.62</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.76</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> prereg </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.6</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.89</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> conventional </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.68</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.6</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.6</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.89</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> age </td>
+   <td style="text-align:left;"> <span style="     ">-0.5</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.5</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.63</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.63</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.64</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.64</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.37</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.37</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.89</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.89</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.35</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> male </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.79</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.79</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.59</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.59</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.56</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.56</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.35</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> dur </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.89</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.89</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.76</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.76</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.91</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.98</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> int </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.57</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.57</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.81</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.81</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.62</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.62</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.91</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.94</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> FU </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.38</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sess </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.4</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.4</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.94</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.94</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.76</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.76</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.98</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.94</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+  </tr>
+</tbody>
+</table></div>
+
+`````
+
+:::
+:::
+
+
+
+
+#### Hope, empowerment & self-efficacy
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+2
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 2
+```
+
+
+:::
+:::
+
+
+
+#### Social functioning (degree of impairment)
+
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+3
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 3
+```
+
+
+:::
+:::
+
+
+
+#### Wellbeing and quality of life
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r}}
+4
+```
+````
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 4
+```
+
+
+:::
+:::
+
+
+
+:::
+
+### Mental health outcomes
+
+
+
+::: {#tbl-cor-matix-mental .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all mental health outcomes.'}
+
+````{.cell-code}
+```{{r correlation-matrix-mental}}
+#| tbl-cap: "Correlation matrix across all mental health outcomes."
+#| tbl-cap-location: top
+#| label: tbl-cor-matix-mental
+
+cor_mat_dat_cat_mental <- 
+  mental_health_dat |> 
+  filter(test_type != "Raw events") |> 
+  select(
+    plan = analysis_plan,
+    samp = schizophrenia,
+    treat = CBT_int,
+    test = test_type,
+    str = analysis_strategy,
+    des = QES_design,
+    ctr = control,
+    rob = overall_rob,
+    pre = prereg_chr
+  )
+
+cat_dummy_dat_mental <- 
+  fastDummies::dummy_cols(cor_mat_dat_cat_mental) %>% 
+  select(where(is.numeric))
+
+
+cor_mat_dat_con_mental <- 
+  mental_health_dat |>  
+  filter(test_type != "Raw events") |> 
+  select(
+    age = age_mean,
+    male = male_pct,
+    dur = duration_in_weeks,
+    int = sessions_per_week,
+    FU = time_after_end_intervention_weeks,
+    sess = total_number_of_sessions
+  )
+
+cor_mat_dat_mental <- 
+  bind_cols(cat_dummy_dat_mental, cor_mat_dat_con_mental) |> 
+  select(
+    anxiety = plan_Anxiety,
+    depress = plan_Depression,
+    g_mental = `plan_General mental health`,
+    symptoms = `plan_Symptoms of psychosis`,
+    s_schizo = samp_Schizophrenia,
+    s_oth = samp_Other,
+    cbt_trt = treat_CBT, 
+    oth_trt = treat_Other,
+    test_clin = `test_Clinician-rated measure`,
+    test_self = `test_Self-reported`,
+    itt = str_ITT,
+    tot = str_TOT,
+    qes = des_QES,
+    rct = des_RCT,
+    tau = ctr_TAU,
+    tau_wait = `ctr_TAU with Waiting-list`,
+    wait = `ctr_Waiting-list only`,
+    ind_trt = `ctr_Individual treatment` ,
+    rob_low = rob_Low,
+    rob_mod = `rob_Some concerns/Moderate`,
+    rob_high = `rob_Serious/High`,
+    prereg = pre_Preregistered, 
+    conventional = `pre_Not preregistered`,
+    everything()
+  ) |> 
+  na.omit()
+
+cor_mat_mental <- 
+  cor(
+    model.matrix(
+      reformulate(names(cor_mat_dat_mental[,1:ncol(cor_mat_dat_mental)])), 
+      data = cor_mat_dat_mental
+      )
+  ) %>% 
+  as.data.frame() %>% 
+  select(-c(`(Intercept)`)) %>% 
+  na.omit() |> 
+  mutate(
+    
+    across(.cols = everything(), ~ round(.x, 2))
+  )
+
+cor_mat_formatted_mental <- 
+  cor_mat_mental |> 
+  mutate(
+    across(.cols = everything(), ~ cell_spec(.x, bold = ifelse(abs(.x) > 0.5, T, F)))
+  )
+
+
+kbl(
+  cor_mat_formatted_mental, 
+  escape = F,
+  col.names = c("Category", colnames(cor_mat_mental))
+  ) |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Category </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> anxiety </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> depress </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> g_mental </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> symptoms </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> s_schizo </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> s_oth </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> cbt_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> oth_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_clin </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> test_self </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> itt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tot </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> qes </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rct </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> tau_wait </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> wait </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> ind_trt </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_low </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_mod </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> rob_high </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> prereg </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> conventional </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> age </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> male </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> dur </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> int </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> FU </th>
+   <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> sess </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> anxiety </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> depress </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.58</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> g_mental </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.58</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> symptoms </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.43</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.43</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s_schizo </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.43</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.35</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> s_oth </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.43</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.35</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> cbt_trt </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> oth_trt </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_clin </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> test_self </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> itt </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tot </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> qes </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.67</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rct </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.67</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.79</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> tau_wait </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.79</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> wait </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.23</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> ind_trt </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_low </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.35</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.35</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.66</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_mod </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.66</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.54</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> rob_high </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.67</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.67</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.54</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> prereg </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> conventional </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> age </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> male </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.33</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.34</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.05</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> dur </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.32</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.3</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.72</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> int </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.39</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.46</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.43</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> FU </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.18</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> sess </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.42</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.04</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.12</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.72</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.43</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
+   <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
+  </tr>
+</tbody>
+</table></div>
+
+`````
+
+:::
+:::
+
+
+
+:::
+
+:::
+
+:::
+
+# Standard Errors and Other Auxiliary Data
+
+# Visualization of the Distribution of Effect Size Estimates
 
 # Colophon
 
@@ -9204,7 +13309,7 @@ See spirtual study
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-06-30
+ date     2025-07-01
  pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
@@ -9213,6 +13318,7 @@ See spirtual study
  cli            3.6.3      2024-06-21 [1] CRAN (R 4.4.2)
  clubSandwich * 0.5.11     2024-06-20 [1] CRAN (R 4.4.2)
  colorspace     2.1-1      2024-07-26 [1] CRAN (R 4.4.2)
+ data.table     1.16.2     2024-10-10 [1] CRAN (R 4.4.2)
  digest         0.6.37     2024-08-19 [1] CRAN (R 4.4.2)
  dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.4.2)
  evaluate       1.0.1      2024-10-10 [1] CRAN (R 4.4.2)
