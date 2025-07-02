@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-07-01"
+date: "2025-07-02"
 format:
   html: 
     keep-md: true
@@ -409,10 +409,14 @@ A general overview of the main data, we use for analyses of reintegrational outc
 
 
 
-::: {.cell}
+::: {#tbl-reint-dat .cell .tbl-cap-location-top tbl-cap='Data with reintegration outcomes.'}
 
 ````{.cell-code}
-```{{r load-reint-data}}
+```{{r reint-data}}
+#| tbl-cap: "Data with reintegration outcomes."
+#| tbl-cap-location: top
+#| label: tbl-reint-dat
+
 reintergation_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
@@ -3105,10 +3109,14 @@ A general overview of the main data, we use for analyses of mental health outcom
 
 
 
-::: {.cell}
+::: {#tbl-mental-dat .cell .tbl-cap-location-top tbl-cap='Data with mental health outcomes.'}
 
 ````{.cell-code}
-```{{r}}
+```{{r mental-data}}
+#| tbl-cap: "Data with mental health outcomes."
+#| tbl-cap-location: top
+#| label: tbl-mental-dat
+
 mental_health_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
@@ -5331,16 +5339,16 @@ n_studies <- sample_size_summary$studies
 ````
 :::
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-es-structure .cell .tbl-cap-location-top tbl-cap='Data structure for the all data.'}
 
 ````{.cell-code}
 ```{{r structure-table}}
+#| tbl-cap: "Data structure for the all data."
 #| tbl-cap-location: top
-#| label: tab-es-structure
+#| label: tbl-es-structure
 
 kable(
   sample_size_summary,
-  caption = "Data structure for the all data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -5364,7 +5372,6 @@ kable(
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Data structure for the all data</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> Studies </th>
@@ -5522,16 +5529,16 @@ n_studies_reint <- sample_size_summary_reint$studies
 ````
 :::
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-es-structure-reint .cell .tbl-cap-location-top tbl-cap='Data structure for the reintegrational data.'}
 
 ````{.cell-code}
 ```{{r structure-table-reint}}
+#| tbl-cap: "Data structure for the reintegrational data."
 #| tbl-cap-location: top
-#| label: tab-es-structure-reint
+#| label: tbl-es-structure-reint
 
 kable(
   sample_size_summary_reint,
-  caption = "Data structure for the reintegrational data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -5555,7 +5562,6 @@ kable(
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Data structure for the reintegrational data</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> Studies </th>
@@ -5679,16 +5685,16 @@ n_studies_mental <- sample_size_summary_mental$studies
 ````
 :::
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-es-structure-mental .cell .tbl-cap-location-top tbl-cap='Data structure for the mental health data.'}
 
 ````{.cell-code}
 ```{{r structure-table-mental}}
+#| tbl-cap: "Data structure for the mental health data."
 #| tbl-cap-location: top
-#| label: tab-es-structure-mental
+#| label: tbl-es-structure-mental
 
 kable(
   sample_size_summary_mental,
-  caption = "Data structure for the mental health data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -5712,7 +5718,6 @@ kable(
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Data structure for the mental health data</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> Studies </th>
@@ -6028,12 +6033,13 @@ label_cat_hist_ridge(
 ::: {.column width="95%"}
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for reintegrational outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-overall-reint}}
+#| tbl-cap: "Distribution of primary study sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size
+#| label: tbl-sample-size
 
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
@@ -6062,7 +6068,6 @@ primary_sample_size_descriptive <-
 primary_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of primary study sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -6073,7 +6078,6 @@ primary_sample_size_descriptive |>
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of primary study sample sizes at post test for reintegrational outcomes</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> mean </th>
@@ -6109,12 +6113,13 @@ primary_sample_size_descriptive |>
 ::: {.column-margin} 
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size-mental .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for mental health outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-overall-mental}}
+#| tbl-cap: "Distribution of primary study sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-mental
+#| label: tbl-sample-size-mental
 
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid_mental <- 
@@ -6267,12 +6272,13 @@ study_sizes_plot_mental
 ::: {.column width="95%"}
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size-treatment .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for reintegrational outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-treatment-reint}}
+#| tbl-cap: "Distribution of treatment sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-treatment
+#| label: tbl-sample-size-treatment
 
 treatment_sample_size_descriptive <- 
   N_t_stud_trtid$N_treat |> 
@@ -6283,7 +6289,6 @@ treatment_sample_size_descriptive <-
 treatment_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of treatment sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -6294,7 +6299,6 @@ treatment_sample_size_descriptive |>
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of treatment sample sizes at post test for reintegrational outcomes</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> mean </th>
@@ -6330,12 +6334,13 @@ treatment_sample_size_descriptive |>
 ::: {.column-margin} 
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size-treatment-mental .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for mental health outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-treatment-mental}}
+#| tbl-cap: "Distribution of treatment sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-treatment-mental
+#| label: tbl-sample-size-treatment-mental
 
 treatment_sample_size_descriptive_mental <- 
   N_t_stud_trtid_mental$N_treat |> 
@@ -6346,7 +6351,6 @@ treatment_sample_size_descriptive_mental <-
 treatment_sample_size_descriptive_mental |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of treatment sample sizes at post test for mental health outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -6357,7 +6361,6 @@ treatment_sample_size_descriptive_mental |>
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of treatment sample sizes at post test for mental health outcomes</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> mean </th>
@@ -6470,12 +6473,13 @@ treatment_sizes_plot_mental
 ::: {.column width="95%"}
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size-control .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for reintegrational outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-control-reint}}
+#| tbl-cap: "Distribution of control group sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-control
+#| label: tbl-sample-size-control
 
 control_sample_size_descriptive <- 
   N_total_dat$N_c_total |> 
@@ -6486,7 +6490,6 @@ control_sample_size_descriptive <-
 control_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of control group sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -6497,7 +6500,6 @@ control_sample_size_descriptive |>
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of control group sample sizes at post test for reintegrational outcomes</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> mean </th>
@@ -6533,12 +6535,13 @@ control_sample_size_descriptive |>
 ::: {.column-margin} 
 
 
-::: {.cell .tbl-cap-location-top}
+::: {#tbl-sample-size-control-mental .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for mental health outcomes'}
 
 ````{.cell-code}
 ```{{r sample-size-control-mental}}
+#| tbl-cap: "Distribution of control group sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-control-mental
+#| label: tbl-sample-size-control-mental
 
 control_sample_size_descriptive_mental <- 
   N_total_dat_mental$N_c_total |> 
@@ -6549,7 +6552,6 @@ control_sample_size_descriptive_mental <-
 control_sample_size_descriptive_mental |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of control group sample sizes at post test for mental health outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -6560,7 +6562,6 @@ control_sample_size_descriptive_mental |>
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of control group sample sizes at post test for mental health outcomes</caption>
  <thead>
   <tr>
    <th style="text-align:right;"> mean </th>
@@ -6768,18 +6769,20 @@ cat_dat_cross <- function(variable, study_id, data) {
 
 
 
-::: {.cell}
+::: {#tbl-outcome .cell .tbl-cap-location-top tbl-cap='Dependency table for preregistration status (reintegration)'}
 
 ````{.cell-code}
 ```{{r outcome-dependency-table-reint}}
+#| tbl-cap: "Dependency table for preregistration status (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-outcome
+
 outcome_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = analysis_plan,
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome
 
 outcome_dat_cross |>
   knitr::kable(
@@ -6787,8 +6790,7 @@ outcome_dat_cross |>
     col.names = c(
       "Outcome",
       colnames(outcome_dat_cross)[-1]
-    ),
-    caption = "Dependency table for preregistration status (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -6804,7 +6806,6 @@ outcome_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for preregistration status (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Outcome </th>
@@ -6946,18 +6947,20 @@ outcome_dat_cross |>
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-outcome-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (reintegration)'}
 
 ````{.cell-code}
 ```{{r outcome-subgroup-dependency-table-reint}}
+#| tbl-cap: "Dependency table for outcome used for subgroup analysis (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-outcome-subgroup
+
 outcome_subgroup_dat_cross <- cat_dat_cross(
   data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
   variable = analysis_plan,
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome-subgroup
 
 outcome_subgroup_dat_cross |>
   knitr::kable(
@@ -6965,8 +6968,7 @@ outcome_subgroup_dat_cross |>
     col.names = c(
       "Outcome",
       colnames(outcome_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for outcome used for subgroup analysis (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -6982,7 +6984,6 @@ outcome_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for outcome used for subgroup analysis (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Outcome </th>
@@ -7037,18 +7038,20 @@ outcome_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-outcome-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (mental health)'}
 
 ````{.cell-code}
 ```{{r outcome-subgroup-dependency-table-mental}}
+#| tbl-cap: "Dependency table for outcome used for subgroup analysis (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-outcome-subgroup-mental
+
 outcome_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = analysis_plan,
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome-subgroup-mental
 
 outcome_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -7056,8 +7059,7 @@ outcome_subgroup_dat_cross_mental |>
     col.names = c(
       "Outcome",
       colnames(outcome_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for outcome used for subgroup analysis (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7073,7 +7075,6 @@ outcome_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for outcome used for subgroup analysis (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Outcome </th>
@@ -7441,18 +7442,19 @@ network_plot(g, outcome_construct_incidents_matrix)
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-diagnosis-subgroup-reint .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (reintegration)'}
 
 ````{.cell-code}
 ```{{r diagnosis-dependency-table-reint}}
+#| tbl-cap: "Dependency table for diagnosis (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-diagnosis-subgroup-reint
+
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = schizophrenia,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-diagnosis-subgroup
 
 diagnosis_subgroup_dat_cross |>
   knitr::kable(
@@ -7460,8 +7462,7 @@ diagnosis_subgroup_dat_cross |>
     col.names = c(
       "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for diagnosis (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7477,7 +7478,6 @@ diagnosis_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for diagnosis (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Diagnosis </th>
@@ -7512,18 +7512,19 @@ diagnosis_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-diagnosis-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (mental health)'}
 
 ````{.cell-code}
 ```{{r diagnosis-dependency-table-mental}}
+#| tbl-cap: "Dependency table for diagnosis (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-diagnosis-subgroup-mental
+
 diagnosis_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = schizophrenia,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-diagnosis-subgroup
 
 diagnosis_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -7531,8 +7532,7 @@ diagnosis_subgroup_dat_cross_mental |>
     col.names = c(
       "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for diagnosis (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7548,7 +7548,6 @@ diagnosis_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for diagnosis (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Diagnosis </th>
@@ -7581,7 +7580,6 @@ diagnosis_subgroup_dat_cross_mental |>
 :::
 
 :::
-
 
 
 ::: {.columns}
@@ -7646,18 +7644,19 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-cbt-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (reintegration)'}
 
 ````{.cell-code}
 ```{{r cbt-dependency-table-reint}}
+#| tbl-cap: "Dependency table for type of intervention (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-cbt-subgroup
+
 cbt_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = CBT_int,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-cbt-subgroup
 
 cbt_subgroup_dat_cross |>
   knitr::kable(
@@ -7665,8 +7664,7 @@ cbt_subgroup_dat_cross |>
     col.names = c(
       "Intervention",
       colnames(cbt_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of intervention (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7682,7 +7680,6 @@ cbt_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of intervention (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Intervention </th>
@@ -7717,18 +7714,19 @@ cbt_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-cbt-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (mental health)'}
 
 ````{.cell-code}
 ```{{r cbt-dependency-table-mental}}
+#| tbl-cap: "Dependency table for type of intervention (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-cbt-subgroup-mental
+
 cbt_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = CBT_int,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-cbt-subgroup-mental
 
 cbt_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -7736,8 +7734,7 @@ cbt_subgroup_dat_cross_mental |>
     col.names = c(
       "Intervention",
       colnames(cbt_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of intervention (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7753,7 +7750,6 @@ cbt_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of intervention (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Intervention </th>
@@ -7849,10 +7845,14 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-test-type-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (reintegration)'}
 
 ````{.cell-code}
 ```{{r test-type-dependency-table-reint}}
+#| tbl-cap: "Dependency table for type of test (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-test-type-subgroup
+
 test_type_dat <- 
   reintergation_dat |> 
   filter(test_type != "Raw events")
@@ -7863,17 +7863,13 @@ test_type_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-test-type-subgroup
-
 test_type_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Type of test",
       colnames(test_type_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of test (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7889,7 +7885,6 @@ test_type_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of test (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Type of test </th>
@@ -7924,10 +7919,14 @@ test_type_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-test-type-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (mental health)'}
 
 ````{.cell-code}
 ```{{r test-type-dependency-table-mental}}
+#| tbl-cap: "Dependency table for type of test (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-test-type-subgroup-mental
+
 test_type_dat_mental <- 
   mental_health_dat |> 
   filter(test_type != "Raw events")
@@ -7939,17 +7938,13 @@ test_type_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-test-type-subgroup-mental
-
 test_type_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Type of test",
       colnames(test_type_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of test (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -7965,7 +7960,6 @@ test_type_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of test (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Type of test </th>
@@ -8054,6 +8048,9 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 
 :::
 
+::: {.columns}
+
+::: {.column width="130%"}
 
 
 ::: {.cell}
@@ -8062,7 +8059,7 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 ```{{r es-pval-plot-reint}}
 #| label: fig-es-pval-reint
 #| fig-cap: "Distributions of effect size by p values and outcome measure type."
-#| fig.width: 8
+#| fig.width: 9
 #| fig.height: 6
 #| fig.retina: 2
 #| message: false
@@ -8087,12 +8084,14 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 ````
 
 ::: {.cell-output-display}
-![Distributions of effect size by p values and outcome measure type.](PRIMED-workflow--group-based-_files/figure-html/fig-es-pval-reint-1.png){#fig-es-pval-reint fig-pos='H' width=768}
+![Distributions of effect size by p values and outcome measure type.](PRIMED-workflow--group-based-_files/figure-html/fig-es-pval-reint-1.png){#fig-es-pval-reint fig-pos='H' width=864}
 :::
 :::
 
 
+:::
 
+:::
 
 ### ITT vs. TOT
 ::: {.columns}
@@ -8100,18 +8099,19 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-strategy-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (reintegration)'}
 
 ````{.cell-code}
 ```{{r strategy-dependency-table-reint}}
+#| tbl-cap: "Dependency table for estimation strategy (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-strategy-subgroup
+
 strategy_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = analysis_strategy,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-strategy-subgroup
 
 strategy_subgroup_dat_cross |>
   knitr::kable(
@@ -8119,8 +8119,7 @@ strategy_subgroup_dat_cross |>
     col.names = c(
       "Strategy",
       colnames(strategy_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for estimation strategy (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8139,7 +8138,6 @@ strategy_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for estimation strategy (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Strategy </th>
@@ -8174,18 +8172,19 @@ strategy_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-strategy-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (mental health)'}
 
 ````{.cell-code}
 ```{{r strategy-dependency-table-mental}}
+#| tbl-cap: "Dependency table for estimation strategy (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-strategy-subgroup-mental
+
 strategy_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = analysis_strategy,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-strategy-subgroup-mental
 
 strategy_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -8193,8 +8192,7 @@ strategy_subgroup_dat_cross_mental |>
     col.names = c(
       "Strategy",
       colnames(strategy_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for estimation strategy (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8213,7 +8211,6 @@ strategy_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for estimation strategy (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Strategy </th>
@@ -8308,18 +8305,19 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-design-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (reintegration)'}
 
 ````{.cell-code}
 ```{{r design-dependency-table-reint}}
+#| tbl-cap: "Dependency table for type of research design (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-design-subgroup
+
 design_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = QES_design,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-design-subgroup
 
 design_subgroup_dat_cross |>
   knitr::kable(
@@ -8327,8 +8325,7 @@ design_subgroup_dat_cross |>
     col.names = c(
       "Design",
       colnames(design_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of research design (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8346,7 +8343,6 @@ design_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of research design (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Design </th>
@@ -8381,18 +8377,19 @@ design_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-design-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (mental health)'}
 
 ````{.cell-code}
 ```{{r design-dependency-table-mental}}
+#| tbl-cap: "Dependency table for type of research design (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-design-subgroup-mental
+
 design_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = QES_design,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-design-subgroup-mental
 
 design_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -8400,8 +8397,7 @@ design_subgroup_dat_cross_mental |>
     col.names = c(
       "Design",
       colnames(design_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of research design (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8419,7 +8415,6 @@ design_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of research design (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Design </th>
@@ -8514,18 +8509,19 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-control-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (reintegration)'}
 
 ````{.cell-code}
 ```{{r control-dependency-table-reint}}
+#| tbl-cap: "Dependency table for type of control group (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-control-subgroup
+
 control_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = control,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-control-subgroup
 
 control_subgroup_dat_cross |>
   knitr::kable(
@@ -8533,8 +8529,7 @@ control_subgroup_dat_cross |>
     col.names = c(
       "Control",
       colnames(control_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of control group (reintegration)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8553,7 +8548,6 @@ control_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of control group (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Control </th>
@@ -8608,18 +8602,19 @@ control_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-control-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (mental health)'}
 
 ````{.cell-code}
 ```{{r control-dependency-table-mental}}
+#| tbl-cap: "Dependency table for type of control group (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-control-subgroup-mental
+
 control_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = control,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-control-subgroup-mental
 
 control_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -8627,8 +8622,7 @@ control_subgroup_dat_cross_mental |>
     col.names = c(
       "Control",
       colnames(control_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of control group (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8644,7 +8638,6 @@ control_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table for type of control group (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Control </th>
@@ -8760,18 +8753,19 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-rob-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (reintegration)'}
 
 ````{.cell-code}
 ```{{r rob-dependency-table-reint}}
+#| tbl-cap: "Dependency table across overall risk of bias assessments (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-rob-subgroup
+
 rob_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = overall_rob,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-rob-subgroup
 
 rob_subgroup_dat_cross |>
   knitr::kable(
@@ -8779,8 +8773,7 @@ rob_subgroup_dat_cross |>
     col.names = c(
       "Risk of bias judgment",
       colnames(rob_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table across overall risk of bias assessments (reintegration)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8798,7 +8791,6 @@ rob_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table across overall risk of bias assessments (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Risk of bias judgment </th>
@@ -8842,18 +8834,19 @@ rob_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-rob-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (mental health)'}
 
 ````{.cell-code}
 ```{{r rob-dependency-table-mental}}
+#| tbl-cap: "Dependency table across overall risk of bias assessments (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-rob-subgroup-mental
+
 rob_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = overall_rob,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-rob-subgroup-mental
 
 rob_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -8861,8 +8854,7 @@ rob_subgroup_dat_cross_mental |>
     col.names = c(
       "Risk of bias judgment",
       colnames(rob_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table across overall risk of bias assessments (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -8880,7 +8872,6 @@ rob_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table across overall risk of bias assessments (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Risk of bias judgment </th>
@@ -8984,18 +8975,19 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-prereg-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (reintegration)'}
 
 ````{.cell-code}
 ```{{r prereg-dependency-table-reint}}
+#| tbl-cap: "Dependency table by type of registration (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-prereg-subgroup
+
 prereg_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
   variable = prereg_chr,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-prereg-subgroup
 
 prereg_subgroup_dat_cross |>
   knitr::kable(
@@ -9003,8 +8995,7 @@ prereg_subgroup_dat_cross |>
     col.names = c(
       "Registration",
       colnames(prereg_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table by type of registration (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -9022,7 +9013,6 @@ prereg_subgroup_dat_cross |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table by type of registration (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Registration </th>
@@ -9057,18 +9047,19 @@ prereg_subgroup_dat_cross |>
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-prereg-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (mental health)'}
 
 ````{.cell-code}
 ```{{r prereg-dependency-table-mental}}
+#| tbl-cap: "Dependency table by type of registration (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-prereg-subgroup-mental
+
 prereg_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = prereg_chr,
   study_id = study
 )
-
-#| tbl-cap-location: top
-#| label: tab-prereg-subgroup-mental
 
 prereg_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -9076,8 +9067,7 @@ prereg_subgroup_dat_cross_mental |>
     col.names = c(
       "Risk of bias judgment",
       colnames(prereg_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table by type of registration (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -9095,7 +9085,6 @@ prereg_subgroup_dat_cross_mental |>
 
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
-<caption>Dependency table by type of registration (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Risk of bias judgment </th>
@@ -9184,7 +9173,9 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 
 :::
 
+::: {.columns}
 
+::: {.column width="130%"}
 
 
 ::: {.cell}
@@ -9212,7 +9203,9 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
 :::
 
 
+:::
 
+:::
 ## Continuous moderators
 
 ::: {.columns}
@@ -9220,10 +9213,14 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
 ::: {.column width="95%"}
 
 
-::: {.cell}
+::: {#tbl-continuous-characteristics-reint .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (reintegration)'}
 
 ````{.cell-code}
 ```{{r, continuous-mod-reint}}
+#| tbl-cap: "Distribution of continuous moderators (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-continuous-characteristics-reint
+
 var_labels <- c(
   "Mean age" = "age",
   "Percent Male" = "male_pct",
@@ -9271,11 +9268,8 @@ continuous_descriptives_tab <-
     var = factor(var, levels = var_labels, labels = names(var_labels))
   )
 
-#| tbl-cap-location: top
-#| label: tab-continuous-characteristics-reint
 knitr::kable(
   continuous_descriptives_tab, 
-  caption = "Distribution of continuous moderators (reintegration)",
   col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
   digits = 1,
   booktabs = TRUE
@@ -9289,7 +9283,6 @@ knitr::kable(
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of continuous moderators (reintegration)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Variable </th>
@@ -9395,10 +9388,14 @@ knitr::kable(
 ::: {.column-margin}
 
 
-::: {.cell}
+::: {#tbl-continuous-characteristics-mental .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (mental health)'}
 
 ````{.cell-code}
 ```{{r, continuous-mod-mental}}
+#| tbl-cap: "Distribution of continuous moderators (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-continuous-characteristics-mental
+
 var_labels_mental <- c(
   "Mean age" = "age",
   "Percent Male" = "male_pct",
@@ -9446,11 +9443,8 @@ continuous_descriptives_tab_mental <-
     var = factor(var, levels = var_labels_mental, labels = names(var_labels_mental))
   )
 
-#| tbl-cap-location: top
-#| label: tab-continuous-characteristics-mental
 knitr::kable(
   continuous_descriptives_tab_mental, 
-  caption = "Distribution of continuous moderators (mental health)",
   col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
   digits = 1,
   booktabs = TRUE
@@ -9464,7 +9458,6 @@ knitr::kable(
 
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<caption>Distribution of continuous moderators (mental health)</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Variable </th>
@@ -13301,7 +13294,7 @@ kbl(
 ```
 ─ Session info ───────────────────────────────────────────────────────────────────────────────────
  setting  value
- version  R version 4.4.2 (2024-10-31 ucrt)
+ version  R version 4.5.1 (2025-06-13 ucrt)
  os       Windows 11 x64 (build 22631)
  system   x86_64, mingw32
  ui       RTerm
@@ -13309,99 +13302,99 @@ kbl(
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-07-01
- pandoc   3.4 @ C:/RStudio-2025.05.0-496/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ date     2025-07-02
+ pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
- base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.4.0)
- cli            3.6.3      2024-06-21 [1] CRAN (R 4.4.2)
- clubSandwich * 0.5.11     2024-06-20 [1] CRAN (R 4.4.2)
- colorspace     2.1-1      2024-07-26 [1] CRAN (R 4.4.2)
- data.table     1.16.2     2024-10-10 [1] CRAN (R 4.4.2)
- digest         0.6.37     2024-08-19 [1] CRAN (R 4.4.2)
- dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.4.2)
- evaluate       1.0.1      2024-10-10 [1] CRAN (R 4.4.2)
- fansi          1.0.6      2023-12-08 [1] CRAN (R 4.4.2)
- farver         2.1.2      2024-05-13 [1] CRAN (R 4.4.2)
- fastDummies  * 1.7.4      2024-08-16 [1] CRAN (R 4.4.2)
- fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.4.2)
- forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.4.2)
- generics       0.1.3      2022-07-05 [1] CRAN (R 4.4.2)
- GGally       * 2.2.1      2024-02-14 [1] CRAN (R 4.4.3)
- ggExtra      * 0.10.1     2023-08-21 [1] CRAN (R 4.4.3)
- ggplot2      * 3.5.1      2024-04-23 [1] CRAN (R 4.4.2)
- ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.4.2)
- ggridges     * 0.5.6      2024-01-23 [1] CRAN (R 4.4.3)
- ggstats        0.9.0      2025-03-10 [1] CRAN (R 4.4.3)
- glue           1.8.0      2024-09-30 [1] CRAN (R 4.4.2)
- gtable         0.3.6      2024-10-25 [1] CRAN (R 4.4.2)
- hms            1.1.3      2023-03-21 [1] CRAN (R 4.4.2)
- htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.4.2)
- htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.4.2)
- httpuv         1.6.15     2024-03-26 [1] CRAN (R 4.4.2)
- igraph       * 2.1.4      2025-01-23 [1] CRAN (R 4.4.3)
- janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.4.3)
- jsonlite       1.8.9      2024-09-20 [1] CRAN (R 4.4.2)
- kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.4.2)
- knitr        * 1.49       2024-11-08 [1] CRAN (R 4.4.2)
- labeling       0.4.3      2023-08-29 [1] CRAN (R 4.4.0)
- later          1.3.2      2023-12-06 [1] CRAN (R 4.4.2)
- lattice        0.22-6     2024-03-20 [1] CRAN (R 4.4.2)
- lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.4.2)
- lubridate    * 1.9.3      2023-09-27 [1] CRAN (R 4.4.2)
- magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.4.2)
- mathjaxr       1.6-0      2022-02-28 [1] CRAN (R 4.4.2)
- Matrix       * 1.7-1      2024-10-18 [1] CRAN (R 4.4.2)
- metadat      * 1.2-0      2022-04-06 [1] CRAN (R 4.4.2)
- metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.4.2)
- MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.4.3)
- mgcv           1.9-1      2023-12-21 [1] CRAN (R 4.4.2)
- mime           0.12       2021-09-28 [1] CRAN (R 4.4.0)
- miniUI         0.1.1.1    2018-05-18 [1] CRAN (R 4.4.2)
- munsell        0.5.1      2024-04-01 [1] CRAN (R 4.4.2)
- nlme           3.1-166    2024-08-14 [1] CRAN (R 4.4.2)
- numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.4.0)
- pillar         1.9.0      2023-03-22 [1] CRAN (R 4.4.2)
- pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.4.2)
- plyr           1.8.9      2023-10-02 [1] CRAN (R 4.4.2)
- promises       1.3.0      2024-04-05 [1] CRAN (R 4.4.2)
- purrr        * 1.0.2      2023-08-10 [1] CRAN (R 4.4.2)
- R6             2.5.1      2021-08-19 [1] CRAN (R 4.4.2)
- RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.4.0)
- Rcpp           1.0.13-1   2024-11-02 [1] CRAN (R 4.4.2)
- readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.4.2)
- repr           1.1.7      2024-03-22 [1] CRAN (R 4.4.2)
- rlang        * 1.1.4      2024-06-04 [1] CRAN (R 4.4.2)
- rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.4.2)
- rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.4.2)
- sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.4.2)
- scales         1.3.0      2023-11-28 [1] CRAN (R 4.4.2)
- sessioninfo    1.2.2      2021-12-06 [1] CRAN (R 4.4.2)
- shiny          1.9.1      2024-08-01 [1] CRAN (R 4.4.2)
- skimr        * 2.1.5      2022-12-23 [1] CRAN (R 4.4.2)
- snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.4.3)
- stringi        1.8.4      2024-05-06 [1] CRAN (R 4.4.0)
- stringr      * 1.5.1      2023-11-14 [1] CRAN (R 4.4.2)
- svglite        2.1.3      2023-12-08 [1] CRAN (R 4.4.2)
- systemfonts    1.1.0      2024-05-15 [1] CRAN (R 4.4.2)
- tibble       * 3.2.1      2023-03-20 [1] CRAN (R 4.4.2)
- tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.4.2)
- tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.4.2)
- tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.4.2)
- timechange     0.3.0      2024-01-18 [1] CRAN (R 4.4.2)
- tzdb           0.4.0      2023-05-12 [1] CRAN (R 4.4.2)
- utf8           1.2.4      2023-10-22 [1] CRAN (R 4.4.2)
- vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.4.2)
- viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.4.2)
- withr          3.0.2      2024-10-28 [1] CRAN (R 4.4.2)
- xfun           0.49       2024-10-31 [1] CRAN (R 4.4.2)
- xml2           1.3.6      2023-12-04 [1] CRAN (R 4.4.2)
- xtable         1.8-4      2019-04-21 [1] CRAN (R 4.4.2)
- yaml           2.3.10     2024-07-26 [1] CRAN (R 4.4.1)
- zoo            1.8-12     2023-04-13 [1] CRAN (R 4.4.2)
+ base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.5.0)
+ cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.0)
+ clubSandwich * 0.6.0      2025-04-01 [1] CRAN (R 4.5.0)
+ data.table     1.17.6     2025-06-17 [1] CRAN (R 4.5.0)
+ digest         0.6.37     2024-08-19 [1] CRAN (R 4.5.0)
+ dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.5.0)
+ evaluate       1.0.4      2025-06-18 [1] CRAN (R 4.5.0)
+ farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.0)
+ fastDummies  * 1.7.5      2025-01-20 [1] CRAN (R 4.5.0)
+ fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.0)
+ forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.5.0)
+ generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.0)
+ GGally       * 2.2.1      2024-02-14 [1] CRAN (R 4.5.0)
+ ggExtra      * 0.10.1     2023-08-21 [1] CRAN (R 4.5.0)
+ ggplot2      * 3.5.2      2025-04-09 [1] CRAN (R 4.5.0)
+ ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.0)
+ ggridges     * 0.5.6      2024-01-23 [1] CRAN (R 4.5.0)
+ ggstats        0.9.0      2025-03-10 [1] CRAN (R 4.5.0)
+ glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.0)
+ gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.0)
+ hms            1.1.3      2023-03-21 [1] CRAN (R 4.5.0)
+ htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.5.0)
+ htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.0)
+ httpuv         1.6.16     2025-04-16 [1] CRAN (R 4.5.0)
+ igraph       * 2.1.4      2025-01-23 [1] CRAN (R 4.5.0)
+ janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.5.0)
+ jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.0)
+ kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.5.0)
+ knitr        * 1.50       2025-03-16 [1] CRAN (R 4.5.0)
+ labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.0)
+ later          1.4.2      2025-04-08 [1] CRAN (R 4.5.0)
+ lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.1)
+ lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.0)
+ lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.0)
+ magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.5.0)
+ mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.0)
+ Matrix       * 1.7-3      2025-03-11 [1] CRAN (R 4.5.1)
+ metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.0)
+ metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.5.0)
+ MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.5.0)
+ mgcv           1.9-3      2025-04-04 [1] CRAN (R 4.5.1)
+ mime           0.13       2025-03-17 [1] CRAN (R 4.5.0)
+ miniUI         0.1.2      2025-04-17 [1] CRAN (R 4.5.0)
+ nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.1)
+ numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.0)
+ pillar         1.10.2     2025-04-05 [1] CRAN (R 4.5.0)
+ pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.0)
+ plyr           1.8.9      2023-10-02 [1] CRAN (R 4.5.0)
+ promises       1.3.3      2025-05-29 [1] CRAN (R 4.5.0)
+ purrr        * 1.0.4      2025-02-05 [1] CRAN (R 4.5.0)
+ R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.0)
+ RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.0)
+ Rcpp           1.0.14     2025-01-12 [1] CRAN (R 4.5.0)
+ readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.5.0)
+ repr           1.1.7      2024-03-22 [1] CRAN (R 4.5.0)
+ rlang        * 1.1.6      2025-04-11 [1] CRAN (R 4.5.0)
+ rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.5.0)
+ rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.5.0)
+ sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.0)
+ scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.0)
+ sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.0)
+ shiny          1.11.0     2025-06-24 [1] CRAN (R 4.5.0)
+ skimr        * 2.1.5      2022-12-23 [1] CRAN (R 4.5.0)
+ snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.5.0)
+ stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.0)
+ stringr      * 1.5.1      2023-11-14 [1] CRAN (R 4.5.0)
+ svglite        2.2.1      2025-05-12 [1] CRAN (R 4.5.0)
+ systemfonts    1.2.3      2025-04-30 [1] CRAN (R 4.5.0)
+ textshaping    1.0.1      2025-05-01 [1] CRAN (R 4.5.0)
+ tibble       * 3.3.0      2025-06-08 [1] CRAN (R 4.5.0)
+ tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.5.0)
+ tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.0)
+ tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.0)
+ timechange     0.3.0      2024-01-18 [1] CRAN (R 4.5.0)
+ tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.0)
+ utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.0)
+ vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.0)
+ viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.5.0)
+ withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.0)
+ xfun           0.52       2025-04-02 [1] CRAN (R 4.5.0)
+ xml2           1.3.8      2025-03-14 [1] CRAN (R 4.5.0)
+ xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.0)
+ yaml           2.3.10     2024-07-26 [1] CRAN (R 4.5.0)
+ zoo            1.8-14     2025-04-10 [1] CRAN (R 4.5.0)
 
- [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.4.2/library
+ [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.1/library
+ * ── Packages attached to the search path.
 
 ──────────────────────────────────────────────────────────────────────────────────────────────────
 ```

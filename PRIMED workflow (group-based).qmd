@@ -379,7 +379,10 @@ Below, we separate the data by reintegrational (primary analysis) and mental hea
 
 A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
 
-```{r load-reint-data}
+```{r reint-data}
+#| tbl-cap: "Data with reintegration outcomes."
+#| tbl-cap-location: top
+#| label: tbl-reint-dat
 
 reintergation_dat <- 
   gb_dat |> 
@@ -414,7 +417,12 @@ reint_overview |>
 
 A general overview of the main data, we use for analyses of mental health outcomes can be found below.
 
-```{r}
+```{r mental-data}
+#| tbl-cap: "Data with mental health outcomes."
+#| tbl-cap-location: top
+#| label: tbl-mental-dat
+
+
 mental_health_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
@@ -694,12 +702,12 @@ n_studies <- sample_size_summary$studies
 ```
 
 ```{r structure-table}
+#| tbl-cap: "Data structure for the all data."
 #| tbl-cap-location: top
-#| label: tab-es-structure
+#| label: tbl-es-structure
 
 kable(
   sample_size_summary,
-  caption = "Data structure for the all data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -825,12 +833,12 @@ n_studies_reint <- sample_size_summary_reint$studies
 ```
 
 ```{r structure-table-reint}
+#| tbl-cap: "Data structure for the reintegrational data."
 #| tbl-cap-location: top
-#| label: tab-es-structure-reint
+#| label: tbl-es-structure-reint
 
 kable(
   sample_size_summary_reint,
-  caption = "Data structure for the reintegrational data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -929,12 +937,12 @@ n_studies_mental <- sample_size_summary_mental$studies
 ```
 
 ```{r structure-table-mental}
+#| tbl-cap: "Data structure for the mental health data."
 #| tbl-cap-location: top
-#| label: tab-es-structure-mental
+#| label: tbl-es-structure-mental
 
 kable(
   sample_size_summary_mental,
-  caption = "Data structure for the mental health data",
   col.names = c(
     studies = "Studies",
     studies_multiple_tx = "Multi-treatment studies",
@@ -1172,8 +1180,9 @@ label_cat_hist_ridge(
 
 ::: {.column width="95%"}
 ```{r sample-size-overall-reint}
+#| tbl-cap: "Distribution of primary study sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size
+#| label: tbl-sample-size
 
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
@@ -1202,7 +1211,6 @@ primary_sample_size_descriptive <-
 primary_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of primary study sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -1212,8 +1220,9 @@ primary_sample_size_descriptive |>
 
 ::: {.column-margin} 
 ```{r sample-size-overall-mental}
+#| tbl-cap: "Distribution of primary study sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-mental
+#| label: tbl-sample-size-mental
 
 
 # Used when describing the treatment group sample sizes
@@ -1305,8 +1314,9 @@ study_sizes_plot_mental
 
 ::: {.column width="95%"}
 ```{r sample-size-treatment-reint}
+#| tbl-cap: "Distribution of treatment sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-treatment
+#| label: tbl-sample-size-treatment
 
 
 treatment_sample_size_descriptive <- 
@@ -1318,7 +1328,6 @@ treatment_sample_size_descriptive <-
 treatment_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of treatment sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -1328,8 +1337,9 @@ treatment_sample_size_descriptive |>
 
 ::: {.column-margin} 
 ```{r sample-size-treatment-mental}
+#| tbl-cap: "Distribution of treatment sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-treatment-mental
+#| label: tbl-sample-size-treatment-mental
 
 
 treatment_sample_size_descriptive_mental <- 
@@ -1341,7 +1351,6 @@ treatment_sample_size_descriptive_mental <-
 treatment_sample_size_descriptive_mental |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of treatment sample sizes at post test for mental health outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -1403,8 +1412,9 @@ treatment_sizes_plot_mental
 
 ::: {.column width="95%"}
 ```{r sample-size-control-reint}
+#| tbl-cap: "Distribution of control group sample sizes at post test for reintegrational outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-control
+#| label: tbl-sample-size-control
 
 
 control_sample_size_descriptive <- 
@@ -1416,7 +1426,6 @@ control_sample_size_descriptive <-
 control_sample_size_descriptive |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of control group sample sizes at post test for reintegrational outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -1426,8 +1435,9 @@ control_sample_size_descriptive |>
 
 ::: {.column-margin} 
 ```{r sample-size-control-mental}
+#| tbl-cap: "Distribution of control group sample sizes at post test for mental health outcomes"
 #| tbl-cap-location: top
-#| label: tab-sample-size-control-mental
+#| label: tbl-sample-size-control-mental
 
 
 control_sample_size_descriptive_mental <- 
@@ -1439,7 +1449,6 @@ control_sample_size_descriptive_mental <-
 control_sample_size_descriptive_mental |>
   knitr::kable(
     digits = 2,
-    caption = "Distribution of control group sample sizes at post test for mental health outcomes",
     booktabs = TRUE
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
@@ -1575,6 +1584,9 @@ cat_dat_cross <- function(variable, study_id, data) {
 ### Outcome measure
 
 ```{r outcome-dependency-table-reint}
+#| tbl-cap: "Dependency table for preregistration status (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-outcome
 
 outcome_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -1582,8 +1594,6 @@ outcome_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome
 
 outcome_dat_cross |>
   knitr::kable(
@@ -1591,8 +1601,7 @@ outcome_dat_cross |>
     col.names = c(
       "Outcome",
       colnames(outcome_dat_cross)[-1]
-    ),
-    caption = "Dependency table for preregistration status (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -1608,6 +1617,9 @@ outcome_dat_cross |>
 
 ::: {.column width="95%"}
 ```{r outcome-subgroup-dependency-table-reint}
+#| tbl-cap: "Dependency table for outcome used for subgroup analysis (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-outcome-subgroup
 
 outcome_subgroup_dat_cross <- cat_dat_cross(
   data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
@@ -1615,8 +1627,6 @@ outcome_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome-subgroup
 
 outcome_subgroup_dat_cross |>
   knitr::kable(
@@ -1624,8 +1634,7 @@ outcome_subgroup_dat_cross |>
     col.names = c(
       "Outcome",
       colnames(outcome_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for outcome used for subgroup analysis (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -1639,6 +1648,9 @@ outcome_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r outcome-subgroup-dependency-table-mental}
+#| tbl-cap: "Dependency table for outcome used for subgroup analysis (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-outcome-subgroup-mental
 
 outcome_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -1646,8 +1658,6 @@ outcome_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-outcome-subgroup-mental
 
 outcome_subgroup_dat_cross_mental |>
   knitr::kable(
@@ -1655,8 +1665,7 @@ outcome_subgroup_dat_cross_mental |>
     col.names = c(
       "Outcome",
       colnames(outcome_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for outcome used for subgroup analysis (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -1913,6 +1922,10 @@ network_plot(g, outcome_construct_incidents_matrix)
 
 ::: {.column width="95%"}
 ```{r diagnosis-dependency-table-reint}
+#| tbl-cap: "Dependency table for diagnosis (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-diagnosis-subgroup-reint
+
 
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -1920,17 +1933,13 @@ diagnosis_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-diagnosis-subgroup
-
 diagnosis_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for diagnosis (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -1944,6 +1953,9 @@ diagnosis_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r diagnosis-dependency-table-mental}
+#| tbl-cap: "Dependency table for diagnosis (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-diagnosis-subgroup-mental
 
 diagnosis_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -1951,17 +1963,13 @@ diagnosis_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-diagnosis-subgroup
-
 diagnosis_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Diagnosis",
       colnames(diagnosis_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for diagnosis (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -1974,7 +1982,6 @@ diagnosis_subgroup_dat_cross_mental |>
 :::
 
 :::
-
 
 
 ::: {.columns}
@@ -2012,6 +2019,9 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 
 ::: {.column width="95%"}
 ```{r cbt-dependency-table-reint}
+#| tbl-cap: "Dependency table for type of intervention (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-cbt-subgroup
 
 cbt_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2019,17 +2029,13 @@ cbt_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-cbt-subgroup
-
 cbt_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Intervention",
       colnames(cbt_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of intervention (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2043,6 +2049,9 @@ cbt_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r cbt-dependency-table-mental}
+#| tbl-cap: "Dependency table for type of intervention (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-cbt-subgroup-mental
 
 cbt_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2050,17 +2059,13 @@ cbt_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-cbt-subgroup-mental
-
 cbt_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Intervention",
       colnames(cbt_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of intervention (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2109,6 +2114,9 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 
 ::: {.column width="95%"}
 ```{r test-type-dependency-table-reint}
+#| tbl-cap: "Dependency table for type of test (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-test-type-subgroup
 
 test_type_dat <- 
   reintergation_dat |> 
@@ -2120,17 +2128,13 @@ test_type_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-test-type-subgroup
-
 test_type_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Type of test",
       colnames(test_type_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of test (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2144,6 +2148,9 @@ test_type_dat_cross |>
 
 ::: {.column-margin}
 ```{r test-type-dependency-table-mental}
+#| tbl-cap: "Dependency table for type of test (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-test-type-subgroup-mental
 
 test_type_dat_mental <- 
   mental_health_dat |> 
@@ -2156,17 +2163,13 @@ test_type_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-test-type-subgroup-mental
-
 test_type_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Type of test",
       colnames(test_type_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of test (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2209,10 +2212,13 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 
 :::
 
+::: {.columns}
+
+::: {.column width="130%"}
 ```{r es-pval-plot-reint}
 #| label: fig-es-pval-reint
 #| fig-cap: "Distributions of effect size by p values and outcome measure type."
-#| fig.width: 8
+#| fig.width: 9
 #| fig.height: 6
 #| fig.retina: 2
 #| message: false
@@ -2235,13 +2241,18 @@ theme(legend.position="none") +
 labs(x = "p values", y = "Effect sizes (Hedges' g)")
 
 ```
+:::
 
+:::
 
 ### ITT vs. TOT
 ::: {.columns}
 
 ::: {.column width="95%"}
 ```{r strategy-dependency-table-reint}
+#| tbl-cap: "Dependency table for estimation strategy (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-strategy-subgroup
 
 strategy_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2249,17 +2260,13 @@ strategy_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-strategy-subgroup
-
 strategy_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Strategy",
       colnames(strategy_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for estimation strategy (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2276,6 +2283,9 @@ strategy_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r strategy-dependency-table-mental}
+#| tbl-cap: "Dependency table for estimation strategy (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-strategy-subgroup-mental
 
 strategy_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2283,17 +2293,13 @@ strategy_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-strategy-subgroup-mental
-
 strategy_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Strategy",
       colnames(strategy_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for estimation strategy (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2344,6 +2350,9 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 
 ::: {.column width="95%"}
 ```{r design-dependency-table-reint}
+#| tbl-cap: "Dependency table for type of research design (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-design-subgroup
 
 design_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2351,17 +2360,13 @@ design_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-design-subgroup
-
 design_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Design",
       colnames(design_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of research design (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2377,6 +2382,9 @@ design_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r design-dependency-table-mental}
+#| tbl-cap: "Dependency table for type of research design (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-design-subgroup-mental
 
 design_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2384,17 +2392,13 @@ design_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-design-subgroup-mental
-
 design_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Design",
       colnames(design_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of research design (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2444,6 +2448,9 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 
 ::: {.column width="95%"}
 ```{r control-dependency-table-reint}
+#| tbl-cap: "Dependency table for type of control group (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-control-subgroup
 
 control_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2451,17 +2458,13 @@ control_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-control-subgroup
-
 control_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Control",
       colnames(control_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table for type of control group (reintegration)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2478,6 +2481,9 @@ control_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r control-dependency-table-mental}
+#| tbl-cap: "Dependency table for type of control group (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-control-subgroup-mental
 
 control_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2485,17 +2491,13 @@ control_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-control-subgroup-mental
-
 control_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Control",
       colnames(control_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table for type of control group (mental health)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2544,6 +2546,9 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 
 ::: {.column width="95%"}
 ```{r rob-dependency-table-reint}
+#| tbl-cap: "Dependency table across overall risk of bias assessments (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-rob-subgroup
 
 rob_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2551,17 +2556,13 @@ rob_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-rob-subgroup
-
 rob_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Risk of bias judgment",
       colnames(rob_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table across overall risk of bias assessments (reintegration)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2577,6 +2578,9 @@ rob_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r rob-dependency-table-mental}
+#| tbl-cap: "Dependency table across overall risk of bias assessments (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-rob-subgroup-mental
 
 rob_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2584,17 +2588,13 @@ rob_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-rob-subgroup-mental
-
 rob_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Risk of bias judgment",
       colnames(rob_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table across overall risk of bias assessments (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2644,6 +2644,9 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 
 ::: {.column width="95%"}
 ```{r prereg-dependency-table-reint}
+#| tbl-cap: "Dependency table by type of registration (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-prereg-subgroup
 
 prereg_subgroup_dat_cross <- cat_dat_cross(
   data = reintergation_dat,
@@ -2651,17 +2654,13 @@ prereg_subgroup_dat_cross <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-prereg-subgroup
-
 prereg_subgroup_dat_cross |>
   knitr::kable(
     "html",
     col.names = c(
       "Registration",
       colnames(prereg_subgroup_dat_cross)[-1]
-    ),
-    caption = "Dependency table by type of registration (reintegration)"
+    )
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2677,6 +2676,9 @@ prereg_subgroup_dat_cross |>
 
 ::: {.column-margin}
 ```{r prereg-dependency-table-mental}
+#| tbl-cap: "Dependency table by type of registration (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-prereg-subgroup-mental
 
 prereg_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
@@ -2684,17 +2686,13 @@ prereg_subgroup_dat_cross_mental <- cat_dat_cross(
   study_id = study
 )
 
-#| tbl-cap-location: top
-#| label: tab-prereg-subgroup-mental
-
 prereg_subgroup_dat_cross_mental |>
   knitr::kable(
     "html",
     col.names = c(
       "Risk of bias judgment",
       colnames(prereg_subgroup_dat_cross_mental)[-1]
-    ),
-    caption = "Dependency table by type of registration (mental health)"
+    ) 
   ) |>
   kableExtra::column_spec(1, bold = TRUE) |>
   kableExtra::footnote(
@@ -2739,7 +2737,9 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 
 :::
 
+::: {.columns}
 
+::: {.column width="130%"}
 ```{r prereg-rob-ridge-mental}
 #| label: fig-prereg-rob-ridge-mental
 #| fig-cap: "Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health)."
@@ -2754,13 +2754,18 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
     strip.background = element_rect(color = "black", fill = "gray92")
   )
 ```
+:::
 
+:::
 ## Continuous moderators
 
 ::: {.columns}
 
 ::: {.column width="95%"}
 ```{r, continuous-mod-reint}
+#| tbl-cap: "Distribution of continuous moderators (reintegration)"
+#| tbl-cap-location: top
+#| label: tbl-continuous-characteristics-reint
 
 var_labels <- c(
   "Mean age" = "age",
@@ -2809,11 +2814,8 @@ continuous_descriptives_tab <-
     var = factor(var, levels = var_labels, labels = names(var_labels))
   )
 
-#| tbl-cap-location: top
-#| label: tab-continuous-characteristics-reint
 knitr::kable(
   continuous_descriptives_tab, 
-  caption = "Distribution of continuous moderators (reintegration)",
   col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
   digits = 1,
   booktabs = TRUE
@@ -2826,6 +2828,9 @@ knitr::kable(
 
 ::: {.column-margin}
 ```{r, continuous-mod-mental}
+#| tbl-cap: "Distribution of continuous moderators (mental health)"
+#| tbl-cap-location: top
+#| label: tbl-continuous-characteristics-mental
 
 var_labels_mental <- c(
   "Mean age" = "age",
@@ -2874,11 +2879,8 @@ continuous_descriptives_tab_mental <-
     var = factor(var, levels = var_labels_mental, labels = names(var_labels_mental))
   )
 
-#| tbl-cap-location: top
-#| label: tab-continuous-characteristics-mental
 knitr::kable(
   continuous_descriptives_tab_mental, 
-  caption = "Distribution of continuous moderators (mental health)",
   col.names = c("Variable", colnames(continuous_descriptives_tab)[-1]),
   digits = 1,
   booktabs = TRUE
@@ -3256,7 +3258,6 @@ mental_health_dat |>
   theme_minimal() + 
   theme(legend.position = "none") + 
   labs(x = "Follow-up duration (months)", y = "Hedges' g")
-
 ```
 :::
 
