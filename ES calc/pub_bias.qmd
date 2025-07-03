@@ -215,7 +215,7 @@ alpha_line <- 0.5
 
 .fp_plot(outcome_name = "Reintegrational")
 
-#dev.off()
+#png("Funnel plot overall.png", height = 4.5, width = 7, unit = "in", res = 600)
 ```
 
 ## Across outcome subgroups
