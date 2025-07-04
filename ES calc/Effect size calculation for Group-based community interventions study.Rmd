@@ -40,7 +40,7 @@ This document contains effect size calculation for the Campbell systematic revie
 
 ```{r}
 # To retrieved the function used to cluster bias correct effect sizes
-# devtools::install_github("MikkelVembye/VIVECampbell")
+#devtools::install_github("MikkelVembye/VIVECampbell")
 
 library(tidyverse)
 #library(dplyr)

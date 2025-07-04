@@ -72,11 +72,7 @@ reint_dat
 ```{r}
 reintergation_dat <- 
   reint_dat |> 
-  mutate(esid = 1:n()) |> 
-  select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
-    prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
-  )
+  mutate(esid = 1:n()) 
 ```
 
 
@@ -223,6 +219,12 @@ alpha_line <- 0.5
 ```{r, eval = FALSE}
 
 reintergation_dat |> 
+mutate(
+  report_bias = case_when(
+    str_detect(rob_tool, "2") & ~ D5,
+    .default = D7
+  )
+  ) |>  
 ggplot() + 
 geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = "grey", alpha = 0.5) + 
 geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = "grey10", alpha = 0.5) + 
