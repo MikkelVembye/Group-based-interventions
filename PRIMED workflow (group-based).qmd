@@ -60,6 +60,8 @@ library(MetBrewer)
 library(GGally)
 library(igraph)
 library(fastDummies)
+library(patchwork)
+library(ggh4x)
 ```
 
 # Data manipulation - prepare data sets
@@ -455,21 +457,38 @@ mental_overview_dat |>
 :::
 
 # Risk of bias
+```{r rob2-dat}
+rho <- 0.8
 
-```{r rob2}
-#| label: fig-rob2-reint
-#| fig-cap: "Risk of bias plot across type of registration"
-#| fig.width: 8
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
- 
-rob_sum <- 
+V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho) 
+
+rma_res <- 
+  metafor::rma.mv(
+    gt_pop, 
+    V = V_mat,
+    random = ~ 1 | study / esid,
+    data = reintergation_dat
+  )
+
+tau2 <- rma_res$sigma2[1]
+omega2<- rma_res$sigma2[2]
+
+reint_rob2_dat <- 
   reintergation_dat |> 
+  mutate(
+    kj = n(),
+    sigma2j = mean(vgt_pop),
+    weight = 1 / (kj*tau2 + omega2 + (kj-1)*rho*sigma2j + sigma2j),
+    .by = study
+  ) |> 
   filter(rob_tool == "RoB2") |> 
   select(
-    study, D1:D5, Overall
-  ) |> 
+    prereg = prereg_chr, study, D1:D5, Overall, weight
+  ) 
+
+
+rob_sum <-  
+  reint_rob2_dat |> 
   pivot_longer(D1:Overall, names_to = "Category", values_to = "Rating") |> 
   mutate(
     Category = factor(
@@ -489,37 +508,805 @@ rob_sum <-
     Rating = factor(Rating, levels = c("Low", "Some concerns", "High"))
     
   ) |> 
-  group_by(Category, Rating, study) |> 
+  group_by(prereg, Category, Rating, study) |> 
   summarize(
     effects = n(),
+    weight = sum(weight),
     .groups = "drop_last"
   ) |> 
   summarise(
     studies = length(unique(study)),
     effects = sum(effects),
+    weight = sum(weight),
     .groups = "drop_last"
   ) |> 
   mutate(
     effects_pct = 100 * effects / sum(effects),
     studies_pct = 100 * studies / sum(studies),
+    effects_pct_w = weight/sum(weight) * 100,
+    studies_w = studies * weight,
+    studies_pct_w = studies_w / sum(studies_w) * 100
   ) |> 
-  ungroup() |> 
-  mutate(
-    analysis = "Overall"
+  ungroup() 
+
+# Mental health
+V_mat_mental <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = mental_health_dat, rho = rho) 
+
+rma_res_mental <- 
+  metafor::rma.mv(
+    gt_pop, 
+    V = V_mat_mental,
+    random = ~ 1 | study / esid,
+    data = mental_health_dat
   )
 
-rob_sum |> 
-mutate(Rating = fct_rev(Rating)) |> 
-ggplot(aes(x = studies_pct, y = Category, fill = Rating)) + 
+tau2_mental <- rma_res_mental$sigma2[1]
+omega2_mental <- rma_res_mental$sigma2[2]
+
+mental_rob2_dat <- 
+  mental_health_dat |> 
+  mutate(
+    kj = n(),
+    sigma2j = mean(vgt_pop),
+    weight = 1 / (kj*tau2_mental + omega2_mental + (kj-1)*rho*sigma2j + sigma2j),
+    .by = study
+  ) |> 
+  filter(rob_tool == "RoB2") |> 
+  select(
+    prereg = prereg_chr, study, D1:D5, Overall, weight
+  ) 
+
+
+rob_sum_mental <-  
+  mental_rob2_dat |> 
+  pivot_longer(D1:Overall, names_to = "Category", values_to = "Rating") |> 
+  mutate(
+    Category = factor(
+      Category, levels = c(paste0("D", 1:5), "Overall"), 
+      labels = c(
+        "Bias arising from the randomization process",
+        "Bias due to deviations from intended interventions",
+        "Bias due to missing outcome data",
+        "Bias in measurement of the outcome",
+        "Bias in selection of the reported result",
+        "Overall risk of bias"
+        )
+      ),
+    
+    Rating = case_when(str_detect(Rating, "Some") ~ "Some concerns", .default = Rating),
+    
+    Rating = factor(Rating, levels = c("Low", "Some concerns", "High"))
+    
+  ) |> 
+  group_by(prereg, Category, Rating, study) |> 
+  summarize(
+    effects = n(),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  summarise(
+    studies = length(unique(study)),
+    effects = sum(effects),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  mutate(
+    effects_pct = 100 * effects / sum(effects),
+    studies_pct = 100 * studies / sum(studies),
+    effects_pct_w = weight/sum(weight) * 100,
+    studies_w = studies * weight,
+    studies_pct_w = studies_w / sum(studies_w) * 100
+  ) |> 
+  ungroup() 
+
+
+```
+
+::: {.column width="130%"}
+
+::: {.panel-tabset}
+## Reintegration
+
+::: {.panel-tabset}
+### Number of studies
+```{r rob2-fig-number-reint}
+#| label: fig-rob2-reint-raw-number
+#| fig-cap: "RoB plot for reintegration studies and outcomes across type of registration (raw numbers)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Study-level"
+    ) |> 
+  ggplot(aes(x = studies, y = Category, fill = Rating)) + 
   geom_col(alpha = 0.9) +
-  facet_wrap(~ analysis) + 
+  facet_grid(level ~ prereg, scales = "free_x") + 
   scale_fill_manual(
-    values = c("Low" = "green3", "Some concerns" = "yellow", "High" = "red")
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
   ) +
-  scale_y_discrete(limits = rev) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
   labs(
-    x = "Percentage of studies",
     y = "",
+    x = "Number of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" ~ scale_x_continuous(breaks = seq(0, 16, 2)
+      )
+    )
+  )
+
+rob_pct_effects <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Outcome-level"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Number of effects",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Preregistered" ~ scale_x_continuous(breaks = seq(0, 150, 25)
+      )
+    )
+  )
+
+
+rob_pct_studies / rob_pct_effects
+
+```
+
+
+### Weighted percentage
+```{r rob2-weighted}
+#| label: fig-rob2-reint-weigthed
+#| fig-cap: "RoB plot for reintegration studies and outcomes across type of registration (weighted percentage)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies_weight <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.x=element_blank()
+  ) 
+
+rob_pct_effects_weight <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Weighted percentage",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) 
+
+
+rob_pct_studies_weight / rob_pct_effects_weight
+
+```
+
+
+### Raw percentage
+```{r rob2-unweighted}
+#| label: fig-rob2-reint-unweigthed
+#| fig-cap: "RoB plot for reintegration studies and outcomes across type of registration (unweighted percentage)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies_unweight <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.x=element_blank()
+  ) 
+
+rob_pct_effects_unweight <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Percentage",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) 
+
+
+rob_pct_studies_unweight / rob_pct_effects_unweight
+
+```
+
+:::
+
+## Mental health
+::: {.panel-tabset}
+### Number of studies
+```{r rob2-fig-number-mental}
+#| label: fig-rob2-mental-raw-number
+#| fig-cap: "RoB plot for mental health studies and outcomes across type of registration (raw numbers)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies_mental <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Study-level"
+    ) |> 
+  ggplot(aes(x = studies, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Number of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" ~ scale_x_continuous(breaks = seq(0, 16, 2)
+      )
+    )
+  )
+
+rob_pct_effects_mental <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Outcome-level"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Number of effects",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) 
+
+
+rob_pct_studies_mental / rob_pct_effects_mental
+
+```
+
+
+### Weighted percentage
+```{r rob2-weighted-mental}
+#| label: fig-rob2-mental-weigthed
+#| fig-cap: "RoB plot for mental health studies and outcomes across type of registration (weighted percentage)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies_weight_mental <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.x=element_blank()
+  ) 
+
+rob_pct_effects_weight_mental <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Weighted percentage",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) 
+
+
+rob_pct_studies_weight_mental / rob_pct_effects_weight_mental
+
+```
+
+
+### Raw percentage
+```{r rob2-unweighted-mental}
+#| label: fig-rob2-mental-unweigthed
+#| fig-cap: "RoB plot for mental health studies and outcomes across type of registration (unweighted percentage)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+ 
+rob_pct_studies_unweight_mental <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    axis.title.x=element_blank()
+  ) 
+
+rob_pct_effects_unweight <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Percentage",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) 
+
+
+rob_pct_studies_unweight / rob_pct_effects_unweight
+
+
+
+```
+
+
+:::
+
+:::
+
+:::
+
+
+## Subgrouped risk of bias plots (reintegration)
+```{r rob2-dat-subgroup}
+
+reint_rob2_subgrp_dat <- 
+  reintergation_dat |> 
+  mutate(
+    kj = n(),
+    sigma2j = mean(vgt_pop),
+    weight = 1 / (kj*tau2 + omega2 + (kj-1)*rho*sigma2j + sigma2j),
+    .by = study
+  ) |> 
+  filter(rob_tool == "RoB2" & str_detect(analysis_plan, "Alco|Well|Hope|Social")) |> 
+  select(
+    outcome = analysis_plan, prereg = prereg_chr, study, D1:D5, Overall, weight
+  ) |> 
+  mutate(
+    outcome = case_match(
+      outcome,
+      "Alcohol and drug abuse/misuse" ~ "Alcohol/drugs",
+      "Hope, empowerment & self-efficacy" ~ "Hope/empower",
+      "Social functioning (degree of impairment)" ~ "Social function",
+      "Wellbeing and quality of life" ~ "Wellbeing/QoL"
+    )
+  )
+
+
+rob_sum_subgrp <-  
+  reint_rob2_subgrp_dat |> 
+  pivot_longer(D1:Overall, names_to = "Category", values_to = "Rating") |> 
+  mutate(
+    Category = factor(
+      Category, levels = c(paste0("D", 1:5), "Overall"), 
+      labels = c(
+        "Bias arising from the randomization process",
+        "Bias due to deviations from intended interventions",
+        "Bias due to missing outcome data",
+        "Bias in measurement of the outcome",
+        "Bias in selection of the reported result",
+        "Overall risk of bias"
+        )
+      ),
+    
+    Rating = case_when(str_detect(Rating, "Some") ~ "Some concerns", .default = Rating),
+    
+    Rating = factor(Rating, levels = c("Low", "Some concerns", "High"))
+    
+  ) |> 
+  group_by(prereg, outcome, Category, Rating, study) |> 
+  summarize(
+    effects = n(),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  summarise(
+    studies = length(unique(study)),
+    effects = sum(effects),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  mutate(
+    effects_pct = 100 * effects / sum(effects),
+    studies_pct = 100 * studies / sum(studies),
+    effects_pct_w = weight/sum(weight) * 100,
+    studies_w = studies * weight,
+    studies_pct_w = studies_w / sum(studies_w) * 100
+  ) |> 
+  ungroup() 
+```
+
+::: {.columns}
+
+::: {.column width="130%"}
+::: {.panel-tabset}
+### Study-level
+
+::: {.panel-tabset}
+### Number of studies
+```{r rob2-subgroup-n-studies}
+#| label: fig-rob2-reint-n-studies-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (number of studies)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+ 
+rob_studies_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_nested_wrap(outcome ~ prereg, scales = "free_x", ncol = 2) + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Number of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" & outcome == "Alcohol/drugs" ~ scale_x_continuous(breaks = seq(0, 2, 1)),
+      prereg == "Preregistered" & outcome == "Wellbeing/QoL" ~ scale_x_continuous(breaks = seq(0, 14, 2)),
+      prereg == "Preregistered" & outcome == "Social function" ~ scale_x_continuous(breaks = seq(0, 10, 2))
+    )
+  )
+
+rob_studies_subgrp
+
+```
+### Weighted percentage
+```{r rob2-subgroup-studies-weighted}
+#| label: fig-rob2-reint-weigthed-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+ 
+# Weigthed percent
+rob_weight_pct_studies_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Weighted percentage of studies",
     fill = "Risk of Bias"
   ) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
@@ -528,8 +1315,216 @@ ggplot(aes(x = studies_pct, y = Category, fill = Rating)) +
     legend.position = "bottom"
   ) 
 
+rob_weight_pct_studies_subgrp
+
 ```
 
+### Unweighted percentage
+```{r rob2-subgroup-studies-unweight}
+#| label: fig-rob2-reint-unweigthed-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+
+# unweigthed percent
+rob_unweight_pct_studies_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Percentage of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_unweight_pct_studies_subgrp
+```
+:::
+
+### Outcome-level
+::: {.panel-tabset}
+### Number of effects
+```{r rob2-subgroup-n-effects}
+#| label: fig-rob2-reint-n-effects-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (number of effects)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+ 
+rob_effects_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_nested_wrap(outcome ~ prereg, scales = "free_x", ncol = 2) + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Number of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" & outcome == "Hope/empower" ~ scale_x_continuous(breaks = seq(0, 12, 2)),
+      prereg == "Preregistered" & outcome == "Hope/empower" ~ scale_x_continuous(breaks = seq(0, 20, 5)),
+      prereg == "Not preregistered" & outcome == "Social function" ~ scale_x_continuous(breaks = seq(0, 10, 2)),
+      prereg == "Preregistered" & outcome == "Social function" ~ scale_x_continuous(breaks = seq(0, 40, 10)),
+      prereg == "Not preregistered" & outcome == "Wellbeing/QoL" ~ scale_x_continuous(breaks = seq(0, 10, 2))
+    )
+  )
+
+rob_effects_subgrp
+
+```
+### Weighted percentage
+```{r rob2-subgroup-effects-weighted}
+#| label: fig-rob2-reint-weigthed-effects-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+ 
+# Weigthed percent
+rob_weight_pct_effects_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Weighted percentage of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_weight_pct_effects_subgrp
+
+```
+
+### Unweighted percentage
+```{r rob2-subgroup-effects-unweight}
+#| label: fig-rob2-reint-unweigthed-effects-subgroup
+#| fig-cap: "RoB plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of effects)"
+#| fig.width: 12
+#| fig.height: 14
+#| fig.retina: 2
+#| message: false
+
+# unweigthed percent
+rob_unweight_pct_effects_subgrp <- 
+  rob_sum_subgrp |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = effects_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Percentage of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_unweight_pct_effects_subgrp
+```
+:::
+
+:::
+
+:::
+
+:::
 
 # Descriptives and Dependence Structures
 
