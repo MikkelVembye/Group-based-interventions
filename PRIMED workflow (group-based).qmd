@@ -390,6 +390,7 @@ reintergation_dat <-
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
 
+saveRDS(reintergation_dat, file = "reintergation_dat.rds")
 
 reint_overview <- 
   reintergation_dat |> 
@@ -428,6 +429,8 @@ A general overview of the main data, we use for analyses of mental health outcom
 mental_health_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
+
+#saveRDS(mental_health_dat, file = "mental_health_dat.rds")
 
 mental_overview_dat <- 
   mental_health_dat |> 

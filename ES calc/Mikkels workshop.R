@@ -33,6 +33,7 @@ reint_dat <-
 
 # Data
 reint_dat <- readRDS("ES calc/reintergation_dat.rds") 
+mental_health_dat <- readRDS("ES calc/mental_health_dat.rds") 
 
 ## Select relevant variables
 
@@ -42,7 +43,7 @@ reintergation_dat <-
   mutate(esid = 1:n()) |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
-    prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
+    prereg_chr, conventional, analysis_plan, rob_tool:Overall, timing
   )
  
 
@@ -180,7 +181,18 @@ breaks_y <- seq(-3, 3, 0.5)
 
 es_level_fp <- 
   reintergation_dat |> 
-  mutate(level = "Effect size level") |> 
+  mutate(
+    level = "Effect size level",
+    report_bias = case_when(
+      rob_tool == "RoB2" & D5 == "Low" ~ "Low",
+      rob_tool == "RoB2" & str_detect(D5, "Some") ~ "Moderate",
+      rob_tool == "RoB2" & str_detect(D5, "High") ~ "Serious",
+      .default = D7
+    ),
+    
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious"))
+    
+  ) |> 
   ggplot() + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
@@ -189,12 +201,14 @@ es_level_fp <-
   geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse, gt, col = analysis_plan), alpha = 1, size = 1.2) +
-  scale_color_brewer(type = "qual", palette = 2) + 
+  geom_point(aes(Wse, gt, color = report_bias), alpha = 1, size = 1.5) +
   coord_flip() +
   facet_grid(level~prereg_chr) +
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
+  scale_color_manual(
+    values = c("Low" = "green3", "Moderate" = "yellow", "Serious" = "red")
+  ) + 
   theme_bw() + 
   labs(x = "Standard error (modified)", 
        y = "Standardized mean difference (Hedges' g)", 
@@ -203,8 +217,8 @@ es_level_fp <-
     legend.position = "bottom",
     strip.text.x = element_blank()
   ) +
-  labs(color = "Outcome") +
-  guides(col = guide_legend(nrow = 2))
+  labs(color = "Risk of bias") +
+  guides(col = guide_legend(nrow = 1))
 
 # Make aggregate plot
 
@@ -311,7 +325,7 @@ study_level_fp <-
   geom_hline(data = subgroup_dat_agg, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat_agg, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat_agg, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse, gt), alpha = 1, size = 1.2) +
+  geom_point(aes(Wse, gt), alpha = 1, size = 1.5) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
   facet_grid(level~prereg_chr) +
