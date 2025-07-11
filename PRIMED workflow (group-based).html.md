@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-07-04"
+date: "2025-07-07"
 format:
   html: 
     keep-md: true
@@ -423,6 +423,7 @@ reintergation_dat <-
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
 
+saveRDS(reintergation_dat, file = "reintergation_dat.rds")
 
 reint_overview <- 
   reintergation_dat |> 
@@ -3123,6 +3124,8 @@ mental_health_dat <-
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
 
+#saveRDS(mental_health_dat, file = "mental_health_dat.rds")
+
 mental_overview_dat <- 
   mental_health_dat |> 
   select(
@@ -5779,7 +5782,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 :::
 
 
-### Subgrouped risk of bias plots (reintegration)
+### Subgrouped risk of bias plots 
 
 
 ::: {.cell}
@@ -5850,6 +5853,69 @@ rob_sum_subgrp <-
     studies_pct_w = studies_w / sum(studies_w) * 100
   ) |> 
   ungroup() 
+
+# Mental health
+mental_rob2_subgrp_dat <- 
+  mental_health_dat |> 
+  mutate(
+    kj = n(),
+    sigma2j = mean(vgt_pop),
+    weight = 1 / (kj*tau2 + omega2 + (kj-1)*rho*sigma2j + sigma2j),
+    .by = study
+  ) |> 
+  filter(rob_tool == "RoB2") |> 
+  select(
+    outcome = analysis_plan, prereg = prereg_chr, study, D1:D5, Overall, weight
+  ) |> 
+  mutate(
+    outcome = factor(
+      outcome, 
+      levels = c("Anxiety", "Depression", "General mental health", "Symptoms of psychosis")
+    )
+  )
+
+
+rob_sum_subgrp_mental <-  
+  mental_rob2_subgrp_dat |> 
+  pivot_longer(D1:Overall, names_to = "Category", values_to = "Rating") |> 
+  mutate(
+    Category = factor(
+      Category, levels = c(paste0("D", 1:5), "Overall"), 
+      labels = c(
+        "Bias arising from the randomization process",
+        "Bias due to deviations from intended interventions",
+        "Bias due to missing outcome data",
+        "Bias in measurement of the outcome",
+        "Bias in selection of the reported result",
+        "Overall risk of bias"
+        )
+      ),
+    
+    Rating = case_when(str_detect(Rating, "Some") ~ "Some concerns", .default = Rating),
+    
+    Rating = factor(Rating, levels = c("Low", "Some concerns", "High"))
+    
+  ) |> 
+  group_by(prereg, outcome, Category, Rating, study) |> 
+  summarize(
+    effects = n(),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  summarise(
+    studies = length(unique(study)),
+    effects = sum(effects),
+    weight = sum(weight),
+    .groups = "drop_last"
+  ) |> 
+  mutate(
+    effects_pct = 100 * effects / sum(effects),
+    studies_pct = 100 * studies / sum(studies),
+    effects_pct_w = weight/sum(weight) * 100,
+    studies_w = studies * weight,
+    studies_pct_w = studies_w / sum(studies_w) * 100
+  ) |> 
+  ungroup() 
 ```
 ````
 :::
@@ -5859,6 +5925,10 @@ rob_sum_subgrp <-
 ::: {.columns}
 
 ::: {.column width="130%"}
+
+::: {.panel-tabset}
+### Reintegration
+
 ::: {.panel-tabset}
 #### Study-level
 
@@ -5872,8 +5942,8 @@ rob_sum_subgrp <-
 ```{{r rob2-subgroup-n-studies}}
 #| label: fig-rob2-reint-n-studies-subgroup
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of studies)"
-#| fig.width: 12
-#| fig.height: 14
+#| fig.width: 9
+#| fig.height: 10
 #| fig.retina: 2
 #| message: false
 
@@ -5923,7 +5993,7 @@ rob_studies_subgrp
 ````
 
 ::: {.cell-output-display}
-![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-studies-subgroup-1.png){#fig-rob2-reint-n-studies-subgroup fig-pos='H' width=1152}
+![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-studies-subgroup-1.png){#fig-rob2-reint-n-studies-subgroup fig-pos='H' width=864}
 :::
 :::
 
@@ -5937,8 +6007,8 @@ rob_studies_subgrp
 ```{{r rob2-subgroup-studies-weighted}}
 #| label: fig-rob2-reint-weigthed-subgroup
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)"
-#| fig.width: 12
-#| fig.height: 14
+#| fig.width: 9
+#| fig.height: 6
 #| fig.retina: 2
 #| message: false
 
@@ -5982,7 +6052,7 @@ rob_weight_pct_studies_subgrp
 ````
 
 ::: {.cell-output-display}
-![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-subgroup-1.png){#fig-rob2-reint-weigthed-subgroup fig-pos='H' width=1152}
+![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-subgroup-1.png){#fig-rob2-reint-weigthed-subgroup fig-pos='H' width=864}
 :::
 :::
 
@@ -5997,8 +6067,8 @@ rob_weight_pct_studies_subgrp
 ```{{r rob2-subgroup-studies-unweight}}
 #| label: fig-rob2-reint-unweigthed-subgroup
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)"
-#| fig.width: 12
-#| fig.height: 14
+#| fig.width: 9
+#| fig.height: 6
 #| fig.retina: 2
 #| message: false
 
@@ -6042,7 +6112,7 @@ rob_unweight_pct_studies_subgrp
 ````
 
 ::: {.cell-output-display}
-![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-unweigthed-subgroup-1.png){#fig-rob2-reint-unweigthed-subgroup fig-pos='H' width=1152}
+![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-unweigthed-subgroup-1.png){#fig-rob2-reint-unweigthed-subgroup fig-pos='H' width=864}
 :::
 :::
 
@@ -6060,8 +6130,8 @@ rob_unweight_pct_studies_subgrp
 ```{{r rob2-subgroup-n-effects}}
 #| label: fig-rob2-reint-n-effects-subgroup
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of effects)"
-#| fig.width: 12
-#| fig.height: 14
+#| fig.width: 9
+#| fig.height: 10
 #| fig.retina: 2
 #| message: false
 
@@ -6113,7 +6183,7 @@ rob_effects_subgrp
 ````
 
 ::: {.cell-output-display}
-![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-effects-subgroup-1.png){#fig-rob2-reint-n-effects-subgroup fig-pos='H' width=1152}
+![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-effects-subgroup-1.png){#fig-rob2-reint-n-effects-subgroup fig-pos='H' width=864}
 :::
 :::
 
@@ -6127,8 +6197,8 @@ rob_effects_subgrp
 ```{{r rob2-subgroup-effects-weighted}}
 #| label: fig-rob2-reint-weigthed-effects-subgroup
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)"
-#| fig.width: 12
-#| fig.height: 14
+#| fig.width: 9
+#| fig.height: 6
 #| fig.retina: 2
 #| message: false
 
@@ -6172,7 +6242,7 @@ rob_weight_pct_effects_subgrp
 ````
 
 ::: {.cell-output-display}
-![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-effects-subgroup-1.png){#fig-rob2-reint-weigthed-effects-subgroup fig-pos='H' width=1152}
+![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-effects-subgroup-1.png){#fig-rob2-reint-weigthed-effects-subgroup fig-pos='H' width=864}
 :::
 :::
 
@@ -6236,6 +6306,392 @@ rob_unweight_pct_effects_subgrp
 :::
 :::
 
+
+:::
+
+:::
+
+### Mental health
+
+::: {.panel-tabset}
+#### Study-level
+
+::: {.panel-tabset}
+#### Number of studies
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-n-studies-mental}}
+#| label: fig-rob2-mental-n-studies-subgroup
+#| fig-cap: "RoB2 plot for mental studies and outcomes by type of registration and outcome (number of studies)"
+#| fig.width: 9
+#| fig.height: 10
+#| fig.retina: 2
+#| message: false
+
+rob_studies_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_nested_wrap(outcome ~ prereg, scales = "free_x", ncol = 2) + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Number of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" & outcome == "Anxiety" ~ scale_x_continuous(breaks = seq(0, 2, 1)),
+      prereg == "Preregistered" & outcome == "Depression" ~ scale_x_continuous(breaks = seq(0, 10, 2)),
+      prereg == "Not preregistered" & outcome == "General mental health" ~ scale_x_continuous(breaks = seq(0, 10, 2)),
+      prereg == "Preregistered" & outcome == "Symptoms of psychosis" ~ scale_x_continuous(breaks = seq(0, 2, 1))
+    )
+  )
+
+rob_studies_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental studies and outcomes by type of registration and outcome (number of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-n-studies-subgroup-1.png){#fig-rob2-mental-n-studies-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+#### Weighted percentage of studies
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-studies-weighted-mental}}
+#| label: fig-rob2-mental-weigthed-subgroup
+#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of studies)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+# Weigthed percent
+rob_weight_pct_studies_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Weighted percentage of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_weight_pct_studies_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-weigthed-subgroup-1.png){#fig-rob2-mental-weigthed-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+
+#### Unweighted percentage of studies
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-studies-unweight-mental}}
+#| label: fig-rob2-mental-unweigthed-subgroup
+#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of studies)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+# unweigthed percent
+rob_unweight_pct_studies_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = studies_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Percentage of studies",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_unweight_pct_studies_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-unweigthed-subgroup-1.png){#fig-rob2-mental-unweigthed-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+:::
+
+#### Outcome-level
+::: {.panel-tabset}
+#### Number of effects
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-n-effects-mental}}
+#| label: fig-rob2-mental-n-effects-subgroup
+#| fig-cap: "RoB2 plot for mental studies and outcomes by type of registration and outcome (number of effects)"
+#| fig.width: 9
+#| fig.height: 10
+#| fig.retina: 2
+#| message: false
+
+rob_effects_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_nested_wrap(outcome ~ prereg, scales = "free_x", ncol = 2) + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Number of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  )  + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Not preregistered" & outcome == "Anxiety" ~ scale_x_continuous(breaks = seq(0, 2, 1)),
+      prereg == "Preregistered" & outcome == "Anxiety" ~ scale_x_continuous(breaks = seq(0, 10, 2)),
+      prereg == "Not preregistered" & outcome == "Depression" ~ scale_x_continuous(breaks = seq(0, 10, 2)),
+      prereg == "Not preregistered" & outcome == "Symptoms of psychosis" ~ scale_x_continuous(breaks = seq(0, 10, 2))
+    )
+  )
+
+rob_effects_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental studies and outcomes by type of registration and outcome (number of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-n-effects-subgroup-1.png){#fig-rob2-mental-n-effects-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+#### Weighted percentage of effects
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-effects-weighted-mental}}
+#| label: fig-rob2-mental-weigthed-effects-subgroup
+#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of effects)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+# Weigthed percent
+rob_weight_pct_effects_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Effects"
+    ) |> 
+  ggplot(aes(x = effects_pct_w, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Weighted percentage of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_weight_pct_effects_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-weigthed-effects-subgroup-1.png){#fig-rob2-mental-weigthed-effects-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+
+#### Unweighted percentage of effects
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r rob2-subgroup-effects-unweight-mental}}
+#| label: fig-rob2-mental-unweigthed-effects-subgroup
+#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of effects)"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+# unweigthed percent
+rob_unweight_pct_effects_subgrp_mental <- 
+  rob_sum_subgrp_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Studies"
+    ) |> 
+  ggplot(aes(x = effects_pct, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid2(outcome ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Percentage of effects",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom"
+  ) 
+
+rob_unweight_pct_effects_subgrp_mental
+```
+````
+
+::: {.cell-output-display}
+![RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-unweigthed-effects-subgroup-1.png){#fig-rob2-mental-unweigthed-effects-subgroup fig-pos='H' width=864}
+:::
+:::
+
+
+:::
 
 :::
 
@@ -9895,7 +10351,7 @@ egm_dat_reint |>
 ```{{r egm-mental}}
 #| label: fig-egm-mental
 #| fig-cap: "EGM for mental health outcomes"
-#| fig.width: 12
+#| fig.width: 18
 #| fig.height: 18
 #| fig.retina: 2
 #| message: false
@@ -9993,7 +10449,7 @@ egm_dat_mental |>
 ````
 
 ::: {.cell-output-display}
-![EGM for mental health outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-egm-mental-1.png){#fig-egm-mental fig-pos='H' width=1152}
+![EGM for mental health outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-egm-mental-1.png){#fig-egm-mental fig-pos='H' width=1728}
 :::
 :::
 
@@ -17672,7 +18128,7 @@ kbl(
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-07-04
+ date     2025-07-07
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 

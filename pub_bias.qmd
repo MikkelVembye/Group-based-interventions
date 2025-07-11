@@ -1,0 +1,301 @@
+---
+title: "Publication bias testing in Dalgaard et al. (2025)"
+date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
+format:
+  html:
+    code-fold: true
+    code-tools: true
+    code-summary: "Show the code"
+    toc: true
+execute: 
+  echo: fenced
+  warning: false
+  message: false
+knitr:
+  opts_chunk: 
+    fig.pos: "H"
+    fig.retina: 2
+    cache: FALSE
+    R.options:
+      knitr.graphics.auto_pdf: true
+      width: 100
+      knitr.kable.NA: "-"
+      dplyr.summarise.inform: FALSE
+      scipen: 10
+      pillar.sigfig: 4 
+---
+
+# Used package
+
+```{r packages}
+#| code-fold: false
+
+library(tidyverse)
+library(robvis)
+library(purrr)
+library(metafor)
+library(patchwork)
+library(clubSandwich)
+library(wildmeta)
+library(gt)
+library(metaselection)
+library(DT)
+library(kableExtra)
+library(ggh4x)
+
+library(puniform)
+library(tidyverse) # for tidying
+library(janitor)   # for tidying variable names
+library(boot)      # for bootstrapping
+library(tictoc) 
+
+# Loading in helper function used to calculate effect size and conduct the analysis
+source("Helpers.R")
+source("pub-bias-test-helpers.R")
+```
+
+# Data
+```{r load-data}
+#| code-fold: false
+
+reintergation_dat <- 
+  readRDS("reintergation_dat.rds") |> 
+  mutate(
+    esid = 1:n(),
+    outcome = case_when(
+      str_detect(analysis_plan, "Alco|Hope|Social|Well", negate = TRUE) ~ "Other",
+    .default = analysis_plan
+    ),
+    se_gt_pop = sqrt(vgt_pop), 
+    Wse_pop = sqrt(Wgt_pop) # Change to Wgt_pop when created
+  )
+
+#Secondary analysis
+mental_health_dat <- 
+  readRDS("mental_health_dat.rds") |> 
+  mutate(
+    esid = 1:n(),
+    se_gt_pop = sqrt(vgt_pop), 
+    Wse_pop = sqrt(Wgt_pop)
+    )
+```
+
+
+# Funnel plots
+```{r, main-res}
+rho <- 0.8
+
+V_mat <- vcalc(vgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+
+overall_res <- 
+  rma.mv(
+    gt_pop ~ + 1,
+    V = V_mat, 
+    random = ~ 1 | study / esid,
+    data = reintergation_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+overall_res
+
+sub_res <- 
+  rma.mv(
+    gt_pop ~ -1 + outcome,
+    V = V_mat, 
+    random = list(~ outcome | study, ~ outcome | esid),
+    struct = c("DIAG", "DIAG"),
+    data = reintergation_dat,
+    sparse = TRUE
+  )
+
+sub_res
+
+# Mental health
+V_mat_mental <- vcalc(vgt_pop, cluster = study, obs = esid, data = mental_health_dat, rho = rho)
+
+overall_res_mental <- 
+  rma.mv(
+    gt_pop ~ + 1,
+    V = V_mat_mental, 
+    random = ~ 1 | study / esid,
+    data = mental_health_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+overall_res_mental
+
+sub_res_mental <- 
+  rma.mv(
+    gt_pop ~ -1 + analysis_plan,
+    V = V_mat_mental, 
+    random = list(~ analysis_plan | study, ~ analysis_plan | esid),
+    struct = c("DIAG", "DIAG"),
+    data = mental_health_dat,
+    sparse = TRUE
+  )
+
+sub_res_mental
+
+
+```
+## Overall 
+
+::: {.panel-tabset}
+## Reintegration
+
+```{r reint-overall-fp}
+#| label: fig-reint-overall-fp
+#| fig-cap: "Funnel plot across all reintegrational outcomes"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+alpha_line = 0.5
+polygon_fill = c("grey", "grey10", "lightcyan")
+mean_line = "dashed"
+reg_test = TRUE
+reg_line = "longdash"
+reg_color = "blue"
+
+overall_mean <- as.numeric(overall_res$b)
+      
+y_lim_exp1 <- max(reintergation_dat$se_gt_pop) + 0.02 
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+# Egg CHE-ISCW-RVE ------------
+V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+
+W_ISCW <- solve(V_mat_ISCW)
+
+egg_ISCW <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_ISCW,
+    W = W_ISCW,
+    mods = ~ Wse_pop,
+    random = ~ 1 | study / esid,
+    data = reintergation_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+#----------------------------------
+
+
+reintergation_dat |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(yintercept = overall_mean, linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(slope = as.numeric(egg_ISCW$b[2]), intercept = as.numeric(egg_ISCW$b[1]), linetype = reg_line, color = reg_color) +
+  # Add prereg and rob to plot 
+  geom_point(aes(se_gt_pop, gt_pop), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid2(~ outcome_construct) +
+  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+  #scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "bottom")
+
+
+
+```
+
+
+## Mental health
+```{r reint-overall-fp-mental}
+#| label: fig-reint-overall-fp-mental
+#| fig-cap: "Funnel plot across all mental health outcomes"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+overall_mean_mental<- as.numeric(overall_res_mental$b)
+      
+y_lim_exp1 <- max(mental_health_dat$se_gt_pop) + 0.02 
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+# Egg CHE-ISCW-RVE ------------
+V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+
+W_ISCW <- solve(V_mat_ISCW)
+
+egg_ISCW <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_ISCW,
+    W = W_ISCW,
+    mods = ~ Wse_pop,
+    random = ~ 1 | study / esid,
+    data = reintergation_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+#----------------------------------
+
+
+reintergation_dat |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(yintercept = overall_mean, linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(slope = as.numeric(egg_ISCW$b[2]), intercept = as.numeric(egg_ISCW$b[1]), linetype = reg_line, color = reg_color) +
+  # Add prereg and rob to plot 
+  geom_point(aes(se_gt_pop, gt_pop), alpha = 1, size = 1.2) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid2(~ outcome_construct) +
+  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+  #scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Standard error (adjusted)", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(legend.position = "bottom")
+
+
+
+```
+
+:::
+ 
+# References
+Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
+
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
+
+## Session Information
+
+```{r}
+#| code-fold: false
+sessioninfo::session_info()
+```
+
+:::

@@ -1,0 +1,447 @@
+---
+title: "CWB issue"
+format: 
+  html:
+    toc: true
+    toc-location: left
+editor: visual
+execute: 
+  echo: fenced
+  warning: false
+knitr:
+  opts_chunk: 
+    fig.pos: "H"
+    fig.retina: 2
+    cache: FALSE
+    R.options:
+      knitr.graphics.auto_pdf: true
+      width: 100
+      knitr.kable.NA: "-"
+      dplyr.summarise.inform: FALSE
+      scipen: 10
+      pillar.sigfig: 4 
+---
+
+# Intro to problem and data
+
+## Loading R packages and data
+
+```{r r-pack-plus-data}
+library(rlang)
+library(tidyverse)
+library(metafor)
+library(clubSandwich)
+library(wildmeta)
+library(future)
+library(knitr)
+library(kableExtra)
+
+# This data contains outcome pertaining to mental health measures, such as anxiety, depression, symptoms of psychosis, and general mental health (typically containing a combination of anxiety and depression measures). 
+mental_health_dat <- 
+  readRDS("mental_health_dat.rds") |> 
+  mutate(esid = 1:n()) |> 
+  select(
+    study, esid, N_t, N_c, gt_pop, vgt_pop,
+    outcome = analysis_plan, prereg_chr
+  )
+
+# Used to construct rma_object$call
+attr(mental_health_dat, "data_name") <- "mental_health_dat"
+
+mental_health_dat |> 
+  kable(digits=3)  |> 
+  kable_styling(
+    bootstrap_options = c("striped", "hover"),
+    font_size = 10
+  ) |> 
+  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
+```
+
+
+# Fitting models and estimation 
+
+## Used functions
+```{r che-from-function}
+
+arg_tbl <- 
+  function(
+    yi, vi, covars, r, model, data
+  ){
+    
+    covariates <- if (str_detect(covars, ";")) str_split_1(covars, pattern = ";") else covars 
+    
+    formula <- reformulate(covariates, response = yi, intercept = FALSE)
+    
+    if (str_detect(model, "SCE")) {
+      
+      main_pred <- labels(terms(formula))[1]
+      
+      outer_form <- 
+        substitute(
+          ~ moderator | study, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      inner_form <- 
+        substitute(
+          ~ moderator | esid, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      random <-  if (model == "SCEp") list(outer_form, inner_form) else list(outer_form)
+      struct <- rep("DIAG", length(random))
+      
+      res <- 
+        tibble(
+          formula = list(formula),
+          var = vi,
+          rand = list(random),
+          structure = list(struct),
+          rho = r,
+          data = list(data)
+        )
+      
+    } else if (model == "CHE") {
+      
+      res <- 
+        tibble(
+          formula = list(formula),
+          var = vi,
+          rand = list(~ 1 | study / esid),
+          rho = r,
+          data = list(data)
+        )
+      
+    }
+    
+    res
+    
+}
+
+
+
+rma_fun <- function(formula, var, rand, structure, rho, data){
+  
+  suppressPackageStartupMessages(require(metafor))
+  
+  data$vi <- data[[var]]
+  
+  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+
+  res <- rma.mv(
+    formula,
+    V = V_mat, 
+    rand = rand,
+    struct = structure,
+    data = data,
+    sparse=TRUE
+  )
+ 
+  res
+  
+}
+
+
+```
+
+## CHE results
+::: {.panel-tabset}
+## Out of function
+```{r}
+V_mat <- 
+  vcalc(
+    vi = vgt_pop, 
+    cluster = study, 
+    obs = esid, 
+    data = mental_health_dat, 
+    rho = 0.8
+  )
+
+rma_obj <- 
+  rma.mv(
+    yi = gt_pop ~ prereg_chr - 1,
+    V = V_mat, 
+    rand = list(~ prereg_chr | study, ~ prereg_chr | esid),
+    struct = c("DIAG", "DIAG"),
+    data = mental_health_dat,
+    sparse=TRUE
+  )
+
+rma_obj
+```
+
+## In function
+
+```{r}
+
+rma_args <- arg_tbl(
+  yi = "gt_pop", 
+  vi = "vgt_pop", 
+  covars = "prereg_chr", 
+  model = "SCEp", 
+  r = 0.8,
+  data = mental_health_dat
+)
+
+list_che_res_obj <- pmap(.l = rma_args, .f = rma_fun)
+list_che_res_obj[[1]] 
+```
+
+:::
+
+
+## CHE-RVE results
+::: {.panel-tabset}
+## Out of function
+```{r che-rve-out-of-function}
+rma_obj |> robust(cluster = study, clubSandwich = TRUE)
+```
+
+## In function
+
+```{r}
+list_che_res_obj |> 
+map(\(x) robust(x, cluster = study, clubSandwich = TRUE))
+```
+
+:::
+
+## HTZ results
+::: {.panel-tabset}
+## Out of function
+```{r htz-out-of-function}
+
+clubSandwich::Wald_test(
+  rma_obj,
+  constraints = constrain_equal(1:2),
+  vcov = "CR2"
+)
+
+```
+
+## In function
+```{r}
+list_che_res_obj |> 
+map(\(x) Wald_test(x, constraints = constrain_equal(1:2), vcov = "CR2"))
+```
+
+:::
+
+
+## CWT result
+::: {.panel-tabset}
+## Out of function
+```{r cwt-out-of-function}
+#| eval: true
+plan(multisession)
+
+cbt_obj <- 
+  Wald_test_cwb(
+    full_model = rma_obj,
+    constraints = constrain_equal(1:2),
+    R = 19,
+    seed = 080725
+  ) |> 
+  # Supresses the metafor package message when running in parallel 
+  suppressPackageStartupMessages() 
+
+plan(sequential) 
+
+cbt_obj
+```
+
+## In function (error message)
+```{r}
+#| eval: false
+list_che_res_obj |> 
+  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 19, seed = 080725))
+```
+
+```{r}
+#| echo: false
+x <- try(
+  list_che_res_obj |> 
+  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 19, seed = 080725)),
+  silent = TRUE
+)
+
+print(x)
+```
+:::
+
+# Solution trial
+To understand the error I started looking into the difference between the list obj and the out-of-function object. 
+```{r}
+all.equal(rma_obj, list_che_res_obj[[1]])
+```
+
+
+## Object calls
+```{r}
+rma_obj$call
+list_che_res_obj[[1]]$call
+```
+
+## Reworking the functions
+So I first made a function where I tried to re-construct the call as it looks in the out-of-function. 
+```{r}
+rma_fun <- function(formula, var, rand, structure, rho, data){
+  
+  suppressPackageStartupMessages(require(metafor))
+  
+  data$vi <- data[[var]]
+  data_name <- attr(data, "data_name")
+  
+  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+
+  res <- rma.mv(
+    formula,
+    V = V_mat, 
+    rand = rand,
+    struct = structure,
+    data = data,
+    sparse=TRUE
+  )
+ 
+  res$call <- call2(
+    "rma.mv", 
+    yi = formula, 
+    V = as.name("V_mat"), 
+    data = as.name(data_name), 
+    random = rand, 
+    struct = structure, 
+    sparse = TRUE, 
+    .ns = "metafor"
+  )
+  
+  res
+  
+}
+
+rma_args <- arg_tbl(
+  yi = "gt_pop", 
+  vi = "vgt_pop", 
+  covars = "prereg_chr", 
+  model = "SCEp", 
+  r = 0.8,
+  data = mental_health_dat
+)
+
+rma_obj_list <- pmap(.l = rma_args, .f = rma_fun)
+```
+
+Now the calls looking somewhat similar
+```{r}
+rma_obj$call
+rma_obj_list[[1]]$call
+
+```
+
+Then I tweaked the `V_mat` to be assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that is where `Wald_test_cwb()` retrieves it from. 
+
+```{r}
+#| eval: true
+# Quick and dirty function
+Wald_test_cwb_fun <- 
+  function(rma_fun_obj, R = 19, seed = 080725){
+    
+    V_mat <- rma_fun_obj$V
+    assign("V_mat", V_mat, envir = .GlobalEnv)
+    
+    cwb_res <- 
+      Wald_test_cwb(
+        full_model = rma_fun_obj,
+        constraints = constrain_equal(1:2),
+        R = R,
+        seed = seed
+      )
+    
+    rm(V_mat, envir = .GlobalEnv)
+    
+    return(cwb_res)
+    
+}
+
+plan(multisession)
+in_fun_res <- map(.x = rma_obj_list, .f = Wald_test_cwb_fun)
+plan(sequential)
+
+in_fun_res[[1]]
+```
+
+# Difference between in and out of function results
+So now it works, but the results are quite different, though they should be the same as I use the same seeds across the specifications. 
+```{r}
+#| eval: true
+c(`In-function CWB p value` = in_fun_res[[1]]$p_val, `Out-of-function p value` = cbt_obj$p_val)
+```
+
+# Another solution given the same result
+## Running everything through one function
+```{r}
+#| eval: true
+rma_fun <- function(formula, var, rand, structure, rho, data){
+  
+  suppressPackageStartupMessages(require(metafor))
+  
+  data$vi <- data[[var]]
+  data_name <- attr(data, "data_name")
+  
+  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+  assign("V_mat", V_mat, envir = .GlobalEnv)
+  
+  res <- rma.mv(
+    formula,
+    V = V_mat, 
+    rand = rand,
+    struct = structure,
+    data = data,
+    sparse=TRUE
+  )
+ 
+  
+  res$call <- as.call(call2(
+    "rma.mv", 
+    yi = formula, 
+    V = as.name("V_mat"), 
+    data = as.name(data_name), 
+    random = rand, 
+    struct = structure, 
+    sparse = TRUE, 
+    .ns = "metafor"
+  ))
+
+  cwb_res <- 
+    Wald_test_cwb(
+      full_model = res,
+      constraints = constrain_equal(1:2),
+      R = 19,
+      seed = 080725
+    )
+  
+  rm(V_mat, envir = .GlobalEnv)
+  
+  return(cwb_res)
+  
+}
+
+plan(multisession)
+pmap(.l = rma_args, .f = rma_fun)
+plan(sequential)
+```
+
+
+
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false}
+
+```{r}
+#| echo: false
+ses_info <- sessioninfo::session_info()
+ses_info$packages$library <- NULL
+
+ses_info
+```
+
+:::
