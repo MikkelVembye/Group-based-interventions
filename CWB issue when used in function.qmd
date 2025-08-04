@@ -24,7 +24,11 @@ knitr:
 
 # Intro to problem and data
 
+In our review, we are conducting a range of subgroup analyses, and we therefore want to use a large computer server to ease the computation of all the cluster wild bootstrap *p* values. To do so, our idea is to make a list of `rma.mv` object with all the main subgroup analysis that we can map onto `Wald_test_cwb()`. However, I struggle quite a bit to make this procedure work for several reasons. Below, I have tried to illustrate the issue(s), we experience. Hereto, I have use tabsets "out-of-function" and "in-function" to distinguish between results we get from using `Wald_test_cwb()` as usual vs. wrapping it in a function. In order for you to reproduce my example, I have enclosed our dataset in the email. 
+
 ## Loading R packages and data
+
+Short describtion of data
 
 ```{r r-pack-plus-data}
 library(rlang)
@@ -57,10 +61,10 @@ mental_health_dat |>
   scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
 ```
 
-
-# Fitting models and estimation 
+# Fitting models and estimation
 
 ## Used functions
+
 ```{r che-from-function}
 
 arg_tbl <- 
@@ -120,6 +124,17 @@ arg_tbl <-
     
 }
 
+#x_tbl <- tibble(
+#  yi = c("gt_pop", "gt"),
+#  vi = c("vgt_pop", "vgt"),
+#  covars = "prereg_chr",
+#  model = "SCEp", 
+#  r = 0.8
+#)
+#
+#pmap(.l = x_tbl, .f = arg_tbl, data = mental_health_dat) |> 
+#  list_rbind()
+
 
 
 rma_fun <- function(formula, var, rand, structure, rho, data){
@@ -147,8 +162,10 @@ rma_fun <- function(formula, var, rand, structure, rho, data){
 ```
 
 ## CHE results
-::: {.panel-tabset}
+
+::: panel-tabset
 ## Out of function
+
 ```{r}
 V_mat <- 
   vcalc(
@@ -185,16 +202,17 @@ rma_args <- arg_tbl(
   data = mental_health_dat
 )
 
+
 list_che_res_obj <- pmap(.l = rma_args, .f = rma_fun)
 list_che_res_obj[[1]] 
 ```
-
 :::
 
-
 ## CHE-RVE results
-::: {.panel-tabset}
+
+::: panel-tabset
 ## Out of function
+
 ```{r che-rve-out-of-function}
 rma_obj |> robust(cluster = study, clubSandwich = TRUE)
 ```
@@ -205,12 +223,13 @@ rma_obj |> robust(cluster = study, clubSandwich = TRUE)
 list_che_res_obj |> 
 map(\(x) robust(x, cluster = study, clubSandwich = TRUE))
 ```
-
 :::
 
 ## HTZ results
-::: {.panel-tabset}
+
+::: panel-tabset
 ## Out of function
+
 ```{r htz-out-of-function}
 
 clubSandwich::Wald_test(
@@ -222,17 +241,18 @@ clubSandwich::Wald_test(
 ```
 
 ## In function
+
 ```{r}
 list_che_res_obj |> 
 map(\(x) Wald_test(x, constraints = constrain_equal(1:2), vcov = "CR2"))
 ```
-
 :::
 
-
 ## CWT result
-::: {.panel-tabset}
+
+::: panel-tabset
 ## Out of function
+
 ```{r cwt-out-of-function}
 #| eval: true
 plan(multisession)
@@ -253,6 +273,7 @@ cbt_obj
 ```
 
 ## In function (error message)
+
 ```{r}
 #| eval: false
 list_che_res_obj |> 
@@ -272,20 +293,24 @@ print(x)
 :::
 
 # Solution trial
-To understand the error I started looking into the difference between the list obj and the out-of-function object. 
+
+To understand the error I started looking into the difference between the list obj and the out-of-function object.
+
 ```{r}
 all.equal(rma_obj, list_che_res_obj[[1]])
 ```
 
-
 ## Object calls
+
 ```{r}
 rma_obj$call
 list_che_res_obj[[1]]$call
 ```
 
 ## Reworking the functions
-So I first made a function where I tried to re-construct the call as it looks in the out-of-function. 
+
+So I first made a function where I tried to re-construct the call as it looks in the out-of-function.
+
 ```{r}
 rma_fun <- function(formula, var, rand, structure, rho, data){
   
@@ -333,13 +358,14 @@ rma_obj_list <- pmap(.l = rma_args, .f = rma_fun)
 ```
 
 Now the calls looking somewhat similar
+
 ```{r}
 rma_obj$call
 rma_obj_list[[1]]$call
 
 ```
 
-Then I tweaked the `V_mat` to be assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that is where `Wald_test_cwb()` retrieves it from. 
+Then I tweaked the `V_mat` to be assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that is where `Wald_test_cwb()` retrieves it from.
 
 ```{r}
 #| eval: true
@@ -372,14 +398,18 @@ in_fun_res[[1]]
 ```
 
 # Difference between in and out of function results
-So now it works, but the results are quite different, though they should be the same as I use the same seeds across the specifications. 
+
+So now it works, but the results are quite different, though they should be the same as I use the same seeds across the specifications.
+
 ```{r}
 #| eval: true
 c(`In-function CWB p value` = in_fun_res[[1]]$p_val, `Out-of-function p value` = cbt_obj$p_val)
 ```
 
 # Another solution given the same result
+
 ## Running everything through one function
+
 ```{r}
 #| eval: true
 rma_fun <- function(formula, var, rand, structure, rho, data){
@@ -432,10 +462,7 @@ pmap(.l = rma_args, .f = rma_fun)
 plan(sequential)
 ```
 
-
-
-::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false}
-
+::: {.callout-note icon="false" appearance="simple" title="Session Information" collapse="false"}
 ```{r}
 #| echo: false
 ses_info <- sessioninfo::session_info()
@@ -443,5 +470,4 @@ ses_info$packages$library <- NULL
 
 ses_info
 ```
-
 :::
