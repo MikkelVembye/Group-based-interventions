@@ -22,13 +22,13 @@ knitr:
       pillar.sigfig: 4 
 ---
 
-# Intro to problem and data
+# Intro to the problem
 
-In our review, we are conducting a range of subgroup analyses, and we therefore want to use a large computer server to ease the computation of all the cluster wild bootstrap *p* values. To do so, our idea is to make a list of `rma.mv` object with all the main subgroup analysis that we can map onto `Wald_test_cwb()`. However, I struggle quite a bit to make this procedure work for several reasons. Below, I have tried to illustrate the issue(s), we experience. Hereto, I have use tabsets "out-of-function" and "in-function" to distinguish between results we get from using `Wald_test_cwb()` as usual vs. wrapping it in a function. In order for you to reproduce my example, I have enclosed our dataset in the email. 
+In our review, we are conducting a range of subgroup and sensitivity analyses, and we therefore want to use a large computer server to ease the computation of all the cluster wild bootstrap *p*-values. To do so, our idea is to make a list of `rma.mv` objects with all the main subgroup analyses that we can map onto `Wald_test_cwb()`. However, I struggle quite a bit to make this procedure work for several reasons. Below, I have tried to illustrate the issue(s) we experience. Hereto, I have used the tabsets "out-of-function" and "in-function" to distinguish between the results we get when using `rma.mv()` as usual vs. wrapping it in a function. Also, we use the tabsets "Out-of-list" and "From-list" to indicate how the main results are added to the `robust()`, `clubSandwich::Wald_test`, and `Wald_test_cwb().` In order for you to reproduce my example, I have enclosed the dataset in the email.
 
-## Loading R packages and data
+## R packages and data
 
-Short describtion of data
+Just to give a short description of the data used in the example below, the data is a subset of our total dataset which contains SMD effect sizes pertaining to mental health measures, such as anxiety, depression, symptoms of psychosis, and general mental health (typically containing a combination of anxiety and depression measures). In the data, we denote the variables of the main effect size estimate and the corresponding variance as `gt_pop` and `vgt_pop`, respectively. The `gt` and `vgt` notation indicate that the effect size has between standardized by the total variation comprising both between and within group variation whereas the `_pop` notation indicates that this variable contains effect size estimates that has been standardized by a population-based standard deviation as described by Fitzgerald & Tipton (2025). If you need, you can find other types of SMDs in the dataset such `gt`, `vgt`, `g`, `vg`, and `d`, `vd`. For the latter two sets of variables, the effect size and variance estimate ignore clustering issues. In the following example, we want to compute the CWB *p*-value from a contrast hypothesis test between preregistered vs. not preregistered studies from a SCE+ model. This variable is denoted as `prereg_chr`. You can find a brief overview of the data below.
 
 ```{r r-pack-plus-data}
 library(rlang)
@@ -40,7 +40,7 @@ library(future)
 library(knitr)
 library(kableExtra)
 
-# This data contains outcome pertaining to mental health measures, such as anxiety, depression, symptoms of psychosis, and general mental health (typically containing a combination of anxiety and depression measures). 
+
 mental_health_dat <- 
   readRDS("mental_health_dat.rds") |> 
   mutate(esid = 1:n()) |> 
@@ -49,7 +49,7 @@ mental_health_dat <-
     outcome = analysis_plan, prereg_chr
   )
 
-# Used to construct rma_object$call
+# Later used to re-construct rma_object$call
 attr(mental_health_dat, "data_name") <- "mental_health_dat"
 
 mental_health_dat |> 
@@ -58,14 +58,46 @@ mental_health_dat |>
     bootstrap_options = c("striped", "hover"),
     font_size = 10
   ) |> 
-  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
+  scroll_box(width = "100%", height = "500px", fixed_thead = TRUE)
 ```
 
 # Fitting models and estimation
 
-## Used functions
+To automate most of our analyses, I first built a function (beta version below) that yields a tibble where each row contains different model and data specifications to be map onto `rma.mv()`. The following example represents the simplest case where the function yields one row only. This is intended for illustration purposes only.
 
-```{r che-from-function}
+## CHE results
+
+As you can see below, we get the exact same result independently of whether we fit the SCE+ model as usual or through our functions.
+
+::: panel-tabset
+## Out-of-function
+
+```{r}
+V_mat <- 
+  vcalc(
+    vi = vgt_pop, 
+    cluster = study, 
+    obs = esid, 
+    data = mental_health_dat, 
+    rho = 0.8
+  )
+
+rma_obj <- 
+  rma.mv(
+    yi = gt_pop ~ prereg_chr - 1,
+    V = V_mat, 
+    random = list(~ prereg_chr | study, ~ prereg_chr | esid),
+    struct = c("DIAG", "DIAG"),
+    data = mental_health_dat,
+    sparse=TRUE
+  )
+
+rma_obj
+```
+
+## In-function
+
+```{r}
 
 arg_tbl <- 
   function(
@@ -95,6 +127,7 @@ arg_tbl <-
         as.formula()
       
       random <-  if (model == "SCEp") list(outer_form, inner_form) else list(outer_form)
+      
       struct <- rep("DIAG", length(random))
       
       res <- 
@@ -124,19 +157,6 @@ arg_tbl <-
     
 }
 
-#x_tbl <- tibble(
-#  yi = c("gt_pop", "gt"),
-#  vi = c("vgt_pop", "vgt"),
-#  covars = "prereg_chr",
-#  model = "SCEp", 
-#  r = 0.8
-#)
-#
-#pmap(.l = x_tbl, .f = arg_tbl, data = mental_health_dat) |> 
-#  list_rbind()
-
-
-
 rma_fun <- function(formula, var, rand, structure, rho, data){
   
   suppressPackageStartupMessages(require(metafor))
@@ -148,7 +168,7 @@ rma_fun <- function(formula, var, rand, structure, rho, data){
   res <- rma.mv(
     formula,
     V = V_mat, 
-    rand = rand,
+    random = rand,
     struct = structure,
     data = data,
     sparse=TRUE
@@ -158,40 +178,6 @@ rma_fun <- function(formula, var, rand, structure, rho, data){
   
 }
 
-
-```
-
-## CHE results
-
-::: panel-tabset
-## Out of function
-
-```{r}
-V_mat <- 
-  vcalc(
-    vi = vgt_pop, 
-    cluster = study, 
-    obs = esid, 
-    data = mental_health_dat, 
-    rho = 0.8
-  )
-
-rma_obj <- 
-  rma.mv(
-    yi = gt_pop ~ prereg_chr - 1,
-    V = V_mat, 
-    rand = list(~ prereg_chr | study, ~ prereg_chr | esid),
-    struct = c("DIAG", "DIAG"),
-    data = mental_health_dat,
-    sparse=TRUE
-  )
-
-rma_obj
-```
-
-## In function
-
-```{r}
 
 rma_args <- arg_tbl(
   yi = "gt_pop", 
@@ -210,14 +196,16 @@ list_che_res_obj[[1]]
 
 ## CHE-RVE results
 
+The same counts when we obtain RVE estimates.
+
 ::: panel-tabset
-## Out of function
+## Out-of-list
 
 ```{r che-rve-out-of-function}
 rma_obj |> robust(cluster = study, clubSandwich = TRUE)
 ```
 
-## In function
+## From-list
 
 ```{r}
 list_che_res_obj |> 
@@ -227,8 +215,10 @@ map(\(x) robust(x, cluster = study, clubSandwich = TRUE))
 
 ## HTZ results
 
+And when we use `Wald_test()` from `clubSandwich`.
+
 ::: panel-tabset
-## Out of function
+## Out-of-list
 
 ```{r htz-out-of-function}
 
@@ -240,7 +230,7 @@ clubSandwich::Wald_test(
 
 ```
 
-## In function
+## From-list
 
 ```{r}
 list_che_res_obj |> 
@@ -248,20 +238,22 @@ map(\(x) Wald_test(x, constraints = constrain_equal(1:2), vcov = "CR2"))
 ```
 :::
 
-## CWT result
+## CWB result
+
+But when we try to do the same using the `Wald_test_cwb()` the procedure fails. Find the error message under the " From-list (error message)"-tab.
 
 ::: panel-tabset
-## Out of function
+## Out-of-list
 
-```{r cwt-out-of-function}
-#| eval: true
+```{r cwt-out-of-list}
+#| eval: false
 plan(multisession)
 
-cbt_obj <- 
+cwb_obj <- 
   Wald_test_cwb(
     full_model = rma_obj,
     constraints = constrain_equal(1:2),
-    R = 19,
+    R = 1999,
     seed = 080725
   ) |> 
   # Supresses the metafor package message when running in parallel 
@@ -269,22 +261,34 @@ cbt_obj <-
 
 plan(sequential) 
 
-cbt_obj
+saveRDS(cwb_obj, file = "cwb_res_1999.rds")
+
+cwb_obj
 ```
 
-## In function (error message)
+```{r}
+#| eval: true
+#| echo: false
+
+cwb_obj <- readRDS("cwb_res_1999.rds")
+cwb_obj
+```
+
+## From-list (error message)
+
+We get the following error.
 
 ```{r}
 #| eval: false
 list_che_res_obj |> 
-  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 19, seed = 080725))
+  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 1999, seed = 080725))
 ```
 
 ```{r}
 #| echo: false
 x <- try(
   list_che_res_obj |> 
-  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 19, seed = 080725)),
+  map(\(x) Wald_test_cwb(full_model = x, constraints = constrain_equal(1:2), R = 1999, seed = 080725)),
   silent = TRUE
 )
 
@@ -292,13 +296,15 @@ print(x)
 ```
 :::
 
-# Solution trial
+# Solution attempt
 
-To understand the error I started looking into the difference between the list obj and the out-of-function object.
+To understand the error I started looking into the difference between the list and `rma.mv` objects.
 
 ```{r}
 all.equal(rma_obj, list_che_res_obj[[1]])
 ```
+
+As you can see, there are some differences between the number of variables in the two used datasets but this is caused by the fact that `rma_fun()` adds a new variable to the dataset called `vi`, so I cannot see that this should cause the error. Then there are some minor time differences, but again, this also seems to be inconsequential. However, the difference between the object calls seems to be consequential. As you can see below, the calls differ between the objects, with the results obtained through the wrapper function being incorrectly specified.
 
 ## Object calls
 
@@ -307,9 +313,9 @@ rma_obj$call
 list_che_res_obj[[1]]$call
 ```
 
-## Reworking the functions
+## Reworking functions
 
-So I first made a function where I tried to re-construct the call as it looks in the out-of-function.
+Therefore, I first tried to make a function in which the call is re-constructed thus that it resembles the call from the out-of-function `rma.mv` object.
 
 ```{r}
 rma_fun <- function(formula, var, rand, structure, rho, data){
@@ -357,7 +363,7 @@ rma_args <- arg_tbl(
 rma_obj_list <- pmap(.l = rma_args, .f = rma_fun)
 ```
 
-Now the calls looking somewhat similar
+Now the calls look somewhat similar, with the only difference being `metafor::,` but as far as I understand, this difference should be immaterial, right?
 
 ```{r}
 rma_obj$call
@@ -365,13 +371,13 @@ rma_obj_list[[1]]$call
 
 ```
 
-Then I tweaked the `V_mat` to be assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that is where `Wald_test_cwb()` retrieves it from.
+Then I tweaked `Wald_test_cwb()` so that the `V_mat` gets assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that this is where `Wald_test_cwb()` retrieves it from?
 
 ```{r}
-#| eval: true
+#| eval: false
 # Quick and dirty function
 Wald_test_cwb_fun <- 
-  function(rma_fun_obj, R = 19, seed = 080725){
+  function(rma_fun_obj, R = 1999, seed = 080725){
     
     V_mat <- rma_fun_obj$V
     assign("V_mat", V_mat, envir = .GlobalEnv)
@@ -390,77 +396,38 @@ Wald_test_cwb_fun <-
     
 }
 
-plan(multisession)
+plan(multisession, workers = availableCores() - 1)
 in_fun_res <- map(.x = rma_obj_list, .f = Wald_test_cwb_fun)
 plan(sequential)
+
+saveRDS(in_fun_res, "cwb_res_list_1999.rds")
 
 in_fun_res[[1]]
 ```
 
+```{r}
+#| echo: false
+in_fun_res <- readRDS("cwb_res_list_1999.rds")
+in_fun_res[[1]]
+
+```
+
 # Difference between in and out of function results
 
-So now it works, but the results are quite different, though they should be the same as I use the same seeds across the specifications.
+So, as you see, that works, but the results are quite different from the out-of-function results, although I use the same seeds across the specifications.
 
 ```{r}
 #| eval: true
-c(`In-function CWB p value` = in_fun_res[[1]]$p_val, `Out-of-function p value` = cbt_obj$p_val)
+c(`In-function CWB p value` = in_fun_res[[1]]$p_val, `Out-of-function p value` = cwb_obj$p_val)
 ```
 
-# Another solution given the same result
+# Concluding remarks
 
-## Running everything through one function
+I hope this little blog somehow makes sense. Otherwise, please let me know if I should elaborate on anything. Moreover, I think it is also important to say that we experience that this issue is not idiosyncratic to this specific subgroup variable. We have tried many different predictor and control variables, always getting different results between the in and out-of-function solution. Hope you can easily figure this issue out, and sorry if I have overlooked anything.
 
-```{r}
-#| eval: true
-rma_fun <- function(formula, var, rand, structure, rho, data){
-  
-  suppressPackageStartupMessages(require(metafor))
-  
-  data$vi <- data[[var]]
-  data_name <- attr(data, "data_name")
-  
-  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
-  assign("V_mat", V_mat, envir = .GlobalEnv)
-  
-  res <- rma.mv(
-    formula,
-    V = V_mat, 
-    rand = rand,
-    struct = structure,
-    data = data,
-    sparse=TRUE
-  )
- 
-  
-  res$call <- as.call(call2(
-    "rma.mv", 
-    yi = formula, 
-    V = as.name("V_mat"), 
-    data = as.name(data_name), 
-    random = rand, 
-    struct = structure, 
-    sparse = TRUE, 
-    .ns = "metafor"
-  ))
+# Literature
 
-  cwb_res <- 
-    Wald_test_cwb(
-      full_model = res,
-      constraints = constrain_equal(1:2),
-      R = 19,
-      seed = 080725
-    )
-  
-  rm(V_mat, envir = .GlobalEnv)
-  
-  return(cwb_res)
-  
-}
-
-plan(multisession)
-pmap(.l = rma_args, .f = rma_fun)
-plan(sequential)
-```
+Fitzgerald, K. G., & Tipton, E. (2025). Using Extant Data to Improve Estimation of the Standardized Mean Difference. *Journal of Educational and Behavioral Statistics*, 10769986241238478. https://doi.org/10.3102/10769986241238478
 
 ::: {.callout-note icon="false" appearance="simple" title="Session Information" collapse="false"}
 ```{r}
