@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-07-07"
+date: "2025-08-12"
 format:
   html: 
     keep-md: true
@@ -58,6 +58,7 @@ library(kableExtra)
 library(skimr)
 library(janitor)
 library(tidyverse)
+library(tidyr)
 library(metafor)
 library(clubSandwich)
 library(fastDummies)  
@@ -133,6 +134,13 @@ gb_dat <-
     vgt_pop = if_else(!is.na(vgt_reg), vgt_reg, vgt_pop),
     vgt_pop = if_else(!is.na(vgt_DD_pop), vgt_DD_pop, vgt_pop),
     vgt_pop = if_else(!is.na(vgt_adj_pop), vgt_adj_pop, vgt_pop),
+    
+    Wgt_pop = if_else(!is.na(Wgt_post), Wgt_post, NA_real_),
+    Wgt_pop = if_else(!is.na(Wgt_DD), Wgt_DD, Wgt_pop),
+    Wgt_pop = if_else(!is.na(Wgt_adj), Wgt_adj, Wgt_pop),
+    Wgt_pop = if_else(!is.na(Wgt_reg), Wgt_reg, Wgt_pop),
+    Wgt_pop = if_else(!is.na(Wgt_DD_pop), Wgt_DD_pop, Wgt_pop),
+    Wgt_pop = if_else(!is.na(Wgt_adj_pop), Wgt_adj_pop, Wgt_pop),
     
     # Main covariate adjusted effect cluster adjusted 
     gt = if_else(!is.na(gt_post), gt_post, NA_real_),
@@ -423,7 +431,7 @@ reintergation_dat <-
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
 
-saveRDS(reintergation_dat, file = "reintergation_dat.rds")
+#saveRDS(reintergation_dat, file = "reintergation_dat.rds")
 
 reint_overview <- 
   reintergation_dat |> 
@@ -18105,11 +18113,598 @@ kbl(
 
 # Standard Errors and Other Auxiliary Data
 
-# Visualization of the Distribution of Effect Size Estimates
+## SE forest plot
+
+This forest plot shows the within- and between study variation of standard error of effect size estimates for reintegrational outcomes.
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r se-plot-reintegration}}
+#| label: fig-forset-plot-se
+#| fig-cap: "Forest plot of standard error of reintegrational effect size estimates."
+#| fig.width: 6.8
+#| fig.height: 7
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+reintergation_dat |> 
+  arrange(desc(study)) |>
+  mutate(
+    study = factor(study, unique(study)),
+    segt_pop = sqrt(vgt_pop)
+    ) |> 
+  ggplot(aes(x = segt_pop, y = study, color = study)) +
+  geom_point(aes(size = N_total), alpha = 0.5) +
+  scale_y_discrete() +
+  theme_minimal() +
+  labs(y = "", x = "SE") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 10))
+```
+````
+
+::: {.cell-output-display}
+![Forest plot of standard error of reintegrational effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-1.png){#fig-forset-plot-se fig-pos='H' width=652.8}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r se-plot-mental}}
+#| label: fig-forset-plot-se-mental
+#| fig-cap: "Forest plot of standard error of mental health effect size estimates."
+#| fig.height: 11
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+mental_health_dat |> 
+  arrange(desc(study)) |>
+  mutate(
+    study = factor(study, unique(study)),
+    segt_pop = sqrt(vgt_pop)
+    ) |> 
+  ggplot(aes(x = segt_pop, y = study, color = study)) +
+  geom_point(aes(size = N_total), alpha = 0.5) +
+  scale_y_discrete() +
+  theme_minimal() +
+  labs(y = "", x = "SE") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 10))
+```
+````
+
+::: {.cell-output-display}
+![Forest plot of standard error of mental health effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-mental-1.png){#fig-forset-plot-se-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+## Modified SE forest plot
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r se-plot-reintegration-modified}}
+#| label: fig-forset-plot-se-modified
+#| fig-cap: "Forest plot of modified standard error of reintegrational effect size estimates."
+#| fig.width: 6.8
+#| fig.height: 7
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+reintergation_dat |> 
+  arrange(desc(study)) |>
+  mutate(
+    study = factor(study, unique(study)),
+    Wse_pop = sqrt(Wgt_pop)
+    ) |> 
+  ggplot(aes(x = Wse_pop, y = study, color = study)) +
+  geom_point(aes(size = N_total), alpha = 0.5, position = position_jitter(height = 0.4)) +
+  scale_y_discrete() +
+  theme_minimal() +
+  labs(y = "", x = "Modified SE") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 10))
+```
+````
+
+::: {.cell-output-display}
+![Forest plot of modified standard error of reintegrational effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-modified-1.png){#fig-forset-plot-se-modified fig-pos='H' width=652.8}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r se-plot-mental-modified}}
+#| label: fig-forset-plot-se-mental-modified
+#| fig-cap: "Forest plot of modified standard error of mental health effect size estimates."
+#| fig.height: 11
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+mental_health_dat |> 
+  arrange(desc(study)) |>
+  mutate(
+    study = factor(study, unique(study)),
+    Wse_pop = sqrt(Wgt_pop)
+    ) |> 
+  ggplot(aes(x = Wse_pop, y = study, color = study)) +
+  geom_point(aes(size = N_total), alpha = 0.5, position = position_jitter(height = 0.4)) +
+  scale_y_discrete() +
+  theme_minimal() +
+  labs(y = "", x = "Modified SE") +
+  theme(legend.position = "none", axis.text.y = element_text(size = 10))
+```
+````
+
+::: {.cell-output-display}
+![Forest plot of modified standard error of mental health effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-mental-modified-1.png){#fig-forset-plot-se-mental-modified fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+## Inverse sampling covariance weights plot
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r ISCW-plot}}
+#| label: fig-iscw
+#| fig-cap: "Plot of inverse sampling covariance (ISC) weights for each study (reintegrational outcomes)"
+#| fig.width: 6.8
+#| fig.height: 7
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+iscw <-
+  function(k, rho, v) {
+    iscw_weights <-  k / (((k - 1) * rho + 1) * v)
+    return(iscw_weights)
+  }
+
+rho_val <- round(seq(0, 0.8, 0.2), 1)
+
+ISCW_plot <- 
+  reintergation_dat |> 
+  expand_grid(rho = rho_val) |> 
+  group_by(study, rho) |> 
+  summarise(
+    k = n(),
+    v_bar = mean(vgt_pop)
+  ) |> 
+  ungroup() |> 
+  mutate(iscw_w = iscw(k, rho, v_bar),
+         depd = ifelse(k > 1, 1, 0)) |> 
+  group_by(rho) |> 
+  mutate(iscw_w_norm = iscw_w / sum(iscw_w)) |> 
+  ungroup() |> 
+  distinct(study, rho, iscw_w_norm, depd) |> 
+  mutate(study = factor(study, levels = study[rho == 0.8][order(iscw_w_norm[rho == 0.8])])) |> 
+  ggplot(aes(y = iscw_w_norm, x = study, group = factor(rho), colour = factor(rho))) +
+  geom_point() +
+  geom_line() + 
+  theme_minimal() +
+  coord_flip() +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.8, 0.2)
+  ) +
+  labs(x = "", y = "Normalized Weight", colour = "Assumed Correlation") 
+
+ISCW_plot
+```
+````
+
+::: {.cell-output-display}
+![Plot of inverse sampling covariance (ISC) weights for each study (reintegrational outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-iscw-1.png){#fig-iscw fig-pos='H' width=652.8}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell fig.topcaption='true'}
+
+````{.cell-code}
+```{{r ISCW-plot-mental}}
+#| label: fig-iscw-mental
+#| fig-cap: "Plot of inverse sampling covariance (ISC) weights for each study (mental healt outcomes)"
+#| fig.height: 11
+#| fig.retina: 2
+#| fig.topcaption: TRUE
+#| message: false
+
+ISCW_plot_mental <- 
+  mental_health_dat |> 
+  expand_grid(rho = rho_val) |> 
+  group_by(study, rho) |> 
+  summarise(
+    k = n(),
+    v_bar = mean(vgt_pop)
+  ) |> 
+  ungroup() |> 
+  mutate(iscw_w = iscw(k, rho, v_bar),
+         depd = ifelse(k > 1, 1, 0)) |> 
+  group_by(rho) |> 
+  mutate(iscw_w_norm = iscw_w / sum(iscw_w)) |> 
+  ungroup() |> 
+  distinct(study, rho, iscw_w_norm, depd) |> 
+  mutate(study = factor(study, levels = study[rho == 0.8][order(iscw_w_norm[rho == 0.8])])) |> 
+  ggplot(aes(y = iscw_w_norm, x = study, group = factor(rho), colour = factor(rho))) +
+  geom_point() +
+  geom_line() + 
+  theme_minimal() +
+  coord_flip() +
+  theme(
+    legend.position = "inside",
+    legend.position.inside = c(0.85, 0.2)
+  ) +
+  labs(x = "", y = "Normalized Weight", colour = "Assumed Correlation") 
+
+ISCW_plot_mental
+```
+````
+
+::: {.cell-output-display}
+![Plot of inverse sampling covariance (ISC) weights for each study (mental healt outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-iscw-mental-1.png){#fig-iscw-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+# Effect size estimates distribution and outliers
+
+## Marginal distributions 
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell .tbl-cap-location-top}
+
+````{.cell-code}
+```{{r es-distribution-table}}
+#| tbl-cap-location: top
+#| label: tab-es-distribution
+reintergation_dat$gt_pop |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) |>
+  knitr::kable(
+    digits = 2,
+    caption = "Marginal distribution of effect size estimates",
+    booktabs = TRUE
+  )  |> 
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Marginal distribution of effect size estimates</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> sd </th>
+   <th style="text-align:right;"> p0 </th>
+   <th style="text-align:right;"> p25 </th>
+   <th style="text-align:right;"> p50 </th>
+   <th style="text-align:right;"> p75 </th>
+   <th style="text-align:right;"> p100 </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0.21 </td>
+   <td style="text-align:right;"> 0.28 </td>
+   <td style="text-align:right;"> -0.5 </td>
+   <td style="text-align:right;"> 0.03 </td>
+   <td style="text-align:right;"> 0.18 </td>
+   <td style="text-align:right;"> 0.38 </td>
+   <td style="text-align:right;"> 1.35 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin} 
+
+
+::: {.cell .tbl-cap-location-top}
+
+````{.cell-code}
+```{{r es-distribution-table-mental}}
+#| tbl-cap-location: top
+#| label: tab-es-distribution-mental
+mental_health_dat$gt_pop |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) |>
+  knitr::kable(
+    digits = 2,
+    caption = "Marginal distribution of effect size estimates",
+    booktabs = TRUE
+  )  |> 
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+```
+````
+
+::: {.cell-output-display}
+
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>Marginal distribution of effect size estimates</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> sd </th>
+   <th style="text-align:right;"> p0 </th>
+   <th style="text-align:right;"> p25 </th>
+   <th style="text-align:right;"> p50 </th>
+   <th style="text-align:right;"> p75 </th>
+   <th style="text-align:right;"> p100 </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 0.28 </td>
+   <td style="text-align:right;"> 0.39 </td>
+   <td style="text-align:right;"> -0.64 </td>
+   <td style="text-align:right;"> 0.02 </td>
+   <td style="text-align:right;"> 0.21 </td>
+   <td style="text-align:right;"> 0.53 </td>
+   <td style="text-align:right;"> 1.8 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+
+:::
+:::
+
+
+:::
+
+:::
+
+## Marginal distribution plots
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-distribution-plot}}
+#| label: fig-es-distribution
+#| fig-cap: "Empirical distribution of reintegrational effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition."
+#| fig.width: 8
+#| fig.height: 2.5
+#| fig.retina: 2
+#| message: false
+
+qrtls <- quantile(reintergation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
+fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
+fence_dat <- data.frame(qrtl = qrtls, fence = fences)
+
+es_dist_plot <- 
+  ggplot(reintergation_dat, aes(gt_pop)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
+  geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
+  geom_rug(alpha = 0.25) + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+
+es_dist_plot
+```
+````
+
+::: {.cell-output-display}
+![Empirical distribution of reintegrational effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition.](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-1.png){#fig-es-distribution fig-pos='H' width=768}
+:::
+:::
+
+
+:::
+
+::: {.column-margin} 
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-distribution-plot-mental}}
+#| label: fig-es-distribution-mental
+#| fig-cap: "Empirical distribution of mental health effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition."
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+qrtls_mental <- quantile(mental_health_dat$gt_pop, c(.25, .75), na.rm = TRUE)
+fences_mental <-  qrtls_mental + 3 * diff(qrtls_mental) * c(-1, 1)
+fence_dat_mental <- data.frame(qrtl = qrtls_mental, fence = fences_mental)
+
+es_dist_plot_mental <- 
+  ggplot(mental_health_dat, aes(gt_pop)) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
+  geom_vline(data = fence_dat_mental, aes(xintercept = qrtl), linetype = "solid") + 
+  geom_vline(data = fence_dat_mental, aes(xintercept = fence), linetype = "dashed") + 
+  geom_rug(alpha = 0.25) + 
+  theme_minimal() + 
+  theme(axis.title.y = element_blank()) +
+  labs(x = "Effect size estimate")
+
+es_dist_plot_mental
+```
+````
+
+::: {.cell-output-display}
+![Empirical distribution of mental health effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition.](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-mental-1.png){#fig-es-distribution-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+## Effect size distribution across type of outcomes
+
+::: {.panel-tabset}
+## Reintegrational outcomes
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-dist-subgroup-plot}}
+#| label: fig-es-distribution-reint-subgroup
+#| fig-cap: "Empirical distribution of effect size estimates, by reintegrational constructs" 
+#| fig.retina: 2
+#| message: false
+
+outcomes_reint_dat <- 
+  reintergation_dat |> 
+  filter(!str_detect(analysis_plan, "Psychiatric")) |> 
+  group_by(analysis_plan) |> 
+  reframe(
+    qrtl = quantile(gt,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    .groups = "drop"
+  )
+
+
+reintegration_outcome_plot <- 
+  reintergation_dat |> 
+  #Has only one data point
+  filter(!str_detect(analysis_plan, "Psychiatric")) |> 
+  ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = outcomes_reint_dat, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = outcomes_reint_dat, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan, ncol = 2) +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title.y = element_blank(), axis.text.y = element_blank()) +
+  labs(x = "Effect size estimate", ); reintegration_outcome_plot
+```
+````
+
+::: {.cell-output-display}
+![Empirical distribution of effect size estimates, by reintegrational constructs](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-reint-subgroup-1.png){#fig-es-distribution-reint-subgroup fig-pos='H' width=672}
+:::
+:::
+
+
+
+
+## Mental health outcomes
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r es-dist-subgroup-plot-mental}}
+#| label: fig-es-distribution-mental-subgroup
+#| fig-cap: "Empirical distribution of effect size estimates, by mental health constructs" 
+#| fig.retina: 2
+#| message: false
+
+outcome_mental_health_dat <- 
+  mental_health_dat |> 
+  group_by(analysis_plan) |> 
+  reframe(
+    qrtl = quantile(gt,  c(.25, .75)),
+    fence = qrtl + 3 * diff(qrtl) * c(-1,1),
+    
+    .groups = "drop"
+  )
+
+mental_health_outcomes_plot <- 
+  mental_health_dat |> 
+  ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
+  geom_density(alpha = 0.7) +
+  geom_vline(data = outcome_mental_health_dat, aes(xintercept = qrtl), linetype = "solid")+
+  geom_vline(data = outcome_mental_health_dat, aes(xintercept = fence), linetype = "dashed")+
+  geom_rug(alpha = 0.25) +
+  facet_wrap(~analysis_plan, scales = "free") +
+  theme_minimal() +
+  theme(legend.position = "none", axis.title.y = element_blank(), axis.text = element_blank()) +
+  labs(x = "Effect size estimate"); mental_health_outcomes_plot
+```
+````
+
+::: {.cell-output-display}
+![Empirical distribution of effect size estimates, by mental health constructs](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-mental-subgroup-1.png){#fig-es-distribution-mental-subgroup fig-pos='H' width=672}
+:::
+:::
+
+
+
+:::
+
 
 # Colophon
 
-::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true #session-info}
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false #session-info}
 
 
 
@@ -18128,7 +18723,7 @@ kbl(
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-07-07
+ date     2025-08-12
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
