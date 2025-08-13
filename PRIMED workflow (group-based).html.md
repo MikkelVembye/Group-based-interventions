@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-08-12"
+date: "2025-08-13"
 format:
   html: 
     keep-md: true
@@ -33,15 +33,38 @@ bibliography: bibliography.bib
 ---
 
 
+::: {.cell}
+<style type="text/css">
+
+.panel-tabset .nav-tabs {
+  border-bottom: none;
+}
+
+.panel-tabset .nav-tabs .nav-link {
+  border: 1px solid #555;
+  border-radius: 5px 5px 0 0;
+  margin-right: 5px;
+  padding: 6px 12px;
+  border-bottom: none; 
+}
+
+/* Style for the active tab */
+.panel-tabset .nav-tabs .nav-link.active {
+  background-color: #F5F5F5; 
+  border-bottom: 1px solid white; 
+}
+</style>
+:::
+
 
 
 # Introduction 
 
-This document contains all preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. Below one can inspect the R packages we use for this analysis as well as the data set behind our analyses. 
+This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All package that we have used to create this document, can be found in the next section. 
 
 
 ## R packages
-For exact R package versions, see the colophon by unfolding the [Session Information](#session-info) at the bottom of this document. 
+Below, we present the R package we use in this document. For exact R package versions, see the [Session Information](#session-info) at the bottom of this document. 
 
 
 
@@ -79,8 +102,9 @@ library(ggh4x)
 
 # Data manipulation - prepare data sets
 
-In the following section, we construct all the main variables that are used in the main analysis of the review. Unfold the below code to see this exact manipulations. 
+In the following section, we create all the variables that are used in the main analyses of the review. Unfold the below code to see this exact manipulations. 
 
+## Loading data
 
 
 ::: {.cell}
@@ -104,7 +128,8 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
 
 
 
-Primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes
+## Main variable manipulation
+Unfold the below code, to find the primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes. 
 
 
 
@@ -410,12 +435,14 @@ gb_dat <-
 
 
 
+## Creating primary and secondary data
+
 Below, we separate the data by reintegrational (primary analysis) and mental health outcomes (secondary analyses)
 
 ::: {.panel-tabset}
 ## Reintegration data
 
-A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
+A general overview of the main data, we use for analyses of reintegrational outcomes can be found in the scroll box below.
 
 
 
@@ -427,26 +454,26 @@ A general overview of the main data, we use for analyses of reintegrational outc
 #| tbl-cap-location: top
 #| label: tbl-reint-dat
 
-reintergation_dat <- 
+reintegation_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
 
-#saveRDS(reintergation_dat, file = "reintergation_dat.rds")
+#saveRDS(reintegation_dat, file = "reintegation_dat.rds")
 
 reint_overview <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
+    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
 reint_overview |> 
   mutate(
-    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
+    p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) )
   ) |> 
   select(
     `Authors (year)` = study, N_t, N_c,
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, 
+    `Outcome construct` = analysis_plan, gt_pop, vgt_pop, Wgt, Wse, p_val, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -454,22 +481,22 @@ reint_overview |>
     bootstrap_options = c("striped", "hover"),
     font_size = 10
   ) |> 
-  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
+  scroll_box(width = "100%", height = "600px", fixed_thead = TRUE)
 ```
 ````
 
 ::: {.cell-output-display}
 
 `````{=html}
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:600px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
   <tr>
    <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Authors (year) </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> N_t </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> N_c </th>
    <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Outcome construct </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> gt </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> vgt </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> gt_pop </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> vgt_pop </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Wgt </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Wse </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p_val </th>
@@ -487,7 +514,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.196 </td>
    <td style="text-align:right;"> 0.195 </td>
    <td style="text-align:right;"> 0.442 </td>
-   <td style="text-align:right;"> 0.477 </td>
+   <td style="text-align:right;"> 0.478 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -513,7 +540,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.159 </td>
    <td style="text-align:right;"> 0.399 </td>
-   <td style="text-align:right;"> 0.267 </td>
+   <td style="text-align:right;"> 0.272 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -539,7 +566,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.164 </td>
    <td style="text-align:right;"> 0.159 </td>
    <td style="text-align:right;"> 0.399 </td>
-   <td style="text-align:right;"> 0.170 </td>
+   <td style="text-align:right;"> 0.176 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -565,7 +592,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.095 </td>
    <td style="text-align:right;"> 0.094 </td>
    <td style="text-align:right;"> 0.307 </td>
-   <td style="text-align:right;"> 0.314 </td>
+   <td style="text-align:right;"> 0.316 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -574,11 +601,11 @@ reint_overview |>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.138 </td>
-   <td style="text-align:right;"> 0.082 </td>
+   <td style="text-align:right;"> -0.082 </td>
+   <td style="text-align:right;"> 0.078 </td>
    <td style="text-align:right;"> 0.082 </td>
    <td style="text-align:right;"> 0.286 </td>
-   <td style="text-align:right;"> 0.631 </td>
+   <td style="text-align:right;"> 0.769 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -587,11 +614,11 @@ reint_overview |>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> 0.340 </td>
-   <td style="text-align:right;"> 0.089 </td>
+   <td style="text-align:right;"> 0.142 </td>
+   <td style="text-align:right;"> 0.084 </td>
    <td style="text-align:right;"> 0.088 </td>
    <td style="text-align:right;"> 0.297 </td>
-   <td style="text-align:right;"> 0.253 </td>
+   <td style="text-align:right;"> 0.624 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -708,7 +735,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0.079 </td>
-   <td style="text-align:right;"> 0.104 </td>
+   <td style="text-align:right;"> 0.105 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -955,7 +982,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.011 </td>
    <td style="text-align:right;"> 0.011 </td>
    <td style="text-align:right;"> 0.105 </td>
-   <td style="text-align:right;"> 0.019 </td>
+   <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -968,7 +995,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0.162 </td>
-   <td style="text-align:right;"> 0.128 </td>
+   <td style="text-align:right;"> 0.129 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -977,11 +1004,11 @@ reint_overview |>
    <td style="text-align:right;"> 121 </td>
    <td style="text-align:right;"> 121 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.020 </td>
-   <td style="text-align:right;"> 0.025 </td>
+   <td style="text-align:right;"> -0.022 </td>
+   <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.025 </td>
    <td style="text-align:right;"> 0.159 </td>
-   <td style="text-align:right;"> 0.900 </td>
+   <td style="text-align:right;"> 0.885 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -990,11 +1017,11 @@ reint_overview |>
    <td style="text-align:right;"> 119 </td>
    <td style="text-align:right;"> 121 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.046 </td>
-   <td style="text-align:right;"> 0.026 </td>
+   <td style="text-align:right;"> -0.052 </td>
+   <td style="text-align:right;"> 0.024 </td>
    <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0.160 </td>
-   <td style="text-align:right;"> 0.774 </td>
+   <td style="text-align:right;"> 0.739 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1003,11 +1030,11 @@ reint_overview |>
    <td style="text-align:right;"> 121 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.037 </td>
-   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> -0.039 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.141 </td>
-   <td style="text-align:right;"> 0.792 </td>
+   <td style="text-align:right;"> 0.779 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1016,11 +1043,11 @@ reint_overview |>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.083 </td>
-   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> -0.085 </td>
+   <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.020 </td>
    <td style="text-align:right;"> 0.142 </td>
-   <td style="text-align:right;"> 0.558 </td>
+   <td style="text-align:right;"> 0.542 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1033,7 +1060,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.147 </td>
-   <td style="text-align:right;"> 0.070 </td>
+   <td style="text-align:right;"> 0.071 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1059,7 +1086,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.147 </td>
-   <td style="text-align:right;"> 0.157 </td>
+   <td style="text-align:right;"> 0.158 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1085,7 +1112,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.147 </td>
-   <td style="text-align:right;"> 0.167 </td>
+   <td style="text-align:right;"> 0.168 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1137,7 +1164,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.065 </td>
    <td style="text-align:right;"> 0.065 </td>
    <td style="text-align:right;"> 0.254 </td>
-   <td style="text-align:right;"> 0.416 </td>
+   <td style="text-align:right;"> 0.417 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1241,7 +1268,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.118 </td>
-   <td style="text-align:right;"> 0.102 </td>
+   <td style="text-align:right;"> 0.103 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1254,7 +1281,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.120 </td>
-   <td style="text-align:right;"> 0.191 </td>
+   <td style="text-align:right;"> 0.192 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1280,7 +1307,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.129 </td>
-   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1293,7 +1320,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.116 </td>
-   <td style="text-align:right;"> 0.092 </td>
+   <td style="text-align:right;"> 0.093 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1358,7 +1385,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.046 </td>
    <td style="text-align:right;"> 0.046 </td>
    <td style="text-align:right;"> 0.214 </td>
-   <td style="text-align:right;"> 0.340 </td>
+   <td style="text-align:right;"> 0.341 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1371,7 +1398,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.138 </td>
-   <td style="text-align:right;"> 0.081 </td>
+   <td style="text-align:right;"> 0.082 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1380,11 +1407,11 @@ reint_overview |>
    <td style="text-align:right;"> 8 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> 0.181 </td>
-   <td style="text-align:right;"> 0.190 </td>
+   <td style="text-align:right;"> 0.206 </td>
+   <td style="text-align:right;"> 0.287 </td>
    <td style="text-align:right;"> 0.189 </td>
    <td style="text-align:right;"> 0.434 </td>
-   <td style="text-align:right;"> 0.677 </td>
+   <td style="text-align:right;"> 0.701 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1397,7 +1424,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.142 </td>
    <td style="text-align:right;"> 0.141 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.492 </td>
+   <td style="text-align:right;"> 0.494 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1410,7 +1437,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.143 </td>
    <td style="text-align:right;"> 0.141 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.301 </td>
+   <td style="text-align:right;"> 0.305 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1436,7 +1463,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0.162 </td>
-   <td style="text-align:right;"> 0.002 </td>
+   <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1471,11 +1498,11 @@ reint_overview |>
    <td style="text-align:right;"> 23 </td>
    <td style="text-align:right;"> 12 </td>
    <td style="text-align:left;"> Physical health </td>
-   <td style="text-align:right;"> 0.175 </td>
-   <td style="text-align:right;"> 0.141 </td>
+   <td style="text-align:right;"> 0.189 </td>
+   <td style="text-align:right;"> 0.138 </td>
    <td style="text-align:right;"> 0.140 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.640 </td>
+   <td style="text-align:right;"> 0.612 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1501,7 +1528,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.142 </td>
    <td style="text-align:right;"> 0.140 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.450 </td>
+   <td style="text-align:right;"> 0.452 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1514,7 +1541,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.143 </td>
    <td style="text-align:right;"> 0.140 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.247 </td>
+   <td style="text-align:right;"> 0.252 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1536,11 +1563,11 @@ reint_overview |>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:left;"> Physical health </td>
-   <td style="text-align:right;"> 0.492 </td>
-   <td style="text-align:right;"> 0.085 </td>
+   <td style="text-align:right;"> 0.507 </td>
+   <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.087 </td>
+   <td style="text-align:right;"> 0.079 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1553,7 +1580,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.085 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.107 </td>
+   <td style="text-align:right;"> 0.111 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1562,11 +1589,11 @@ reint_overview |>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:left;"> Physical health </td>
-   <td style="text-align:right;"> 0.508 </td>
-   <td style="text-align:right;"> 0.085 </td>
+   <td style="text-align:right;"> 0.523 </td>
+   <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.077 </td>
+   <td style="text-align:right;"> 0.070 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1579,7 +1606,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1592,7 +1619,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.120 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.147 </td>
+   <td style="text-align:right;"> 0.152 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1605,7 +1632,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.119 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.195 </td>
+   <td style="text-align:right;"> 0.200 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1618,7 +1645,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.117 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.696 </td>
+   <td style="text-align:right;"> 0.697 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1644,7 +1671,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.118 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.251 </td>
+   <td style="text-align:right;"> 0.255 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1657,7 +1684,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.119 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.205 </td>
+   <td style="text-align:right;"> 0.209 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1670,7 +1697,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.117 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.515 </td>
+   <td style="text-align:right;"> 0.516 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1683,7 +1710,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.117 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.723 </td>
+   <td style="text-align:right;"> 0.724 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1709,7 +1736,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.329 </td>
+   <td style="text-align:right;"> 0.331 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1722,7 +1749,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.087 </td>
    <td style="text-align:right;"> 0.085 </td>
    <td style="text-align:right;"> 0.291 </td>
-   <td style="text-align:right;"> 0.064 </td>
+   <td style="text-align:right;"> 0.069 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1731,11 +1758,11 @@ reint_overview |>
    <td style="text-align:right;"> 32 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.151 </td>
-   <td style="text-align:right;"> 0.078 </td>
+   <td style="text-align:right;"> -0.177 </td>
+   <td style="text-align:right;"> 0.075 </td>
    <td style="text-align:right;"> 0.078 </td>
    <td style="text-align:right;"> 0.279 </td>
-   <td style="text-align:right;"> 0.589 </td>
+   <td style="text-align:right;"> 0.517 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1761,7 +1788,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.148 </td>
    <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0.371 </td>
-   <td style="text-align:right;"> 0.020 </td>
+   <td style="text-align:right;"> 0.025 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1787,7 +1814,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.159 </td>
    <td style="text-align:right;"> 0.158 </td>
    <td style="text-align:right;"> 0.398 </td>
-   <td style="text-align:right;"> 0.590 </td>
+   <td style="text-align:right;"> 0.591 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -1809,11 +1836,11 @@ reint_overview |>
    <td style="text-align:right;"> 39 </td>
    <td style="text-align:right;"> 19 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> 0.056 </td>
-   <td style="text-align:right;"> 0.091 </td>
+   <td style="text-align:right;"> 0.038 </td>
+   <td style="text-align:right;"> 0.087 </td>
    <td style="text-align:right;"> 0.091 </td>
    <td style="text-align:right;"> 0.302 </td>
-   <td style="text-align:right;"> 0.852 </td>
+   <td style="text-align:right;"> 0.898 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1826,7 +1853,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.110 </td>
    <td style="text-align:right;"> 0.332 </td>
-   <td style="text-align:right;"> 0.139 </td>
+   <td style="text-align:right;"> 0.144 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1848,11 +1875,11 @@ reint_overview |>
    <td style="text-align:right;"> 31 </td>
    <td style="text-align:right;"> 16 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> 0.010 </td>
-   <td style="text-align:right;"> 0.111 </td>
+   <td style="text-align:right;"> 0.008 </td>
+   <td style="text-align:right;"> 0.106 </td>
    <td style="text-align:right;"> 0.111 </td>
    <td style="text-align:right;"> 0.333 </td>
-   <td style="text-align:right;"> 0.976 </td>
+   <td style="text-align:right;"> 0.982 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1865,7 +1892,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.119 </td>
    <td style="text-align:right;"> 0.114 </td>
    <td style="text-align:right;"> 0.338 </td>
-   <td style="text-align:right;"> 0.045 </td>
+   <td style="text-align:right;"> 0.050 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1878,7 +1905,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.052 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.219 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -1904,7 +1931,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.128 </td>
-   <td style="text-align:right;"> 0.003 </td>
+   <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1930,7 +1957,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.019 </td>
    <td style="text-align:right;"> 0.137 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -1943,7 +1970,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.055 </td>
    <td style="text-align:right;"> 0.054 </td>
    <td style="text-align:right;"> 0.233 </td>
-   <td style="text-align:right;"> 0.200 </td>
+   <td style="text-align:right;"> 0.203 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1956,7 +1983,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.180 </td>
-   <td style="text-align:right;"> 0.052 </td>
+   <td style="text-align:right;"> 0.056 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1969,7 +1996,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.177 </td>
-   <td style="text-align:right;"> 0.518 </td>
+   <td style="text-align:right;"> 0.519 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1982,7 +2009,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.037 </td>
    <td style="text-align:right;"> 0.036 </td>
    <td style="text-align:right;"> 0.190 </td>
-   <td style="text-align:right;"> 0.083 </td>
+   <td style="text-align:right;"> 0.087 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -1995,7 +2022,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.054 </td>
    <td style="text-align:right;"> 0.052 </td>
    <td style="text-align:right;"> 0.229 </td>
-   <td style="text-align:right;"> 0.039 </td>
+   <td style="text-align:right;"> 0.043 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2008,7 +2035,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.044 </td>
    <td style="text-align:right;"> 0.043 </td>
    <td style="text-align:right;"> 0.207 </td>
-   <td style="text-align:right;"> 0.048 </td>
+   <td style="text-align:right;"> 0.052 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2034,7 +2061,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.035 </td>
    <td style="text-align:right;"> 0.035 </td>
    <td style="text-align:right;"> 0.186 </td>
-   <td style="text-align:right;"> 0.148 </td>
+   <td style="text-align:right;"> 0.151 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2047,7 +2074,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.055 </td>
    <td style="text-align:right;"> 0.052 </td>
    <td style="text-align:right;"> 0.229 </td>
-   <td style="text-align:right;"> 0.013 </td>
+   <td style="text-align:right;"> 0.015 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2060,7 +2087,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.045 </td>
    <td style="text-align:right;"> 0.044 </td>
    <td style="text-align:right;"> 0.209 </td>
-   <td style="text-align:right;"> 0.063 </td>
+   <td style="text-align:right;"> 0.066 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2073,7 +2100,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.166 </td>
-   <td style="text-align:right;"> 0.074 </td>
+   <td style="text-align:right;"> 0.075 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2086,7 +2113,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.091 </td>
    <td style="text-align:right;"> 0.078 </td>
    <td style="text-align:right;"> 0.279 </td>
-   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.001 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2099,7 +2126,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.163 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.787 </td>
+   <td style="text-align:right;"> 0.788 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2112,7 +2139,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.164 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.506 </td>
+   <td style="text-align:right;"> 0.508 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2151,7 +2178,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.178 </td>
-   <td style="text-align:right;"> 0.067 </td>
+   <td style="text-align:right;"> 0.069 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2164,7 +2191,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.178 </td>
-   <td style="text-align:right;"> 0.344 </td>
+   <td style="text-align:right;"> 0.345 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2177,7 +2204,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.178 </td>
-   <td style="text-align:right;"> 0.317 </td>
+   <td style="text-align:right;"> 0.318 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2203,7 +2230,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.118 </td>
    <td style="text-align:right;"> 0.112 </td>
    <td style="text-align:right;"> 0.334 </td>
-   <td style="text-align:right;"> 0.032 </td>
+   <td style="text-align:right;"> 0.037 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2229,7 +2256,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.112 </td>
    <td style="text-align:right;"> 0.334 </td>
-   <td style="text-align:right;"> 0.376 </td>
+   <td style="text-align:right;"> 0.378 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2268,7 +2295,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.114 </td>
    <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.337 </td>
-   <td style="text-align:right;"> 0.504 </td>
+   <td style="text-align:right;"> 0.505 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2320,7 +2347,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.104 </td>
    <td style="text-align:right;"> 0.102 </td>
    <td style="text-align:right;"> 0.319 </td>
-   <td style="text-align:right;"> 0.297 </td>
+   <td style="text-align:right;"> 0.301 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2346,7 +2373,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.125 </td>
    <td style="text-align:right;"> 0.118 </td>
    <td style="text-align:right;"> 0.344 </td>
-   <td style="text-align:right;"> 0.059 </td>
+   <td style="text-align:right;"> 0.066 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2359,7 +2386,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.035 </td>
    <td style="text-align:right;"> 0.031 </td>
    <td style="text-align:right;"> 0.177 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2372,7 +2399,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.107 </td>
    <td style="text-align:right;"> 0.103 </td>
    <td style="text-align:right;"> 0.321 </td>
-   <td style="text-align:right;"> 0.104 </td>
+   <td style="text-align:right;"> 0.111 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2385,7 +2412,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.155 </td>
    <td style="text-align:right;"> 0.154 </td>
    <td style="text-align:right;"> 0.393 </td>
-   <td style="text-align:right;"> 0.617 </td>
+   <td style="text-align:right;"> 0.618 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2398,7 +2425,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.155 </td>
    <td style="text-align:right;"> 0.154 </td>
    <td style="text-align:right;"> 0.393 </td>
-   <td style="text-align:right;"> 0.510 </td>
+   <td style="text-align:right;"> 0.512 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2411,7 +2438,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.391 </td>
    <td style="text-align:right;"> 0.381 </td>
    <td style="text-align:right;"> 0.617 </td>
-   <td style="text-align:right;"> 0.211 </td>
+   <td style="text-align:right;"> 0.217 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2424,7 +2451,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.094 </td>
    <td style="text-align:right;"> 0.092 </td>
    <td style="text-align:right;"> 0.304 </td>
-   <td style="text-align:right;"> 0.267 </td>
+   <td style="text-align:right;"> 0.271 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2437,7 +2464,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.274 </td>
    <td style="text-align:right;"> 0.266 </td>
    <td style="text-align:right;"> 0.515 </td>
-   <td style="text-align:right;"> 0.160 </td>
+   <td style="text-align:right;"> 0.167 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2463,7 +2490,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.069 </td>
    <td style="text-align:right;"> 0.068 </td>
    <td style="text-align:right;"> 0.262 </td>
-   <td style="text-align:right;"> 0.303 </td>
+   <td style="text-align:right;"> 0.305 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2489,7 +2516,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.041 </td>
    <td style="text-align:right;"> 0.041 </td>
    <td style="text-align:right;"> 0.202 </td>
-   <td style="text-align:right;"> 0.278 </td>
+   <td style="text-align:right;"> 0.279 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2515,7 +2542,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.063 </td>
    <td style="text-align:right;"> 0.063 </td>
    <td style="text-align:right;"> 0.251 </td>
-   <td style="text-align:right;"> 0.814 </td>
+   <td style="text-align:right;"> 0.815 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2541,7 +2568,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.063 </td>
    <td style="text-align:right;"> 0.061 </td>
    <td style="text-align:right;"> 0.248 </td>
-   <td style="text-align:right;"> 0.073 </td>
+   <td style="text-align:right;"> 0.076 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2554,7 +2581,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.062 </td>
    <td style="text-align:right;"> 0.061 </td>
    <td style="text-align:right;"> 0.248 </td>
-   <td style="text-align:right;"> 0.169 </td>
+   <td style="text-align:right;"> 0.171 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2593,7 +2620,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.338 </td>
+   <td style="text-align:right;"> 0.339 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2606,7 +2633,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.320 </td>
+   <td style="text-align:right;"> 0.321 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2619,7 +2646,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.021 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2645,7 +2672,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.137 </td>
+   <td style="text-align:right;"> 0.138 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2658,7 +2685,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.328 </td>
+   <td style="text-align:right;"> 0.329 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2697,7 +2724,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.015 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2710,7 +2737,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.225 </td>
+   <td style="text-align:right;"> 0.226 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2723,7 +2750,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.078 </td>
+   <td style="text-align:right;"> 0.079 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2749,7 +2776,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.041 </td>
+   <td style="text-align:right;"> 0.042 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2788,7 +2815,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.100 </td>
+   <td style="text-align:right;"> 0.101 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2801,7 +2828,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.096 </td>
+   <td style="text-align:right;"> 0.097 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -2827,7 +2854,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.034 </td>
    <td style="text-align:right;"> 0.034 </td>
    <td style="text-align:right;"> 0.184 </td>
-   <td style="text-align:right;"> 0.171 </td>
+   <td style="text-align:right;"> 0.172 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2840,7 +2867,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.044 </td>
    <td style="text-align:right;"> 0.043 </td>
    <td style="text-align:right;"> 0.208 </td>
-   <td style="text-align:right;"> 0.001 </td>
+   <td style="text-align:right;"> 0.002 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2866,7 +2893,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.034 </td>
    <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0.183 </td>
-   <td style="text-align:right;"> 0.171 </td>
+   <td style="text-align:right;"> 0.172 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2879,7 +2906,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.194 </td>
-   <td style="text-align:right;"> 0.069 </td>
+   <td style="text-align:right;"> 0.071 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2892,7 +2919,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.194 </td>
-   <td style="text-align:right;"> 0.671 </td>
+   <td style="text-align:right;"> 0.672 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2901,11 +2928,11 @@ reint_overview |>
    <td style="text-align:right;"> 70 </td>
    <td style="text-align:right;"> 67 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
-   <td style="text-align:right;"> -0.254 </td>
-   <td style="text-align:right;"> 0.038 </td>
+   <td style="text-align:right;"> -0.213 </td>
+   <td style="text-align:right;"> 0.036 </td>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.194 </td>
-   <td style="text-align:right;"> 0.191 </td>
+   <td style="text-align:right;"> 0.262 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2918,7 +2945,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.044 </td>
    <td style="text-align:right;"> 0.042 </td>
    <td style="text-align:right;"> 0.206 </td>
-   <td style="text-align:right;"> 0.010 </td>
+   <td style="text-align:right;"> 0.011 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -2941,7 +2968,7 @@ reint_overview |>
    <td style="text-align:right;"> 58 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
    <td style="text-align:right;"> 0.008 </td>
-   <td style="text-align:right;"> 0.042 </td>
+   <td style="text-align:right;"> 0.041 </td>
    <td style="text-align:right;"> 0.042 </td>
    <td style="text-align:right;"> 0.206 </td>
    <td style="text-align:right;"> 0.970 </td>
@@ -2996,7 +3023,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.047 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.135 </td>
+   <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -3009,7 +3036,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.047 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.533 </td>
+   <td style="text-align:right;"> 0.534 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -3035,7 +3062,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.047 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.429 </td>
+   <td style="text-align:right;"> 0.430 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -3087,7 +3114,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.093 </td>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.026 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3100,7 +3127,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.091 </td>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
-   <td style="text-align:right;"> 0.086 </td>
+   <td style="text-align:right;"> 0.090 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3116,7 +3143,7 @@ reint_overview |>
 
 ## Mental health data
 
-A general overview of the main data, we use for analyses of mental health outcomes can be found below.
+A general overview of the main data, we use for analyses of mental health outcomes can be found the scroll box  below.
 
 
 
@@ -3137,17 +3164,17 @@ mental_health_dat <-
 mental_overview_dat <- 
   mental_health_dat |> 
   select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
+    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
 mental_overview_dat |> 
   mutate(
-    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
+    p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) )
   ) |> 
   select(
     `Authors (year)` = study, N_t, N_c,
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, 
+    `Outcome construct` = analysis_plan, gt_pop, vgt_pop, Wgt, Wse, p_val, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -3169,8 +3196,8 @@ mental_overview_dat |>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> N_t </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> N_c </th>
    <th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;"> Outcome construct </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> gt </th>
-   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> vgt </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> gt_pop </th>
+   <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> vgt_pop </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Wgt </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> Wse </th>
    <th style="text-align:right;position: sticky; top:0; background-color: #FFFFFF;"> p_val </th>
@@ -3188,7 +3215,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.087 </td>
    <td style="text-align:right;"> 0.084 </td>
    <td style="text-align:right;"> 0.289 </td>
-   <td style="text-align:right;"> 0.065 </td>
+   <td style="text-align:right;"> 0.070 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3201,7 +3228,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.093 </td>
    <td style="text-align:right;"> 0.092 </td>
    <td style="text-align:right;"> 0.303 </td>
-   <td style="text-align:right;"> 0.396 </td>
+   <td style="text-align:right;"> 0.398 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3214,7 +3241,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.135 </td>
    <td style="text-align:right;"> 0.131 </td>
    <td style="text-align:right;"> 0.362 </td>
-   <td style="text-align:right;"> 0.123 </td>
+   <td style="text-align:right;"> 0.128 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3227,7 +3254,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.134 </td>
    <td style="text-align:right;"> 0.133 </td>
    <td style="text-align:right;"> 0.364 </td>
-   <td style="text-align:right;"> 0.351 </td>
+   <td style="text-align:right;"> 0.354 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3275,8 +3302,8 @@ mental_overview_dat |>
    <td style="text-align:right;"> 315 </td>
    <td style="text-align:right;"> 316 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.769 </td>
-   <td style="text-align:right;"> 0.002 </td>
+   <td style="text-align:right;"> 0.755 </td>
+   <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.001 </td>
    <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 0.000 </td>
@@ -3314,8 +3341,8 @@ mental_overview_dat |>
    <td style="text-align:right;"> 273 </td>
    <td style="text-align:right;"> 238 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.422 </td>
-   <td style="text-align:right;"> 0.001 </td>
+   <td style="text-align:right;"> 0.434 </td>
+   <td style="text-align:right;"> 0.002 </td>
    <td style="text-align:right;"> 0.001 </td>
    <td style="text-align:right;"> 0.035 </td>
    <td style="text-align:right;"> 0.000 </td>
@@ -3353,8 +3380,8 @@ mental_overview_dat |>
    <td style="text-align:right;"> 229 </td>
    <td style="text-align:right;"> 204 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.445 </td>
-   <td style="text-align:right;"> 0.002 </td>
+   <td style="text-align:right;"> 0.466 </td>
+   <td style="text-align:right;"> 0.003 </td>
    <td style="text-align:right;"> 0.001 </td>
    <td style="text-align:right;"> 0.038 </td>
    <td style="text-align:right;"> 0.000 </td>
@@ -3392,8 +3419,8 @@ mental_overview_dat |>
    <td style="text-align:right;"> 208 </td>
    <td style="text-align:right;"> 180 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.430 </td>
-   <td style="text-align:right;"> 0.002 </td>
+   <td style="text-align:right;"> 0.450 </td>
+   <td style="text-align:right;"> 0.003 </td>
    <td style="text-align:right;"> 0.002 </td>
    <td style="text-align:right;"> 0.040 </td>
    <td style="text-align:right;"> 0.000 </td>
@@ -3418,11 +3445,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 157 </td>
    <td style="text-align:right;"> 77 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> -0.513 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> -0.498 </td>
+   <td style="text-align:right;"> 0.025 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.001 </td>
+   <td style="text-align:right;"> 0.002 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3448,7 +3475,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.040 </td>
    <td style="text-align:right;"> 0.040 </td>
    <td style="text-align:right;"> 0.200 </td>
-   <td style="text-align:right;"> 0.438 </td>
+   <td style="text-align:right;"> 0.439 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -3500,7 +3527,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 0.004 </td>
    <td style="text-align:right;"> 0.066 </td>
-   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.032 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3513,7 +3540,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0.120 </td>
-   <td style="text-align:right;"> 0.126 </td>
+   <td style="text-align:right;"> 0.127 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3552,7 +3579,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.016 </td>
    <td style="text-align:right;"> 0.126 </td>
-   <td style="text-align:right;"> 0.086 </td>
+   <td style="text-align:right;"> 0.087 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3565,7 +3592,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.205 </td>
    <td style="text-align:right;"> 0.193 </td>
    <td style="text-align:right;"> 0.439 </td>
-   <td style="text-align:right;"> 0.175 </td>
+   <td style="text-align:right;"> 0.188 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3604,7 +3631,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.169 </td>
    <td style="text-align:right;"> 0.166 </td>
    <td style="text-align:right;"> 0.408 </td>
-   <td style="text-align:right;"> 0.319 </td>
+   <td style="text-align:right;"> 0.323 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3617,7 +3644,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.171 </td>
    <td style="text-align:right;"> 0.166 </td>
    <td style="text-align:right;"> 0.408 </td>
-   <td style="text-align:right;"> 0.202 </td>
+   <td style="text-align:right;"> 0.208 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3626,11 +3653,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 15 </td>
    <td style="text-align:right;"> 15 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.490 </td>
-   <td style="text-align:right;"> 0.178 </td>
+   <td style="text-align:right;"> 0.355 </td>
+   <td style="text-align:right;"> 0.169 </td>
    <td style="text-align:right;"> 0.173 </td>
    <td style="text-align:right;"> 0.416 </td>
-   <td style="text-align:right;"> 0.239 </td>
+   <td style="text-align:right;"> 0.387 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3643,7 +3670,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.000 </td>
    <td style="text-align:right;"> 0.021 </td>
-   <td style="text-align:right;"> 0.107 </td>
+   <td style="text-align:right;"> 0.109 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3669,7 +3696,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.142 </td>
    <td style="text-align:right;"> 0.140 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.368 </td>
+   <td style="text-align:right;"> 0.371 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3682,7 +3709,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.141 </td>
    <td style="text-align:right;"> 0.140 </td>
    <td style="text-align:right;"> 0.375 </td>
-   <td style="text-align:right;"> 0.590 </td>
+   <td style="text-align:right;"> 0.591 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> High </td>
   </tr>
@@ -3695,7 +3722,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.086 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.038 </td>
+   <td style="text-align:right;"> 0.042 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3708,7 +3735,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.084 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.181 </td>
+   <td style="text-align:right;"> 0.184 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3721,7 +3748,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.084 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.187 </td>
+   <td style="text-align:right;"> 0.191 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3734,7 +3761,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.086 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.050 </td>
+   <td style="text-align:right;"> 0.054 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3747,7 +3774,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.086 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.029 </td>
+   <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3760,7 +3787,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.088 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.011 </td>
+   <td style="text-align:right;"> 0.014 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3773,7 +3800,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0.006 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3786,7 +3813,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.084 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.302 </td>
+   <td style="text-align:right;"> 0.304 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3795,11 +3822,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 19 </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.456 </td>
-   <td style="text-align:right;"> 0.119 </td>
+   <td style="text-align:right;"> 0.482 </td>
+   <td style="text-align:right;"> 0.114 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.181 </td>
+   <td style="text-align:right;"> 0.152 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3808,11 +3835,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 19 </td>
    <td style="text-align:right;"> 24 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.328 </td>
-   <td style="text-align:right;"> 0.118 </td>
+   <td style="text-align:right;"> 0.379 </td>
+   <td style="text-align:right;"> 0.113 </td>
    <td style="text-align:right;"> 0.116 </td>
    <td style="text-align:right;"> 0.341 </td>
-   <td style="text-align:right;"> 0.336 </td>
+   <td style="text-align:right;"> 0.260 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3825,7 +3852,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.088 </td>
    <td style="text-align:right;"> 0.083 </td>
    <td style="text-align:right;"> 0.288 </td>
-   <td style="text-align:right;"> 0.007 </td>
+   <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3838,7 +3865,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.081 </td>
    <td style="text-align:right;"> 0.079 </td>
    <td style="text-align:right;"> 0.282 </td>
-   <td style="text-align:right;"> 0.099 </td>
+   <td style="text-align:right;"> 0.103 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -3877,7 +3904,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.143 </td>
    <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0.371 </td>
-   <td style="text-align:right;"> 0.072 </td>
+   <td style="text-align:right;"> 0.078 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3903,7 +3930,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.144 </td>
    <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0.371 </td>
-   <td style="text-align:right;"> 0.061 </td>
+   <td style="text-align:right;"> 0.067 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3916,7 +3943,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.143 </td>
    <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0.371 </td>
-   <td style="text-align:right;"> 0.082 </td>
+   <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3929,7 +3956,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.142 </td>
    <td style="text-align:right;"> 0.137 </td>
    <td style="text-align:right;"> 0.371 </td>
-   <td style="text-align:right;"> 0.121 </td>
+   <td style="text-align:right;"> 0.128 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -3942,7 +3969,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.158 </td>
    <td style="text-align:right;"> 0.398 </td>
-   <td style="text-align:right;"> 0.207 </td>
+   <td style="text-align:right;"> 0.213 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -3951,11 +3978,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 25 </td>
    <td style="text-align:right;"> 10 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.437 </td>
-   <td style="text-align:right;"> 0.161 </td>
+   <td style="text-align:right;"> 0.456 </td>
+   <td style="text-align:right;"> 0.157 </td>
    <td style="text-align:right;"> 0.158 </td>
    <td style="text-align:right;"> 0.398 </td>
-   <td style="text-align:right;"> 0.272 </td>
+   <td style="text-align:right;"> 0.250 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -4046,7 +4073,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.115 </td>
    <td style="text-align:right;"> 0.114 </td>
    <td style="text-align:right;"> 0.338 </td>
-   <td style="text-align:right;"> 0.612 </td>
+   <td style="text-align:right;"> 0.613 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -4059,7 +4086,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.169 </td>
    <td style="text-align:right;"> 0.164 </td>
    <td style="text-align:right;"> 0.405 </td>
-   <td style="text-align:right;"> 0.117 </td>
+   <td style="text-align:right;"> 0.124 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Serious </td>
   </tr>
@@ -4072,7 +4099,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.068 </td>
    <td style="text-align:right;"> 0.067 </td>
    <td style="text-align:right;"> 0.260 </td>
-   <td style="text-align:right;"> 0.330 </td>
+   <td style="text-align:right;"> 0.332 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4081,11 +4108,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 36 </td>
    <td style="text-align:right;"> 35 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.615 </td>
-   <td style="text-align:right;"> 0.070 </td>
+   <td style="text-align:right;"> 0.577 </td>
+   <td style="text-align:right;"> 0.066 </td>
    <td style="text-align:right;"> 0.067 </td>
    <td style="text-align:right;"> 0.260 </td>
-   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> 0.025 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4107,11 +4134,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 35 </td>
    <td style="text-align:right;"> 35 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.549 </td>
-   <td style="text-align:right;"> 0.071 </td>
+   <td style="text-align:right;"> 0.526 </td>
+   <td style="text-align:right;"> 0.067 </td>
    <td style="text-align:right;"> 0.069 </td>
    <td style="text-align:right;"> 0.262 </td>
-   <td style="text-align:right;"> 0.036 </td>
+   <td style="text-align:right;"> 0.042 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4124,7 +4151,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.166 </td>
-   <td style="text-align:right;"> 0.004 </td>
+   <td style="text-align:right;"> 0.005 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4150,7 +4177,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.028 </td>
    <td style="text-align:right;"> 0.027 </td>
    <td style="text-align:right;"> 0.166 </td>
-   <td style="text-align:right;"> 0.215 </td>
+   <td style="text-align:right;"> 0.216 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4163,7 +4190,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.103 </td>
    <td style="text-align:right;"> 0.096 </td>
    <td style="text-align:right;"> 0.309 </td>
-   <td style="text-align:right;"> 0.014 </td>
+   <td style="text-align:right;"> 0.018 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4176,7 +4203,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.052 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.219 </td>
-   <td style="text-align:right;"> 0.011 </td>
+   <td style="text-align:right;"> 0.015 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4189,7 +4216,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.049 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.219 </td>
-   <td style="text-align:right;"> 0.200 </td>
+   <td style="text-align:right;"> 0.205 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4202,7 +4229,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.051 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.219 </td>
-   <td style="text-align:right;"> 0.028 </td>
+   <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4215,7 +4242,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.166 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.263 </td>
+   <td style="text-align:right;"> 0.269 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4228,7 +4255,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.178 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.017 </td>
+   <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4241,7 +4268,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.166 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.265 </td>
+   <td style="text-align:right;"> 0.270 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4254,7 +4281,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.169 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.121 </td>
+   <td style="text-align:right;"> 0.128 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4267,7 +4294,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.168 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.166 </td>
+   <td style="text-align:right;"> 0.173 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4280,7 +4307,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.176 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.030 </td>
+   <td style="text-align:right;"> 0.037 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4293,7 +4320,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.168 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.163 </td>
+   <td style="text-align:right;"> 0.170 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4306,7 +4333,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.172 </td>
    <td style="text-align:right;"> 0.162 </td>
    <td style="text-align:right;"> 0.403 </td>
-   <td style="text-align:right;"> 0.067 </td>
+   <td style="text-align:right;"> 0.075 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4319,7 +4346,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.329 </td>
    <td style="text-align:right;"> 0.324 </td>
    <td style="text-align:right;"> 0.569 </td>
-   <td style="text-align:right;"> 0.460 </td>
+   <td style="text-align:right;"> 0.464 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4332,7 +4359,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.269 </td>
    <td style="text-align:right;"> 0.245 </td>
    <td style="text-align:right;"> 0.495 </td>
-   <td style="text-align:right;"> 0.077 </td>
+   <td style="text-align:right;"> 0.091 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4354,11 +4381,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 153 </td>
    <td style="text-align:right;"> 148 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> -0.486 </td>
-   <td style="text-align:right;"> 0.018 </td>
+   <td style="text-align:right;"> -0.421 </td>
+   <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 0.132 </td>
-   <td style="text-align:right;"> 0.000 </td>
+   <td style="text-align:right;"> 0.001 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Moderate </td>
   </tr>
@@ -4371,7 +4398,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.092 </td>
    <td style="text-align:right;"> 0.086 </td>
    <td style="text-align:right;"> 0.293 </td>
-   <td style="text-align:right;"> 0.027 </td>
+   <td style="text-align:right;"> 0.033 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4384,7 +4411,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.183 </td>
    <td style="text-align:right;"> 0.181 </td>
    <td style="text-align:right;"> 0.425 </td>
-   <td style="text-align:right;"> 0.389 </td>
+   <td style="text-align:right;"> 0.392 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4393,11 +4420,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 38 </td>
    <td style="text-align:right;"> 38 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> -0.060 </td>
-   <td style="text-align:right;"> 0.068 </td>
+   <td style="text-align:right;"> -0.048 </td>
+   <td style="text-align:right;"> 0.066 </td>
    <td style="text-align:right;"> 0.068 </td>
    <td style="text-align:right;"> 0.262 </td>
-   <td style="text-align:right;"> 0.820 </td>
+   <td style="text-align:right;"> 0.852 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4423,7 +4450,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.039 </td>
    <td style="text-align:right;"> 0.039 </td>
    <td style="text-align:right;"> 0.198 </td>
-   <td style="text-align:right;"> 0.237 </td>
+   <td style="text-align:right;"> 0.239 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4436,7 +4463,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.040 </td>
    <td style="text-align:right;"> 0.039 </td>
    <td style="text-align:right;"> 0.198 </td>
-   <td style="text-align:right;"> 0.128 </td>
+   <td style="text-align:right;"> 0.130 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4449,7 +4476,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.333 </td>
+   <td style="text-align:right;"> 0.334 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4462,7 +4489,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.634 </td>
+   <td style="text-align:right;"> 0.635 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4488,7 +4515,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.062 </td>
    <td style="text-align:right;"> 0.062 </td>
    <td style="text-align:right;"> 0.249 </td>
-   <td style="text-align:right;"> 0.447 </td>
+   <td style="text-align:right;"> 0.448 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4501,7 +4528,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.075 </td>
    <td style="text-align:right;"> 0.073 </td>
    <td style="text-align:right;"> 0.269 </td>
-   <td style="text-align:right;"> 0.074 </td>
+   <td style="text-align:right;"> 0.078 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4514,7 +4541,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.062 </td>
    <td style="text-align:right;"> 0.061 </td>
    <td style="text-align:right;"> 0.248 </td>
-   <td style="text-align:right;"> 0.541 </td>
+   <td style="text-align:right;"> 0.542 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -4523,11 +4550,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.072 </td>
+   <td style="text-align:right;"> 0.081 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.632 </td>
+   <td style="text-align:right;"> 0.584 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4536,11 +4563,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.141 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.162 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.351 </td>
+   <td style="text-align:right;"> 0.280 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4549,11 +4576,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.185 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.210 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.218 </td>
+   <td style="text-align:right;"> 0.155 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4562,11 +4589,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.168 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.186 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.269 </td>
+   <td style="text-align:right;"> 0.214 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4579,7 +4606,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.833 </td>
+   <td style="text-align:right;"> 0.827 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4588,11 +4615,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.271 </td>
-   <td style="text-align:right;"> 0.023 </td>
+   <td style="text-align:right;"> 0.283 </td>
+   <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.074 </td>
+   <td style="text-align:right;"> 0.059 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4631,7 +4658,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.048 </td>
+   <td style="text-align:right;"> 0.049 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4644,7 +4671,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.229 </td>
+   <td style="text-align:right;"> 0.230 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4709,7 +4736,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.150 </td>
-   <td style="text-align:right;"> 0.204 </td>
+   <td style="text-align:right;"> 0.205 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4722,7 +4749,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.023 </td>
    <td style="text-align:right;"> 0.152 </td>
-   <td style="text-align:right;"> 0.468 </td>
+   <td style="text-align:right;"> 0.469 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4839,7 +4866,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.047 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.481 </td>
+   <td style="text-align:right;"> 0.482 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -4852,7 +4879,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.048 </td>
    <td style="text-align:right;"> 0.047 </td>
    <td style="text-align:right;"> 0.218 </td>
-   <td style="text-align:right;"> 0.546 </td>
+   <td style="text-align:right;"> 0.547 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -4917,7 +4944,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.127 </td>
    <td style="text-align:right;"> 0.126 </td>
    <td style="text-align:right;"> 0.355 </td>
-   <td style="text-align:right;"> 0.548 </td>
+   <td style="text-align:right;"> 0.549 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4926,11 +4953,11 @@ mental_overview_dat |>
    <td style="text-align:right;"> 21 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:left;"> Depression </td>
-   <td style="text-align:right;"> 0.289 </td>
-   <td style="text-align:right;"> 0.127 </td>
+   <td style="text-align:right;"> 0.125 </td>
+   <td style="text-align:right;"> 0.124 </td>
    <td style="text-align:right;"> 0.126 </td>
    <td style="text-align:right;"> 0.355 </td>
-   <td style="text-align:right;"> 0.416 </td>
+   <td style="text-align:right;"> 0.723 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -4943,7 +4970,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.022 </td>
    <td style="text-align:right;"> 0.021 </td>
    <td style="text-align:right;"> 0.147 </td>
-   <td style="text-align:right;"> 0.565 </td>
+   <td style="text-align:right;"> 0.566 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Low </td>
   </tr>
@@ -4995,7 +5022,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.095 </td>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
-   <td style="text-align:right;"> 0.006 </td>
+   <td style="text-align:right;"> 0.008 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -5008,7 +5035,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.091 </td>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
-   <td style="text-align:right;"> 0.121 </td>
+   <td style="text-align:right;"> 0.125 </td>
    <td style="text-align:right;"> 0 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
@@ -5027,6 +5054,12 @@ mental_overview_dat |>
 
 # Risk of bias
 
+In this section, we present the main risk og bias (RoB) visualizations. 
+
+::: {.callout-note}
+Note that in plots where the number of studies appears on the x-axis, some bars differ in length. This occurs because a single study contribute multiple effect size estimates that received different RoB assessments.
+:::
+
 ## RoB2
 
 
@@ -5036,21 +5069,21 @@ mental_overview_dat |>
 ```{{r rob2-dat}}
 rho <- 0.8
 
-V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho) 
+V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintegation_dat, rho = rho) 
 
 rma_res <- 
   metafor::rma.mv(
     gt_pop, 
     V = V_mat,
     random = ~ 1 | study / esid,
-    data = reintergation_dat
+    data = reintegation_dat
   )
 
 tau2 <- rma_res$sigma2[1]
 omega2<- rma_res$sigma2[2]
 
 reint_rob2_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -5179,14 +5212,14 @@ rob_sum_mental <-
 :::
 
 
-### Overall
+### Overall (Not preregistered vs. preregistered)
 ::: {.column width="130%"}
 
 ::: {.panel-tabset}
 ### Reintegration
 
 ::: {.panel-tabset}
-#### Number of studies
+#### Number of studies/effects
 
 
 ::: {.cell}
@@ -5489,7 +5522,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 ### Mental health
 ::: {.panel-tabset}
-#### Number of studies
+#### Number of studies/effects
 
 
 ::: {.cell}
@@ -5798,7 +5831,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 ````{.cell-code}
 ```{{r rob2-dat-subgroup}}
 reint_rob2_subgrp_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -6718,7 +6751,7 @@ rob_unweight_pct_effects_subgrp_mental
 ````{.cell-code}
 ```{{r ROBINS-I-dat}}
 reint_robinsi_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -7624,10 +7657,10 @@ es_plot_per_study
 #| fig-height: 8
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
 ggplot(aes(y = study, fill = gt_pop >= 0)) + 
-geom_bar(data = subset(reintergation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
-geom_bar(data = subset(reintergation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
 theme_minimal() +
 scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-10, 30)) +
 scale_y_discrete(limits=rev) +
@@ -7900,14 +7933,14 @@ gb_dat |>
 ```{{r structure-reint}}
 # Multi-arms studies
 multi_arm_studies_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(trt_id > 1) |> 
   reframe(study = unique(study))
   
 
 # Multi-time-points studies
 follow_up_studies_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   summarise(
     time_points = length(unique(time_after_end_intervention_weeks)),
     .by = c(study, trt_id, ctr_id)
@@ -7916,7 +7949,7 @@ follow_up_studies_reint <-
 
 # Preregistered studies
 prereg_studies_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(
     prereg_chr = unique(prereg_chr),
     n_es = n(),
@@ -7929,7 +7962,7 @@ prereg_studies_reint <-
   )
 
 study_sample_sizes_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   group_by(study, trt_id, ctr_id) |>
   summarise(
     effects = n(),
@@ -8220,7 +8253,7 @@ kable(
 #| fig-height: 6
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   summarise(
     es_count = n(),
     .by = study
@@ -8490,7 +8523,7 @@ label_cat_hist_ridge(
 
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   reframe(N_treat = max(N_t), .by = c(study, trt_id)) 
 
 N_t_total <- 
@@ -8498,7 +8531,7 @@ N_t_total <-
   summarise(N_t_total = sum(N_treat), .by = study)
 
 N_c_total <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(N_c_total = max(N_c), .by = study)
 
 N_total_dat <- 
@@ -9128,7 +9161,7 @@ control_sizes_plot_mental
 #| message: false
 
 plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(effects = n(), .by = study) |> 
   left_join(N_total_dat, by = join_by(study)) |> 
   relocate(effects, .after = N_total) |> 
@@ -9154,7 +9187,6 @@ ggMarginal(plot, type = "density")
 ![Study sample sizes versus number of effect size estimates for reintegrational outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-bivariate-1.png){#fig-es-distribution-bivariate fig-pos='H' width=576}
 :::
 :::
-
 
 
 
@@ -9223,7 +9255,7 @@ cat_dat_cross <- function(variable, study_id, data) {
 #| label: tbl-outcome
 
 outcome_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = analysis_plan,
   study_id = study
 )
@@ -9401,7 +9433,7 @@ outcome_dat_cross |>
 #| label: tbl-outcome-subgroup
 
 outcome_subgroup_dat_cross <- cat_dat_cross(
-  data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
+  data = filter(reintegation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
   variable = analysis_plan,
   study_id = study
 )
@@ -9639,7 +9671,7 @@ cat_ridge <- function(data, es, v, variable) {
 #| message: false
 
 analyzed_outcomes <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -9668,7 +9700,7 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 #| message: false
 
 not_analyzed_outcomes <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -9836,7 +9868,7 @@ text(
 #| label: tbl-diagnosis-subgroup-reint
 
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = schizophrenia,
   study_id = study
 )
@@ -9983,7 +10015,7 @@ diagnosis_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
 ```
 ````
 
@@ -10038,7 +10070,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 #| label: tbl-cbt-subgroup
 
 cbt_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = CBT_int,
   study_id = study
 )
@@ -10184,7 +10216,7 @@ cbt_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 ```
 ````
 
@@ -10245,7 +10277,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 #| message: false
 
 egm_dat_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(
     n = n(),
     n_studies = factor(n_distinct(study), levels = c(1:4)),
@@ -10486,7 +10518,7 @@ egm_dat_mental |>
 #| label: tbl-test-type-subgroup
 
 test_type_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(test_type != "Raw events")
 
 test_type_dat_cross <- cat_dat_cross(
@@ -10740,7 +10772,7 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 #| label: tbl-strategy-subgroup
 
 strategy_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = analysis_strategy,
   study_id = study
 )
@@ -10892,7 +10924,7 @@ strategy_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
 ```
 ````
 
@@ -10946,7 +10978,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 #| label: tbl-design-subgroup
 
 design_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = QES_design,
   study_id = study
 )
@@ -11096,7 +11128,7 @@ design_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
 ```
 ````
 
@@ -11150,7 +11182,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 #| label: tbl-control-subgroup
 
 control_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = control,
   study_id = study
 )
@@ -11339,7 +11371,7 @@ control_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = control, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = control, v = vgt_pop)
 ```
 ````
 
@@ -11394,7 +11426,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 #| label: tbl-rob-subgroup
 
 rob_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = overall_rob,
   study_id = study
 )
@@ -11562,7 +11594,7 @@ rob_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ```
 ````
 
@@ -11616,7 +11648,7 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 #| label: tbl-prereg-subgroup
 
 prereg_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = prereg_chr,
   study_id = study
 )
@@ -11766,7 +11798,7 @@ prereg_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 ```
 ````
 
@@ -11864,7 +11896,7 @@ var_labels <- c(
 )
 
 continuous_descriptives <- 
- reintergation_dat |> 
+ reintegation_dat |> 
   summarise(
     age = mean(age_mean),
     male_pct = mean(male_pct),
@@ -12455,7 +12487,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
   arrange(desc(duration_in_weeks)) |> 
@@ -12597,7 +12629,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
   select(study, time_after_end_intervention_weeks, N_total) |> 
   arrange(desc(study)) |> 
   mutate(study = factor(study, levels = unique(study))) |> 
@@ -12675,7 +12707,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
   ggplot() +
   aes(x = time_after_end_intervention_weeks, y = gt_pop, color = study) +
@@ -12764,10 +12796,10 @@ mental_health_dat |>
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -12790,6 +12822,10 @@ multivariate_pairs_reint <- ggpairs(multivariate_dat_reint) + theme(
 multivariate_pairs_reint
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-1.png){#fig-multivariate-plot-reint fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -12808,7 +12844,7 @@ multivariate_pairs_reint
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental <- 
   mental_health_dat |> 
@@ -12833,6 +12869,10 @@ multivariate_pairs_mental <- ggpairs(multivariate_dat_mental) + theme(
 multivariate_pairs_mental
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-1.png){#fig-multivariate-plot-mental fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -12857,10 +12897,10 @@ multivariate_pairs_mental
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint_method <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Strategy` = analysis_strategy,
@@ -12884,6 +12924,10 @@ multivariate_pairs_reint_method <- ggpairs(multivariate_dat_reint_method) + them
 multivariate_pairs_reint_method
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between methodological categorical and continuous covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-1.png){#fig-multivariate-plot-reint-method fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -12901,7 +12945,7 @@ multivariate_pairs_reint_method
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental_method <- 
   mental_health_dat |> 
@@ -12927,6 +12971,10 @@ multivariate_pairs_mental_method <- ggpairs(multivariate_dat_mental_method) + th
 multivariate_pairs_mental_method 
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between methodological categorical and continuous (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-1.png){#fig-multivariate-plot-mental-method fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -12951,10 +12999,10 @@ multivariate_pairs_mental_method
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint_method_theo <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -12977,6 +13025,10 @@ multivariate_pairs_reint_method_theo <- ggpairs(multivariate_dat_reint_method_th
 multivariate_pairs_reint_method_theo
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between substantial and methodological categorical covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-theoretical-1.png){#fig-multivariate-plot-reint-method-theoretical fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -12994,7 +13046,7 @@ multivariate_pairs_reint_method_theo
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental_method_theo <- 
   mental_health_dat |> 
@@ -13024,6 +13076,10 @@ multivariate_pairs_mental_method_theo <- ggpairs(multivariate_dat_mental_method_
 multivariate_pairs_mental_method_theo
 ```
 ````
+
+::: {.cell-output-display}
+![Multivariate structure between substantial and methodological categorical covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-theoretical-1.png){#fig-multivariate-plot-mental-method-theoretical fig-pos='H' width=2304}
+:::
 :::
 
 
@@ -13058,7 +13114,7 @@ multivariate_pairs_mental_method_theo
 #| message: false
 
 cor_mat_dat_cat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     plan = analysis_plan,
@@ -13078,7 +13134,7 @@ cat_dummy_dat <-
 
 
 cor_mat_dat_con <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -14144,7 +14200,7 @@ Excluded factors due to no variation: type of sample (schizophania vs. rest), lo
 #| message: false
 
 cor_mat_dat_cat_alcohol <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     treat = CBT_int,
@@ -14162,7 +14218,7 @@ cat_dummy_dat_alcohol <-
 
 
 cor_mat_dat_con_alcohol <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -14744,7 +14800,7 @@ Excluded factors due to no variation: type of intervention (CBT vs. rest) and ty
 #| message: false
 
 cor_mat_dat_cat_hope <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -14763,7 +14819,7 @@ cat_dummy_dat_hope <-
 
 
 cor_mat_dat_con_hope <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -15388,7 +15444,7 @@ Excluded factors due to no appearance: waitlist-only
 #| message: false
 
 cor_mat_dat_cat_social <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -15407,7 +15463,7 @@ cat_dummy_dat_social <-
 
 
 cor_mat_dat_con_social <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -16182,7 +16238,7 @@ Excluded factors due to no appearance: waitlist-only
 #| message: false
 
 cor_mat_dat_cat_well <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -16201,7 +16257,7 @@ cat_dummy_dat_well <-
 
 
 cor_mat_dat_con_well <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -18134,7 +18190,7 @@ This forest plot shows the within- and between study variation of standard error
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -18214,7 +18270,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -18303,7 +18359,7 @@ iscw <-
 rho_val <- round(seq(0, 0.8, 0.2), 1)
 
 ISCW_plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   expand_grid(rho = rho_val) |> 
   group_by(study, rho) |> 
   summarise(
@@ -18396,7 +18452,7 @@ ISCW_plot_mental
 
 :::
 
-# Effect size estimates distribution and outliers
+# Effect size estimates distributions and outliers
 
 ## Marginal distributions 
 ::: {.columns}
@@ -18410,7 +18466,7 @@ ISCW_plot_mental
 ```{{r es-distribution-table}}
 #| tbl-cap-location: top
 #| label: tab-es-distribution
-reintergation_dat$gt_pop |> 
+reintegation_dat$gt_pop |> 
   skim() |>
   select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
   rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) |>
@@ -18539,12 +18595,12 @@ mental_health_dat$gt_pop |>
 #| fig.retina: 2
 #| message: false
 
-qrtls <- quantile(reintergation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
+qrtls <- quantile(reintegation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
 fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
 fence_dat <- data.frame(qrtl = qrtls, fence = fences)
 
 es_dist_plot <- 
-  ggplot(reintergation_dat, aes(gt_pop)) + 
+  ggplot(reintegation_dat, aes(gt_pop)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
   geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
   geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
@@ -18622,7 +18678,7 @@ es_dist_plot_mental
 #| message: false
 
 outcomes_reint_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   group_by(analysis_plan) |> 
   reframe(
@@ -18633,7 +18689,7 @@ outcomes_reint_dat <-
 
 
 reintegration_outcome_plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   #Has only one data point
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
@@ -18701,6 +18757,178 @@ mental_health_outcomes_plot <-
 
 :::
 
+## Study sample sizes versus standard error estimates
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r sample-vs-se}}
+#| label: fig-sample-vs-se
+#| fig-cap: "Study sample sizes versus reintegrational standard error estimates"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+reintegation_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+```
+````
+
+::: {.cell-output-display}
+![Study sample sizes versus reintegrational standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-1.png){#fig-sample-vs-se fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r sample-vs-se-mental}}
+#| label: fig-sample-vs-se-mental
+#| fig-cap: "Study sample sizes versus mental health standard error estimates"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+```
+````
+
+::: {.cell-output-display}
+![Study sample sizes versus mental health standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-mental-1.png){#fig-sample-vs-se-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+## Standard error vs. scaled standrad error
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r se-vs-scaled}}
+#| label: fig-se-vs-scaled
+#| fig-cap: "Standard error vs. modified standard errors (reintegration)"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+reintegation_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+```
+````
+
+::: {.cell-output-display}
+![Standard error vs. modified standard errors (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-1.png){#fig-se-vs-scaled fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+````{.cell-code}
+```{{r se-vs-scaled-mental}}
+#| label: fig-se-vs-scaled-mental
+#| fig-cap: "Standard error vs. modified standard errors (mental health outcomes)"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+```
+````
+
+::: {.cell-output-display}
+![Standard error vs. modified standard errors (mental health outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-mental-1.png){#fig-se-vs-scaled-mental fig-pos='H' width=672}
+:::
+:::
+
+
+
+:::
+
+:::
+
 
 # Colophon
 
@@ -18723,7 +18951,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-08-12
+ date     2025-08-13
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 

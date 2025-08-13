@@ -32,13 +32,34 @@ citation-location: margin
 bibliography: bibliography.bib  
 ---
 
+```{css, echo=FALSE}
+
+.panel-tabset .nav-tabs {
+  border-bottom: none;
+}
+
+.panel-tabset .nav-tabs .nav-link {
+  border: 1px solid #555;
+  border-radius: 5px 5px 0 0;
+  margin-right: 5px;
+  padding: 6px 12px;
+  border-bottom: none; 
+}
+
+/* Style for the active tab */
+.panel-tabset .nav-tabs .nav-link.active {
+  background-color: #F5F5F5; 
+  border-bottom: 1px solid white; 
+}
+```
+
 # Introduction 
 
-This document contains all preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. Below one can inspect the R packages we use for this analysis as well as the data set behind our analyses. 
+This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
 
 
 ## R packages
-For exact R package versions, see the colophon by unfolding the [Session Information](#session-info) at the bottom of this document. 
+Below, we present the R package we use in this document. For exact R package versions, see the [Session Information](#session-info) at the bottom of this document. 
 
 ```{r set-up}
 #| cache: false
@@ -67,8 +88,9 @@ library(ggh4x)
 
 # Data manipulation - prepare data sets
 
-In the following section, we construct all the main variables that are used in the main analysis of the review. Unfold the below code to see this exact manipulations. 
+In the following section, we create all the variables that are used in the main analyses of the review. Unfold the below code to see this exact manipulations. 
 
+## Loading data
 ```{r load-data}
 # Loading the needed data for analysis
 group_based_dat <- readRDS("Group-based interventions data.RDS") |> 
@@ -84,7 +106,8 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
 
 ```
 
-Primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes
+## Main variable manipulation
+Unfold the below code, to find the primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes. 
 
 ```{r primary-data-manipultion}
 
@@ -382,38 +405,40 @@ gb_dat <-
   filter(!c(str_detect(study, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
 ```
 
+## Creating primary and secondary data
+
 Below, we separate the data by reintegrational (primary analysis) and mental health outcomes (secondary analyses)
 
 ::: {.panel-tabset}
 ## Reintegration data
 
-A general overview of the main data, we use for analyses of reintegrational outcomes can be found below.
+A general overview of the main data, we use for analyses of reintegrational outcomes can be found in the scroll box below.
 
 ```{r reint-data}
 #| tbl-cap: "Data with reintegration outcomes."
 #| tbl-cap-location: top
 #| label: tbl-reint-dat
 
-reintergation_dat <- 
+reintegation_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
 
-#saveRDS(reintergation_dat, file = "reintergation_dat.rds")
+#saveRDS(reintegation_dat, file = "reintegation_dat.rds")
 
 reint_overview <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
+    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
 reint_overview |> 
   mutate(
-    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
+    p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) )
   ) |> 
   select(
     `Authors (year)` = study, N_t, N_c,
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, 
+    `Outcome construct` = analysis_plan, gt_pop, vgt_pop, Wgt, Wse, p_val, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -421,12 +446,12 @@ reint_overview |>
     bootstrap_options = c("striped", "hover"),
     font_size = 10
   ) |> 
-  scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
+  scroll_box(width = "100%", height = "600px", fixed_thead = TRUE)
 ```
 
 ## Mental health data
 
-A general overview of the main data, we use for analyses of mental health outcomes can be found below.
+A general overview of the main data, we use for analyses of mental health outcomes can be found the scroll box  below.
 
 ```{r mental-data}
 #| tbl-cap: "Data with mental health outcomes."
@@ -443,17 +468,17 @@ mental_health_dat <-
 mental_overview_dat <- 
   mental_health_dat |> 
   select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
+    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
   )
 
 mental_overview_dat |> 
   mutate(
-    p_val = 2 * ( 1 - pnorm( abs(gt) / sqrt(Wgt) ) )
+    p_val = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) )
   ) |> 
   select(
     `Authors (year)` = study, N_t, N_c,
-    `Outcome construct` = analysis_plan, gt, vgt, Wgt, Wse, p_val, 
+    `Outcome construct` = analysis_plan, gt_pop, vgt_pop, Wgt, Wse, p_val, 
     `No protocol` = conventional, `Overall RoB` = Overall
   ) |> 
   kable(digits=3)  |> 
@@ -469,25 +494,31 @@ mental_overview_dat |>
 
 # Risk of bias
 
+In this section, we present the main risk og bias (RoB) visualizations. 
+
+::: {.callout-note}
+Note that in plots where the number of studies appears on the x-axis, some bars differ in length. This occurs because a single study contribute multiple effect size estimates that received different RoB assessments.
+:::
+
 ## RoB2
 ```{r rob2-dat}
 rho <- 0.8
 
-V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho) 
+V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintegation_dat, rho = rho) 
 
 rma_res <- 
   metafor::rma.mv(
     gt_pop, 
     V = V_mat,
     random = ~ 1 | study / esid,
-    data = reintergation_dat
+    data = reintegation_dat
   )
 
 tau2 <- rma_res$sigma2[1]
 omega2<- rma_res$sigma2[2]
 
 reint_rob2_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -614,14 +645,14 @@ rob_sum_mental <-
 
 
 ```
-### Overall
+### Overall (Not preregistered vs. preregistered)
 ::: {.column width="130%"}
 
 ::: {.panel-tabset}
 ### Reintegration
 
 ::: {.panel-tabset}
-#### Number of studies
+#### Number of studies/effects
 ```{r rob2-fig-number-reint}
 #| label: fig-rob2-reint-raw-number
 #| fig-cap: "RoB2 plot for reintegration studies and outcomes across type of registration (raw numbers)"
@@ -888,7 +919,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 ### Mental health
 ::: {.panel-tabset}
-#### Number of studies
+#### Number of studies/effects
 ```{r rob2-fig-number-mental}
 #| label: fig-rob2-mental-raw-number
 #| fig-cap: "RoB2 plot for mental health studies and outcomes across type of registration (raw numbers)"
@@ -1159,7 +1190,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 ```{r rob2-dat-subgroup}
 
 reint_rob2_subgrp_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -1925,7 +1956,7 @@ rob_unweight_pct_effects_subgrp_mental
 ```{r ROBINS-I-dat}
 
 reint_robinsi_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -2706,10 +2737,10 @@ es_plot_per_study
 #| fig-height: 8
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
 ggplot(aes(y = study, fill = gt_pop >= 0)) + 
-geom_bar(data = subset(reintergation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
-geom_bar(data = subset(reintergation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
 theme_minimal() +
 scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-10, 30)) +
 scale_y_discrete(limits=rev) +
@@ -2897,14 +2928,14 @@ gb_dat |>
 ```{r structure-reint}
 # Multi-arms studies
 multi_arm_studies_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(trt_id > 1) |> 
   reframe(study = unique(study))
   
 
 # Multi-time-points studies
 follow_up_studies_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   summarise(
     time_points = length(unique(time_after_end_intervention_weeks)),
     .by = c(study, trt_id, ctr_id)
@@ -2913,7 +2944,7 @@ follow_up_studies_reint <-
 
 # Preregistered studies
 prereg_studies_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(
     prereg_chr = unique(prereg_chr),
     n_es = n(),
@@ -2926,7 +2957,7 @@ prereg_studies_reint <-
   )
 
 study_sample_sizes_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   group_by(study, trt_id, ctr_id) |>
   summarise(
     effects = n(),
@@ -3113,7 +3144,7 @@ kable(
 #| fig-height: 6
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   summarise(
     es_count = n(),
     .by = study
@@ -3325,7 +3356,7 @@ label_cat_hist_ridge(
 
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   reframe(N_treat = max(N_t), .by = c(study, trt_id)) 
 
 N_t_total <- 
@@ -3333,7 +3364,7 @@ N_t_total <-
   summarise(N_t_total = sum(N_treat), .by = study)
 
 N_c_total <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(N_c_total = max(N_c), .by = study)
 
 N_total_dat <- 
@@ -3653,7 +3684,7 @@ control_sizes_plot_mental
 #| message: false
 
 plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(effects = n(), .by = study) |> 
   left_join(N_total_dat, by = join_by(study)) |> 
   relocate(effects, .after = N_total) |> 
@@ -3674,7 +3705,6 @@ plot <-
 ggMarginal(plot, type = "density")
 
 ```
-
 
 # Moderators
 ```{r cross-tab-function}
@@ -3727,7 +3757,7 @@ cat_dat_cross <- function(variable, study_id, data) {
 #| label: tbl-outcome
 
 outcome_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = analysis_plan,
   study_id = study
 )
@@ -3760,7 +3790,7 @@ outcome_dat_cross |>
 #| label: tbl-outcome-subgroup
 
 outcome_subgroup_dat_cross <- cat_dat_cross(
-  data = filter(reintergation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
+  data = filter(reintegation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
   variable = analysis_plan,
   study_id = study
 )
@@ -3869,7 +3899,7 @@ cat_ridge <- function(data, es, v, variable) {
 #| message: false
 
 analyzed_outcomes <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -3885,7 +3915,7 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 #| message: false
 
 not_analyzed_outcomes <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -4017,7 +4047,7 @@ text(
 
 
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = schizophrenia,
   study_id = study
 )
@@ -4084,7 +4114,7 @@ diagnosis_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
 ```
 :::
 
@@ -4113,7 +4143,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 #| label: tbl-cbt-subgroup
 
 cbt_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = CBT_int,
   study_id = study
 )
@@ -4179,7 +4209,7 @@ cbt_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 ```
 :::
 
@@ -4214,7 +4244,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 #| message: false
 
 egm_dat_reint <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   summarise(
     n = n(),
     n_studies = factor(n_distinct(study), levels = c(1:4)),
@@ -4433,7 +4463,7 @@ egm_dat_mental |>
 #| label: tbl-test-type-subgroup
 
 test_type_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(test_type != "Raw events")
 
 test_type_dat_cross <- cat_dat_cross(
@@ -4569,7 +4599,7 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 #| label: tbl-strategy-subgroup
 
 strategy_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = analysis_strategy,
   study_id = study
 )
@@ -4641,7 +4671,7 @@ strategy_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
 ```
 :::
 
@@ -4669,7 +4699,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 #| label: tbl-design-subgroup
 
 design_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = QES_design,
   study_id = study
 )
@@ -4739,7 +4769,7 @@ design_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
 ```
 :::
 
@@ -4767,7 +4797,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 #| label: tbl-control-subgroup
 
 control_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = control,
   study_id = study
 )
@@ -4836,7 +4866,7 @@ control_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = control, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = control, v = vgt_pop)
 ```
 :::
 
@@ -4865,7 +4895,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 #| label: tbl-rob-subgroup
 
 rob_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = overall_rob,
   study_id = study
 )
@@ -4935,7 +4965,7 @@ rob_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ```
 :::
 
@@ -4963,7 +4993,7 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 #| label: tbl-prereg-subgroup
 
 prereg_subgroup_dat_cross <- cat_dat_cross(
-  data = reintergation_dat,
+  data = reintegation_dat,
   variable = prereg_chr,
   study_id = study
 )
@@ -5033,7 +5063,7 @@ prereg_subgroup_dat_cross_mental |>
 #| fig.retina: 2
 #| message: false
 
-cat_ridge(data = reintergation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
+cat_ridge(data = reintegation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 ```
 :::
 
@@ -5092,7 +5122,7 @@ var_labels <- c(
 )
 
 continuous_descriptives <- 
- reintergation_dat |> 
+ reintegation_dat |> 
   summarise(
     age = mean(age_mean),
     male_pct = mean(male_pct),
@@ -5367,7 +5397,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
   arrange(desc(duration_in_weeks)) |> 
@@ -5483,7 +5513,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |>
+reintegation_dat |>
   select(study, time_after_end_intervention_weeks, N_total) |> 
   arrange(desc(study)) |> 
   mutate(study = factor(study, levels = unique(study))) |> 
@@ -5535,7 +5565,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
   ggplot() +
   aes(x = time_after_end_intervention_weeks, y = gt_pop, color = study) +
@@ -5599,10 +5629,10 @@ mental_health_dat |>
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -5634,7 +5664,7 @@ multivariate_pairs_reint
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental <- 
   mental_health_dat |> 
@@ -5674,10 +5704,10 @@ multivariate_pairs_mental
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint_method <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Strategy` = analysis_strategy,
@@ -5709,7 +5739,7 @@ multivariate_pairs_reint_method
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental_method <- 
   mental_health_dat |> 
@@ -5750,10 +5780,10 @@ multivariate_pairs_mental_method
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_reint_method_theo <- 
-  reintergation_dat |>
+  reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -5784,7 +5814,7 @@ multivariate_pairs_reint_method_theo
 #| fig.height: 24
 #| fig.retina: 2
 #| message: false
-#| eval: false
+#| eval: true
 
 multivariate_dat_mental_method_theo <- 
   mental_health_dat |> 
@@ -5839,7 +5869,7 @@ multivariate_pairs_mental_method_theo
 #| message: false
 
 cor_mat_dat_cat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     plan = analysis_plan,
@@ -5859,7 +5889,7 @@ cat_dummy_dat <-
 
 
 cor_mat_dat_con <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -5943,7 +5973,7 @@ Excluded factors due to no variation: type of sample (schizophania vs. rest), lo
 #| message: false
 
 cor_mat_dat_cat_alcohol <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     treat = CBT_int,
@@ -5961,7 +5991,7 @@ cat_dummy_dat_alcohol <-
 
 
 cor_mat_dat_con_alcohol <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -6038,7 +6068,7 @@ Excluded factors due to no variation: type of intervention (CBT vs. rest) and ty
 #| message: false
 
 cor_mat_dat_cat_hope <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -6057,7 +6087,7 @@ cat_dummy_dat_hope <-
 
 
 cor_mat_dat_con_hope <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -6132,7 +6162,7 @@ Excluded factors due to no appearance: waitlist-only
 #| message: false
 
 cor_mat_dat_cat_social <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -6151,7 +6181,7 @@ cat_dummy_dat_social <-
 
 
 cor_mat_dat_con_social <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -6229,7 +6259,7 @@ Excluded factors due to no appearance: waitlist-only
 #| message: false
 
 cor_mat_dat_cat_well <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -6248,7 +6278,7 @@ cat_dummy_dat_well <-
 
 
 cor_mat_dat_con_well <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -6449,7 +6479,7 @@ This forest plot shows the within- and between study variation of standard error
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -6505,7 +6535,7 @@ mental_health_dat |>
 #| fig.topcaption: TRUE
 #| message: false
 
-reintergation_dat |> 
+reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -6570,7 +6600,7 @@ iscw <-
 rho_val <- round(seq(0, 0.8, 0.2), 1)
 
 ISCW_plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   expand_grid(rho = rho_val) |> 
   group_by(study, rho) |> 
   summarise(
@@ -6644,7 +6674,7 @@ ISCW_plot_mental
 
 :::
 
-# Effect size estimates distribution and outliers
+# Effect size estimates distributions and outliers
 
 ## Marginal distributions 
 ::: {.columns}
@@ -6653,7 +6683,7 @@ ISCW_plot_mental
 ```{r es-distribution-table}
 #| tbl-cap-location: top
 #| label: tab-es-distribution
-reintergation_dat$gt_pop |> 
+reintegation_dat$gt_pop |> 
   skim() |>
   select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
   rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) |>
@@ -6699,12 +6729,12 @@ mental_health_dat$gt_pop |>
 #| message: false
 
 
-qrtls <- quantile(reintergation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
+qrtls <- quantile(reintegation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
 fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
 fence_dat <- data.frame(qrtl = qrtls, fence = fences)
 
 es_dist_plot <- 
-  ggplot(reintergation_dat, aes(gt_pop)) + 
+  ggplot(reintegation_dat, aes(gt_pop)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
   geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
   geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
@@ -6759,7 +6789,7 @@ es_dist_plot_mental
 #| message: false
 
 outcomes_reint_dat <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   group_by(analysis_plan) |> 
   reframe(
@@ -6770,7 +6800,7 @@ outcomes_reint_dat <-
 
 
 reintegration_outcome_plot <- 
-  reintergation_dat |> 
+  reintegation_dat |> 
   #Has only one data point
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
@@ -6816,6 +6846,134 @@ mental_health_outcomes_plot <-
   labs(x = "Effect size estimate"); mental_health_outcomes_plot
 
 ```
+
+:::
+
+## Study sample sizes versus standard error estimates
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-vs-se}
+#| label: fig-sample-vs-se
+#| fig-cap: "Study sample sizes versus reintegrational standard error estimates"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+reintegation_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+
+```
+:::
+
+::: {.column-margin}
+```{r sample-vs-se-mental}
+#| label: fig-sample-vs-se-mental
+#| fig-cap: "Study sample sizes versus mental health standard error estimates"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+
+```
+:::
+
+:::
+
+## Standard error vs. scaled standrad error
+::: {.columns}
+
+::: {.column width="95%"}
+```{r se-vs-scaled}
+#| label: fig-se-vs-scaled
+#| fig-cap: "Standard error vs. modified standard errors (reintegration)"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+
+reintegation_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+
+
+```
+:::
+
+::: {.column-margin}
+```{r se-vs-scaled-mental}
+#| label: fig-se-vs-scaled-mental
+#| fig-cap: "Standard error vs. modified standard errors (mental health outcomes)"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+
+
+
+```
+
+:::
 
 :::
 
