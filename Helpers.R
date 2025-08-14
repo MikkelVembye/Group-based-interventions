@@ -178,6 +178,7 @@
     
   }
   
+  # Change studyid to study
   robu_res <- raw_res |> metafor::robust(cluster = studyid, clubSandwich = TRUE)
   
   moderators <- robu_res$g.levels.f[[1]]

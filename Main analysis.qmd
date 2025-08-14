@@ -1,0 +1,125 @@
+---
+title: "Main analysis (group-based)"
+author: "Mikkel H. Vembye"
+subtitle: ""
+date: "`r Sys.Date()`"
+format:
+  html: 
+    keep-md: true
+    self-contained: true
+    grid: 
+      margin-width: 350px
+    code-fold: true
+    code-summary: "Show the code"
+    toc: true
+    toc-location: left
+pdf-engine: pdflatex
+execute: 
+  echo: fenced
+  warning: false
+  message: false
+knitr:
+  opts_chunk: 
+    fig.pos: "H"
+    fig.retina: 2
+    cache: FALSE
+    R.options:
+      knitr.graphics.auto_pdf: true
+      width: 100
+      knitr.kable.NA: "-"
+      dplyr.summarise.inform: FALSE
+---
+
+## Loading R packages and data
+
+Below, we load the R package and data used for you main analyses. You can find the generated datasets and the corresponding variables in the PRIMED workflow document. 
+
+```{r packages-and-source-file}
+
+library(dplyr)
+library(tibble)
+library(ggplot2)
+library(stringr)
+library(tidyr)
+library(rempsyc)
+library(flextable)
+library(purrr)
+library(metafor)
+library(patchwork)
+library(clubSandwich)
+
+source("Helpers.R")
+
+reintegration_dat <- readRDS("reintegation_dat.rds")
+mental_health_dat <- readRDS("mental_health_dat.rds")
+
+
+```
+
+
+## Moderators and control variables manipulation
+
+In this section, we manipulate all variables used in meta-regression analyses. 
+
+```{r, manipulate-data}
+# List all relevant moderator variables here: 
+## Type of outcome: analysis_plan
+## 
+
+reint_ma_dat <- 
+  reintegration_dat |> 
+  mutate(
+    esid = 1:n(),
+    
+    # Outcome variables
+    outcome_type = case_match(
+      analysis_plan, 
+      c("Employment", "Physical health", "Psychiatric hospitalization") ~ "Other",
+      .default = analysis_plan
+    )
+    
+  )
+
+
+```
+
+
+## Outcome
+```{r outcome-test}
+rho <- 0.8
+
+V_mat_outcome <- 
+  vcalc(
+    vi = vgt_pop, 
+    cluster = study, 
+    obs = esid, 
+    data = reint_ma_dat, 
+    rho = 0.8
+  )
+
+outcome_obj <- 
+  rma.mv(
+    yi = gt_pop ~ outcome_type - 1,
+    V = V_mat_outcome, 
+    random = list(~ outcome_type | study, ~ outcome_type | esid),
+    struct = c("DIAG", "DIAG"),
+    data = reint_ma_dat,
+    sparse=TRUE
+  )
+
+outcome_obj
+
+outcome_obj_robu <- 
+  outcome_obj |> 
+  metafor::robust(cluster = study, clubSandwich = TRUE)
+
+
+```
+
+
+
+
+
+
+
+

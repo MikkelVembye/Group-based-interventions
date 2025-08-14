@@ -15,8 +15,9 @@ format:
     toc-location: left
 pdf-engine: pdflatex
 execute: 
-  echo: fenced
+  echo: true
   warning: false
+  message: false
 knitr:
   opts_chunk: 
     fig.pos: "H"
@@ -6674,6 +6675,134 @@ ISCW_plot_mental
 
 :::
 
+## Study sample sizes versus standard error estimates
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-vs-se}
+#| label: fig-sample-vs-se
+#| fig-cap: "Study sample sizes versus reintegrational standard error estimates"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+reintegation_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+
+```
+:::
+
+::: {.column-margin}
+```{r sample-vs-se-mental}
+#| label: fig-sample-vs-se-mental
+#| fig-cap: "Study sample sizes versus mental health standard error estimates"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+
+```
+:::
+
+:::
+
+## Standard error vs. scaled standrad error
+::: {.columns}
+
+::: {.column width="95%"}
+```{r se-vs-scaled}
+#| label: fig-se-vs-scaled
+#| fig-cap: "Standard error vs. modified standard errors (reintegration)"
+#| fig.width: 6
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+
+
+reintegation_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+
+
+```
+:::
+
+::: {.column-margin}
+```{r se-vs-scaled-mental}
+#| label: fig-se-vs-scaled-mental
+#| fig-cap: "Standard error vs. modified standard errors (mental health outcomes)"
+#| fig.height: 5.5
+#| fig.retina: 2
+#| message: false
+
+mental_health_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+
+
+
+```
+
+:::
+
+:::
+
 # Effect size estimates distributions and outliers
 
 ## Marginal distributions 
@@ -6849,133 +6978,6 @@ mental_health_outcomes_plot <-
 
 :::
 
-## Study sample sizes versus standard error estimates
-
-::: {.columns}
-
-::: {.column width="95%"}
-```{r sample-vs-se}
-#| label: fig-sample-vs-se
-#| fig-cap: "Study sample sizes versus reintegrational standard error estimates"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
-reintegation_dat |> 
-  mutate(segt_pop = sqrt(vgt_pop)) |> 
-  ggplot(aes(N_total, segt_pop)) + 
-  geom_point() +
-  geom_smooth() +
-  theme_bw() +
-  labs(x = "Total sample size", y = "Modified standard error")
-
-```
-:::
-
-::: {.column-margin}
-```{r sample-vs-se-mental}
-#| label: fig-sample-vs-se-mental
-#| fig-cap: "Study sample sizes versus mental health standard error estimates"
-#| fig.height: 5.5
-#| fig.retina: 2
-#| message: false
-
-mental_health_dat |> 
-  mutate(segt_pop = sqrt(vgt_pop)) |> 
-  ggplot(aes(N_total, segt_pop)) + 
-  geom_point() +
-  geom_smooth() +
-  theme_bw() +
-  labs(x = "Total sample size", y = "Modified standard error")
-
-```
-:::
-
-:::
-
-## Standard error vs. scaled standrad error
-::: {.columns}
-
-::: {.column width="95%"}
-```{r se-vs-scaled}
-#| label: fig-se-vs-scaled
-#| fig-cap: "Standard error vs. modified standard errors (reintegration)"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
-
-reintegation_dat |> 
-  mutate(
-    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
-    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
-    segt_pop = sqrt(vgt_pop),
-    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
-  ) |> 
-  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
-  geom_point() +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_bw() +
-  theme(
-    plot.caption=element_text(hjust = 0, size = 10),
-    legend.position= "bottom",
-    legend.title = element_blank(),
-    panel.spacing.x = unit(5, "mm"), 
-    panel.spacing.y = unit(5, "mm"),
-    #panel.grid.major = element_blank(),
-    #panel.grid.minor = element_blank()
-  ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
-  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
-
-
-```
-:::
-
-::: {.column-margin}
-```{r se-vs-scaled-mental}
-#| label: fig-se-vs-scaled-mental
-#| fig-cap: "Standard error vs. modified standard errors (mental health outcomes)"
-#| fig.height: 5.5
-#| fig.retina: 2
-#| message: false
-
-mental_health_dat |> 
-  mutate(
-    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
-    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
-    segt_pop = sqrt(vgt_pop),
-    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
-  ) |> 
-  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
-  geom_point() +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_bw() +
-  theme(
-    plot.caption=element_text(hjust = 0, size = 10),
-    legend.position= "bottom",
-    legend.title = element_blank(),
-    panel.spacing.x = unit(5, "mm"), 
-    panel.spacing.y = unit(5, "mm"),
-    #panel.grid.major = element_blank(),
-    #panel.grid.minor = element_blank()
-  ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
-  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
-
-
-
-```
-
-:::
-
-:::
 
 
 # Colophon

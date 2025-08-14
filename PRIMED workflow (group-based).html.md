@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-08-13"
+date: "2025-08-14"
 format:
   html: 
     keep-md: true
@@ -15,8 +15,9 @@ format:
     toc-location: left
 pdf-engine: pdflatex
 execute: 
-  echo: fenced
+  echo: true
   warning: false
+  message: false
 knitr:
   opts_chunk: 
     fig.pos: "H"
@@ -60,7 +61,7 @@ bibliography: bibliography.bib
 
 # Introduction 
 
-This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All package that we have used to create this document, can be found in the next section. 
+This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
 
 
 ## R packages
@@ -70,11 +71,7 @@ Below, we present the R package we use in this document. For exact R package ver
 
 ::: {.cell}
 
-````{.cell-code  code-fold="false"}
-```{{r set-up}}
-#| cache: false
-#| code-fold: false
-
+```{.r .cell-code  code-fold="false"}
 # Load packages -----------------------------------------------------------
 library(knitr)
 library(kableExtra)
@@ -95,7 +92,6 @@ library(fastDummies)
 library(patchwork)
 library(ggh4x)
 ```
-````
 :::
 
 
@@ -109,8 +105,7 @@ In the following section, we create all the variables that are used in the main 
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r load-data}}
+```{.r .cell-code}
 # Loading the needed data for analysis
 group_based_dat <- readRDS("Group-based interventions data.RDS") |> 
   # The post-measurement of Empowerment Scale seems flawed for the study by 
@@ -123,7 +118,6 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
  # Remove unused outcomes
  filter(!str_detect(analysis_plan, "Unused"))
 ```
-````
 :::
 
 
@@ -135,8 +129,7 @@ Unfold the below code, to find the primary data manipulation for the overall dat
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r primary-data-manipultion}}
+```{.r .cell-code}
 gb_dat <- 
   group_based_dat |> 
   # Exclude the two binary outcomes
@@ -430,7 +423,6 @@ gb_dat <-
   # Removing ITT analyses from Cano-Vindel et al. 2021 and Craigie & Nathan 2009 
   filter(!c(str_detect(study, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
 ```
-````
 :::
 
 
@@ -448,12 +440,7 @@ A general overview of the main data, we use for analyses of reintegrational outc
 
 ::: {#tbl-reint-dat .cell .tbl-cap-location-top tbl-cap='Data with reintegration outcomes.'}
 
-````{.cell-code}
-```{{r reint-data}}
-#| tbl-cap: "Data with reintegration outcomes."
-#| tbl-cap-location: top
-#| label: tbl-reint-dat
-
+```{.r .cell-code}
 reintegation_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Reintegational outcome") 
@@ -483,7 +470,6 @@ reint_overview |>
   ) |> 
   scroll_box(width = "100%", height = "600px", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -3149,12 +3135,7 @@ A general overview of the main data, we use for analyses of mental health outcom
 
 ::: {#tbl-mental-dat .cell .tbl-cap-location-top tbl-cap='Data with mental health outcomes.'}
 
-````{.cell-code}
-```{{r mental-data}}
-#| tbl-cap: "Data with mental health outcomes."
-#| tbl-cap-location: top
-#| label: tbl-mental-dat
-
+```{.r .cell-code}
 mental_health_dat <- 
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
@@ -3184,7 +3165,6 @@ mental_overview_dat |>
   ) |> 
   scroll_box(width = "100%", height = "300px", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -5065,8 +5045,7 @@ Note that in plots where the number of studies appears on the x-axis, some bars 
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-dat}}
+```{.r .cell-code}
 rho <- 0.8
 
 V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintegation_dat, rho = rho) 
@@ -5208,7 +5187,6 @@ rob_sum_mental <-
   ) |> 
   ungroup() 
 ```
-````
 :::
 
 
@@ -5224,15 +5202,7 @@ rob_sum_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-fig-number-reint}}
-#| label: fig-rob2-reint-raw-number
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes across type of registration (raw numbers)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies <- 
   rob_sum |> 
   mutate(
@@ -5317,7 +5287,6 @@ rob_pct_effects <-
 
 rob_pct_studies / rob_pct_effects
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes across type of registration (raw numbers)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-raw-number-1.png){#fig-rob2-reint-raw-number fig-pos='H' width=864}
@@ -5332,15 +5301,7 @@ rob_pct_studies / rob_pct_effects
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-weighted}}
-#| label: fig-rob2-reint-weigthed
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes across type of registration (weighted percentage)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies_weight <- 
   rob_sum |> 
   mutate(
@@ -5413,7 +5374,6 @@ rob_pct_effects_weight <-
 
 rob_pct_studies_weight / rob_pct_effects_weight
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes across type of registration (weighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-1.png){#fig-rob2-reint-weigthed fig-pos='H' width=864}
@@ -5428,15 +5388,7 @@ rob_pct_studies_weight / rob_pct_effects_weight
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-unweighted}}
-#| label: fig-rob2-reint-unweigthed
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes across type of registration (unweighted percentage)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies_unweight <- 
   rob_sum |> 
   mutate(
@@ -5509,7 +5461,6 @@ rob_pct_effects_unweight <-
 
 rob_pct_studies_unweight / rob_pct_effects_unweight
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes across type of registration (unweighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-unweigthed-1.png){#fig-rob2-reint-unweigthed fig-pos='H' width=864}
@@ -5527,15 +5478,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-fig-number-mental}}
-#| label: fig-rob2-mental-raw-number
-#| fig-cap: "RoB2 plot for mental health studies and outcomes across type of registration (raw numbers)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies_mental <- 
   rob_sum_mental |> 
   mutate(
@@ -5614,7 +5557,6 @@ rob_pct_effects_mental <-
 
 rob_pct_studies_mental / rob_pct_effects_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes across type of registration (raw numbers)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-raw-number-1.png){#fig-rob2-mental-raw-number fig-pos='H' width=864}
@@ -5629,15 +5571,7 @@ rob_pct_studies_mental / rob_pct_effects_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-weighted-mental}}
-#| label: fig-rob2-mental-weigthed
-#| fig-cap: "RoB2 plot for mental health studies and outcomes across type of registration (weighted percentage)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies_weight_mental <- 
   rob_sum_mental |> 
   mutate(
@@ -5710,7 +5644,6 @@ rob_pct_effects_weight_mental <-
 
 rob_pct_studies_weight_mental / rob_pct_effects_weight_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes across type of registration (weighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-weigthed-1.png){#fig-rob2-mental-weigthed fig-pos='H' width=864}
@@ -5725,15 +5658,7 @@ rob_pct_studies_weight_mental / rob_pct_effects_weight_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-unweighted-mental}}
-#| label: fig-rob2-mental-unweigthed
-#| fig-cap: "RoB2 plot for mental health studies and outcomes across type of registration (unweighted percentage)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_pct_studies_unweight_mental <- 
   rob_sum_mental |> 
   mutate(
@@ -5806,7 +5731,6 @@ rob_pct_effects_unweight <-
 
 rob_pct_studies_unweight / rob_pct_effects_unweight
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes across type of registration (unweighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-unweigthed-1.png){#fig-rob2-mental-unweigthed fig-pos='H' width=864}
@@ -5828,8 +5752,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-dat-subgroup}}
+```{.r .cell-code}
 reint_rob2_subgrp_dat <- 
   reintegation_dat |> 
   mutate(
@@ -5958,7 +5881,6 @@ rob_sum_subgrp_mental <-
   ) |> 
   ungroup() 
 ```
-````
 :::
 
 
@@ -5979,15 +5901,7 @@ rob_sum_subgrp_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-n-studies}}
-#| label: fig-rob2-reint-n-studies-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of studies)"
-#| fig.width: 9
-#| fig.height: 10
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_studies_subgrp <- 
   rob_sum_subgrp |> 
   mutate(
@@ -6031,7 +5945,6 @@ rob_studies_subgrp <-
 
 rob_studies_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-studies-subgroup-1.png){#fig-rob2-reint-n-studies-subgroup fig-pos='H' width=864}
@@ -6044,15 +5957,7 @@ rob_studies_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-studies-weighted}}
-#| label: fig-rob2-reint-weigthed-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # Weigthed percent
 rob_weight_pct_studies_subgrp <- 
   rob_sum_subgrp |> 
@@ -6090,7 +5995,6 @@ rob_weight_pct_studies_subgrp <-
 
 rob_weight_pct_studies_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-subgroup-1.png){#fig-rob2-reint-weigthed-subgroup fig-pos='H' width=864}
@@ -6104,15 +6008,7 @@ rob_weight_pct_studies_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-studies-unweight}}
-#| label: fig-rob2-reint-unweigthed-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # unweigthed percent
 rob_unweight_pct_studies_subgrp <- 
   rob_sum_subgrp |> 
@@ -6150,7 +6046,6 @@ rob_unweight_pct_studies_subgrp <-
 
 rob_unweight_pct_studies_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-unweigthed-subgroup-1.png){#fig-rob2-reint-unweigthed-subgroup fig-pos='H' width=864}
@@ -6167,15 +6062,7 @@ rob_unweight_pct_studies_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-n-effects}}
-#| label: fig-rob2-reint-n-effects-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of effects)"
-#| fig.width: 9
-#| fig.height: 10
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_effects_subgrp <- 
   rob_sum_subgrp |> 
   mutate(
@@ -6221,7 +6108,6 @@ rob_effects_subgrp <-
 
 rob_effects_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (number of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-n-effects-subgroup-1.png){#fig-rob2-reint-n-effects-subgroup fig-pos='H' width=864}
@@ -6234,15 +6120,7 @@ rob_effects_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-effects-weighted}}
-#| label: fig-rob2-reint-weigthed-effects-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # Weigthed percent
 rob_weight_pct_effects_subgrp <- 
   rob_sum_subgrp |> 
@@ -6280,7 +6158,6 @@ rob_weight_pct_effects_subgrp <-
 
 rob_weight_pct_effects_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (weighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-weigthed-effects-subgroup-1.png){#fig-rob2-reint-weigthed-effects-subgroup fig-pos='H' width=864}
@@ -6294,15 +6171,7 @@ rob_weight_pct_effects_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-effects-unweight}}
-#| label: fig-rob2-reint-unweigthed-effects-subgroup
-#| fig-cap: "RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of effects)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # unweigthed percent
 rob_unweight_pct_effects_subgrp <- 
   rob_sum_subgrp |> 
@@ -6340,7 +6209,6 @@ rob_unweight_pct_effects_subgrp <-
 
 rob_unweight_pct_effects_subgrp
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for reintegration studies and outcomes by type of registration and outcome (unweighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-reint-unweigthed-effects-subgroup-1.png){#fig-rob2-reint-unweigthed-effects-subgroup fig-pos='H' width=864}
@@ -6363,15 +6231,7 @@ rob_unweight_pct_effects_subgrp
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-n-studies-mental}}
-#| label: fig-rob2-mental-n-studies-subgroup
-#| fig-cap: "RoB2 plot for mental studies and outcomes by type of registration and outcome (number of studies)"
-#| fig.width: 9
-#| fig.height: 10
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_studies_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
   mutate(
@@ -6416,7 +6276,6 @@ rob_studies_subgrp_mental <-
 
 rob_studies_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental studies and outcomes by type of registration and outcome (number of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-n-studies-subgroup-1.png){#fig-rob2-mental-n-studies-subgroup fig-pos='H' width=864}
@@ -6429,15 +6288,7 @@ rob_studies_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-studies-weighted-mental}}
-#| label: fig-rob2-mental-weigthed-subgroup
-#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of studies)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # Weigthed percent
 rob_weight_pct_studies_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
@@ -6475,7 +6326,6 @@ rob_weight_pct_studies_subgrp_mental <-
 
 rob_weight_pct_studies_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-weigthed-subgroup-1.png){#fig-rob2-mental-weigthed-subgroup fig-pos='H' width=864}
@@ -6489,15 +6339,7 @@ rob_weight_pct_studies_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-studies-unweight-mental}}
-#| label: fig-rob2-mental-unweigthed-subgroup
-#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of studies)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # unweigthed percent
 rob_unweight_pct_studies_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
@@ -6535,7 +6377,6 @@ rob_unweight_pct_studies_subgrp_mental <-
 
 rob_unweight_pct_studies_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of studies)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-unweigthed-subgroup-1.png){#fig-rob2-mental-unweigthed-subgroup fig-pos='H' width=864}
@@ -6552,15 +6393,7 @@ rob_unweight_pct_studies_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-n-effects-mental}}
-#| label: fig-rob2-mental-n-effects-subgroup
-#| fig-cap: "RoB2 plot for mental studies and outcomes by type of registration and outcome (number of effects)"
-#| fig.width: 9
-#| fig.height: 10
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 rob_effects_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
   mutate(
@@ -6605,7 +6438,6 @@ rob_effects_subgrp_mental <-
 
 rob_effects_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental studies and outcomes by type of registration and outcome (number of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-n-effects-subgroup-1.png){#fig-rob2-mental-n-effects-subgroup fig-pos='H' width=864}
@@ -6618,15 +6450,7 @@ rob_effects_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-effects-weighted-mental}}
-#| label: fig-rob2-mental-weigthed-effects-subgroup
-#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of effects)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # Weigthed percent
 rob_weight_pct_effects_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
@@ -6664,7 +6488,6 @@ rob_weight_pct_effects_subgrp_mental <-
 
 rob_weight_pct_effects_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes by type of registration and outcome (weighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-weigthed-effects-subgroup-1.png){#fig-rob2-mental-weigthed-effects-subgroup fig-pos='H' width=864}
@@ -6678,15 +6501,7 @@ rob_weight_pct_effects_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob2-subgroup-effects-unweight-mental}}
-#| label: fig-rob2-mental-unweigthed-effects-subgroup
-#| fig-cap: "RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of effects)"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 # unweigthed percent
 rob_unweight_pct_effects_subgrp_mental <- 
   rob_sum_subgrp_mental |> 
@@ -6724,7 +6539,6 @@ rob_unweight_pct_effects_subgrp_mental <-
 
 rob_unweight_pct_effects_subgrp_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![RoB2 plot for mental health studies and outcomes by type of registration and outcome (unweighted percentage of effects)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-mental-unweigthed-effects-subgroup-1.png){#fig-rob2-mental-unweigthed-effects-subgroup fig-pos='H' width=864}
@@ -6748,8 +6562,7 @@ rob_unweight_pct_effects_subgrp_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r ROBINS-I-dat}}
+```{.r .cell-code}
 reint_robinsi_dat <- 
   reintegation_dat |> 
   mutate(
@@ -6863,7 +6676,6 @@ robinsi_sum_mental <-
   ) |> 
   ungroup() 
 ```
-````
 :::
 
 
@@ -6879,15 +6691,7 @@ robinsi_sum_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-raw}}
-#| label: fig-rob2-robins-i-raw
-#| fig-cap: "ROBINS-I plot for reintegration QES studies and outcomes (raw number)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_studies <- 
   robinsi_sum |> 
   mutate(
@@ -6966,7 +6770,6 @@ robin_effects <-
 (robin_studies + robin_effects) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for reintegration QES studies and outcomes (raw number)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-raw-1.png){#fig-rob2-robins-i-raw fig-pos='H' width=1152}
@@ -6979,15 +6782,7 @@ robin_effects <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-weighted}}
-#| label: fig-rob2-robins-i-weigthed
-#| fig-cap: "ROBINS-I plot for reintegration QES studies and outcomes (weighted percentage)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_pct_studies_weight <- 
   robinsi_sum |> 
   mutate(
@@ -7066,7 +6861,6 @@ robin_pct_effects_weight <-
 (robin_pct_studies_weight + robin_pct_effects_weight) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for reintegration QES studies and outcomes (weighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-weigthed-1.png){#fig-rob2-robins-i-weigthed fig-pos='H' width=1152}
@@ -7080,15 +6874,7 @@ robin_pct_effects_weight <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-unweighted}}
-#| label: fig-rob2-robins-i-unweigthed
-#| fig-cap: "ROBINS-I plot for reintegration QES studies and outcomes (unweighted percentage)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_pct_studies_unweight <- 
   robinsi_sum |> 
   mutate(
@@ -7169,7 +6955,6 @@ robin_pct_effects_unweight <-
 (robin_pct_studies_unweight + robin_pct_effects_unweight) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for reintegration QES studies and outcomes (unweighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-unweigthed-1.png){#fig-rob2-robins-i-unweigthed fig-pos='H' width=1152}
@@ -7187,15 +6972,7 @@ robin_pct_effects_unweight <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-raw-mental}}
-#| label: fig-rob2-robins-i-raw-mental
-#| fig-cap: "ROBINS-I plot for mental health QES studies and outcomes (raw number)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_studies_mental <- 
   robinsi_sum_mental |> 
   mutate(
@@ -7274,7 +7051,6 @@ robin_effects_mental <-
 (robin_studies_mental + robin_effects_mental) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for mental health QES studies and outcomes (raw number)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-raw-mental-1.png){#fig-rob2-robins-i-raw-mental fig-pos='H' width=1152}
@@ -7288,15 +7064,7 @@ robin_effects_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-weighted-mental}}
-#| label: fig-rob2-robins-i-weigthed-mental
-#| fig-cap: "ROBINS-I plot for mental health QES studies and outcomes (weighted percentage)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_pct_studies_weight_mental <- 
   robinsi_sum_mental |> 
   mutate(
@@ -7375,7 +7143,6 @@ robin_pct_effects_weight_mental <-
 (robin_pct_studies_weight_mental + robin_pct_effects_weight_mental) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for mental health QES studies and outcomes (weighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-weigthed-mental-1.png){#fig-rob2-robins-i-weigthed-mental fig-pos='H' width=1152}
@@ -7389,15 +7156,7 @@ robin_pct_effects_weight_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r robins-i-unweighted-mental}}
-#| label: fig-rob2-robins-i-unweigthed-mental
-#| fig-cap: "ROBINS-I plot for mental health QES studies and outcomes (unweighted percentage)"
-#| fig.width: 12
-#| fig.height: 5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 robin_pct_studies_unweight_mental <- 
   robinsi_sum_mental |> 
   mutate(
@@ -7478,7 +7237,6 @@ robin_pct_effects_unweight_mental <-
 (robin_pct_studies_unweight_mental + robin_pct_effects_unweight_mental) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
 ```
-````
 
 ::: {.cell-output-display}
 ![ROBINS-I plot for mental health QES studies and outcomes (unweighted percentage)](PRIMED-workflow--group-based-_files/figure-html/fig-rob2-robins-i-unweigthed-mental-1.png){#fig-rob2-robins-i-unweigthed-mental fig-pos='H' width=1152}
@@ -7500,14 +7258,7 @@ robin_pct_effects_unweight_mental <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, time-plot}}
-#| label: fig-time-plot
-#| fig-cap: "Number of studies included in meta-analysis by year."
-#| fig-width: 12
-#| fig-height: 8
-#| message: false
-
+```{.r .cell-code}
 # Figure 1: Number of included studies in the meta-analysis by year
 G_timeplot <- 
   group_based_dat |> 
@@ -7542,7 +7293,6 @@ timeline_plot <-  ggplot(G_timeplot, aes(x = year, fill = prereg)) +
 
 timeline_plot
 ```
-````
 
 ::: {.cell-output-display}
 ![Number of studies included in meta-analysis by year.](PRIMED-workflow--group-based-_files/figure-html/fig-time-plot-1.png){#fig-time-plot fig-pos='H' width=1152}
@@ -7558,8 +7308,7 @@ timeline_plot
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r}}
+```{.r .cell-code}
 # Number of studies reporting OR
 group_based_dat |> 
   summarise(
@@ -7572,7 +7321,6 @@ group_based_dat |>
     .by = effect_size
   )
 ```
-````
 
 ::: {.cell-output .cell-output-stdout}
 
@@ -7600,14 +7348,7 @@ group_based_dat |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-plot}}
-#| label: fig-es-hist-per-stud
-#| fig-cap: "Distribution of number of effect size estimates per study"
-#| fig.width: 6.5
-#| fig.height: 7
-#| message: false
-
+```{.r .cell-code}
 es_plot_per_study <- 
   gb_dat |>
   arrange(desc(study)) |>
@@ -7629,7 +7370,6 @@ es_plot_per_study <-
 
 es_plot_per_study
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-1.png){#fig-es-hist-per-stud fig-pos='H' width=624}
@@ -7649,14 +7389,7 @@ es_plot_per_study
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-plot-reint}}
-#| label: fig-es-hist-per-stud-reint
-#| fig-cap: "Distribution of number of effects per study, by direction of the effects for reintegrational outcomes."
-#| fig-width: 12
-#| fig-height: 8
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |>
 ggplot(aes(y = study, fill = gt_pop >= 0)) + 
 geom_bar(data = subset(reintegation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
@@ -7678,7 +7411,6 @@ theme(
     plot.title = element_text(hjust = 0.5) 
   )
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effects per study, by direction of the effects for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-reint-1.png){#fig-es-hist-per-stud-reint fig-pos='H' width=1152}
@@ -7693,13 +7425,7 @@ theme(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-plot-mental}}
-#| label: fig-es-hist-per-stud-mental
-#| fig-cap: "Distribution of number of effects per study, by direction of the effects for mental health outcomes."
-#| fig-height: 8.5
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |>
 ggplot(aes(y = study, fill = gt_pop >= 0)) + 
 geom_bar(data = subset(mental_health_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
@@ -7721,7 +7447,6 @@ theme(
     plot.title = element_text(hjust = 0.5) 
   )
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effects per study, by direction of the effects for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-per-stud-mental-1.png){#fig-es-hist-per-stud-mental fig-pos='H' width=672}
@@ -7739,8 +7464,7 @@ theme(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r structure}}
+```{.r .cell-code}
 # Multi-arms studies
 multi_arm_studies <- 
   gb_dat |> 
@@ -7816,17 +7540,11 @@ sample_size_summary <-
 
 n_studies <- sample_size_summary$studies
 ```
-````
 :::
 
 ::: {#tbl-es-structure .cell .tbl-cap-location-top tbl-cap='Data structure for the all data.'}
 
-````{.cell-code}
-```{{r structure-table}}
-#| tbl-cap: "Data structure for the all data."
-#| tbl-cap-location: top
-#| label: tbl-es-structure
-
+```{.r .cell-code}
 kable(
   sample_size_summary,
   col.names = c(
@@ -7846,7 +7564,6 @@ kable(
   kable_styling(bootstrap_options = c("striped", "condensed"),
                 full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -7889,14 +7606,7 @@ kable(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, sum-es-per-study-plot}}
-#| label: fig-es-hist
-#| fig-cap: "Distribution of number of effect size estimates per study"
-#| fig.width: 9
-#| fig.height: 7
-#| message: false
-
+```{.r .cell-code}
 gb_dat |> 
   summarise(
     es_count = n(),
@@ -7910,7 +7620,6 @@ gb_dat |>
   theme_minimal() +
   labs(x = "Effect Size Estimates per Study", y = "Number of Studies")
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effect size estimates per study](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-1.png){#fig-es-hist fig-pos='H' width=864}
@@ -7929,8 +7638,7 @@ gb_dat |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r structure-reint}}
+```{.r .cell-code}
 # Multi-arms studies
 multi_arm_studies_reint <- 
   reintegation_dat |> 
@@ -8006,17 +7714,11 @@ sample_size_summary_reint <-
 
 n_studies_reint <- sample_size_summary_reint$studies
 ```
-````
 :::
 
 ::: {#tbl-es-structure-reint .cell .tbl-cap-location-top tbl-cap='Data structure for the reintegrational data.'}
 
-````{.cell-code}
-```{{r structure-table-reint}}
-#| tbl-cap: "Data structure for the reintegrational data."
-#| tbl-cap-location: top
-#| label: tbl-es-structure-reint
-
+```{.r .cell-code}
 kable(
   sample_size_summary_reint,
   col.names = c(
@@ -8036,7 +7738,6 @@ kable(
   kable_styling(bootstrap_options = c("striped", "condensed"),
                 full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8085,8 +7786,7 @@ kable(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r structure-mental}}
+```{.r .cell-code}
 # Multi-arms studies
 multi_arm_studies_mental <- 
   mental_health_dat |> 
@@ -8162,17 +7862,11 @@ sample_size_summary_mental <-
 
 n_studies_mental <- sample_size_summary_mental$studies
 ```
-````
 :::
 
 ::: {#tbl-es-structure-mental .cell .tbl-cap-location-top tbl-cap='Data structure for the mental health data.'}
 
-````{.cell-code}
-```{{r structure-table-mental}}
-#| tbl-cap: "Data structure for the mental health data."
-#| tbl-cap-location: top
-#| label: tbl-es-structure-mental
-
+```{.r .cell-code}
 kable(
   sample_size_summary_mental,
   col.names = c(
@@ -8192,7 +7886,6 @@ kable(
   kable_styling(bootstrap_options = c("striped", "condensed"),
                 full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8245,14 +7938,7 @@ kable(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sum-es-plot-reint}}
-#| label: fig-es-hist-reint
-#| fig-cap: "Distribution of number of effects per study for mental for reintegrational outcomes."
-#| fig-width: 9
-#| fig-height: 6
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |> 
   summarise(
     es_count = n(),
@@ -8268,7 +7954,6 @@ reintegation_dat |>
   labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Reintegration") +
   expand_limits(x = 30)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effects per study for mental for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=864}
@@ -8283,13 +7968,7 @@ reintegation_dat |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-plot-mental}}
-#| label: fig-es-hist-mental
-#| fig-cap: "Distribution of number of effects per study for mental health outcomes."
-#| fig-height: 8
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |> 
   summarise(
     es_count = n(),
@@ -8305,7 +7984,6 @@ mental_health_dat |>
   labs(x = "Effect Size Estimates per Study", y = "Number of Studies", title = "Mental Health") +
   expand_limits(x = 20)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of number of effects per study for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-es-hist-mental-1.png){#fig-es-hist-mental fig-pos='H' width=672}
@@ -8323,8 +8001,7 @@ mental_health_dat |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r labeled-cat-hist-ridge-function}}
+```{.r .cell-code}
 label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
   require(dplyr)
   require(rlang)
@@ -8360,7 +8037,6 @@ label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
     theme(legend.position = "none")
 }
 ```
-````
 :::
 
 
@@ -8374,15 +8050,7 @@ The following plot shows the effect size estimates distribution within each outc
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r outcome-construct-ridge-hist}}
-#| label: fig-outcome-construct-ridge-hist
-#| fig-cap: "Distribution of effect size estimates, by reintegrational outcome constructs."
-#| fig.width: 9
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 n_es_by_construct <- 
   gb_dat |> 
   filter(str_detect(outcome_construct, "Re")) |> 
@@ -8431,7 +8099,6 @@ label_cat_hist_ridge(
   labs(title = "Reintegrational outcomes") + 
   theme(plot.title = element_text(hjust = 0.5))
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by reintegrational outcome constructs.](PRIMED-workflow--group-based-_files/figure-html/fig-outcome-construct-ridge-hist-1.png){#fig-outcome-construct-ridge-hist fig-pos='H' width=864}
@@ -8446,14 +8113,7 @@ label_cat_hist_ridge(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r outcome-construct-ridge-hist-mental}}
-#| label: fig-outcome-construct-ridge-hist-mental
-#| fig-cap: "Distribution of effect size estimates, by mental health outcome constructs."
-#| fig.height: 8.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 n_es_by_construct_mental <- 
   gb_dat |> 
   filter(str_detect(outcome_construct, "Men")) |> 
@@ -8491,7 +8151,6 @@ label_cat_hist_ridge(
   labs(title = "Mental heath outcomes") + 
   theme(plot.title = element_text(hjust = 0.5))
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by mental health outcome constructs.](PRIMED-workflow--group-based-_files/figure-html/fig-outcome-construct-ridge-hist-mental-1.png){#fig-outcome-construct-ridge-hist-mental fig-pos='H' width=672}
@@ -8515,12 +8174,7 @@ label_cat_hist_ridge(
 
 ::: {#tbl-sample-size .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for reintegrational outcomes'}
 
-````{.cell-code}
-```{{r sample-size-overall-reint}}
-#| tbl-cap: "Distribution of primary study sample sizes at post test for reintegrational outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size
-
+```{.r .cell-code}
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
   reintegation_dat |> 
@@ -8552,7 +8206,6 @@ primary_sample_size_descriptive |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8595,12 +8248,7 @@ primary_sample_size_descriptive |>
 
 ::: {#tbl-sample-size-mental .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for mental health outcomes'}
 
-````{.cell-code}
-```{{r sample-size-overall-mental}}
-#| tbl-cap: "Distribution of primary study sample sizes at post test for mental health outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size-mental
-
+```{.r .cell-code}
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid_mental <- 
   mental_health_dat |> 
@@ -8632,7 +8280,6 @@ primary_sample_size_descriptive_mental |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8681,14 +8328,7 @@ The following plot displays the distribution of study sample sizes at post-test.
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-plot-reint}}
-#| label: fig-sample-size-reint
-#| fig-cap: "Distribution of primary study sample sizes at post test for reintegrational outcomes."
-#| fig.height: 2.5
-#| fig.width: 8
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 study_sizes_plot_reint <- 
   ggplot(N_total_dat, aes(N_total)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
@@ -8699,7 +8339,6 @@ study_sizes_plot_reint <-
   labs(x = "Total Sample Size", y = "")
 study_sizes_plot_reint
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of primary study sample sizes at post test for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-reint-1.png){#fig-sample-size-reint fig-pos='H' width=768}
@@ -8714,13 +8353,7 @@ study_sizes_plot_reint
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-plot-mental}}
-#| label: fig-sample-size-mental
-#| fig-cap: "Distribution of primary study sample sizes at post test for mental health outcomes."
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 study_sizes_plot_mental <- 
   ggplot(N_total_dat_mental, aes(N_total)) + 
   geom_density(fill = "gray", alpha = 0.8) + 
@@ -8731,7 +8364,6 @@ study_sizes_plot_mental <-
   labs(x = "Total Sample Size", y = "")
 study_sizes_plot_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of primary study sample sizes at post test for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-mental-1.png){#fig-sample-size-mental fig-pos='H' width=672}
@@ -8752,12 +8384,7 @@ study_sizes_plot_mental
 
 ::: {#tbl-sample-size-treatment .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for reintegrational outcomes'}
 
-````{.cell-code}
-```{{r sample-size-treatment-reint}}
-#| tbl-cap: "Distribution of treatment sample sizes at post test for reintegrational outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size-treatment
-
+```{.r .cell-code}
 treatment_sample_size_descriptive <- 
   N_t_stud_trtid$N_treat |> 
   skim() |>
@@ -8771,7 +8398,6 @@ treatment_sample_size_descriptive |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8814,12 +8440,7 @@ treatment_sample_size_descriptive |>
 
 ::: {#tbl-sample-size-treatment-mental .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for mental health outcomes'}
 
-````{.cell-code}
-```{{r sample-size-treatment-mental}}
-#| tbl-cap: "Distribution of treatment sample sizes at post test for mental health outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size-treatment-mental
-
+```{.r .cell-code}
 treatment_sample_size_descriptive_mental <- 
   N_t_stud_trtid_mental$N_treat |> 
   skim() |>
@@ -8833,7 +8454,6 @@ treatment_sample_size_descriptive_mental |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -8882,14 +8502,7 @@ The following plot displays the distribution of treatment sample sizes at post-t
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-treatment-plot-reint}}
-#| label: fig-sample-size-treatment-reint
-#| fig-cap: "Distribution of treatment sample sizes at post test for reintegrational outcomes."
-#| fig.height: 2.5
-#| fig.width: 8
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 treatment_sizes_plot_reint <- 
   ggplot(N_t_stud_trtid, aes(N_treat)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
@@ -8900,7 +8513,6 @@ treatment_sizes_plot_reint <-
   labs(x = "Total Treatment Sample Size", y = "")
 treatment_sizes_plot_reint
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of treatment sample sizes at post test for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-treatment-reint-1.png){#fig-sample-size-treatment-reint fig-pos='H' width=768}
@@ -8915,13 +8527,7 @@ treatment_sizes_plot_reint
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-treatment-plot-mental}}
-#| label: fig-sample-size-treatment-mental
-#| fig-cap: "Distribution of treatment sample sizes at post test for mental health outcomes."
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 treatment_sizes_plot_mental <- 
   ggplot(N_t_stud_trtid_mental, aes(N_treat)) + 
   geom_density(fill = "gray", alpha = 0.8) + 
@@ -8932,7 +8538,6 @@ treatment_sizes_plot_mental <-
   labs(x = "Total Treatment Sample Size", y = "")
 treatment_sizes_plot_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of treatment sample sizes at post test for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-treatment-mental-1.png){#fig-sample-size-treatment-mental fig-pos='H' width=672}
@@ -8953,12 +8558,7 @@ treatment_sizes_plot_mental
 
 ::: {#tbl-sample-size-control .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for reintegrational outcomes'}
 
-````{.cell-code}
-```{{r sample-size-control-reint}}
-#| tbl-cap: "Distribution of control group sample sizes at post test for reintegrational outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size-control
-
+```{.r .cell-code}
 control_sample_size_descriptive <- 
   N_total_dat$N_c_total |> 
   skim() |>
@@ -8972,7 +8572,6 @@ control_sample_size_descriptive |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9015,12 +8614,7 @@ control_sample_size_descriptive |>
 
 ::: {#tbl-sample-size-control-mental .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for mental health outcomes'}
 
-````{.cell-code}
-```{{r sample-size-control-mental}}
-#| tbl-cap: "Distribution of control group sample sizes at post test for mental health outcomes"
-#| tbl-cap-location: top
-#| label: tbl-sample-size-control-mental
-
+```{.r .cell-code}
 control_sample_size_descriptive_mental <- 
   N_total_dat_mental$N_c_total |> 
   skim() |>
@@ -9034,7 +8628,6 @@ control_sample_size_descriptive_mental |>
   ) |>
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9083,14 +8676,7 @@ The following plot displays the distribution of control sample sizes at post-tes
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-control-plot-reint}}
-#| label: fig-sample-size-control-reint
-#| fig-cap: "Distribution of control group sample sizes at post test for reintegrational outcomes."
-#| fig.height: 2.5
-#| fig.width: 8
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 control_sizes_plot_reint <- 
   ggplot(N_total_dat, aes(N_c_total)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
@@ -9101,7 +8687,6 @@ control_sizes_plot_reint <-
   labs(x = "Total Control Group Sample Size", y = "")
 control_sizes_plot_reint
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of control group sample sizes at post test for reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-control-reint-1.png){#fig-sample-size-control-reint fig-pos='H' width=768}
@@ -9116,13 +8701,7 @@ control_sizes_plot_reint
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sample-size-control-plot-mental}}
-#| label: fig-sample-size-control-mental
-#| fig-cap: "Distribution of control group sample sizes at post test for mental health outcomes."
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
+```{.r .cell-code}
 control_sizes_plot_mental <- 
   ggplot(N_total_dat_mental, aes(N_c_total)) + 
   geom_density(fill = "gray", alpha = 0.8) + 
@@ -9133,7 +8712,6 @@ control_sizes_plot_mental <-
   labs(x = "Total Control Group Sample Size", y = "")
 control_sizes_plot_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of control group sample sizes at post test for mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-sample-size-control-mental-1.png){#fig-sample-size-control-mental fig-pos='H' width=672}
@@ -9151,15 +8729,7 @@ control_sizes_plot_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r bivariate-es-plot}}
-#| label: fig-es-distribution-bivariate
-#| fig-cap: "Study sample sizes versus number of effect size estimates for reintegrational outcomes"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 plot <- 
   reintegation_dat |> 
   summarise(effects = n(), .by = study) |> 
@@ -9181,7 +8751,6 @@ plot <-
 
 ggMarginal(plot, type = "density")
 ```
-````
 
 ::: {.cell-output-display}
 ![Study sample sizes versus number of effect size estimates for reintegrational outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-bivariate-1.png){#fig-es-distribution-bivariate fig-pos='H' width=576}
@@ -9195,8 +8764,7 @@ ggMarginal(plot, type = "density")
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r cross-tab-function}}
+```{.r .cell-code}
 cat_dat_cross <- function(variable, study_id, data) {
   
   require(dplyr)
@@ -9235,7 +8803,6 @@ cat_dat_cross <- function(variable, study_id, data) {
   return(res_dat)
 }
 ```
-````
 :::
 
 
@@ -9248,12 +8815,7 @@ cat_dat_cross <- function(variable, study_id, data) {
 
 ::: {#tbl-outcome .cell .tbl-cap-location-top tbl-cap='Dependency table for preregistration status (reintegration)'}
 
-````{.cell-code}
-```{{r outcome-dependency-table-reint}}
-#| tbl-cap: "Dependency table for preregistration status (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-outcome
-
+```{.r .cell-code}
 outcome_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = analysis_plan,
@@ -9277,7 +8839,6 @@ outcome_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9426,12 +8987,7 @@ outcome_dat_cross |>
 
 ::: {#tbl-outcome-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (reintegration)'}
 
-````{.cell-code}
-```{{r outcome-subgroup-dependency-table-reint}}
-#| tbl-cap: "Dependency table for outcome used for subgroup analysis (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-outcome-subgroup
-
+```{.r .cell-code}
 outcome_subgroup_dat_cross <- cat_dat_cross(
   data = filter(reintegation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
   variable = analysis_plan,
@@ -9455,7 +9011,6 @@ outcome_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9517,12 +9072,7 @@ outcome_subgroup_dat_cross |>
 
 ::: {#tbl-outcome-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (mental health)'}
 
-````{.cell-code}
-```{{r outcome-subgroup-dependency-table-mental}}
-#| tbl-cap: "Dependency table for outcome used for subgroup analysis (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-outcome-subgroup-mental
-
+```{.r .cell-code}
 outcome_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = analysis_plan,
@@ -9546,7 +9096,6 @@ outcome_subgroup_dat_cross_mental |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9612,8 +9161,7 @@ outcome_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r cat-ridge-function}}
+```{.r .cell-code}
 cat_ridge <- function(data, es, v, variable) {
   require(dplyr)
   require(rlang)
@@ -9645,7 +9193,6 @@ cat_ridge <- function(data, es, v, variable) {
     theme(legend.position = "none")
 }
 ```
-````
 :::
 
 
@@ -9661,22 +9208,13 @@ cat_ridge <- function(data, es, v, variable) {
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r type-ridge-reint-analyzed}}
-#| label: fig-type-ridge-reint-analyzed
-#| fig-cap: "Distribution of effect size estimates, by reintegrational outcomes"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 analyzed_outcomes <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by reintegrational outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-reint-analyzed-1.png){#fig-type-ridge-reint-analyzed fig-pos='H' width=576}
@@ -9690,22 +9228,13 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r type-ridge-reint-not-analyzed}}
-#| label: fig-type-ridge-reint-not-analyzed
-#| fig-cap: "Distribution of effect size estimates, by reintegrational outcomes."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 not_analyzed_outcomes <- 
   reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by reintegrational outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-reint-not-analyzed-1.png){#fig-type-ridge-reint-not-analyzed fig-pos='H' width=576}
@@ -9722,17 +9251,9 @@ cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r type-ridge-mental-analyzed}}
-#| label: fig-type-ridge-mental-analyzed
-#| fig-cap: "Distribution of effect size estimates, by mental health outcomes."
-#| fig.height: 7
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_plan, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by mental health outcomes.](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-mental-analyzed-1.png){#fig-type-ridge-mental-analyzed fig-pos='H' width=672}
@@ -9752,15 +9273,7 @@ The following plot shows the network structure of outcomes constructs. Each node
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r network-plot}}
-#| label: fig-network
-#| fig-cap: "Network structure of contrasts between primary and secondary outcome constructs"
-#| fig.width: 7
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 gb_dat_reduced <- gb_dat |> select(study, analysis_plan)
 
 res_dat <- gb_dat_reduced |> 
@@ -9843,7 +9356,6 @@ text(
   xpd = NA
 )
 ```
-````
 
 ::: {.cell-output-display}
 ![Network structure of contrasts between primary and secondary outcome constructs](PRIMED-workflow--group-based-_files/figure-html/fig-network-1.png){#fig-network fig-pos='H' width=672}
@@ -9861,12 +9373,7 @@ text(
 
 ::: {#tbl-diagnosis-subgroup-reint .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (reintegration)'}
 
-````{.cell-code}
-```{{r diagnosis-dependency-table-reint}}
-#| tbl-cap: "Dependency table for diagnosis (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-diagnosis-subgroup-reint
-
+```{.r .cell-code}
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = schizophrenia,
@@ -9889,7 +9396,6 @@ diagnosis_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -9931,12 +9437,7 @@ diagnosis_subgroup_dat_cross |>
 
 ::: {#tbl-diagnosis-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (mental health)'}
 
-````{.cell-code}
-```{{r diagnosis-dependency-table-mental}}
-#| tbl-cap: "Dependency table for diagnosis (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-diagnosis-subgroup-mental
-
+```{.r .cell-code}
 diagnosis_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = schizophrenia,
@@ -9959,7 +9460,6 @@ diagnosis_subgroup_dat_cross_mental |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10006,18 +9506,9 @@ diagnosis_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r diagnosis-ridge-reint}}
-#| label: fig-diagnosis-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by diagnosis (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by diagnosis (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-diagnosis-ridge-reint-1.png){#fig-diagnosis-ridge-reint fig-pos='H' width=576}
@@ -10032,17 +9523,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = schizophrenia, v = vg
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r type-ridge-mental}}
-#| label: fig-type-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by diagnosis (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by diagnosis (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-type-ridge-mental-1.png){#fig-type-ridge-mental fig-pos='H' width=672}
@@ -10063,12 +9546,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 
 ::: {#tbl-cbt-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (reintegration)'}
 
-````{.cell-code}
-```{{r cbt-dependency-table-reint}}
-#| tbl-cap: "Dependency table for type of intervention (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-cbt-subgroup
-
+```{.r .cell-code}
 cbt_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = CBT_int,
@@ -10091,7 +9569,6 @@ cbt_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10133,12 +9610,7 @@ cbt_subgroup_dat_cross |>
 
 ::: {#tbl-cbt-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (mental health)'}
 
-````{.cell-code}
-```{{r cbt-dependency-table-mental}}
-#| tbl-cap: "Dependency table for type of intervention (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-cbt-subgroup-mental
-
+```{.r .cell-code}
 cbt_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = CBT_int,
@@ -10161,7 +9633,6 @@ cbt_subgroup_dat_cross_mental |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10207,18 +9678,9 @@ cbt_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r cbt-ridge-reint}}
-#| label: fig-cbt-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by type of intervention (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of intervention (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-cbt-ridge-reint-1.png){#fig-cbt-ridge-reint fig-pos='H' width=576}
@@ -10233,17 +9695,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r cbt-ridge-mental}}
-#| label: fig-cbt-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by type of intervention (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of intervention (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-cbt-ridge-mental-1.png){#fig-cbt-ridge-mental fig-pos='H' width=672}
@@ -10267,15 +9721,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r egm-reint}}
-#| label: fig-egm-reint
-#| fig-cap: "EGM for reintegrational outcomes"
-#| fig.width: 18
-#| fig.height: 18
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 egm_dat_reint <- 
   reintegation_dat |> 
   summarise(
@@ -10373,7 +9819,6 @@ egm_dat_reint |>
     )
   )
 ```
-````
 
 ::: {.cell-output-display}
 ![EGM for reintegrational outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-egm-reint-1.png){#fig-egm-reint fig-pos='H' width=1728}
@@ -10387,15 +9832,7 @@ egm_dat_reint |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r egm-mental}}
-#| label: fig-egm-mental
-#| fig-cap: "EGM for mental health outcomes"
-#| fig.width: 18
-#| fig.height: 18
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 egm_dat_mental <- 
   mental_health_dat |> 
   summarise(
@@ -10486,7 +9923,6 @@ egm_dat_mental |>
     )
   )
 ```
-````
 
 ::: {.cell-output-display}
 ![EGM for mental health outcomes](PRIMED-workflow--group-based-_files/figure-html/fig-egm-mental-1.png){#fig-egm-mental fig-pos='H' width=1728}
@@ -10511,12 +9947,7 @@ egm_dat_mental |>
 
 ::: {#tbl-test-type-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (reintegration)'}
 
-````{.cell-code}
-```{{r test-type-dependency-table-reint}}
-#| tbl-cap: "Dependency table for type of test (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-test-type-subgroup
-
+```{.r .cell-code}
 test_type_dat <- 
   reintegation_dat |> 
   filter(test_type != "Raw events")
@@ -10543,7 +9974,6 @@ test_type_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10585,12 +10015,7 @@ test_type_dat_cross |>
 
 ::: {#tbl-test-type-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (mental health)'}
 
-````{.cell-code}
-```{{r test-type-dependency-table-mental}}
-#| tbl-cap: "Dependency table for type of test (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-test-type-subgroup-mental
-
+```{.r .cell-code}
 test_type_dat_mental <- 
   mental_health_dat |> 
   filter(test_type != "Raw events")
@@ -10618,7 +10043,6 @@ test_type_dat_cross_mental |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10664,18 +10088,9 @@ test_type_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r test-type-ridge-reint}}
-#| label: fig-test-type-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by type of test (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = test_type_dat, es = gt_pop, variable = test_type, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of test (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-test-type-ridge-reint-1.png){#fig-test-type-ridge-reint fig-pos='H' width=576}
@@ -10690,17 +10105,9 @@ cat_ridge(data = test_type_dat, es = gt_pop, variable = test_type, v = vgt_pop)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r test-type-ridge-mental}}
-#| label: fig-test-type-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by type of test (mental health)."
-#| fig.height: 6.2
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of test (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-test-type-ridge-mental-1.png){#fig-test-type-ridge-mental fig-pos='H' width=672}
@@ -10719,15 +10126,7 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-pval-plot-reint}}
-#| label: fig-es-pval-reint
-#| fig-cap: "Distributions of effect size by p values and outcome measure type."
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 test_type_dat_all <- 
   gb_dat |> 
   filter(test_type != "Raw events") |> 
@@ -10745,7 +10144,6 @@ theme_bw() +
 theme(legend.position="none") +
 labs(x = "p values", y = "Effect sizes (Hedges' g)")
 ```
-````
 
 ::: {.cell-output-display}
 ![Distributions of effect size by p values and outcome measure type.](PRIMED-workflow--group-based-_files/figure-html/fig-es-pval-reint-1.png){#fig-es-pval-reint fig-pos='H' width=864}
@@ -10765,12 +10163,7 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 
 ::: {#tbl-strategy-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (reintegration)'}
 
-````{.cell-code}
-```{{r strategy-dependency-table-reint}}
-#| tbl-cap: "Dependency table for estimation strategy (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-strategy-subgroup
-
+```{.r .cell-code}
 strategy_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = analysis_strategy,
@@ -10796,7 +10189,6 @@ strategy_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10838,12 +10230,7 @@ strategy_subgroup_dat_cross |>
 
 ::: {#tbl-strategy-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (mental health)'}
 
-````{.cell-code}
-```{{r strategy-dependency-table-mental}}
-#| tbl-cap: "Dependency table for estimation strategy (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-strategy-subgroup-mental
-
+```{.r .cell-code}
 strategy_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = analysis_strategy,
@@ -10869,7 +10256,6 @@ strategy_subgroup_dat_cross_mental |>
   )  |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -10915,18 +10301,9 @@ strategy_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r strategy-ridge-reint}}
-#| label: fig-strategy-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by estiamtion strategy (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-strategy-ridge-reint-1.png){#fig-strategy-ridge-reint fig-pos='H' width=576}
@@ -10941,17 +10318,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = analysis_strategy, v 
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r strategy-ridge-mental}}
-#| label: fig-strategy-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by estiamtion strategy (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by estiamtion strategy (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-strategy-ridge-mental-1.png){#fig-strategy-ridge-mental fig-pos='H' width=672}
@@ -10971,12 +10340,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 
 ::: {#tbl-design-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (reintegration)'}
 
-````{.cell-code}
-```{{r design-dependency-table-reint}}
-#| tbl-cap: "Dependency table for type of research design (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-design-subgroup
-
+```{.r .cell-code}
 design_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = QES_design,
@@ -11001,7 +10365,6 @@ design_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11043,12 +10406,7 @@ design_subgroup_dat_cross |>
 
 ::: {#tbl-design-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (mental health)'}
 
-````{.cell-code}
-```{{r design-dependency-table-mental}}
-#| tbl-cap: "Dependency table for type of research design (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-design-subgroup-mental
-
+```{.r .cell-code}
 design_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = QES_design,
@@ -11073,7 +10431,6 @@ design_subgroup_dat_cross_mental |>
   )  |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11119,18 +10476,9 @@ design_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r design-ridge-reint}}
-#| label: fig-design-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by research design (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by research design (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-design-ridge-reint-1.png){#fig-design-ridge-reint fig-pos='H' width=576}
@@ -11145,17 +10493,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = QES_design, v = vgt_p
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r design-ridge-mental}}
-#| label: fig-design-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by research design (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by research design (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-design-ridge-mental-1.png){#fig-design-ridge-mental fig-pos='H' width=672}
@@ -11175,12 +10515,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 
 ::: {#tbl-control-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (reintegration)'}
 
-````{.cell-code}
-```{{r control-dependency-table-reint}}
-#| tbl-cap: "Dependency table for type of control group (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-control-subgroup
-
+```{.r .cell-code}
 control_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = control,
@@ -11206,7 +10541,6 @@ control_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11268,12 +10602,7 @@ control_subgroup_dat_cross |>
 
 ::: {#tbl-control-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (mental health)'}
 
-````{.cell-code}
-```{{r control-dependency-table-mental}}
-#| tbl-cap: "Dependency table for type of control group (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-control-subgroup-mental
-
+```{.r .cell-code}
 control_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = control,
@@ -11296,7 +10625,6 @@ control_subgroup_dat_cross_mental |>
   )  |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11362,18 +10690,9 @@ control_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r control-ridge-reint}}
-#| label: fig-control-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by type of control group (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = control, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of control group (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-control-ridge-reint-1.png){#fig-control-ridge-reint fig-pos='H' width=576}
@@ -11388,17 +10707,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = control, v = vgt_pop)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r control-ridge-mental}}
-#| label: fig-control-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by type of control group (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of control group (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-control-ridge-mental-1.png){#fig-control-ridge-mental fig-pos='H' width=672}
@@ -11419,12 +10730,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 
 ::: {#tbl-rob-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (reintegration)'}
 
-````{.cell-code}
-```{{r rob-dependency-table-reint}}
-#| tbl-cap: "Dependency table across overall risk of bias assessments (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-rob-subgroup
-
+```{.r .cell-code}
 rob_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = overall_rob,
@@ -11449,7 +10755,6 @@ rob_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11500,12 +10805,7 @@ rob_subgroup_dat_cross |>
 
 ::: {#tbl-rob-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (mental health)'}
 
-````{.cell-code}
-```{{r rob-dependency-table-mental}}
-#| tbl-cap: "Dependency table across overall risk of bias assessments (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-rob-subgroup-mental
-
+```{.r .cell-code}
 rob_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = overall_rob,
@@ -11530,7 +10830,6 @@ rob_subgroup_dat_cross_mental |>
   )  |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11585,18 +10884,9 @@ rob_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob-ridge-reint}}
-#| label: fig-rob-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by overall risk of bias assessment (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-rob-ridge-reint-1.png){#fig-rob-ridge-reint fig-pos='H' width=576}
@@ -11611,17 +10901,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = overall_rob, v = vgt_
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r rob-ridge-mental}}
-#| label: fig-rob-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by overall risk of bias assessment (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) 
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by overall risk of bias assessment (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-rob-ridge-mental-1.png){#fig-rob-ridge-mental fig-pos='H' width=672}
@@ -11641,12 +10923,7 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 
 ::: {#tbl-prereg-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (reintegration)'}
 
-````{.cell-code}
-```{{r prereg-dependency-table-reint}}
-#| tbl-cap: "Dependency table by type of registration (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-prereg-subgroup
-
+```{.r .cell-code}
 prereg_subgroup_dat_cross <- cat_dat_cross(
   data = reintegation_dat,
   variable = prereg_chr,
@@ -11671,7 +10948,6 @@ prereg_subgroup_dat_cross |>
   ) |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11713,12 +10989,7 @@ prereg_subgroup_dat_cross |>
 
 ::: {#tbl-prereg-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (mental health)'}
 
-````{.cell-code}
-```{{r prereg-dependency-table-mental}}
-#| tbl-cap: "Dependency table by type of registration (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-prereg-subgroup-mental
-
+```{.r .cell-code}
 prereg_subgroup_dat_cross_mental <- cat_dat_cross(
   data = mental_health_dat,
   variable = prereg_chr,
@@ -11743,7 +11014,6 @@ prereg_subgroup_dat_cross_mental |>
   )  |>
   kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -11789,18 +11059,9 @@ prereg_subgroup_dat_cross_mental |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r prereg-ridge-reint}}
-#| label: fig-prereg-ridge-reint
-#| fig-cap: "Distribution of effect size estimates, by type of registration (reintegrational outcome)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = reintegation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of registration (reintegrational outcome).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-ridge-reint-1.png){#fig-prereg-ridge-reint fig-pos='H' width=576}
@@ -11815,17 +11076,9 @@ cat_ridge(data = reintegation_dat, es = gt_pop, variable = prereg_chr, v = vgt_p
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r prereg-ridge-mental}}
-#| label: fig-prereg-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by type of registration (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop) 
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by type of registration (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-ridge-mental-1.png){#fig-prereg-ridge-mental fig-pos='H' width=672}
@@ -11844,22 +11097,13 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r prereg-rob-ridge-mental}}
-#| label: fig-prereg-rob-ridge-mental
-#| fig-cap: "Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health)."
-#| fig.height: 6
-#| fig.width: 9
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) + 
   facet_grid(outcome_construct~prereg_chr) + 
   theme(
     strip.background = element_rect(color = "black", fill = "gray92")
   )
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of effect size estimates, by risk of bias assessemnt across outcomes and registration (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-prereg-rob-ridge-mental-1.png){#fig-prereg-rob-ridge-mental fig-pos='H' width=864}
@@ -11879,12 +11123,7 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
 
 ::: {#tbl-continuous-characteristics-reint .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (reintegration)'}
 
-````{.cell-code}
-```{{r, continuous-mod-reint}}
-#| tbl-cap: "Distribution of continuous moderators (reintegration)"
-#| tbl-cap-location: top
-#| label: tbl-continuous-characteristics-reint
-
+```{.r .cell-code}
 var_labels <- c(
   "Mean age" = "age",
   "Percent Male" = "male_pct",
@@ -11941,7 +11180,6 @@ knitr::kable(
   kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE) |>
   collapse_rows(1, valign = "top")
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -12054,12 +11292,7 @@ knitr::kable(
 
 ::: {#tbl-continuous-characteristics-mental .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (mental health)'}
 
-````{.cell-code}
-```{{r, continuous-mod-mental}}
-#| tbl-cap: "Distribution of continuous moderators (mental health)"
-#| tbl-cap-location: top
-#| label: tbl-continuous-characteristics-mental
-
+```{.r .cell-code}
 var_labels_mental <- c(
   "Mean age" = "age",
   "Percent Male" = "male_pct",
@@ -12116,7 +11349,6 @@ knitr::kable(
   kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE) |>
   collapse_rows(1, valign = "top")
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -12231,8 +11463,7 @@ knitr::kable(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r density-plot-function}}
+```{.r .cell-code}
 density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
   require(dplyr)
   require(tidyr)
@@ -12252,7 +11483,6 @@ density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
     labs(x = x_title, y = "")
 }
 ```
-````
 :::
 
 
@@ -12264,20 +11494,11 @@ density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r age-density-reint}}
-#| label: fig-age-density-reint
-#| fig-cap: "Distribution of average age in a study (reintegrational)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 age_density <- density_plot(age, "Mean Age", continuous_descriptives)
 
 age_density + expand_limits(x = 70)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of average age in a study (reintegrational).](PRIMED-workflow--group-based-_files/figure-html/fig-age-density-reint-1.png){#fig-age-density-reint fig-pos='H' width=576}
@@ -12292,19 +11513,11 @@ age_density + expand_limits(x = 70)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r age-density-mental}}
-#| label: fig-age-density-mental
-#| fig-cap: "Distribution of average age in a study (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 age_density_mental <- density_plot(age, "Mean Age", continuous_descriptives_mental, color = "gray")
 
 age_density_mental + expand_limits(x = 70)
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of average age in a study (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-age-density-mental-1.png){#fig-age-density-mental fig-pos='H' width=672}
@@ -12324,19 +11537,10 @@ age_density_mental + expand_limits(x = 70)
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r males-density-reint}}
-#| label: fig-males-density-reint
-#| fig-cap: "Distribution proportion of males in each study (reintegration)."
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 male_density <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives))
 male_density 
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution proportion of males in each study (reintegration).](PRIMED-workflow--group-based-_files/figure-html/fig-males-density-reint-1.png){#fig-males-density-reint fig-pos='H' width=576}
@@ -12351,18 +11555,10 @@ male_density
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r males-density-mental}}
-#| label: fig-males-density-mental
-#| fig-cap: "Distribution proportion of males in each study (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 male_density_mental <- suppressWarnings(density_plot(male_pct, "Proportion Male", continuous_descriptives_mental, color = "gray"))
 male_density_mental 
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution proportion of males in each study (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-males-density-mental-1.png){#fig-males-density-mental fig-pos='H' width=672}
@@ -12381,8 +11577,7 @@ male_density_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r hist-plot-function}}
+```{.r .cell-code}
 hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
   require(dplyr)
   require(tidyr)
@@ -12406,7 +11601,6 @@ hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
     labs(x = x_title, y = "")
 }
 ```
-````
 :::
 
 
@@ -12419,19 +11613,10 @@ hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sessions-hist-reint}}
-#| label: fig-sessions-hist-reint
-#| fig-cap: "Distribution of study sessions (reintegration)."
-#| fig.width: 7
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 sessions_hist <- hist_plot(sessions, "Total Number of Sessions in Intervention", continuous_descriptives)
 sessions_hist + labs(title = "Reintegration") + theme(plot.title = element_text(hjust = 0.5))
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of study sessions (reintegration).](PRIMED-workflow--group-based-_files/figure-html/fig-sessions-hist-reint-1.png){#fig-sessions-hist-reint fig-pos='H' width=672}
@@ -12446,18 +11631,10 @@ sessions_hist + labs(title = "Reintegration") + theme(plot.title = element_text(
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r sessions-hist-mental}}
-#| label: fig-sessions-hist-mental
-#| fig-cap: "Distribution of study sessions (mental health)."
-#| fig.height: 6.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 sessions_hist_mental <- hist_plot(sessions, "Total Number of Sessions in Intervention", continuous_descriptives_mental, color = "gray")
 sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = element_text(hjust = 0.5))
 ```
-````
 
 ::: {.cell-output-display}
 ![Distribution of study sessions (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-sessions-hist-mental-1.png){#fig-sessions-hist-mental fig-pos='H' width=672}
@@ -12477,16 +11654,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r duration-plot-reint}}
-#| label: fig-duration-reint
-#| fig-cap: "Length of intervention in weeks (reintegration)"
-#| fig.width: 6.8
-#| fig.height: 7
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
@@ -12531,7 +11699,6 @@ reintegation_dat |>
     plot.caption = element_text(hjust = 0)
   ) 
 ```
-````
 
 ::: {.cell-output-display}
 ![Length of intervention in weeks (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-duration-reint-1.png){#fig-duration-reint fig-pos='H' width=652.8}
@@ -12546,15 +11713,7 @@ reintegation_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r duration-plot-mental}}
-#| label: fig-duration-mental
-#| fig-cap: "Length of intervention in weeks (mental health)"
-#| fig.height: 11
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
@@ -12598,7 +11757,6 @@ mental_health_dat |>
     plot.caption = element_text(hjust = 0)
   )  
 ```
-````
 
 ::: {.cell-output-display}
 ![Length of intervention in weeks (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-duration-mental-1.png){#fig-duration-mental fig-pos='H' width=672}
@@ -12619,16 +11777,7 @@ mental_health_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r follow-up-plot-connected-reint}}
-#| label: fig-follow-up-connected-reint
-#| fig-cap: "Weeks after end of interventions for all studies (reintegration)"
-#| fig.width: 6.5
-#| fig.height: 7
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |>
   select(study, time_after_end_intervention_weeks, N_total) |> 
   arrange(desc(study)) |> 
@@ -12641,7 +11790,6 @@ reintegation_dat |>
   theme_minimal() + 
   theme(legend.position = "none")
 ```
-````
 
 ::: {.cell-output-display}
 ![Weeks after end of interventions for all studies (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-follow-up-connected-reint-1.png){#fig-follow-up-connected-reint fig-pos='H' width=624}
@@ -12656,15 +11804,7 @@ reintegation_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r follow-up-plot-connected-mental}}
-#| label: fig-follow-up-connected-mental
-#| fig-cap: "Weeks after end of interventions for all studies (mental health)"
-#| fig.height: 11
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |>
   select(study, time_after_end_intervention_weeks, N_total) |> 
   arrange(desc(study)) |> 
@@ -12677,7 +11817,6 @@ mental_health_dat |>
   theme_minimal() + 
   theme(legend.position = "none")
 ```
-````
 
 ::: {.cell-output-display}
 ![Weeks after end of interventions for all studies (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-follow-up-connected-mental-1.png){#fig-follow-up-connected-mental fig-pos='H' width=672}
@@ -12697,16 +11836,7 @@ mental_health_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r es-time-plot-reint}}
-#| label: fig-es-time-reint
-#| fig-cap: "Length of intervention in weeks (reintegration)"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |> 
   select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
   ggplot() +
@@ -12720,7 +11850,6 @@ reintegation_dat |>
   theme(legend.position = "none") + 
   labs(x = "Follow-up duration (months)", y = "Hedges' g")
 ```
-````
 
 ::: {.cell-output-display}
 ![Length of intervention in weeks (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-es-time-reint-1.png){#fig-es-time-reint fig-pos='H' width=576}
@@ -12735,15 +11864,7 @@ reintegation_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r es-time-plot-mental}}
-#| label: fig-es-time-mental
-#| fig-cap: "Length of intervention in weeks (mental health)"
-#| fig.height: 6
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |> 
   select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
   ggplot() +
@@ -12757,7 +11878,6 @@ mental_health_dat |>
   theme(legend.position = "none") + 
   labs(x = "Follow-up duration (months)", y = "Hedges' g")
 ```
-````
 
 ::: {.cell-output-display}
 ![Length of intervention in weeks (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-es-time-mental-1.png){#fig-es-time-mental fig-pos='H' width=672}
@@ -12788,16 +11908,7 @@ mental_health_dat |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-plot-reint}}
-#| label: fig-multivariate-plot-reint
-#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_reint <- 
   reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
@@ -12821,7 +11932,6 @@ multivariate_pairs_reint <- ggpairs(multivariate_dat_reint) + theme(
 
 multivariate_pairs_reint
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between substaintial/theoretical categorical and continuous (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-1.png){#fig-multivariate-plot-reint fig-pos='H' width=2304}
@@ -12836,16 +11946,7 @@ multivariate_pairs_reint
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-dat-mental}}
-#| label: fig-multivariate-plot-mental
-#| fig-cap: "Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_mental <- 
   mental_health_dat |> 
   select(
@@ -12868,7 +11969,6 @@ multivariate_pairs_mental <- ggpairs(multivariate_dat_mental) + theme(
 
 multivariate_pairs_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between substaintial/theoretical categorical and continuous covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-1.png){#fig-multivariate-plot-mental fig-pos='H' width=2304}
@@ -12889,16 +11989,7 @@ multivariate_pairs_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-dat-reint-method}}
-#| label: fig-multivariate-plot-reint-method
-#| fig-cap: "Multivariate structure between methodological categorical and continuous covariates (reintegration)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_reint_method <- 
   reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
@@ -12923,7 +12014,6 @@ multivariate_pairs_reint_method <- ggpairs(multivariate_dat_reint_method) + them
 
 multivariate_pairs_reint_method
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between methodological categorical and continuous covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-1.png){#fig-multivariate-plot-reint-method fig-pos='H' width=2304}
@@ -12937,16 +12027,7 @@ multivariate_pairs_reint_method
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-dat-mental-method}}
-#| label: fig-multivariate-plot-mental-method
-#| fig-cap: "Multivariate structure between methodological categorical and continuous (mental health)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_mental_method <- 
   mental_health_dat |> 
   select(
@@ -12970,7 +12051,6 @@ multivariate_pairs_mental_method <- ggpairs(multivariate_dat_mental_method) + th
 
 multivariate_pairs_mental_method 
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between methodological categorical and continuous (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-1.png){#fig-multivariate-plot-mental-method fig-pos='H' width=2304}
@@ -12991,16 +12071,7 @@ multivariate_pairs_mental_method
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-dat-reint-method-theoretical}}
-#| label: fig-multivariate-plot-reint-method-theoretical
-#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (reintegration)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_reint_method_theo <- 
   reintegation_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
@@ -13024,7 +12095,6 @@ multivariate_pairs_reint_method_theo <- ggpairs(multivariate_dat_reint_method_th
 
 multivariate_pairs_reint_method_theo
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between substantial and methodological categorical covariates (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-reint-method-theoretical-1.png){#fig-multivariate-plot-reint-method-theoretical fig-pos='H' width=2304}
@@ -13038,16 +12108,7 @@ multivariate_pairs_reint_method_theo
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r, multivaraite-dat-mental-method-theoretical}}
-#| label: fig-multivariate-plot-mental-method-theoretical
-#| fig-cap: "Multivariate structure between substantial and methodological categorical covariates (mental health)"
-#| fig.width: 24
-#| fig.height: 24
-#| fig.retina: 2
-#| message: false
-#| eval: true
-
+```{.r .cell-code}
 multivariate_dat_mental_method_theo <- 
   mental_health_dat |> 
   select(
@@ -13075,7 +12136,6 @@ multivariate_pairs_mental_method_theo <- ggpairs(multivariate_dat_mental_method_
 
 multivariate_pairs_mental_method_theo
 ```
-````
 
 ::: {.cell-output-display}
 ![Multivariate structure between substantial and methodological categorical covariates (mental health)](PRIMED-workflow--group-based-_files/figure-html/fig-multivariate-plot-mental-method-theoretical-1.png){#fig-multivariate-plot-mental-method-theoretical fig-pos='H' width=2304}
@@ -13106,13 +12166,7 @@ multivariate_pairs_mental_method_theo
 
 ::: {#tbl-cor-matix-reint .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all reintegration outcomes.'}
 
-````{.cell-code}
-```{{r correlation-matrix-reint}}
-#| tbl-cap: "Correlation matrix across all reintegration outcomes."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-reint
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
@@ -13207,7 +12261,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -14192,13 +13245,7 @@ Excluded factors due to no variation: type of sample (schizophania vs. rest), lo
 
 ::: {#tbl-cor-matix-alcohol .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on alcohol outcome only.'}
 
-````{.cell-code}
-```{{r correlation-matrix-alcohol}}
-#| tbl-cap: "Correlation matrix based on alcohol outcome only."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-alcohol
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat_alcohol <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
@@ -14283,7 +13330,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -14792,13 +13838,7 @@ Excluded factors due to no variation: type of intervention (CBT vs. rest) and ty
 
 ::: {#tbl-cor-matix-hope .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on hope, empowerment & self-efficacy outcomes only.'}
 
-````{.cell-code}
-```{{r correlation-matrix-hope}}
-#| tbl-cap: "Correlation matrix based on hope, empowerment & self-efficacy outcomes only."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-hope
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat_hope <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
@@ -14883,7 +13923,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -15436,13 +14475,7 @@ Excluded factors due to no appearance: waitlist-only
 
 ::: {#tbl-cor-matix-social .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on social functioning outcomes only.'}
 
-````{.cell-code}
-```{{r correlation-matrix-social}}
-#| tbl-cap: "Correlation matrix based on social functioning outcomes only."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-social
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat_social <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
@@ -15530,7 +14563,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -16230,13 +15262,7 @@ Excluded factors due to no appearance: waitlist-only
 
 ::: {#tbl-cor-matix-wellbeing .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on wellbeing and quality of life outcomes only.'}
 
-````{.cell-code}
-```{{r correlation-matrix-wellbeing}}
-#| tbl-cap: "Correlation matrix based on wellbeing and quality of life outcomes only."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-wellbeing
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat_well <- 
   reintegation_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
@@ -16325,7 +15351,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -17080,13 +16105,7 @@ kbl(
 
 ::: {#tbl-cor-matix-mental .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all mental health outcomes.'}
 
-````{.cell-code}
-```{{r correlation-matrix-mental}}
-#| tbl-cap: "Correlation matrix across all mental health outcomes."
-#| tbl-cap-location: top
-#| label: tbl-cor-matix-mental
-#| message: false
-
+```{.r .cell-code}
 cor_mat_dat_cat_mental <- 
   mental_health_dat |> 
   filter(test_type != "Raw events") |> 
@@ -17182,7 +16201,6 @@ kbl(
   ) |> 
   scroll_box(width = "100%", height = "100%", fixed_thead = TRUE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -18180,16 +17198,7 @@ This forest plot shows the within- and between study variation of standard error
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r se-plot-reintegration}}
-#| label: fig-forset-plot-se
-#| fig-cap: "Forest plot of standard error of reintegrational effect size estimates."
-#| fig.width: 6.8
-#| fig.height: 7
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
@@ -18203,7 +17212,6 @@ reintegation_dat |>
   labs(y = "", x = "SE") +
   theme(legend.position = "none", axis.text.y = element_text(size = 10))
 ```
-````
 
 ::: {.cell-output-display}
 ![Forest plot of standard error of reintegrational effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-1.png){#fig-forset-plot-se fig-pos='H' width=652.8}
@@ -18218,15 +17226,7 @@ reintegation_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r se-plot-mental}}
-#| label: fig-forset-plot-se-mental
-#| fig-cap: "Forest plot of standard error of mental health effect size estimates."
-#| fig.height: 11
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |> 
   arrange(desc(study)) |>
   mutate(
@@ -18240,7 +17240,6 @@ mental_health_dat |>
   labs(y = "", x = "SE") +
   theme(legend.position = "none", axis.text.y = element_text(size = 10))
 ```
-````
 
 ::: {.cell-output-display}
 ![Forest plot of standard error of mental health effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-mental-1.png){#fig-forset-plot-se-mental fig-pos='H' width=672}
@@ -18260,16 +17259,7 @@ mental_health_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r se-plot-reintegration-modified}}
-#| label: fig-forset-plot-se-modified
-#| fig-cap: "Forest plot of modified standard error of reintegrational effect size estimates."
-#| fig.width: 6.8
-#| fig.height: 7
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 reintegation_dat |> 
   arrange(desc(study)) |>
   mutate(
@@ -18283,7 +17273,6 @@ reintegation_dat |>
   labs(y = "", x = "Modified SE") +
   theme(legend.position = "none", axis.text.y = element_text(size = 10))
 ```
-````
 
 ::: {.cell-output-display}
 ![Forest plot of modified standard error of reintegrational effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-modified-1.png){#fig-forset-plot-se-modified fig-pos='H' width=652.8}
@@ -18298,15 +17287,7 @@ reintegation_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r se-plot-mental-modified}}
-#| label: fig-forset-plot-se-mental-modified
-#| fig-cap: "Forest plot of modified standard error of mental health effect size estimates."
-#| fig.height: 11
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 mental_health_dat |> 
   arrange(desc(study)) |>
   mutate(
@@ -18320,7 +17301,6 @@ mental_health_dat |>
   labs(y = "", x = "Modified SE") +
   theme(legend.position = "none", axis.text.y = element_text(size = 10))
 ```
-````
 
 ::: {.cell-output-display}
 ![Forest plot of modified standard error of mental health effect size estimates.](PRIMED-workflow--group-based-_files/figure-html/fig-forset-plot-se-mental-modified-1.png){#fig-forset-plot-se-mental-modified fig-pos='H' width=672}
@@ -18340,16 +17320,7 @@ mental_health_dat |>
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r ISCW-plot}}
-#| label: fig-iscw
-#| fig-cap: "Plot of inverse sampling covariance (ISC) weights for each study (reintegrational outcomes)"
-#| fig.width: 6.8
-#| fig.height: 7
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 iscw <-
   function(k, rho, v) {
     iscw_weights <-  k / (((k - 1) * rho + 1) * v)
@@ -18387,7 +17358,6 @@ ISCW_plot <-
 
 ISCW_plot
 ```
-````
 
 ::: {.cell-output-display}
 ![Plot of inverse sampling covariance (ISC) weights for each study (reintegrational outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-iscw-1.png){#fig-iscw fig-pos='H' width=652.8}
@@ -18402,15 +17372,7 @@ ISCW_plot
 
 ::: {.cell fig.topcaption='true'}
 
-````{.cell-code}
-```{{r ISCW-plot-mental}}
-#| label: fig-iscw-mental
-#| fig-cap: "Plot of inverse sampling covariance (ISC) weights for each study (mental healt outcomes)"
-#| fig.height: 11
-#| fig.retina: 2
-#| fig.topcaption: TRUE
-#| message: false
-
+```{.r .cell-code}
 ISCW_plot_mental <- 
   mental_health_dat |> 
   expand_grid(rho = rho_val) |> 
@@ -18440,12 +17402,149 @@ ISCW_plot_mental <-
 
 ISCW_plot_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Plot of inverse sampling covariance (ISC) weights for each study (mental healt outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-iscw-mental-1.png){#fig-iscw-mental fig-pos='H' width=672}
 :::
 :::
+
+
+:::
+
+:::
+
+## Study sample sizes versus standard error estimates
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+reintegation_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+```
+
+::: {.cell-output-display}
+![Study sample sizes versus reintegrational standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-1.png){#fig-sample-vs-se fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+mental_health_dat |> 
+  mutate(segt_pop = sqrt(vgt_pop)) |> 
+  ggplot(aes(N_total, segt_pop)) + 
+  geom_point() +
+  geom_smooth() +
+  theme_bw() +
+  labs(x = "Total sample size", y = "Modified standard error")
+```
+
+::: {.cell-output-display}
+![Study sample sizes versus mental health standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-mental-1.png){#fig-sample-vs-se-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
+
+## Standard error vs. scaled standrad error
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+reintegation_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+```
+
+::: {.cell-output-display}
+![Standard error vs. modified standard errors (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-1.png){#fig-se-vs-scaled fig-pos='H' width=576}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+mental_health_dat |> 
+  mutate(
+    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
+    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
+    segt_pop = sqrt(vgt_pop),
+    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
+  ) |> 
+  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
+  geom_point() +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_bw() +
+  theme(
+    plot.caption=element_text(hjust = 0, size = 10),
+    legend.position= "bottom",
+    legend.title = element_blank(),
+    panel.spacing.x = unit(5, "mm"), 
+    panel.spacing.y = unit(5, "mm"),
+    #panel.grid.major = element_blank(),
+    #panel.grid.minor = element_blank()
+  ) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
+  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
+```
+
+::: {.cell-output-display}
+![Standard error vs. modified standard errors (mental health outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-mental-1.png){#fig-se-vs-scaled-mental fig-pos='H' width=672}
+:::
+:::
+
 
 
 :::
@@ -18462,10 +17561,7 @@ ISCW_plot_mental
 
 ::: {.cell .tbl-cap-location-top}
 
-````{.cell-code}
-```{{r es-distribution-table}}
-#| tbl-cap-location: top
-#| label: tab-es-distribution
+```{.r .cell-code}
 reintegation_dat$gt_pop |> 
   skim() |>
   select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
@@ -18477,7 +17573,6 @@ reintegation_dat$gt_pop |>
   )  |> 
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -18521,10 +17616,7 @@ reintegation_dat$gt_pop |>
 
 ::: {.cell .tbl-cap-location-top}
 
-````{.cell-code}
-```{{r es-distribution-table-mental}}
-#| tbl-cap-location: top
-#| label: tab-es-distribution-mental
+```{.r .cell-code}
 mental_health_dat$gt_pop |> 
   skim() |>
   select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
@@ -18536,7 +17628,6 @@ mental_health_dat$gt_pop |>
   )  |> 
   kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
 ```
-````
 
 ::: {.cell-output-display}
 
@@ -18586,15 +17677,7 @@ mental_health_dat$gt_pop |>
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-distribution-plot}}
-#| label: fig-es-distribution
-#| fig-cap: "Empirical distribution of reintegrational effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition."
-#| fig.width: 8
-#| fig.height: 2.5
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 qrtls <- quantile(reintegation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
 fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
 fence_dat <- data.frame(qrtl = qrtls, fence = fences)
@@ -18611,7 +17694,6 @@ es_dist_plot <-
 
 es_dist_plot
 ```
-````
 
 ::: {.cell-output-display}
 ![Empirical distribution of reintegrational effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition.](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-1.png){#fig-es-distribution fig-pos='H' width=768}
@@ -18626,14 +17708,7 @@ es_dist_plot
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-distribution-plot-mental}}
-#| label: fig-es-distribution-mental
-#| fig-cap: "Empirical distribution of mental health effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition."
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 qrtls_mental <- quantile(mental_health_dat$gt_pop, c(.25, .75), na.rm = TRUE)
 fences_mental <-  qrtls_mental + 3 * diff(qrtls_mental) * c(-1, 1)
 fence_dat_mental <- data.frame(qrtl = qrtls_mental, fence = fences_mental)
@@ -18650,7 +17725,6 @@ es_dist_plot_mental <-
 
 es_dist_plot_mental
 ```
-````
 
 ::: {.cell-output-display}
 ![Empirical distribution of mental health effect size estimates. Solid vertical lines indicate lower and upper quartiles. Dashed lines indicate the 1st quartile minus 3 times the inter-quartile range and the 3rd quartile plus 3 times the interquartile range. Effect sizes outside of the range of dashed lines would be considered outliers according to Tukey's (1977) definition.](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-mental-1.png){#fig-es-distribution-mental fig-pos='H' width=672}
@@ -18670,13 +17744,7 @@ es_dist_plot_mental
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-dist-subgroup-plot}}
-#| label: fig-es-distribution-reint-subgroup
-#| fig-cap: "Empirical distribution of effect size estimates, by reintegrational constructs" 
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 outcomes_reint_dat <- 
   reintegation_dat |> 
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
@@ -18702,7 +17770,6 @@ reintegration_outcome_plot <-
   theme(legend.position = "none", axis.title.y = element_blank(), axis.text.y = element_blank()) +
   labs(x = "Effect size estimate", ); reintegration_outcome_plot
 ```
-````
 
 ::: {.cell-output-display}
 ![Empirical distribution of effect size estimates, by reintegrational constructs](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-reint-subgroup-1.png){#fig-es-distribution-reint-subgroup fig-pos='H' width=672}
@@ -18717,13 +17784,7 @@ reintegration_outcome_plot <-
 
 ::: {.cell}
 
-````{.cell-code}
-```{{r es-dist-subgroup-plot-mental}}
-#| label: fig-es-distribution-mental-subgroup
-#| fig-cap: "Empirical distribution of effect size estimates, by mental health constructs" 
-#| fig.retina: 2
-#| message: false
-
+```{.r .cell-code}
 outcome_mental_health_dat <- 
   mental_health_dat |> 
   group_by(analysis_plan) |> 
@@ -18746,7 +17807,6 @@ mental_health_outcomes_plot <-
   theme(legend.position = "none", axis.title.y = element_blank(), axis.text = element_blank()) +
   labs(x = "Effect size estimate"); mental_health_outcomes_plot
 ```
-````
 
 ::: {.cell-output-display}
 ![Empirical distribution of effect size estimates, by mental health constructs](PRIMED-workflow--group-based-_files/figure-html/fig-es-distribution-mental-subgroup-1.png){#fig-es-distribution-mental-subgroup fig-pos='H' width=672}
@@ -18757,177 +17817,6 @@ mental_health_outcomes_plot <-
 
 :::
 
-## Study sample sizes versus standard error estimates
-
-::: {.columns}
-
-::: {.column width="95%"}
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r sample-vs-se}}
-#| label: fig-sample-vs-se
-#| fig-cap: "Study sample sizes versus reintegrational standard error estimates"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
-reintegation_dat |> 
-  mutate(segt_pop = sqrt(vgt_pop)) |> 
-  ggplot(aes(N_total, segt_pop)) + 
-  geom_point() +
-  geom_smooth() +
-  theme_bw() +
-  labs(x = "Total sample size", y = "Modified standard error")
-```
-````
-
-::: {.cell-output-display}
-![Study sample sizes versus reintegrational standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-1.png){#fig-sample-vs-se fig-pos='H' width=576}
-:::
-:::
-
-
-:::
-
-::: {.column-margin}
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r sample-vs-se-mental}}
-#| label: fig-sample-vs-se-mental
-#| fig-cap: "Study sample sizes versus mental health standard error estimates"
-#| fig.height: 5.5
-#| fig.retina: 2
-#| message: false
-
-mental_health_dat |> 
-  mutate(segt_pop = sqrt(vgt_pop)) |> 
-  ggplot(aes(N_total, segt_pop)) + 
-  geom_point() +
-  geom_smooth() +
-  theme_bw() +
-  labs(x = "Total sample size", y = "Modified standard error")
-```
-````
-
-::: {.cell-output-display}
-![Study sample sizes versus mental health standard error estimates](PRIMED-workflow--group-based-_files/figure-html/fig-sample-vs-se-mental-1.png){#fig-sample-vs-se-mental fig-pos='H' width=672}
-:::
-:::
-
-
-:::
-
-:::
-
-## Standard error vs. scaled standrad error
-::: {.columns}
-
-::: {.column width="95%"}
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r se-vs-scaled}}
-#| label: fig-se-vs-scaled
-#| fig-cap: "Standard error vs. modified standard errors (reintegration)"
-#| fig.width: 6
-#| fig.height: 4
-#| fig.retina: 2
-#| message: false
-
-reintegation_dat |> 
-  mutate(
-    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
-    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
-    segt_pop = sqrt(vgt_pop),
-    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
-  ) |> 
-  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
-  geom_point() +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_bw() +
-  theme(
-    plot.caption=element_text(hjust = 0, size = 10),
-    legend.position= "bottom",
-    legend.title = element_blank(),
-    panel.spacing.x = unit(5, "mm"), 
-    panel.spacing.y = unit(5, "mm"),
-    #panel.grid.major = element_blank(),
-    #panel.grid.minor = element_blank()
-  ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 1.5, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.6, 1.5), y = c(-0.041, 0.01)) +
-  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
-```
-````
-
-::: {.cell-output-display}
-![Standard error vs. modified standard errors (reintegration)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-1.png){#fig-se-vs-scaled fig-pos='H' width=576}
-:::
-:::
-
-
-:::
-
-::: {.column-margin}
-
-
-::: {.cell}
-
-````{.cell-code}
-```{{r se-vs-scaled-mental}}
-#| label: fig-se-vs-scaled-mental
-#| fig-cap: "Standard error vs. modified standard errors (mental health outcomes)"
-#| fig.height: 5.5
-#| fig.retina: 2
-#| message: false
-
-mental_health_dat |> 
-  mutate(
-    sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
-    sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
-    segt_pop = sqrt(vgt_pop),
-    diff_se = sqrt(Wgt_pop) - sqrt(vgt_pop)
-  ) |> 
-  ggplot(aes(gt_pop, diff_se, color = sample_above_100)) + 
-  geom_point() +
-  geom_hline(yintercept = 0, linetype = "dashed") +
-  theme_bw() +
-  theme(
-    plot.caption=element_text(hjust = 0, size = 10),
-    legend.position= "bottom",
-    legend.title = element_blank(),
-    panel.spacing.x = unit(5, "mm"), 
-    panel.spacing.y = unit(5, "mm"),
-    #panel.grid.major = element_blank(),
-    #panel.grid.minor = element_blank()
-  ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
-  labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
-```
-````
-
-::: {.cell-output-display}
-![Standard error vs. modified standard errors (mental health outcomes)](PRIMED-workflow--group-based-_files/figure-html/fig-se-vs-scaled-mental-1.png){#fig-se-vs-scaled-mental fig-pos='H' width=672}
-:::
-:::
-
-
-
-:::
-
-:::
 
 
 # Colophon
@@ -18951,7 +17840,7 @@ mental_health_dat |>
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-08-13
+ date     2025-08-14
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
