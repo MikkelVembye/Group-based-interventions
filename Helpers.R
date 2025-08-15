@@ -86,8 +86,8 @@
     mod, 
     control_vars,
     data,
-    yi = gt,
-    vi = vgt,
+    yi = gt_pop,
+    vi = vgt_pop,
     studyid = study,
     rho = 0.8
 ){

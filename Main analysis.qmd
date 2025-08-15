@@ -28,6 +28,9 @@ knitr:
       width: 100
       knitr.kable.NA: "-"
       dplyr.summarise.inform: FALSE
+reference-location: margin
+citation-location: margin
+bibliography: bibliography.bib 
 ---
 
 ## Loading R packages and data
@@ -47,6 +50,8 @@ library(purrr)
 library(metafor)
 library(patchwork)
 library(clubSandwich)
+library(knitr)
+library(kableExtra)
 
 source("Helpers.R")
 
@@ -66,6 +71,7 @@ In this section, we manipulate all variables used in meta-regression analyses.
 ## Type of outcome: analysis_plan
 ## 
 
+# Read: reint_ma_dat = reintegrational meta-analysis data
 reint_ma_dat <- 
   reintegration_dat |> 
   mutate(
@@ -94,7 +100,7 @@ V_mat_outcome <-
     cluster = study, 
     obs = esid, 
     data = reint_ma_dat, 
-    rho = 0.8
+    rho = rho
   )
 
 outcome_obj <- 
@@ -107,14 +113,213 @@ outcome_obj <-
     sparse=TRUE
   )
 
-outcome_obj
 
 outcome_obj_robu <- 
   outcome_obj |> 
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
+outcome_obj_robu
+```
+
+## Function building for analysis
+
+```{r}
+# Read: rma_arg_tbl = rma argument tibble
+
+.rma_arg_tbl <- 
+  function(
+    yi, vi, covars, r, model, data
+  ){
+    
+    covariates <- if (str_detect(covars, ";")) str_split_1(covars, pattern = ";") else covars 
+    
+    formula <- reformulate(covariates, response = yi, intercept = FALSE)
+    
+    if (str_detect(model, "SCE")) {
+      
+      main_pred <- labels(terms(formula))[1]
+      
+      outer_form <- 
+        substitute(
+          ~ moderator | study, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      inner_form <- 
+        substitute(
+          ~ moderator | esid, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      random <-  if (model == "SCEp") list(outer_form, inner_form) else list(outer_form)
+      
+      struct <- rep("DIAG", length(random))
+      
+      res <- 
+        tibble(
+          formula = list(formula),
+          var = vi,
+          rand = list(random),
+          structure = list(struct),
+          rho = r,
+          data = list(data)
+        )
+      
+    } else if (model == "CHE") {
+      
+      res <- 
+        tibble(
+          formula = list(formula),
+          var = vi,
+          rand = list(~ 1 | study / esid),
+          rho = r,
+          data = list(data)
+        )
+      
+    }
+    
+    return(res)
+    
+}
+
+tbl_test <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "outcome_type",
+    model = "SCEp",
+    r = 0.8, 
+    data = reint_ma_dat
+); tbl_test
+
+
+arg_tbl <- 
+  tibble(
+    yi = rep(c("gt_pop", "gt"), each = 10),
+    vi = rep(c("vgt_pop", "vgt"), each = 10),
+    covars = rep(c("outcome_type", "outcome_type;prereg_chr"), 10),
+    model = "SCEp",
+    r = rep(seq(0, 0.8, 0.2), each = 2, 2)
+  )
+
+arg_list_tbl <- 
+  pmap(.l = arg_tbl, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+  list_rbind()
+
+
+.robu_che_models <- 
+  function(formula, var, rand, structure, rho, data, return_rma_obj = FALSE){
+  
+  suppressPackageStartupMessages(require(metafor))
+  
+  data$vi <- data[[var]]
+
+  # Variance-Covariance Matrix
+  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho, sparse = TRUE)
+  
+  optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+  raw_res <- "Non-converged"
+  i <- 1L
+  
+  while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+    
+    raw_res <- tryCatch(
+      suppressWarnings(
+        rma.mv(
+          formula,
+          V = V_mat,
+          random = rand, 
+          struct = structure,
+          data = data,
+          sparse = TRUE,
+          control = list(optimizer=optimizers[i])
+        )
+      ),
+      error = function(e) "Non-converged"
+    )
+    i <- i + 1L
+    
+  }
+  
+  if (return_rma_obj) return(raw_res)
+  
+  robu_res <- raw_res |> metafor::robust(cluster = studyid, clubSandwich = TRUE)
+  
+  all_covariates <- all.vars(delete.response(terms(formula)))
+  
+  if (length(all_covariates) > 1) {
+    
+    controlled <- "Yes"
+    control_vars <- paste0(all_covariates[-1], collapse = ";")
+    
+  } else {
+    
+    controlled <- "No"
+    control_vars <- "None"
+    
+  }
+  
+  mod_string <- all_covariates[1]
+  moderators <- robu_res$g.levels.f[[1]]
+  
+  seq_con <- 1:length(moderators)
+  
+  wald_htz_res <- 
+    clubSandwich::Wald_test(
+      raw_res,
+      constraints = clubSandwich::constrain_equal(c(seq_con)),
+      vcov = "CR2"
+    )
+
+  wald_htz_res
+  
+  mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
+  mod_string_table <- sub("^(\\w)(\\w*)", "\\U\\1\\L\\2", mod_string_table, perl = TRUE)
+  
+  
+  res <- 
+    tibble(
+      Characteric = mod_string,
+      Moderator = c(mod_string_table, moderators, "Wald test"),
+      studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
+      effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
+      avg_effect_F = c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_),
+      LL = c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_),
+      UL = c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_),
+      df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
+      SD_total = c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_),
+      #F_t = c(wald_htz_res$Fstat, robu_res$zval[1:length(moderators)]),
+      pval = c(NA_real_, robu_res$pval[1:length(moderators)], wald_htz_res$p_val),
+      #df_num = c(wald_htz_res$df_num, rep(NA_real_, length(moderators))),
+      #df_denom = c(wald_htz_res$df_denom, rep(NA_real_, length(moderators))),
+      #boot_reps = R,
+      rho = rho,
+      #wald_compared = c(paste(seq_con, collapse = ","), rep(NA_real_, length(moderators))),
+      controls = controlled,
+      control_vars = control_vars,
+      optimizer = raw_res$control$optimizer,
+      tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 4),
+      omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 4)
+    )
+  
+  res
+  
+}
+
+pmap(.l = arg_list_tbl[9:10,], .f = .robu_che_models)
+
 
 ```
+
+
+
+
+
+
+
+
 
 
 
