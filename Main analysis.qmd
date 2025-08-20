@@ -26,7 +26,7 @@ knitr:
     R.options:
       knitr.graphics.auto_pdf: true
       width: 100
-      knitr.kable.NA: "-"
+      knitr.kable.NA: ""
       dplyr.summarise.inform: FALSE
 reference-location: margin
 citation-location: margin
@@ -52,6 +52,11 @@ library(patchwork)
 library(clubSandwich)
 library(knitr)
 library(kableExtra)
+library(forcats)
+library(future)
+library(furrr)
+library(gt)
+library(fastDummies)
 
 source("Helpers.R")
 
@@ -74,6 +79,19 @@ In this section, we manipulate all variables used in meta-regression analyses.
 # Read: reint_ma_dat = reintegrational meta-analysis data
 reint_ma_dat <- 
   reintegration_dat |> 
+  select(
+    # Various types of effect size estimates 
+    study, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, g, vg, d, vd,
+    
+    # Categorical moderators and control variables 
+    analysis_plan, schizophrenia, CBT_intervention = CBT_int, test_type, analysis_strategy,
+    QES_design, control, D1:D7, overall_rob, prereg_chr, conventional,
+    
+    # Continuous moderators and control variables
+    age_mean, male_pct, total_number_of_sessions, sessions_per_week, duration_in_weeks,
+    time_after_end_intervention_weeks, time_from_baseline_weeks
+    
+  ) |> 
   mutate(
     esid = 1:n(),
     
@@ -82,10 +100,41 @@ reint_ma_dat <-
       analysis_plan, 
       c("Employment", "Physical health", "Psychiatric hospitalization") ~ "Other",
       .default = analysis_plan
-    )
+    ),
     
-  )
+    outcome_type = fct_relevel(outcome_type, sort),
+    outcome_type = fct_relevel(outcome_type, "Other", after = Inf),
+    
+    prereg_c = conventional - mean(conventional),
+    
+    schizo_in_sample = if_else(schizophrenia == "Schizophrenia", 1, 0),
+    schizo_c = schizo_in_sample - mean(schizo_in_sample),
+    
+    cbt = if_else(CBT_intervention == "CBT", 1, 0),
+    cbt_c = cbt - mean(cbt),
+    
+    sessions_per_week = if_else(is.na(sessions_per_week), mean(sessions_per_week, na.rm = TRUE), sessions_per_week),
+    male_pct = if_else(is.na(male_pct), mean(male_pct, na.rm = TRUE), male_pct),
+    
+    age_c = age_mean - 40,
+    male_c = male_pct/100 - 0.5,
+    sessions_c = sessions_per_week - 1,
+    duration_c = duration_in_weeks - 12,
+    fu_time_c = time_after_end_intervention_weeks - 1
+    
+  ) 
 
+reint_ma_dat <- 
+  fastDummies::dummy_cols(reint_ma_dat, select_columns = "outcome_type", omit_colname_prefix = TRUE) |> 
+  rename(
+    alcohol = `Alcohol and drug abuse/misuse`, 
+    hope = `Hope, empowerment & self-efficacy`, 
+    lonely = Loneliness,
+    self_est = `Self-esteem`,
+    social_fun = `outcome_type_Social functioning (degree of impairment)`,
+    wellbeing = `Wellbeing and quality of life`,
+    other = Other
+  )
 
 ```
 
@@ -119,6 +168,39 @@ outcome_obj_robu <-
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
 outcome_obj_robu
+
+club_wald_test <- Wald_test(outcome_obj, constraints = constrain_equal(1:3), vcov = "CR2")
+club_wald_test
+
+
+# Continuous model
+
+age_obj <- 
+  rma.mv(
+    yi = gt_pop ~ age_c + prereg_chr - 1,
+    V = V_mat_outcome, 
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  metafor::robust(cluster = study, clubSandwich = TRUE)
+
+age_obj
+
+prereg_obj <- 
+    rma.mv(
+    yi = gt_pop ~ prereg_chr + male_c - 1,
+    V = V_mat_outcome, 
+    random = list(~ prereg_chr | study, ~ prereg_chr | esid),
+    struct = c("DIAG", "DIAG"),
+    data = reint_ma_dat,
+    sparse=TRUE
+  ) |> 
+  metafor::robust(cluster = study, clubSandwich = TRUE)
+
+prereg_obj
+
+
 ```
 
 ## Function building for analysis
@@ -164,7 +246,8 @@ outcome_obj_robu
           rand = list(random),
           structure = list(struct),
           rho = r,
-          data = list(data)
+          data = list(data),
+          model = model
         )
       
     } else if (model == "CHE") {
@@ -175,7 +258,8 @@ outcome_obj_robu
           var = vi,
           rand = list(~ 1 | study / esid),
           rho = r,
-          data = list(data)
+          data = list(data),
+          model = model
         )
       
     }
@@ -197,11 +281,16 @@ tbl_test <-
 
 arg_tbl <- 
   tibble(
-    yi = rep(c("gt_pop", "gt"), each = 10),
-    vi = rep(c("vgt_pop", "vgt"), each = 10),
-    covars = rep(c("outcome_type", "outcome_type;prereg_chr"), 10),
+    yi = rep(c("gt_pop", "gt"), each = 20),
+    vi = rep(c("vgt_pop", "vgt"), each = 20),
+    covars = rep(
+      c(
+        "outcome_type", "outcome_type;schizo_c;cbt_c;prereg_c;age_c;male_c;sessions_c;duration_c;fu_time_c",
+        "prereg_chr", 
+        "prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;schizo_c;cbt_c;age_c;male_c;sessions_c;duration_c;fu_time_c"
+        ), each = 5, 2),
     model = "SCEp",
-    r = rep(seq(0, 0.8, 0.2), each = 2, 2)
+    r = rep(seq(0, 0.8, 0.2), 8)
   )
 
 arg_list_tbl <- 
@@ -209,20 +298,24 @@ arg_list_tbl <-
   list_rbind()
 
 
-.robu_che_models <- 
-  function(formula, var, rand, structure, rho, data, return_rma_obj = FALSE){
-  
-  suppressPackageStartupMessages(require(metafor))
-  
+# Making SCE RVE function
+
+.SCE_RVE <- 
+  function(formula, var, rand, structure, rho, data, model, return_rma_obj = FALSE){
+    
+  if (!str_detect(model, "SCE")) stop("This function only fits SCE models")
+    
   data$vi <- data[[var]]
 
   # Variance-Covariance Matrix
   V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho, sparse = TRUE)
   
+  # Strategy for overcoming non-convergence 
   optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
   raw_res <- "Non-converged"
   i <- 1L
-  
+    
+  # Fitting the main model
   while (!inherits(raw_res, "rma.mv") & i <= 4L) {
     
     raw_res <- tryCatch(
@@ -242,13 +335,17 @@ arg_list_tbl <-
     i <- i + 1L
     
   }
-  
+    
+  # Returning main rma.mv object which can later be used with wald_test_cwb()
   if (return_rma_obj) return(raw_res)
   
-  robu_res <- raw_res |> metafor::robust(cluster = studyid, clubSandwich = TRUE)
+  # Getting robust results
+  robu_res <- raw_res |> metafor::robust(cluster = study, clubSandwich = TRUE)
   
+  # Making character variable with all covariates 
   all_covariates <- all.vars(delete.response(terms(formula)))
   
+  # Model control info
   if (length(all_covariates) > 1) {
     
     controlled <- "Yes"
@@ -261,57 +358,107 @@ arg_list_tbl <-
     
   }
   
+  # Getting name of main predictor variables
   mod_string <- all_covariates[1]
+  # Getting name of each category of the main predictor variables
   moderators <- robu_res$g.levels.f[[1]]
   
+  # Wald test comparison sequence
   seq_con <- 1:length(moderators)
   
+  # Estimating HTZ wald test 
   wald_htz_res <- 
     clubSandwich::Wald_test(
       raw_res,
       constraints = clubSandwich::constrain_equal(c(seq_con)),
       vcov = "CR2"
     )
-
-  wald_htz_res
   
+  # Obtaning HTZ wald test p values
+  wald_pval <- wald_htz_res$p_val
+  
+  # F stat info
+  F_value_str <- paste0(
+    "F(", round(wald_htz_res$df_num, 2), ", ", 
+    round(wald_htz_res$df_denom, 2), ") = ", 
+    round(wald_htz_res$Fstat, 2)
+  )
+  
+  # Readable moderator name removing _ and making upper-case letter for first word
   mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
   mod_string_table <- sub("^(\\w)(\\w*)", "\\U\\1\\L\\2", mod_string_table, perl = TRUE)
   
+  # Moderator effects and CIs
+  mod_effects <- round(as.numeric(robu_res$b[1:length(moderators)]), 2)
+  mod_cil <- round(robu_res$ci.lb[1:length(moderators)], 2)
+  mod_ciu <- round(robu_res$ci.ub[1:length(moderators)], 2)
   
+  # Results in ready to publish format
   res <- 
     tibble(
       Characteric = mod_string,
-      Moderator = c(mod_string_table, moderators, "Wald test"),
+      Moderator = c(mod_string_table, moderators, "Wald test (HTZ)"),
       studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
       effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
-      avg_effect_F = c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_),
-      LL = c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_),
-      UL = c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_),
+      avg_effect_F = 
+        c(
+          NA_real_, 
+          paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
+          F_value_str
+      ),
+      pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 2),
       df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
-      SD_total = c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_),
-      #F_t = c(wald_htz_res$Fstat, robu_res$zval[1:length(moderators)]),
-      pval = c(NA_real_, robu_res$pval[1:length(moderators)], wald_htz_res$p_val),
-      #df_num = c(wald_htz_res$df_num, rep(NA_real_, length(moderators))),
-      #df_denom = c(wald_htz_res$df_denom, rep(NA_real_, length(moderators))),
-      #boot_reps = R,
+      SD_total = round(c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_), 2),
       rho = rho,
-      #wald_compared = c(paste(seq_con, collapse = ","), rep(NA_real_, length(moderators))),
+      wald_compared = c(rep(NA_real_, length(moderators) + 1), paste(seq_con, collapse = ",")),
       controls = controlled,
       control_vars = control_vars,
       optimizer = raw_res$control$optimizer,
-      tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 4),
-      omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 4)
+      avg_effect = round(c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_), 2),
+      LL = round(c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_), 2),
+      UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),
+      tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),
+      omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),
+      t_F = c(NA_real_, robu_res$zval[1:length(moderators)], wald_htz_res$Fstat),
     )
   
   res
   
 }
 
-pmap(.l = arg_list_tbl[9:10,], .f = .robu_che_models)
+opts <- furrr::furrr_options(
+  stdout = FALSE,        # don't forward cat/print output
+  conditions = NULL      # don't forward messages/warnings
+)
 
+arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
+
+plan(multisession)
+x_test <- future_pmap(.l = arg_list_tbl_rho08, .f = .SCE_RVE, .options = opts) |> list_rbind(); x_test
+plan(sequential)
 
 ```
+
+```{r table-test}
+
+wider_dat <- 
+  x_test |> 
+  select(Characteric:SD_total, controls) |> 
+  pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |> 
+  relocate(contains("no",  ignore.case = TRUE), .after = effects) |>          
+  relocate(contains("yes", ignore.case = TRUE), .after = last_col())
+
+
+
+wider_dat |> 
+  select(-1) |> 
+  gt() |> 
+    sub_missing(
+    columns = everything(),   
+    missing_text = ""         
+  )
+```
+
 
 
 

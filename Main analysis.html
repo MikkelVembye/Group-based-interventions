@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Mikkel H. Vembye">
-<meta name="dcterms.date" content="2025-08-15">
+<meta name="dcterms.date" content="2025-08-20">
 
 <title>Main analysis (group-based)</title>
 <style>
@@ -3119,7 +3119,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">August 15, 2025</p>
+      <p class="date">August 20, 2025</p>
     </div>
   </div>
   
@@ -3151,12 +3151,16 @@ vertical-align: -.125em;
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="in">library(clubSandwich)</span></span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="in">library(knitr)</span></span>
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="in">library(kableExtra)</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="in">source(&quot;Helpers.R&quot;)</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="in">reintegration_dat &lt;- readRDS(&quot;reintegation_dat.rds&quot;)</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="in">mental_health_dat &lt;- readRDS(&quot;mental_health_dat.rds&quot;)</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="in">library(forcats)</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="in">library(future)</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="in">library(furrr)</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="in">library(gt)</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="in">source(&quot;Helpers.R&quot;)</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="in">reintegration_dat &lt;- readRDS(&quot;reintegation_dat.rds&quot;)</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="in">mental_health_dat &lt;- readRDS(&quot;mental_health_dat.rds&quot;)</span></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -3174,18 +3178,46 @@ vertical-align: -.125em;
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="in"># Read: reint_ma_dat = reintegrational meta-analysis data</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="in">reint_ma_dat &lt;- </span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="in">  reintegration_dat |&gt; </span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate(</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="in">    esid = 1:n(),</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="in">    # Outcome variables</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="in">    outcome_type = case_match(</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="in">      analysis_plan, </span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="in">      c(&quot;Employment&quot;, &quot;Physical health&quot;, &quot;Psychiatric hospitalization&quot;) ~ &quot;Other&quot;,</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="in">      .default = analysis_plan</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="in">  select(</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="in">    # Various types of effect size estimates </span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="in">    study, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, g, vg, d, vd,</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="in">    # Categorical moderators and control variables </span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="in">    analysis_plan, schizophrenia, CBT_intervention = CBT_int, test_type, analysis_strategy,</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="in">    QES_design, control, D1:D7, overall_rob, prereg_chr,</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="in">    # Continuous moderators and control variables</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="in">    age_mean, male_pct, total_number_of_sessions, sessions_per_week, duration_in_weeks,</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="in">    time_after_end_intervention_weeks, time_from_baseline_weeks</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="in">  mutate(</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="in">    esid = 1:n(),</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="in">    # Outcome variables</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="in">    outcome_type = case_match(</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="in">      analysis_plan, </span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="in">      c(&quot;Employment&quot;, &quot;Physical health&quot;, &quot;Psychiatric hospitalization&quot;) ~ &quot;Other&quot;,</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="in">      .default = analysis_plan</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="in">    ),</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="in">    outcome_type = fct_relevel(outcome_type, sort),</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="in">    outcome_type = fct_relevel(outcome_type, &quot;Other&quot;, after = Inf),</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="in">    sessions_per_week = if_else(is.na(sessions_per_week), mean(sessions_per_week, na.rm = TRUE), sessions_per_week),</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="in">    male_pct = if_else(is.na(male_pct), mean(male_pct, na.rm = TRUE), male_pct),</span></span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a><span class="in">    age_c = age_mean - 40,</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="in">    male_c = male_pct/100 - 0.5,</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a><span class="in">    sessions_c = sessions_per_week - 1,</span></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a><span class="in">    duration_c = duration_in_weeks - 12,</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a><span class="in">    fu_time_c = time_after_end_intervention_weeks - 1</span></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="in">  ) </span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </section>
@@ -3203,7 +3235,7 @@ vertical-align: -.125em;
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="in">    cluster = study, </span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="in">    obs = esid, </span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="in">    data = reint_ma_dat, </span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="in">    rho = 0.8</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="in">    rho = rho</span></span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="in">outcome_obj &lt;- </span></span>
@@ -3222,7 +3254,38 @@ vertical-align: -.125em;
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="in">  metafor::robust(cluster = study, clubSandwich = TRUE)</span></span>
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="in">outcome_obj_robu</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a><span class="in">club_wald_test &lt;- Wald_test(outcome_obj, constraints = constrain_equal(1:3), vcov = &quot;CR2&quot;)</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a><span class="in">club_wald_test</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="in"># Continuous model</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a><span class="in">age_obj &lt;- </span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="in">  rma.mv(</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = gt_pop ~ age_c + prereg_chr - 1,</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="in">    V = V_mat_outcome, </span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="in">    random = ~ 1 | study / esid,</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="in">    data = reint_ma_dat,</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a><span class="in">    sparse = TRUE</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a><span class="in">  metafor::robust(cluster = study, clubSandwich = TRUE)</span></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a><span class="in">age_obj</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="in">prereg_obj &lt;- </span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="in">    rma.mv(</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = gt_pop ~ prereg_chr + male_c - 1,</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="in">    V = V_mat_outcome, </span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a><span class="in">    random = list(~ prereg_chr | study, ~ prereg_chr | esid),</span></span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="in">    struct = c(&quot;DIAG&quot;, &quot;DIAG&quot;),</span></span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a><span class="in">    data = reint_ma_dat,</span></span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a><span class="in">    sparse=TRUE</span></span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a><span class="in">  ) |&gt; </span></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="in">  metafor::robust(cluster = study, clubSandwich = TRUE)</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a><span class="in">prereg_obj</span></span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -3237,10 +3300,10 @@ inner factor: outcome_type (nlvls = 7)
 tau^2.1    0.0000  0.0000      7     no              Alcohol and drug abuse/misuse 
 tau^2.2    0.0139  0.1178     12     no          Hope, empowerment &amp; self-efficacy 
 tau^2.3    0.0662  0.2573      4     no                                 Loneliness 
-tau^2.4    0.0000  0.0000      4     no                                      Other 
-tau^2.5    0.0000  0.0000      5     no                                Self-esteem 
-tau^2.6    0.0249  0.1577     16     no  Social functioning (degree of impairment) 
-tau^2.7    0.0044  0.0662     24     no              Wellbeing and quality of life 
+tau^2.4    0.0000  0.0000      5     no                                Self-esteem 
+tau^2.5    0.0249  0.1577     16     no  Social functioning (degree of impairment) 
+tau^2.6    0.0044  0.0662     24     no              Wellbeing and quality of life 
+tau^2.7    0.0000  0.0000      4     no                                      Other 
 
 outer factor: esid         (nlvls = 202)
 inner factor: outcome_type (nlvls = 7)
@@ -3249,10 +3312,10 @@ inner factor: outcome_type (nlvls = 7)
 gamma^2.1    0.0465  0.2156     31     no              Alcohol and drug abuse/misuse 
 gamma^2.2    0.0280  0.1675     32     no          Hope, empowerment &amp; self-efficacy 
 gamma^2.3    0.0103  0.1017      5     no                                 Loneliness 
-gamma^2.4    0.0000  0.0000      6     no                                      Other 
-gamma^2.5    0.0243  0.1559     14     no                                Self-esteem 
-gamma^2.6    0.0242  0.1557     47     no  Social functioning (degree of impairment) 
-gamma^2.7    0.0282  0.1678     67     no              Wellbeing and quality of life 
+gamma^2.4    0.0243  0.1559     14     no                                Self-esteem 
+gamma^2.5    0.0242  0.1557     47     no  Social functioning (degree of impairment) 
+gamma^2.6    0.0282  0.1678     67     no              Wellbeing and quality of life 
+gamma^2.7    0.0000  0.0000      6     no                                      Other 
 
 Test for Residual Heterogeneity:
 QE(df = 195) = 1133.4973, p-val &lt; .0001
@@ -3270,18 +3333,94 @@ Model Results:
 outcome_typeAlcohol and drug abuse/misuse                0.0775  0.0678   1.1430    4.55   0.3096  
 outcome_typeHope, empowerment &amp; self-efficacy            0.2615  0.0639   4.0940   10.83   0.0018  
 outcome_typeLoneliness                                   0.0310  0.1619   0.1916    2.66   0.8618  
-outcome_typeOther                                        0.2733  0.0453   6.0362     3.4   0.0063  
 outcome_typeSelf-esteem                                  0.4281  0.0709   6.0363    3.96   0.0039  
 outcome_typeSocial functioning (degree of impairment)    0.1462  0.0705   2.0745   12.81   0.0588  
 outcome_typeWellbeing and quality of life                0.2120  0.0452   4.6921   13.88   0.0004  
+outcome_typeOther                                        0.2733  0.0453   6.0362     3.4   0.0063  
                                                          ci.lb¹   ci.ub¹      
 outcome_typeAlcohol and drug abuse/misuse              -0.1021   0.2571       
 outcome_typeHope, empowerment &amp; self-efficacy           0.1207   0.4024    ** 
 outcome_typeLoneliness                                 -0.5237   0.5858       
-outcome_typeOther                                       0.1383   0.4083    ** 
 outcome_typeSelf-esteem                                 0.2304   0.6257    ** 
 outcome_typeSocial functioning (degree of impairment)  -0.0063   0.2986     . 
 outcome_typeWellbeing and quality of life               0.1150   0.3089   *** 
+outcome_typeOther                                       0.1383   0.4083    ** 
+
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+1) results based on cluster-robust inference (var-cov estimator: CR2,
+   approx t/F-tests and confidence intervals, df: Satterthwaite approx)
+
+ test Fstat df_num df_denom p_val sig
+  HTZ  2.14      2     5.44 0.206    
+
+Multivariate Meta-Analysis Model (k = 202; method: REML)
+
+Variance Components:
+
+            estim    sqrt  nlvls  fixed      factor 
+sigma^2.1  0.0032  0.0561     45     no       study 
+sigma^2.2  0.0368  0.1917    202     no  study/esid 
+
+Test for Residual Heterogeneity:
+QE(df = 199) = 1217.2224, p-val &lt; .0001
+
+Number of estimates:   202
+Number of clusters:    45
+Estimates per cluster: 1-28 (mean: 4.49, median: 3)
+
+Test of Moderators (coefficients 1:3):¹
+F(df1 = 3, df2 = 17.31) = 13.0335, p-val = 0.0001
+
+Model Results:
+
+                             estimate      se¹    tval¹     df¹    pval¹    ci.lb¹   ci.ub¹      
+age_c                          0.0081  0.0044   1.8396   13.58   0.0878   -0.0014   0.0176     . 
+prereg_chrNot preregistered    0.3163  0.0595   5.3150   17.72   &lt;.0001    0.1911   0.4415   *** 
+prereg_chrPreregistered        0.1197  0.0467   2.5614    14.2   0.0224    0.0196   0.2198     * 
+
+---
+Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+
+1) results based on cluster-robust inference (var-cov estimator: CR2,
+   approx t/F-tests and confidence intervals, df: Satterthwaite approx)
+
+
+Multivariate Meta-Analysis Model (k = 202; method: REML)
+
+Variance Components:
+
+outer factor: study      (nlvls = 45)
+inner factor: prereg_chr (nlvls = 2)
+
+            estim    sqrt  k.lvl  fixed              level 
+tau^2.1    0.0000  0.0000     22     no  Not preregistered 
+tau^2.2    0.0069  0.0830     23     no      Preregistered 
+
+outer factor: esid       (nlvls = 202)
+inner factor: prereg_chr (nlvls = 2)
+
+              estim    sqrt  k.lvl  fixed              level 
+gamma^2.1    0.0717  0.2678     61     no  Not preregistered 
+gamma^2.2    0.0295  0.1717    141     no      Preregistered 
+
+Test for Residual Heterogeneity:
+QE(df = 199) = 1232.4915, p-val &lt; .0001
+
+Number of estimates:   202
+Number of clusters:    45
+Estimates per cluster: 1-28 (mean: 4.49, median: 3)
+
+Test of Moderators (coefficients 1:3):¹
+F(df1 = 3, df2 = 14.75) = 13.8960, p-val = 0.0001
+
+Model Results:
+
+                             estimate      se¹    tval¹     df¹    pval¹    ci.lb¹   ci.ub¹      
+prereg_chrNot preregistered    0.2905  0.0510   5.6988    16.3   &lt;.0001    0.1826   0.3984   *** 
+prereg_chrPreregistered        0.1413  0.0430   3.2874   15.43   0.0048    0.0499   0.2327    ** 
+male_c                         0.0457  0.1475   0.3096   12.47   0.7620   -0.2744   0.3657       
 
 ---
 Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
@@ -3337,81 +3476,871 @@ Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&
 <span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="in">          rand = list(random),</span></span>
 <span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a><span class="in">          structure = list(struct),</span></span>
 <span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a><span class="in">          rho = r,</span></span>
-<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="in">          data = list(data)</span></span>
-<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="in">        )</span></span>
-<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
-<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="in">    } else if (model == &quot;CHE&quot;) {</span></span>
-<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
-<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="in">      res &lt;- </span></span>
-<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="in">        tibble(</span></span>
-<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="in">          formula = list(formula),</span></span>
-<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="in">          var = vi,</span></span>
-<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="in">          rand = list(~ 1 | study / esid),</span></span>
-<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="in">          rho = r,</span></span>
-<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="in">          data = list(data)</span></span>
-<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="in">        )</span></span>
-<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
-<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="in">    }</span></span>
-<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="in">    return(res)</span></span>
+<span id="cb5-42"><a href="#cb5-42" aria-hidden="true" tabindex="-1"></a><span class="in">          data = list(data),</span></span>
+<span id="cb5-43"><a href="#cb5-43" aria-hidden="true" tabindex="-1"></a><span class="in">          model = model</span></span>
+<span id="cb5-44"><a href="#cb5-44" aria-hidden="true" tabindex="-1"></a><span class="in">        )</span></span>
+<span id="cb5-45"><a href="#cb5-45" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
+<span id="cb5-46"><a href="#cb5-46" aria-hidden="true" tabindex="-1"></a><span class="in">    } else if (model == &quot;CHE&quot;) {</span></span>
+<span id="cb5-47"><a href="#cb5-47" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
+<span id="cb5-48"><a href="#cb5-48" aria-hidden="true" tabindex="-1"></a><span class="in">      res &lt;- </span></span>
+<span id="cb5-49"><a href="#cb5-49" aria-hidden="true" tabindex="-1"></a><span class="in">        tibble(</span></span>
+<span id="cb5-50"><a href="#cb5-50" aria-hidden="true" tabindex="-1"></a><span class="in">          formula = list(formula),</span></span>
+<span id="cb5-51"><a href="#cb5-51" aria-hidden="true" tabindex="-1"></a><span class="in">          var = vi,</span></span>
+<span id="cb5-52"><a href="#cb5-52" aria-hidden="true" tabindex="-1"></a><span class="in">          rand = list(~ 1 | study / esid),</span></span>
+<span id="cb5-53"><a href="#cb5-53" aria-hidden="true" tabindex="-1"></a><span class="in">          rho = r,</span></span>
+<span id="cb5-54"><a href="#cb5-54" aria-hidden="true" tabindex="-1"></a><span class="in">          data = list(data),</span></span>
+<span id="cb5-55"><a href="#cb5-55" aria-hidden="true" tabindex="-1"></a><span class="in">          model = model</span></span>
+<span id="cb5-56"><a href="#cb5-56" aria-hidden="true" tabindex="-1"></a><span class="in">        )</span></span>
+<span id="cb5-57"><a href="#cb5-57" aria-hidden="true" tabindex="-1"></a><span class="in">      </span></span>
+<span id="cb5-58"><a href="#cb5-58" aria-hidden="true" tabindex="-1"></a><span class="in">    }</span></span>
 <span id="cb5-59"><a href="#cb5-59" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
-<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
-<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="in">tbl_test &lt;- </span></span>
-<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a><span class="in">  .rma_arg_tbl(</span></span>
-<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = &quot;gt_pop&quot;, </span></span>
-<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="in">    vi = &quot;vgt_pop&quot;, </span></span>
-<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="in">    covars = &quot;outcome_type&quot;,</span></span>
-<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="in">    model = &quot;SCEp&quot;,</span></span>
-<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="in">    r = 0.8, </span></span>
-<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="in">    data = reint_ma_dat</span></span>
-<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="in">); tbl_test</span></span>
-<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a><span class="in">arg_tbl &lt;- </span></span>
-<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a><span class="in">  tibble(</span></span>
-<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = rep(c(&quot;gt_pop&quot;, &quot;gt&quot;), each = 10),</span></span>
-<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="in">    vi = rep(c(&quot;vgt_pop&quot;, &quot;vgt&quot;), each = 10),</span></span>
-<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="in">    covars = rep(c(&quot;outcome_type&quot;, &quot;outcome_type;prereg_chr&quot;), 10),</span></span>
-<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a><span class="in">    model = &quot;SCEp&quot;,</span></span>
-<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="in">    r = rep(seq(0, 0.8, 0.2), 4)</span></span>
-<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
-<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="in">arg_list_tbl &lt;- </span></span>
-<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="in">  pmap(.l = arg_tbl, .f = .rma_arg_tbl, data = reint_ma_dat) |&gt; </span></span>
-<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="in">  list_rbind()</span></span>
-<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="in">arg_list_tbl</span></span>
-<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-60"><a href="#cb5-60" aria-hidden="true" tabindex="-1"></a><span class="in">    return(res)</span></span>
+<span id="cb5-61"><a href="#cb5-61" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-62"><a href="#cb5-62" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb5-63"><a href="#cb5-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-64"><a href="#cb5-64" aria-hidden="true" tabindex="-1"></a><span class="in">tbl_test &lt;- </span></span>
+<span id="cb5-65"><a href="#cb5-65" aria-hidden="true" tabindex="-1"></a><span class="in">  .rma_arg_tbl(</span></span>
+<span id="cb5-66"><a href="#cb5-66" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = &quot;gt_pop&quot;, </span></span>
+<span id="cb5-67"><a href="#cb5-67" aria-hidden="true" tabindex="-1"></a><span class="in">    vi = &quot;vgt_pop&quot;, </span></span>
+<span id="cb5-68"><a href="#cb5-68" aria-hidden="true" tabindex="-1"></a><span class="in">    covars = &quot;outcome_type&quot;,</span></span>
+<span id="cb5-69"><a href="#cb5-69" aria-hidden="true" tabindex="-1"></a><span class="in">    model = &quot;SCEp&quot;,</span></span>
+<span id="cb5-70"><a href="#cb5-70" aria-hidden="true" tabindex="-1"></a><span class="in">    r = 0.8, </span></span>
+<span id="cb5-71"><a href="#cb5-71" aria-hidden="true" tabindex="-1"></a><span class="in">    data = reint_ma_dat</span></span>
+<span id="cb5-72"><a href="#cb5-72" aria-hidden="true" tabindex="-1"></a><span class="in">); tbl_test</span></span>
+<span id="cb5-73"><a href="#cb5-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-74"><a href="#cb5-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-75"><a href="#cb5-75" aria-hidden="true" tabindex="-1"></a><span class="in">arg_tbl &lt;- </span></span>
+<span id="cb5-76"><a href="#cb5-76" aria-hidden="true" tabindex="-1"></a><span class="in">  tibble(</span></span>
+<span id="cb5-77"><a href="#cb5-77" aria-hidden="true" tabindex="-1"></a><span class="in">    yi = rep(c(&quot;gt_pop&quot;, &quot;gt&quot;), each = 20),</span></span>
+<span id="cb5-78"><a href="#cb5-78" aria-hidden="true" tabindex="-1"></a><span class="in">    vi = rep(c(&quot;vgt_pop&quot;, &quot;vgt&quot;), each = 20),</span></span>
+<span id="cb5-79"><a href="#cb5-79" aria-hidden="true" tabindex="-1"></a><span class="in">    covars = rep(</span></span>
+<span id="cb5-80"><a href="#cb5-80" aria-hidden="true" tabindex="-1"></a><span class="in">      c(</span></span>
+<span id="cb5-81"><a href="#cb5-81" aria-hidden="true" tabindex="-1"></a><span class="in">        &quot;outcome_type&quot;, &quot;outcome_type;prereg_chr;age_c;male_c;sessions_c;duration_c;fu_time_c&quot;,</span></span>
+<span id="cb5-82"><a href="#cb5-82" aria-hidden="true" tabindex="-1"></a><span class="in">        &quot;prereg_chr&quot;, &quot;prereg_chr;outcome_type&quot;</span></span>
+<span id="cb5-83"><a href="#cb5-83" aria-hidden="true" tabindex="-1"></a><span class="in">        ), each = 5, 2),</span></span>
+<span id="cb5-84"><a href="#cb5-84" aria-hidden="true" tabindex="-1"></a><span class="in">    model = &quot;SCEp&quot;,</span></span>
+<span id="cb5-85"><a href="#cb5-85" aria-hidden="true" tabindex="-1"></a><span class="in">    r = rep(seq(0, 0.8, 0.2), 8)</span></span>
+<span id="cb5-86"><a href="#cb5-86" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
+<span id="cb5-87"><a href="#cb5-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-88"><a href="#cb5-88" aria-hidden="true" tabindex="-1"></a><span class="in">arg_list_tbl &lt;- </span></span>
+<span id="cb5-89"><a href="#cb5-89" aria-hidden="true" tabindex="-1"></a><span class="in">  pmap(.l = arg_tbl, .f = .rma_arg_tbl, data = reint_ma_dat) |&gt; </span></span>
+<span id="cb5-90"><a href="#cb5-90" aria-hidden="true" tabindex="-1"></a><span class="in">  list_rbind()</span></span>
+<span id="cb5-91"><a href="#cb5-91" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-92"><a href="#cb5-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-93"><a href="#cb5-93" aria-hidden="true" tabindex="-1"></a><span class="in"># Making SCE RVE function</span></span>
+<span id="cb5-94"><a href="#cb5-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-95"><a href="#cb5-95" aria-hidden="true" tabindex="-1"></a><span class="in">.SCE_RVE &lt;- </span></span>
+<span id="cb5-96"><a href="#cb5-96" aria-hidden="true" tabindex="-1"></a><span class="in">  function(formula, var, rand, structure, rho, data, model, return_rma_obj = FALSE){</span></span>
+<span id="cb5-97"><a href="#cb5-97" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-98"><a href="#cb5-98" aria-hidden="true" tabindex="-1"></a><span class="in">  if (!str_detect(model, &quot;SCE&quot;)) stop(&quot;This function only fits SCE models&quot;)</span></span>
+<span id="cb5-99"><a href="#cb5-99" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-100"><a href="#cb5-100" aria-hidden="true" tabindex="-1"></a><span class="in">  data$vi &lt;- data[[var]]</span></span>
+<span id="cb5-101"><a href="#cb5-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-102"><a href="#cb5-102" aria-hidden="true" tabindex="-1"></a><span class="in">  # Variance-Covariance Matrix</span></span>
+<span id="cb5-103"><a href="#cb5-103" aria-hidden="true" tabindex="-1"></a><span class="in">  V_mat &lt;- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho, sparse = TRUE)</span></span>
+<span id="cb5-104"><a href="#cb5-104" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-105"><a href="#cb5-105" aria-hidden="true" tabindex="-1"></a><span class="in">  # Strategy for overcoming non-convergence </span></span>
+<span id="cb5-106"><a href="#cb5-106" aria-hidden="true" tabindex="-1"></a><span class="in">  optimizers &lt;- c(&quot;nlminb&quot;,&quot;nloptr&quot;,&quot;Rvmmin&quot;,&quot;BFGS&quot;)</span></span>
+<span id="cb5-107"><a href="#cb5-107" aria-hidden="true" tabindex="-1"></a><span class="in">  raw_res &lt;- &quot;Non-converged&quot;</span></span>
+<span id="cb5-108"><a href="#cb5-108" aria-hidden="true" tabindex="-1"></a><span class="in">  i &lt;- 1L</span></span>
+<span id="cb5-109"><a href="#cb5-109" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-110"><a href="#cb5-110" aria-hidden="true" tabindex="-1"></a><span class="in">  # Fitting the main model</span></span>
+<span id="cb5-111"><a href="#cb5-111" aria-hidden="true" tabindex="-1"></a><span class="in">  while (!inherits(raw_res, &quot;rma.mv&quot;) &amp; i &lt;= 4L) {</span></span>
+<span id="cb5-112"><a href="#cb5-112" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-113"><a href="#cb5-113" aria-hidden="true" tabindex="-1"></a><span class="in">    raw_res &lt;- tryCatch(</span></span>
+<span id="cb5-114"><a href="#cb5-114" aria-hidden="true" tabindex="-1"></a><span class="in">      suppressWarnings(</span></span>
+<span id="cb5-115"><a href="#cb5-115" aria-hidden="true" tabindex="-1"></a><span class="in">        rma.mv(</span></span>
+<span id="cb5-116"><a href="#cb5-116" aria-hidden="true" tabindex="-1"></a><span class="in">          formula,</span></span>
+<span id="cb5-117"><a href="#cb5-117" aria-hidden="true" tabindex="-1"></a><span class="in">          V = V_mat,</span></span>
+<span id="cb5-118"><a href="#cb5-118" aria-hidden="true" tabindex="-1"></a><span class="in">          random = rand, </span></span>
+<span id="cb5-119"><a href="#cb5-119" aria-hidden="true" tabindex="-1"></a><span class="in">          struct = structure,</span></span>
+<span id="cb5-120"><a href="#cb5-120" aria-hidden="true" tabindex="-1"></a><span class="in">          data = data,</span></span>
+<span id="cb5-121"><a href="#cb5-121" aria-hidden="true" tabindex="-1"></a><span class="in">          sparse = TRUE,</span></span>
+<span id="cb5-122"><a href="#cb5-122" aria-hidden="true" tabindex="-1"></a><span class="in">          control = list(optimizer=optimizers[i])</span></span>
+<span id="cb5-123"><a href="#cb5-123" aria-hidden="true" tabindex="-1"></a><span class="in">        )</span></span>
+<span id="cb5-124"><a href="#cb5-124" aria-hidden="true" tabindex="-1"></a><span class="in">      ),</span></span>
+<span id="cb5-125"><a href="#cb5-125" aria-hidden="true" tabindex="-1"></a><span class="in">      error = function(e) &quot;Non-converged&quot;</span></span>
+<span id="cb5-126"><a href="#cb5-126" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb5-127"><a href="#cb5-127" aria-hidden="true" tabindex="-1"></a><span class="in">    i &lt;- i + 1L</span></span>
+<span id="cb5-128"><a href="#cb5-128" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-129"><a href="#cb5-129" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb5-130"><a href="#cb5-130" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-131"><a href="#cb5-131" aria-hidden="true" tabindex="-1"></a><span class="in">  # Returning main rma.mv object which can later be used with wald_test_cwb()</span></span>
+<span id="cb5-132"><a href="#cb5-132" aria-hidden="true" tabindex="-1"></a><span class="in">  if (return_rma_obj) return(raw_res)</span></span>
+<span id="cb5-133"><a href="#cb5-133" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-134"><a href="#cb5-134" aria-hidden="true" tabindex="-1"></a><span class="in">  # Getting robust results</span></span>
+<span id="cb5-135"><a href="#cb5-135" aria-hidden="true" tabindex="-1"></a><span class="in">  robu_res &lt;- raw_res |&gt; metafor::robust(cluster = study, clubSandwich = TRUE)</span></span>
+<span id="cb5-136"><a href="#cb5-136" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-137"><a href="#cb5-137" aria-hidden="true" tabindex="-1"></a><span class="in">  # Making character variable with all covariates </span></span>
+<span id="cb5-138"><a href="#cb5-138" aria-hidden="true" tabindex="-1"></a><span class="in">  all_covariates &lt;- all.vars(delete.response(terms(formula)))</span></span>
+<span id="cb5-139"><a href="#cb5-139" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-140"><a href="#cb5-140" aria-hidden="true" tabindex="-1"></a><span class="in">  # Model control info</span></span>
+<span id="cb5-141"><a href="#cb5-141" aria-hidden="true" tabindex="-1"></a><span class="in">  if (length(all_covariates) &gt; 1) {</span></span>
+<span id="cb5-142"><a href="#cb5-142" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-143"><a href="#cb5-143" aria-hidden="true" tabindex="-1"></a><span class="in">    controlled &lt;- &quot;Yes&quot;</span></span>
+<span id="cb5-144"><a href="#cb5-144" aria-hidden="true" tabindex="-1"></a><span class="in">    control_vars &lt;- paste0(all_covariates[-1], collapse = &quot;;&quot;)</span></span>
+<span id="cb5-145"><a href="#cb5-145" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-146"><a href="#cb5-146" aria-hidden="true" tabindex="-1"></a><span class="in">  } else {</span></span>
+<span id="cb5-147"><a href="#cb5-147" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-148"><a href="#cb5-148" aria-hidden="true" tabindex="-1"></a><span class="in">    controlled &lt;- &quot;No&quot;</span></span>
+<span id="cb5-149"><a href="#cb5-149" aria-hidden="true" tabindex="-1"></a><span class="in">    control_vars &lt;- &quot;None&quot;</span></span>
+<span id="cb5-150"><a href="#cb5-150" aria-hidden="true" tabindex="-1"></a><span class="in">    </span></span>
+<span id="cb5-151"><a href="#cb5-151" aria-hidden="true" tabindex="-1"></a><span class="in">  }</span></span>
+<span id="cb5-152"><a href="#cb5-152" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-153"><a href="#cb5-153" aria-hidden="true" tabindex="-1"></a><span class="in">  # Getting name of main predictor variables</span></span>
+<span id="cb5-154"><a href="#cb5-154" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_string &lt;- all_covariates[1]</span></span>
+<span id="cb5-155"><a href="#cb5-155" aria-hidden="true" tabindex="-1"></a><span class="in">  # Getting name of each category of the main predictor variables</span></span>
+<span id="cb5-156"><a href="#cb5-156" aria-hidden="true" tabindex="-1"></a><span class="in">  moderators &lt;- robu_res$g.levels.f[[1]]</span></span>
+<span id="cb5-157"><a href="#cb5-157" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-158"><a href="#cb5-158" aria-hidden="true" tabindex="-1"></a><span class="in">  # Wald test comparison sequence</span></span>
+<span id="cb5-159"><a href="#cb5-159" aria-hidden="true" tabindex="-1"></a><span class="in">  seq_con &lt;- 1:length(moderators)</span></span>
+<span id="cb5-160"><a href="#cb5-160" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-161"><a href="#cb5-161" aria-hidden="true" tabindex="-1"></a><span class="in">  # Estimating HTZ wald test </span></span>
+<span id="cb5-162"><a href="#cb5-162" aria-hidden="true" tabindex="-1"></a><span class="in">  wald_htz_res &lt;- </span></span>
+<span id="cb5-163"><a href="#cb5-163" aria-hidden="true" tabindex="-1"></a><span class="in">    clubSandwich::Wald_test(</span></span>
+<span id="cb5-164"><a href="#cb5-164" aria-hidden="true" tabindex="-1"></a><span class="in">      raw_res,</span></span>
+<span id="cb5-165"><a href="#cb5-165" aria-hidden="true" tabindex="-1"></a><span class="in">      constraints = clubSandwich::constrain_equal(c(seq_con)),</span></span>
+<span id="cb5-166"><a href="#cb5-166" aria-hidden="true" tabindex="-1"></a><span class="in">      vcov = &quot;CR2&quot;</span></span>
+<span id="cb5-167"><a href="#cb5-167" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb5-168"><a href="#cb5-168" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-169"><a href="#cb5-169" aria-hidden="true" tabindex="-1"></a><span class="in">  # Obtaning HTZ wald test p values</span></span>
+<span id="cb5-170"><a href="#cb5-170" aria-hidden="true" tabindex="-1"></a><span class="in">  wald_pval &lt;- wald_htz_res$p_val</span></span>
+<span id="cb5-171"><a href="#cb5-171" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-172"><a href="#cb5-172" aria-hidden="true" tabindex="-1"></a><span class="in">  # F stat info</span></span>
+<span id="cb5-173"><a href="#cb5-173" aria-hidden="true" tabindex="-1"></a><span class="in">  F_value_str &lt;- paste0(</span></span>
+<span id="cb5-174"><a href="#cb5-174" aria-hidden="true" tabindex="-1"></a><span class="in">    &quot;F(&quot;, round(wald_htz_res$df_num, 2), &quot;, &quot;, </span></span>
+<span id="cb5-175"><a href="#cb5-175" aria-hidden="true" tabindex="-1"></a><span class="in">    round(wald_htz_res$df_denom, 2), &quot;) = &quot;, </span></span>
+<span id="cb5-176"><a href="#cb5-176" aria-hidden="true" tabindex="-1"></a><span class="in">    round(wald_htz_res$Fstat, 2)</span></span>
+<span id="cb5-177"><a href="#cb5-177" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
+<span id="cb5-178"><a href="#cb5-178" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-179"><a href="#cb5-179" aria-hidden="true" tabindex="-1"></a><span class="in">  # Readable moderator name removing _ and making upper-case letter for first word</span></span>
+<span id="cb5-180"><a href="#cb5-180" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_string_table &lt;- stringr::str_replace_all(mod_string, pattern = &quot;_&quot;, replacement = &quot; &quot;)</span></span>
+<span id="cb5-181"><a href="#cb5-181" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_string_table &lt;- sub(&quot;^(\\w)(\\w*)&quot;, &quot;\\U\\1\\L\\2&quot;, mod_string_table, perl = TRUE)</span></span>
+<span id="cb5-182"><a href="#cb5-182" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-183"><a href="#cb5-183" aria-hidden="true" tabindex="-1"></a><span class="in">  # Moderator effects and CIs</span></span>
+<span id="cb5-184"><a href="#cb5-184" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_effects &lt;- round(as.numeric(robu_res$b[1:length(moderators)]), 2)</span></span>
+<span id="cb5-185"><a href="#cb5-185" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_cil &lt;- round(robu_res$ci.lb[1:length(moderators)], 2)</span></span>
+<span id="cb5-186"><a href="#cb5-186" aria-hidden="true" tabindex="-1"></a><span class="in">  mod_ciu &lt;- round(robu_res$ci.ub[1:length(moderators)], 2)</span></span>
+<span id="cb5-187"><a href="#cb5-187" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-188"><a href="#cb5-188" aria-hidden="true" tabindex="-1"></a><span class="in">  # Results in ready to publish format</span></span>
+<span id="cb5-189"><a href="#cb5-189" aria-hidden="true" tabindex="-1"></a><span class="in">  res &lt;- </span></span>
+<span id="cb5-190"><a href="#cb5-190" aria-hidden="true" tabindex="-1"></a><span class="in">    tibble(</span></span>
+<span id="cb5-191"><a href="#cb5-191" aria-hidden="true" tabindex="-1"></a><span class="in">      Characteric = mod_string,</span></span>
+<span id="cb5-192"><a href="#cb5-192" aria-hidden="true" tabindex="-1"></a><span class="in">      Moderator = c(mod_string_table, moderators, &quot;Wald test (HTZ)&quot;),</span></span>
+<span id="cb5-193"><a href="#cb5-193" aria-hidden="true" tabindex="-1"></a><span class="in">      studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),</span></span>
+<span id="cb5-194"><a href="#cb5-194" aria-hidden="true" tabindex="-1"></a><span class="in">      effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),</span></span>
+<span id="cb5-195"><a href="#cb5-195" aria-hidden="true" tabindex="-1"></a><span class="in">      avg_effect_F = </span></span>
+<span id="cb5-196"><a href="#cb5-196" aria-hidden="true" tabindex="-1"></a><span class="in">        c(</span></span>
+<span id="cb5-197"><a href="#cb5-197" aria-hidden="true" tabindex="-1"></a><span class="in">          NA_real_, </span></span>
+<span id="cb5-198"><a href="#cb5-198" aria-hidden="true" tabindex="-1"></a><span class="in">          paste0(mod_effects, &quot; [&quot;, mod_cil, &quot;, &quot;, mod_ciu, &quot;]&quot;), </span></span>
+<span id="cb5-199"><a href="#cb5-199" aria-hidden="true" tabindex="-1"></a><span class="in">          F_value_str</span></span>
+<span id="cb5-200"><a href="#cb5-200" aria-hidden="true" tabindex="-1"></a><span class="in">      ),</span></span>
+<span id="cb5-201"><a href="#cb5-201" aria-hidden="true" tabindex="-1"></a><span class="in">      pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 2),</span></span>
+<span id="cb5-202"><a href="#cb5-202" aria-hidden="true" tabindex="-1"></a><span class="in">      df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),</span></span>
+<span id="cb5-203"><a href="#cb5-203" aria-hidden="true" tabindex="-1"></a><span class="in">      SD_total = round(c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_), 2),</span></span>
+<span id="cb5-204"><a href="#cb5-204" aria-hidden="true" tabindex="-1"></a><span class="in">      rho = rho,</span></span>
+<span id="cb5-205"><a href="#cb5-205" aria-hidden="true" tabindex="-1"></a><span class="in">      wald_compared = c(rep(NA_real_, length(moderators) + 1), paste(seq_con, collapse = &quot;,&quot;)),</span></span>
+<span id="cb5-206"><a href="#cb5-206" aria-hidden="true" tabindex="-1"></a><span class="in">      controls = controlled,</span></span>
+<span id="cb5-207"><a href="#cb5-207" aria-hidden="true" tabindex="-1"></a><span class="in">      control_vars = control_vars,</span></span>
+<span id="cb5-208"><a href="#cb5-208" aria-hidden="true" tabindex="-1"></a><span class="in">      optimizer = raw_res$control$optimizer,</span></span>
+<span id="cb5-209"><a href="#cb5-209" aria-hidden="true" tabindex="-1"></a><span class="in">      avg_effect = round(c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_), 2),</span></span>
+<span id="cb5-210"><a href="#cb5-210" aria-hidden="true" tabindex="-1"></a><span class="in">      LL = round(c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_), 2),</span></span>
+<span id="cb5-211"><a href="#cb5-211" aria-hidden="true" tabindex="-1"></a><span class="in">      UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),</span></span>
+<span id="cb5-212"><a href="#cb5-212" aria-hidden="true" tabindex="-1"></a><span class="in">      tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),</span></span>
+<span id="cb5-213"><a href="#cb5-213" aria-hidden="true" tabindex="-1"></a><span class="in">      omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),</span></span>
+<span id="cb5-214"><a href="#cb5-214" aria-hidden="true" tabindex="-1"></a><span class="in">      t_F = c(NA_real_, robu_res$zval[1:length(moderators)], wald_htz_res$Fstat),</span></span>
+<span id="cb5-215"><a href="#cb5-215" aria-hidden="true" tabindex="-1"></a><span class="in">    )</span></span>
+<span id="cb5-216"><a href="#cb5-216" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-217"><a href="#cb5-217" aria-hidden="true" tabindex="-1"></a><span class="in">  res</span></span>
+<span id="cb5-218"><a href="#cb5-218" aria-hidden="true" tabindex="-1"></a><span class="in">  </span></span>
+<span id="cb5-219"><a href="#cb5-219" aria-hidden="true" tabindex="-1"></a><span class="in">}</span></span>
+<span id="cb5-220"><a href="#cb5-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-221"><a href="#cb5-221" aria-hidden="true" tabindex="-1"></a><span class="in">opts &lt;- furrr::furrr_options(</span></span>
+<span id="cb5-222"><a href="#cb5-222" aria-hidden="true" tabindex="-1"></a><span class="in">  stdout = FALSE,        # don&#39;t forward cat/print output</span></span>
+<span id="cb5-223"><a href="#cb5-223" aria-hidden="true" tabindex="-1"></a><span class="in">  conditions = NULL      # don&#39;t forward messages/warnings</span></span>
+<span id="cb5-224"><a href="#cb5-224" aria-hidden="true" tabindex="-1"></a><span class="in">)</span></span>
+<span id="cb5-225"><a href="#cb5-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-226"><a href="#cb5-226" aria-hidden="true" tabindex="-1"></a><span class="in">arg_list_tbl_rho08 &lt;- arg_list_tbl |&gt; filter(rho == 0.8 &amp; var == &quot;vgt_pop&quot;)</span></span>
+<span id="cb5-227"><a href="#cb5-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-228"><a href="#cb5-228" aria-hidden="true" tabindex="-1"></a><span class="in">plan(multisession)</span></span>
+<span id="cb5-229"><a href="#cb5-229" aria-hidden="true" tabindex="-1"></a><span class="in">x_test &lt;- future_pmap(.l = arg_list_tbl_rho08, .f = .SCE_RVE, .options = opts) |&gt; list_rbind(); x_test</span></span>
+<span id="cb5-230"><a href="#cb5-230" aria-hidden="true" tabindex="-1"></a><span class="in">plan(sequential)</span></span>
+<span id="cb5-231"><a href="#cb5-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 6
-  formula   var     rand       structure   rho data                
-  &lt;list&gt;    &lt;chr&gt;   &lt;list&gt;     &lt;list&gt;    &lt;dbl&gt; &lt;list&gt;              
-1 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 308]&gt;
-# A tibble: 20 × 6
-   formula   var     rand       structure   rho data                
-   &lt;list&gt;    &lt;chr&gt;   &lt;list&gt;     &lt;list&gt;    &lt;dbl&gt; &lt;list&gt;              
- 1 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0   &lt;tibble [202 × 308]&gt;
- 2 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.2 &lt;tibble [202 × 308]&gt;
- 3 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.4 &lt;tibble [202 × 308]&gt;
- 4 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.6 &lt;tibble [202 × 308]&gt;
- 5 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 308]&gt;
- 6 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0   &lt;tibble [202 × 308]&gt;
- 7 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.2 &lt;tibble [202 × 308]&gt;
- 8 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.4 &lt;tibble [202 × 308]&gt;
- 9 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.6 &lt;tibble [202 × 308]&gt;
-10 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 308]&gt;
-11 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0   &lt;tibble [202 × 308]&gt;
-12 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.2 &lt;tibble [202 × 308]&gt;
-13 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.4 &lt;tibble [202 × 308]&gt;
-14 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.6 &lt;tibble [202 × 308]&gt;
-15 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 308]&gt;
-16 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0   &lt;tibble [202 × 308]&gt;
-17 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.2 &lt;tibble [202 × 308]&gt;
-18 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.4 &lt;tibble [202 × 308]&gt;
-19 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.6 &lt;tibble [202 × 308]&gt;
-20 &lt;formula&gt; vgt     &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 308]&gt;</code></pre>
+<pre><code># A tibble: 1 × 7
+  formula   var     rand       structure   rho data                model
+  &lt;list&gt;    &lt;chr&gt;   &lt;list&gt;     &lt;list&gt;    &lt;dbl&gt; &lt;list&gt;              &lt;chr&gt;
+1 &lt;formula&gt; vgt_pop &lt;list [2]&gt; &lt;chr [2]&gt;   0.8 &lt;tibble [202 × 41]&gt; SCEp 
+# A tibble: 26 × 19
+   Characteric  Moderator    studies effects avg_effect_F  pval df_satt SD_total   rho wald_compared
+   &lt;chr&gt;        &lt;chr&gt;          &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;   &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;        
+ 1 outcome_type Outcome type      45     202 &lt;NA&gt;         NA       NA      NA      0.8 &lt;NA&gt;         
+ 2 outcome_type Alcohol and…       7      31 0.08 [-0.1,…  0.31     4.6     0.22   0.8 &lt;NA&gt;         
+ 3 outcome_type Hope, empow…      12      32 0.26 [0.12,…  0       10.8     0.2    0.8 &lt;NA&gt;         
+ 4 outcome_type Loneliness         4       5 0.03 [-0.52…  0.86     2.7     0.28   0.8 &lt;NA&gt;         
+ 5 outcome_type Self-esteem        5      14 0.43 [0.23,…  0        4       0.16   0.8 &lt;NA&gt;         
+ 6 outcome_type Social func…      16      47 0.15 [-0.01…  0.06    12.8     0.22   0.8 &lt;NA&gt;         
+ 7 outcome_type Wellbeing a…      24      67 0.21 [0.11,…  0       13.9     0.18   0.8 &lt;NA&gt;         
+ 8 outcome_type Other              4       6 0.27 [0.14,…  0.01     3.4     0      0.8 &lt;NA&gt;         
+ 9 outcome_type Wald test (…      NA      NA F(6, 7) = 1…  0.26    NA      NA      0.8 1,2,3,4,5,6,7
+10 outcome_type Outcome type      45     202 &lt;NA&gt;         NA       NA      NA      0.8 &lt;NA&gt;         
+# ℹ 16 more rows
+# ℹ 9 more variables: controls &lt;chr&gt;, control_vars &lt;chr&gt;, optimizer &lt;chr&gt;, avg_effect &lt;dbl&gt;,
+#   LL &lt;dbl&gt;, UL &lt;dbl&gt;, tau2 &lt;dbl&gt;, omega2 &lt;dbl&gt;, t_F &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show the code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="in">```{r table-test}</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="in">wider_dat &lt;- </span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="in">  x_test |&gt; </span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="in">  select(Characteric:SD_total, controls) |&gt; </span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="in">  pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |&gt; </span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="in">  relocate(contains(&quot;no&quot;,  ignore.case = TRUE), .after = effects) |&gt;          </span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="in">  relocate(contains(&quot;yes&quot;, ignore.case = TRUE), .after = last_col())</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="in">wider_dat |&gt; </span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="in">  select(-1) |&gt; </span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="in">  gt() |&gt; </span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="in">    sub_missing(</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a><span class="in">    columns = everything(),   </span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="in">    missing_text = &quot;&quot;         </span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="in">  )</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div id="vxgkajsbxx" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#vxgkajsbxx table {
+font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+}
+#vxgkajsbxx thead, #vxgkajsbxx tbody, #vxgkajsbxx tfoot, #vxgkajsbxx tr, #vxgkajsbxx td, #vxgkajsbxx th {
+border-style: none;
+}
+#vxgkajsbxx p {
+margin: 0;
+padding: 0;
+}
+#vxgkajsbxx .gt_table {
+display: table;
+border-collapse: collapse;
+line-height: normal;
+margin-left: auto;
+margin-right: auto;
+color: #333333;
+font-size: 16px;
+font-weight: normal;
+font-style: normal;
+background-color: #FFFFFF;
+width: auto;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #A8A8A8;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #A8A8A8;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_caption {
+padding-top: 4px;
+padding-bottom: 4px;
+}
+#vxgkajsbxx .gt_title {
+color: #333333;
+font-size: 125%;
+font-weight: initial;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-color: #FFFFFF;
+border-bottom-width: 0;
+}
+#vxgkajsbxx .gt_subtitle {
+color: #333333;
+font-size: 85%;
+font-weight: initial;
+padding-top: 3px;
+padding-bottom: 5px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-color: #FFFFFF;
+border-top-width: 0;
+}
+#vxgkajsbxx .gt_heading {
+background-color: #FFFFFF;
+text-align: center;
+border-bottom-color: #FFFFFF;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_bottom_border {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_col_headings {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_col_heading {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 6px;
+padding-left: 5px;
+padding-right: 5px;
+overflow-x: hidden;
+}
+#vxgkajsbxx .gt_column_spanner_outer {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: normal;
+text-transform: inherit;
+padding-top: 0;
+padding-bottom: 0;
+padding-left: 4px;
+padding-right: 4px;
+}
+#vxgkajsbxx .gt_column_spanner_outer:first-child {
+padding-left: 0;
+}
+#vxgkajsbxx .gt_column_spanner_outer:last-child {
+padding-right: 0;
+}
+#vxgkajsbxx .gt_column_spanner {
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: bottom;
+padding-top: 5px;
+padding-bottom: 5px;
+overflow-x: hidden;
+display: inline-block;
+width: 100%;
+}
+#vxgkajsbxx .gt_spanner_row {
+border-bottom-style: hidden;
+}
+#vxgkajsbxx .gt_group_heading {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+text-align: left;
+}
+#vxgkajsbxx .gt_empty_group_heading {
+padding: 0.5px;
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+vertical-align: middle;
+}
+#vxgkajsbxx .gt_from_md > :first-child {
+margin-top: 0;
+}
+#vxgkajsbxx .gt_from_md > :last-child {
+margin-bottom: 0;
+}
+#vxgkajsbxx .gt_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+margin: 10px;
+border-top-style: solid;
+border-top-width: 1px;
+border-top-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 1px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 1px;
+border-right-color: #D3D3D3;
+vertical-align: middle;
+overflow-x: hidden;
+}
+#vxgkajsbxx .gt_stub {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+}
+#vxgkajsbxx .gt_stub_row_group {
+color: #333333;
+background-color: #FFFFFF;
+font-size: 100%;
+font-weight: initial;
+text-transform: inherit;
+border-right-style: solid;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+padding-left: 5px;
+padding-right: 5px;
+vertical-align: top;
+}
+#vxgkajsbxx .gt_row_group_first td {
+border-top-width: 2px;
+}
+#vxgkajsbxx .gt_row_group_first th {
+border-top-width: 2px;
+}
+#vxgkajsbxx .gt_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#vxgkajsbxx .gt_first_summary_row {
+border-top-style: solid;
+border-top-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_first_summary_row.thick {
+border-top-width: 2px;
+}
+#vxgkajsbxx .gt_last_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_grand_summary_row {
+color: #333333;
+background-color: #FFFFFF;
+text-transform: inherit;
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#vxgkajsbxx .gt_first_grand_summary_row {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-top-style: double;
+border-top-width: 6px;
+border-top-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_last_grand_summary_row_top {
+padding-top: 8px;
+padding-bottom: 8px;
+padding-left: 5px;
+padding-right: 5px;
+border-bottom-style: double;
+border-bottom-width: 6px;
+border-bottom-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_striped {
+background-color: rgba(128, 128, 128, 0.05);
+}
+#vxgkajsbxx .gt_table_body {
+border-top-style: solid;
+border-top-width: 2px;
+border-top-color: #D3D3D3;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_footnotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_footnote {
+margin: 0px;
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#vxgkajsbxx .gt_sourcenotes {
+color: #333333;
+background-color: #FFFFFF;
+border-bottom-style: none;
+border-bottom-width: 2px;
+border-bottom-color: #D3D3D3;
+border-left-style: none;
+border-left-width: 2px;
+border-left-color: #D3D3D3;
+border-right-style: none;
+border-right-width: 2px;
+border-right-color: #D3D3D3;
+}
+#vxgkajsbxx .gt_sourcenote {
+font-size: 90%;
+padding-top: 4px;
+padding-bottom: 4px;
+padding-left: 5px;
+padding-right: 5px;
+}
+#vxgkajsbxx .gt_left {
+text-align: left;
+}
+#vxgkajsbxx .gt_center {
+text-align: center;
+}
+#vxgkajsbxx .gt_right {
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+#vxgkajsbxx .gt_font_normal {
+font-weight: normal;
+}
+#vxgkajsbxx .gt_font_bold {
+font-weight: bold;
+}
+#vxgkajsbxx .gt_font_italic {
+font-style: italic;
+}
+#vxgkajsbxx .gt_super {
+font-size: 65%;
+}
+#vxgkajsbxx .gt_footnote_marks {
+font-size: 75%;
+vertical-align: 0.4em;
+position: initial;
+}
+#vxgkajsbxx .gt_asterisk {
+font-size: 100%;
+vertical-align: 0;
+}
+#vxgkajsbxx .gt_indent_1 {
+text-indent: 5px;
+}
+#vxgkajsbxx .gt_indent_2 {
+text-indent: 10px;
+}
+#vxgkajsbxx .gt_indent_3 {
+text-indent: 15px;
+}
+#vxgkajsbxx .gt_indent_4 {
+text-indent: 20px;
+}
+#vxgkajsbxx .gt_indent_5 {
+text-indent: 25px;
+}
+#vxgkajsbxx .katex-display {
+display: inline-flex !important;
+margin-bottom: 0.75em !important;
+}
+#vxgkajsbxx div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+height: 0px !important;
+}
+</style>
+
+<table class="gt_table caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-quarto-disable-processing="false" data-quarto-bootstrap="false">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="gt_col_headings header">
+<th id="Moderator" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">Moderator</th>
+<th id="studies" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">studies</th>
+<th id="effects" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">effects</th>
+<th id="avg_effect_F_No" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">avg_effect_F_No</th>
+<th id="pval_No" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">pval_No</th>
+<th id="df_satt_No" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">df_satt_No</th>
+<th id="SD_total_No" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">SD_total_No</th>
+<th id="avg_effect_F_Yes" class="gt_col_heading gt_columns_bottom_border gt_left" data-quarto-table-cell-role="th" scope="col">avg_effect_F_Yes</th>
+<th id="pval_Yes" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">pval_Yes</th>
+<th id="df_satt_Yes" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">df_satt_Yes</th>
+<th id="SD_total_Yes" class="gt_col_heading gt_columns_bottom_border gt_right" data-quarto-table-cell-role="th" scope="col">SD_total_Yes</th>
+</tr>
+</thead>
+<tbody class="gt_table_body">
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Outcome type</td>
+<td class="gt_row gt_right" headers="studies">45</td>
+<td class="gt_row gt_right" headers="effects">202</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No"><br>
+</td>
+<td class="gt_row gt_right" headers="pval_No"><br>
+</td>
+<td class="gt_row gt_right" headers="df_satt_No"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_No"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="pval_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="df_satt_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_Yes"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Alcohol and drug abuse/misuse</td>
+<td class="gt_row gt_right" headers="studies">7</td>
+<td class="gt_row gt_right" headers="effects">31</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.08 [-0.1, 0.26]</td>
+<td class="gt_row gt_right" headers="pval_No">0.31</td>
+<td class="gt_row gt_right" headers="df_satt_No">4.6</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.22</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.2 [-0.04, 0.45]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.09</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">12.9</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.22</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Hope, empowerment &amp; self-efficacy</td>
+<td class="gt_row gt_right" headers="studies">12</td>
+<td class="gt_row gt_right" headers="effects">32</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.26 [0.12, 0.4]</td>
+<td class="gt_row gt_right" headers="pval_No">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_No">10.8</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.20</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.35 [0.16, 0.54]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">17.2</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.21</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Loneliness</td>
+<td class="gt_row gt_right" headers="studies">4</td>
+<td class="gt_row gt_right" headers="effects">5</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.03 [-0.52, 0.59]</td>
+<td class="gt_row gt_right" headers="pval_No">0.86</td>
+<td class="gt_row gt_right" headers="df_satt_No">2.7</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.28</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.07 [-0.16, 0.3]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.48</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">7.0</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.09</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Self-esteem</td>
+<td class="gt_row gt_right" headers="studies">5</td>
+<td class="gt_row gt_right" headers="effects">14</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.43 [0.23, 0.63]</td>
+<td class="gt_row gt_right" headers="pval_No">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_No">4.0</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.16</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.52 [0.35, 0.7]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">6.5</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.15</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Social functioning (degree of impairment)</td>
+<td class="gt_row gt_right" headers="studies">16</td>
+<td class="gt_row gt_right" headers="effects">47</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.15 [-0.01, 0.3]</td>
+<td class="gt_row gt_right" headers="pval_No">0.06</td>
+<td class="gt_row gt_right" headers="df_satt_No">12.8</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.22</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.25 [0.06, 0.45]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.01</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">18.6</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.22</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Wellbeing and quality of life</td>
+<td class="gt_row gt_right" headers="studies">24</td>
+<td class="gt_row gt_right" headers="effects">67</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.21 [0.11, 0.31]</td>
+<td class="gt_row gt_right" headers="pval_No">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_No">13.9</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.18</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.29 [0.11, 0.47]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">18.2</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.20</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Other</td>
+<td class="gt_row gt_right" headers="studies">4</td>
+<td class="gt_row gt_right" headers="effects">6</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.27 [0.14, 0.41]</td>
+<td class="gt_row gt_right" headers="pval_No">0.01</td>
+<td class="gt_row gt_right" headers="df_satt_No">3.4</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.00</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.36 [0.18, 0.54]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">4.9</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.00</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Wald test (HTZ)</td>
+<td class="gt_row gt_right" headers="studies"><br>
+</td>
+<td class="gt_row gt_right" headers="effects"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">F(6, 7) = 1.67</td>
+<td class="gt_row gt_right" headers="pval_No">0.26</td>
+<td class="gt_row gt_right" headers="df_satt_No"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_No"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">F(6, 6.39) = 2.37</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.15</td>
+<td class="gt_row gt_right" headers="df_satt_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_Yes"><br>
+</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Prereg chr</td>
+<td class="gt_row gt_right" headers="studies">45</td>
+<td class="gt_row gt_right" headers="effects">202</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No"><br>
+</td>
+<td class="gt_row gt_right" headers="pval_No"><br>
+</td>
+<td class="gt_row gt_right" headers="df_satt_No"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_No"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="pval_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="df_satt_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_Yes"><br>
+</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Not preregistered</td>
+<td class="gt_row gt_right" headers="studies">22</td>
+<td class="gt_row gt_right" headers="effects">61</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.29 [0.18, 0.4]</td>
+<td class="gt_row gt_right" headers="pval_No">0.00</td>
+<td class="gt_row gt_right" headers="df_satt_No">16.3</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.27</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.14 [-0.08, 0.36]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.20</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">10.2</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.26</td>
+</tr>
+<tr class="even">
+<td class="gt_row gt_left" headers="Moderator">Preregistered</td>
+<td class="gt_row gt_right" headers="studies">23</td>
+<td class="gt_row gt_right" headers="effects">141</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">0.14 [0.04, 0.23]</td>
+<td class="gt_row gt_right" headers="pval_No">0.01</td>
+<td class="gt_row gt_right" headers="df_satt_No">13.5</td>
+<td class="gt_row gt_right" headers="SD_total_No">0.19</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">0.03 [-0.17, 0.24]</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.70</td>
+<td class="gt_row gt_right" headers="df_satt_Yes">5.0</td>
+<td class="gt_row gt_right" headers="SD_total_Yes">0.18</td>
+</tr>
+<tr class="odd">
+<td class="gt_row gt_left" headers="Moderator">Wald test (HTZ)</td>
+<td class="gt_row gt_right" headers="studies"><br>
+</td>
+<td class="gt_row gt_right" headers="effects"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_No">F(1, 26.91) = 4.91</td>
+<td class="gt_row gt_right" headers="pval_No">0.04</td>
+<td class="gt_row gt_right" headers="df_satt_No"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_No"><br>
+</td>
+<td class="gt_row gt_left" headers="avg_effect_F_Yes">F(1, 26.8) = 2.24</td>
+<td class="gt_row gt_right" headers="pval_Yes">0.15</td>
+<td class="gt_row gt_right" headers="df_satt_Yes"><br>
+</td>
+<td class="gt_row gt_right" headers="SD_total_Yes"><br>
+</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 </div>
 </div>
 </section>
