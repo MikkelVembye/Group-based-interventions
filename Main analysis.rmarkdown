@@ -33,9 +33,13 @@ citation-location: margin
 bibliography: bibliography.bib 
 ---
 
+
+
 ## Loading R packages and data
 
 Below, we load the R package and data used for you main analyses. You can find the generated datasets and the corresponding variables in the PRIMED workflow document. 
+
+
 
 ```{r packages-and-source-file}
 
@@ -67,9 +71,13 @@ mental_health_dat <- readRDS("mental_health_dat.rds")
 ```
 
 
+
+
 ## Moderators and control variables manipulation
 
 In this section, we manipulate all variables used in meta-regression analyses. 
+
+
 
 ```{r, manipulate-data}
 # List all relevant moderator variables here: 
@@ -108,7 +116,7 @@ reint_ma_dat <-
     prereg_c = conventional - mean(conventional),
     
     schizophrenia_in_sample = if_else(schizophrenia == "Schizophrenia", "Yes", "No"),
-    schizophrenia_in_sample = factor(schizophrenia_in_sample, levels = c("Yes", "No")),
+    schizophrenia_in_sample = factor(schizophrenia, levels = c("Yes", "No")),
     
     schizo_in_sample = if_else(schizophrenia == "Schizophrenia", 1, 0),
     schizo_c = schizo_in_sample - mean(schizo_in_sample),
@@ -160,7 +168,11 @@ reint_ma_dat <-
 ```
 
 
+
+
 ## Outcome
+
+
 ```{r outcome-test}
 rho <- 0.8
 
@@ -224,7 +236,11 @@ prereg_obj
 
 ```
 
+
+
 ## Function building for analysis
+
+
 
 ```{r}
 # Read: rma_arg_tbl = rma argument tibble
@@ -546,18 +562,17 @@ plan(multisession)
 x_test <- future_pmap(.l = arg_list_tbl_rho08, .f = .SCE_RVE, .options = opts) |> list_rbind(); x_test
 plan(sequential)
 
-#plan(multisession)
-#res_dat <- future_pmap(.l = arg_list_tbl, .f = .SCE_RVE, .options = opts) |> list_rbind(); res_dat
-#plan(sequential)
+plan(multisession)
+res_dat <- future_pmap(.l = arg_list_tbl, .f = .SCE_RVE, .options = opts) |> list_rbind(); res_dat
+plan(sequential)
 
 
 ```
 
 ```{r table-test}
 
-wider_dat_theory_factors <- 
+wider_dat <- 
   x_test |> 
-  filter(table == "theory") |> 
   select(Characteric:SD_total, controls) |> 
   pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |> 
   relocate(contains("no",  ignore.case = TRUE), .after = effects) |>          
@@ -565,7 +580,7 @@ wider_dat_theory_factors <-
 
 
 main_res_table <- 
-  wider_dat_theory_factors |> 
+  wider_dat |> 
   select(-1) |> 
   gt() |> 
     sub_missing(
@@ -575,41 +590,5 @@ main_res_table <-
 
 #main_res_table |> gtsave("main_res_table.docx")
 
-wider_dat_methods_factors <- 
-  x_test |> 
-  filter(table == "methods") |> 
-  select(Characteric:SD_total, controls) |> 
-  pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |> 
-  relocate(contains("no",  ignore.case = TRUE), .after = effects) |>          
-  relocate(contains("yes", ignore.case = TRUE), .after = last_col())
-
-
-methods_res_table <- 
-  wider_dat_methods_factors |> 
-  select(-1) |> 
-  gt() |> 
-    sub_missing(
-    columns = everything(),   
-    missing_text = ""         
-  ); methods_res_table
-
-#methods_res_table |> gtsave("methods_res_table.docx")
-
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
