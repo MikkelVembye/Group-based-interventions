@@ -157,6 +157,8 @@ reint_ma_dat <-
     other = Other
   )
 
+attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
+
 ```
 
 
@@ -220,6 +222,17 @@ prereg_obj <-
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
 prereg_obj
+
+y_test <- 
+  try(
+    Wald_test_cwb(
+      full_model = prereg_obj,
+      constraints = constrain_equal(1:2),
+      R = 19, 
+      adjust = "CR2",
+      seed = 12345
+    )
+  )
 
 
 ```
@@ -407,12 +420,72 @@ arg_list_tbl <-
 
 # Making SCE RVE function
 
+Wald_test_cwb_fun <- 
+  function(rma_fun_obj, seq_con, R = 19, seed = 080725){
+    
+    # Thanks to Rasmus Klokker for providing this solution
+    rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
+    
+    V_mat <- rma_fun_obj$V
+    assign("V_mat", V_mat, envir = .GlobalEnv)
+    
+    auxiliary_dist <- c("Rademacher", "Mammen", "Webb six", "uniform", "standard normal")
+    cwb_res <- list()
+    i <- 1L
+    
+    while (!inherits(cwb_res, "Wald_test_wildmeta") & i <= length(auxiliary_dist)) {
+      cwb_res <- try( 
+        Wald_test_cwb(
+          full_model = rma_fun_obj,
+          constraints = constrain_equal(seq_con),
+          R = R,
+          auxiliary_dist = auxiliary_dist[i],
+          # "we see it as reasonable to use CWB without adjustment because it" 
+          # "is conceptually and algorithmically simpler than CWB Adjusted." Joshi et al. 2022, p. 474
+          adjust = "CR0",
+          seed = seed,
+          future_args = list(future.stdout = FALSE, future.conditions = character(0L))
+        )
+      )
+      
+      i <- i + 1L
+      
+    }
+    
+    if (inherits(cwb_res, 'try-error')) {
+      
+      cwb_res <- 
+        data.frame(
+          Test = "Not converged", 
+          Adjustment = NA_character_, 
+          CR_type = NA_character_, 
+          Statistic = NA_character_,
+          R = NA_real_,
+          p_val = NA_real_
+        )
+      
+    }
+    
+    rm(V_mat, envir = .GlobalEnv)
+    
+    return(cwb_res)
+    
+}
+
+#plan(multisession)
+#Wald_test_cwb_fun(
+#  rma_fun_obj = x_test[[1]],
+#  seq_con = 1:2
+#)
+#plan(sequential)
+
 .SCE_RVE <- 
   function(formula, es, var, rand, structure, rho, data, model, table, return_rma_obj = FALSE){
     
   if (!str_detect(model, "SCE")) stop("This function only fits SCE models")
     
   data$vi <- data[[var]]
+  data_name <- attr(data, "data_name")
 
   # Variance-Covariance Matrix
   V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho, sparse = TRUE)
@@ -443,6 +516,18 @@ arg_list_tbl <-
     
   }
     
+  raw_res$call <- 
+    call2(
+      "rma.mv", 
+      yi = formula, 
+      V = as.name("V_mat"), 
+      data = as.name(data_name), 
+      random = rand, 
+      struct = structure, 
+      sparse = TRUE, 
+      .ns = "metafor"
+    )
+  
   # Returning main rma.mv object which can later be used with wald_test_cwb()
   if (return_rma_obj) return(raw_res)
   
@@ -543,7 +628,7 @@ opts <- furrr::furrr_options(
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
 plan(multisession)
-x_test <- future_pmap(.l = arg_list_tbl_rho08, .f = .SCE_RVE, .options = opts) |> list_rbind(); x_test
+x_test <- future_pmap(.l = arg_list_tbl_rho08[2,], .f = .SCE_RVE, return_rma_obj = TRUE, .options = opts); x_test
 plan(sequential)
 
 #plan(multisession)
@@ -568,6 +653,21 @@ main_res_table <-
   wider_dat_theory_factors |> 
   select(-1) |> 
   gt() |> 
+  tab_spanner(label = "Subgroup analyses", columns = c("Moderator", "studies", "effects")) |> 
+  tab_spanner(label = "Unadjusted effects", columns = contains("No")) |> 
+  tab_spanner(label = "Covariate-adjusted effects", columns = contains("Yes")) |> 
+  cols_label(
+    studies = "Studes",
+    effects = "Effects",
+    avg_effect_F_No  = html("Est [95% CI]<br>F stats"),
+    pval_No = "Sig.",
+    df_satt_No = "Satt. df",
+    SD_total_No = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2"),
+    avg_effect_F_Yes  = html("Est [95% CI]<br>F stats"),
+    pval_Yes = "Sig.",
+    df_satt_Yes = "Satt. df",
+    SD_total_Yes = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2")
+  ) |> 
     sub_missing(
     columns = everything(),   
     missing_text = ""         
@@ -588,6 +688,21 @@ methods_res_table <-
   wider_dat_methods_factors |> 
   select(-1) |> 
   gt() |> 
+  tab_spanner(label = "Subgroup analyses", columns = c("Moderator", "studies", "effects")) |> 
+  tab_spanner(label = "Unadjusted effects", columns = contains("No")) |> 
+  tab_spanner(label = "Covariate-adjusted effects", columns = contains("Yes")) |> 
+  cols_label(
+    studies = "Studes",
+    effects = "Effects",
+    avg_effect_F_No  = html("Est [95% CI]<br>F stats"),
+    pval_No = "Sig.",
+    df_satt_No = "Satt. df",
+    SD_total_No = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2"),
+    avg_effect_F_Yes  = html("Est [95% CI]<br>F stats"),
+    pval_Yes = "Sig.",
+    df_satt_Yes = "Satt. df",
+    SD_total_Yes = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2")
+  ) |>
     sub_missing(
     columns = everything(),   
     missing_text = ""         

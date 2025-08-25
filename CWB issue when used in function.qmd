@@ -246,14 +246,14 @@ But when we try to do the same using the `Wald_test_cwb()` the procedure fails. 
 ## Out-of-list
 
 ```{r cwt-out-of-list}
-#| eval: false
+#| eval: true
 plan(multisession)
 
 cwb_obj <- 
   Wald_test_cwb(
     full_model = rma_obj,
     constraints = constrain_equal(1:2),
-    R = 1999,
+    R = 19,
     seed = 080725
   ) |> 
   # Supresses the metafor package message when running in parallel 
@@ -261,7 +261,7 @@ cwb_obj <-
 
 plan(sequential) 
 
-saveRDS(cwb_obj, file = "cwb_res_1999.rds")
+#saveRDS(cwb_obj, file = "cwb_res_1999.rds")
 
 cwb_obj
 ```
@@ -374,10 +374,13 @@ rma_obj_list[[1]]$call
 Then I tweaked `Wald_test_cwb()` so that the `V_mat` gets assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that this is where `Wald_test_cwb()` retrieves it from?
 
 ```{r}
-#| eval: false
+#| eval: true
 # Quick and dirty function
 Wald_test_cwb_fun <- 
-  function(rma_fun_obj, R = 1999, seed = 080725){
+  function(rma_fun_obj, R = 19, seed = 080725){
+    
+    # Thanks to Rasmus Klokker for providing this solution
+    rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
     
     V_mat <- rma_fun_obj$V
     assign("V_mat", V_mat, envir = .GlobalEnv)
@@ -397,12 +400,12 @@ Wald_test_cwb_fun <-
 }
 
 plan(multisession, workers = availableCores() - 1)
-in_fun_res <- map(.x = rma_obj_list, .f = Wald_test_cwb_fun)
+in_fun_res <- map(.x = rma_obj_list, .f = Wald_test_cwb_fun) |> list_rbind()
 plan(sequential)
 
-saveRDS(in_fun_res, "cwb_res_list_1999.rds")
+#saveRDS(in_fun_res, "cwb_res_list_1999.rds")
 
-in_fun_res[[1]]
+in_fun_res
 ```
 
 ```{r}
