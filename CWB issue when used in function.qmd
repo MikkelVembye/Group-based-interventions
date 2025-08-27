@@ -4,7 +4,6 @@ format:
   html:
     toc: true
     toc-location: left
-editor: visual
 execute: 
   echo: fenced
   warning: false
@@ -127,7 +126,6 @@ arg_tbl <-
         as.formula()
       
       random <-  if (model == "SCEp") list(outer_form, inner_form) else list(outer_form)
-      
       struct <- rep("DIAG", length(random))
       
       res <- 
@@ -336,16 +334,20 @@ rma_fun <- function(formula, var, rand, structure, rho, data){
     sparse=TRUE
   )
  
+  struct_lang <- str2lang('c("DIAG", "DIAG")')
+  random_lang <- paste0("list(", paste0(rand, collapse = ", "), ")") |> str2lang()
+  
   res$call <- call2(
     "rma.mv", 
     yi = formula, 
     V = as.name("V_mat"), 
     data = as.name(data_name), 
-    random = rand, 
-    struct = structure, 
-    sparse = TRUE, 
-    .ns = "metafor"
+    random = random_lang, 
+    struct = struct_lang, 
+    sparse = TRUE
   )
+  
+  res$call$yi <- as(res$call$yi, Class = "call") 
   
   res
   
@@ -369,6 +371,7 @@ Now the calls look somewhat similar, with the only difference being `metafor::,`
 rma_obj$call
 rma_obj_list[[1]]$call
 
+all.equal(rma_obj$call, rma_obj_list[[1]]$call)
 ```
 
 Then I tweaked `Wald_test_cwb()` so that the `V_mat` gets assigned to the Global envoironment (`.GlobalEnv`) as it seemed to me that this is where `Wald_test_cwb()` retrieves it from?
@@ -380,7 +383,7 @@ Wald_test_cwb_fun <-
   function(rma_fun_obj, R = 19, seed = 080725){
     
     # Thanks to Rasmus Klokker for providing this solution
-    rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
+    #rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
     
     V_mat <- rma_fun_obj$V
     assign("V_mat", V_mat, envir = .GlobalEnv)
@@ -421,7 +424,7 @@ So, as you see, that works, but the results are quite different from the out-of-
 
 ```{r}
 #| eval: true
-c(`In-function CWB p value` = in_fun_res[[1]]$p_val, `Out-of-function p value` = cwb_obj$p_val)
+c(`In-function CWB p value` = in_fun_res$p_val, `Out-of-function p value` = cwb_obj$p_val)
 ```
 
 # Concluding remarks

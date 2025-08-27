@@ -57,6 +57,9 @@ library(future)
 library(furrr)
 library(gt)
 library(fastDummies)
+library(rlang)
+library(wildmeta)
+library(clubSandwich)
 
 source("Helpers.R")
 
@@ -166,19 +169,20 @@ attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 ```{r outcome-test}
 rho <- 0.8
 
-V_mat_outcome <- 
+V_mat <- 
   vcalc(
     vi = vgt_pop, 
     cluster = study, 
     obs = esid, 
     data = reint_ma_dat, 
-    rho = rho
+    rho = rho,
+    sparse = TRUE
   )
 
 outcome_obj <- 
   rma.mv(
     yi = gt_pop ~ outcome_type - 1,
-    V = V_mat_outcome, 
+    V = V_mat, 
     random = list(~ outcome_type | study, ~ outcome_type | esid),
     struct = c("DIAG", "DIAG"),
     data = reint_ma_dat,
@@ -415,19 +419,27 @@ arg_tbl_all <-
 
 arg_list_tbl <- 
   pmap(.l = arg_tbl, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
-  list_rbind()
+  list_rbind() |> 
+  mutate(
+    R = 19,
+    seed = 26082025
+  )
 
-
-# Making SCE RVE function
-
-Wald_test_cwb_fun <- 
-  function(rma_fun_obj, seq_con, R = 19, seed = 080725){
+################################################################################
+# Makign Wald_test_cwb_fun
+################################################################################
+.Wald_test_cwb_fun <- 
+  function(rma_fun_obj, seq_c, reps, seed_num){
     
     # Thanks to Rasmus Klokker for providing this solution
-    rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
+    #rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
+    #rma_fun_obj$call$data <- as(rma_fun_obj$call$data, Class = "call") 
     
     V_mat <- rma_fun_obj$V
     assign("V_mat", V_mat, envir = .GlobalEnv)
+    
+    reint_ma_dat <- rma_fun_obj$data
+    assign("reint_ma_dat", reint_ma_dat, envir = .GlobalEnv)
     
     auxiliary_dist <- c("Rademacher", "Mammen", "Webb six", "uniform", "standard normal")
     cwb_res <- list()
@@ -435,15 +447,15 @@ Wald_test_cwb_fun <-
     
     while (!inherits(cwb_res, "Wald_test_wildmeta") & i <= length(auxiliary_dist)) {
       cwb_res <- try( 
-        Wald_test_cwb(
+        wildmeta::Wald_test_cwb(
           full_model = rma_fun_obj,
-          constraints = constrain_equal(seq_con),
-          R = R,
+          constraints = wildmeta::constrain_equal(seq_c),
+          R = reps,
           auxiliary_dist = auxiliary_dist[i],
           # "we see it as reasonable to use CWB without adjustment because it" 
           # "is conceptually and algorithmically simpler than CWB Adjusted." Joshi et al. 2022, p. 474
           adjust = "CR0",
-          seed = seed,
+          seed = seed_num,
           future_args = list(future.stdout = FALSE, future.conditions = character(0L))
         )
       )
@@ -456,8 +468,8 @@ Wald_test_cwb_fun <-
       
       cwb_res <- 
         data.frame(
-          Test = "Not converged", 
-          Adjustment = NA_character_, 
+          Test = "Non-converged", 
+          Adjustment = as.character(attr(cwb_res, "condition")), 
           CR_type = NA_character_, 
           Statistic = NA_character_,
           R = NA_real_,
@@ -467,20 +479,24 @@ Wald_test_cwb_fun <-
     }
     
     rm(V_mat, envir = .GlobalEnv)
+    #rm(reint_ma_dat, envir = .GlobalEnv)
     
     return(cwb_res)
     
 }
 
 #plan(multisession)
-#Wald_test_cwb_fun(
+#.Wald_test_cwb_fun(
 #  rma_fun_obj = x_test[[1]],
 #  seq_con = 1:2
 #)
 #plan(sequential)
 
+################################################################################
+## Making SCE RVE function
+################################################################################
 .SCE_RVE <- 
-  function(formula, es, var, rand, structure, rho, data, model, table, return_rma_obj = FALSE){
+  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE){
     
   if (!str_detect(model, "SCE")) stop("This function only fits SCE models")
     
@@ -516,17 +532,21 @@ Wald_test_cwb_fun <-
     
   }
     
+  struct_lang <- if(model == "SCEp") str2lang('c("DIAG", "DIAG")') else str2lang('"DIAG"')
+  random_lang <- paste0("list(", paste0(rand, collapse = ", "), ")") |> str2lang()
+  
   raw_res$call <- 
     call2(
       "rma.mv", 
       yi = formula, 
       V = as.name("V_mat"), 
       data = as.name(data_name), 
-      random = rand, 
-      struct = structure, 
-      sparse = TRUE, 
-      .ns = "metafor"
+      random = random_lang, 
+      struct = struct_lang, 
+      sparse = TRUE
     )
+  
+  raw_res$call$yi <- as(raw_res$call$yi, Class = "call") 
   
   # Returning main rma.mv object which can later be used with wald_test_cwb()
   if (return_rma_obj) return(raw_res)
@@ -558,23 +578,35 @@ Wald_test_cwb_fun <-
   # Wald test comparison sequence
   seq_con <- 1:length(moderators)
   
-  # Estimating HTZ wald test 
-  wald_htz_res <- 
-    clubSandwich::Wald_test(
-      raw_res,
-      constraints = clubSandwich::constrain_equal(c(seq_con)),
-      vcov = "CR2"
+  wald_cwb_res <-
+    .Wald_test_cwb_fun(
+      rma_fun_obj = raw_res,
+      seq_c = seq_con,
+      reps = R,
+      seed_num = seed
     )
   
-  # Obtaning HTZ wald test p values
-  wald_pval <- wald_htz_res$p_val
   
-  # F stat info
-  F_value_str <- paste0(
-    "F(", round(wald_htz_res$df_num, 2), ", ", 
-    round(wald_htz_res$df_denom, 2), ") = ", 
-    round(wald_htz_res$Fstat, 2)
-  )
+  
+  wald_pval <- wald_cwb_res$p_val
+  
+  # Estimating HTZ wald test 
+#  wald_htz_res <- 
+#    clubSandwich::Wald_test(
+#      raw_res,
+#      constraints = clubSandwich::constrain_equal(c(seq_con)),
+#      vcov = "CR2"
+#    )
+#  
+#  # Obtaning HTZ wald test p values
+#  wald_pval <- wald_htz_res$p_val
+#  
+#  # F stat info
+#  F_value_str <- paste0(
+#    "F(", round(wald_htz_res$df_num, 2), ", ", 
+#    round(wald_htz_res$df_denom, 2), ") = ", 
+#    round(wald_htz_res$Fstat, 2)
+#  )
   
   # Readable moderator name removing _ and making upper-case letter for first word
   mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
@@ -589,14 +621,14 @@ Wald_test_cwb_fun <-
   res <- 
     tibble(
       Characteric = mod_string,
-      Moderator = c(mod_string_table, moderators, "Wald test (HTZ)"),
+      Moderator = c(mod_string_table, moderators, "Wald test (CWB)"),
       studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
       effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
-      avg_effect_F = 
+      avg_effect_ci = 
         c(
           NA_real_, 
           paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
-          F_value_str
+          NA_real_
       ),
       pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 3),
       df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
@@ -611,7 +643,7 @@ Wald_test_cwb_fun <-
       UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),
       tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),
       omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),
-      t_F = c(NA_real_, robu_res$zval[1:length(moderators)], wald_htz_res$Fstat),
+      t_val = c(NA_real_, robu_res$zval[1:length(moderators)], NA_real_),
       table = table,
       effect_size = es
     )
@@ -622,24 +654,49 @@ Wald_test_cwb_fun <-
 
 opts <- furrr::furrr_options(
   stdout = FALSE,        # don't forward cat/print output
-  conditions = NULL      # don't forward messages/warnings
+  conditions = NULL,      # don't forward messages/warnings
+  seed = NULL
 )
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-plan(multisession)
-x_test <- future_pmap(.l = arg_list_tbl_rho08[2,], .f = .SCE_RVE, return_rma_obj = TRUE, .options = opts); x_test
+
+library(tictoc)
+
+
+plan(multisession, workers = availableCores() - 1)
+tic()
+x_test <- future_pmap(.l = arg_list_tbl_rho08[1,], .f = .SCE_RVE, return_rma_obj = FALSE, .options = opts); x_test
+toc()
+
 plan(sequential)
 
 #plan(multisession)
 #res_dat <- future_pmap(.l = arg_list_tbl, .f = .SCE_RVE, .options = opts) |> list_rbind(); res_dat
 #plan(sequential)
 
-
+#plan(multisession, workers = availableCores() - 1)
+#.Wald_test_cwb_fun(
+#  rma_fun_obj = x_test[[1]],
+#  seq_c = 1:7,
+#  reps = 19,
+#  seed_num = 26082025
+#)
+#plan(sequential)
+#
+#plan(multisession)
+#Wald_test_cwb(
+#  full_model = outcome_obj,
+#  constraints = constrain_equal(1:7),
+#  R = 19,
+#  seed = 26082025,
+#  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
+#)
+#plan(sequential)
 ```
 
 ```{r table-test}
-
+#| eval: false 
 wider_dat_theory_factors <- 
   x_test |> 
   filter(table == "theory") |> 
