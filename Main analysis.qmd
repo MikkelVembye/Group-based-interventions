@@ -45,10 +45,8 @@ library(ggplot2)
 library(stringr)
 library(tidyr)
 library(rempsyc)
-library(flextable)
 library(purrr)
 library(metafor)
-library(patchwork)
 library(clubSandwich)
 library(knitr)
 library(kableExtra)
@@ -59,7 +57,6 @@ library(gt)
 library(fastDummies)
 library(rlang)
 library(wildmeta)
-library(clubSandwich)
 
 source("Helpers.R")
 
@@ -162,6 +159,8 @@ reint_ma_dat <-
 
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 
+#saveRDS(reint_ma_dat, "reint_ma_dat.rds")
+
 ```
 
 
@@ -175,8 +174,7 @@ V_mat <-
     cluster = study, 
     obs = esid, 
     data = reint_ma_dat, 
-    rho = rho,
-    sparse = TRUE
+    rho = rho
   )
 
 outcome_obj <- 
@@ -189,6 +187,7 @@ outcome_obj <-
     sparse=TRUE
   )
 
+saveRDS(outcome_obj, file = "outcome_obj.rds")
 
 outcome_obj_robu <- 
   outcome_obj |> 
@@ -205,7 +204,7 @@ club_wald_test
 age_obj <- 
   rma.mv(
     yi = gt_pop ~ age_c + prereg_chr - 1,
-    V = V_mat_outcome, 
+    V = V_mat, 
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
     sparse = TRUE
@@ -217,7 +216,7 @@ age_obj
 prereg_obj <- 
     rma.mv(
     yi = gt_pop ~ prereg_chr + male_c - 1,
-    V = V_mat_outcome, 
+    V = V_mat, 
     random = list(~ prereg_chr | study, ~ prereg_chr | esid),
     struct = c("DIAG", "DIAG"),
     data = reint_ma_dat,
@@ -251,11 +250,11 @@ y_test <-
     yi, vi, covars, r, model, data, type
   ){
     
-    covariates <- if (str_detect(covars, ";")) str_split_1(covars, pattern = ";") else covars 
+    covariates <- if (str_detect(covars, ";")) stringr::str_split_1(covars, pattern = ";") else covars 
     
     formula <- reformulate(covariates, response = yi, intercept = FALSE)
     
-    if (str_detect(model, "SCE")) {
+    if (stringr::str_detect(model, "SCE")) {
       
       main_pred <- labels(terms(formula))[1]
       
@@ -278,7 +277,7 @@ y_test <-
       struct <- rep("DIAG", length(random))
       
       res <- 
-        tibble(
+        tibble::tibble(
           formula = list(formula),
           es = yi, 
           var = vi,
@@ -293,7 +292,7 @@ y_test <-
     } else if (model == "CHE") {
       
       res <- 
-        tibble(
+        tibble::tibble(
           formula = list(formula),
           es = yi, 
           var = vi,
@@ -323,7 +322,7 @@ tbl_test <-
 
 
 arg_tbl <- 
-  tibble(
+  tibble::tibble(
     yi = "gt_pop",
     vi = "vgt_pop",
     
@@ -407,6 +406,7 @@ var_es_names <-  list("vgt", "vg", "vd", "vgt_post")
 arg_tbl_alt_es <- 
   map2(es_names, var_es_names, ~ {
     arg_tbl |> 
+      filter(r == 0.8) |> 
       mutate(
         yi = .x,
         vi = .y
@@ -418,7 +418,7 @@ arg_tbl_all <-
   rbind(arg_tbl, arg_tbl_alt_es)
 
 arg_list_tbl <- 
-  pmap(.l = arg_tbl, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+  pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
     R = 19,
@@ -498,13 +498,13 @@ arg_list_tbl <-
 .SCE_RVE <- 
   function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE){
     
-  if (!str_detect(model, "SCE")) stop("This function only fits SCE models")
+  if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
     
   data$vi <- data[[var]]
   data_name <- attr(data, "data_name")
 
   # Variance-Covariance Matrix
-  V_mat <- vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho, sparse = TRUE)
+  V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
   
   # Strategy for overcoming non-convergence 
   optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
@@ -516,7 +516,7 @@ arg_list_tbl <-
     
     raw_res <- tryCatch(
       suppressWarnings(
-        rma.mv(
+        metafor::rma.mv(
           formula,
           V = V_mat,
           random = rand, 
@@ -536,7 +536,7 @@ arg_list_tbl <-
   random_lang <- paste0("list(", paste0(rand, collapse = ", "), ")") |> str2lang()
   
   raw_res$call <- 
-    call2(
+    rlang::call2(
       "rma.mv", 
       yi = formula, 
       V = as.name("V_mat"), 
@@ -546,7 +546,7 @@ arg_list_tbl <-
       sparse = TRUE
     )
   
-  raw_res$call$yi <- as(raw_res$call$yi, Class = "call") 
+  raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
   
   # Returning main rma.mv object which can later be used with wald_test_cwb()
   if (return_rma_obj) return(raw_res)
@@ -655,18 +655,16 @@ arg_list_tbl <-
 opts <- furrr::furrr_options(
   stdout = FALSE,        # don't forward cat/print output
   conditions = NULL,      # don't forward messages/warnings
-  seed = NULL
+  seed = TRUE
 )
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
 
-library(tictoc)
-
 
 plan(multisession, workers = availableCores() - 1)
 tic()
-x_test <- future_pmap(.l = arg_list_tbl_rho08[1,], .f = .SCE_RVE, return_rma_obj = FALSE, .options = opts); x_test
+x_test <- pmap(.l = arg_list_tbl_rho08[1,], .f = .SCE_RVE, return_rma_obj = FALSE); x_test
 toc()
 
 plan(sequential)
@@ -684,15 +682,27 @@ plan(sequential)
 #)
 #plan(sequential)
 #
-#plan(multisession)
-#Wald_test_cwb(
-#  full_model = outcome_obj,
-#  constraints = constrain_equal(1:7),
-#  R = 19,
-#  seed = 26082025,
-#  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
-#)
-#plan(sequential)
+
+V_mat <- 
+  vcalc(
+    vi = vgt_pop, 
+    cluster = study, 
+    obs = esid, 
+    data = reint_ma_dat, 
+    rho = rho
+  )
+
+plan(multisession)
+tic()
+Wald_test_cwb(
+  full_model = outcome_obj,
+  constraints = constrain_equal(1:7),
+  R = 19,
+  seed = 26082025,
+  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
+)
+toc()
+plan(sequential)
 ```
 
 ```{r table-test}
