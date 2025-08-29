@@ -38,6 +38,7 @@ bibliography: bibliography.bib
 Below, we load the R package and data used for you main analyses. You can find the generated datasets and the corresponding variables in the PRIMED workflow document. 
 
 ```{r packages-and-source-file}
+RNGkind("L'Ecuyer-CMRG") 
 
 library(dplyr)
 library(tibble)
@@ -57,6 +58,7 @@ library(gt)
 library(fastDummies)
 library(rlang)
 library(wildmeta)
+library(tictoc)
 
 source("Helpers.R")
 
@@ -141,9 +143,16 @@ reint_ma_dat <-
     male_c = male_pct/100 - 0.5,
     sessions_c = sessions_per_week - 1,
     duration_c = duration_in_weeks - 12,
-    fu_time_c = time_after_end_intervention_weeks - 1
+    fu_time_c = time_after_end_intervention_weeks - 1,
     
-  ) 
+    study = stringi::stri_trans_general(study, "Latin-ASCII"),
+    study = fct_relevel(study, sort)
+    
+  ) |> 
+  arrange(study) |> 
+  mutate(
+    study = as.character(study)
+  )
 
 reint_ma_dat <- 
   fastDummies::dummy_cols(reint_ma_dat, select_columns = "outcome_type", omit_colname_prefix = TRUE) |> 
@@ -155,6 +164,10 @@ reint_ma_dat <-
     social_fun = `outcome_type_Social functioning (degree of impairment)`,
     wellbeing = `Wellbeing and quality of life`,
     other = Other
+  ) |> 
+  mutate(
+    across(where(is.double), as.double),
+    across(where(is.integer), as.integer)
   )
 
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
@@ -169,7 +182,7 @@ attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 rho <- 0.8
 
 V_mat <- 
-  vcalc(
+  metafor::vcalc(
     vi = vgt_pop, 
     cluster = study, 
     obs = esid, 
@@ -178,7 +191,7 @@ V_mat <-
   )
 
 outcome_obj <- 
-  rma.mv(
+  metafor::rma.mv(
     yi = gt_pop ~ outcome_type - 1,
     V = V_mat, 
     random = list(~ outcome_type | study, ~ outcome_type | esid),
@@ -226,16 +239,16 @@ prereg_obj <-
 
 prereg_obj
 
-y_test <- 
-  try(
-    Wald_test_cwb(
-      full_model = prereg_obj,
-      constraints = constrain_equal(1:2),
-      R = 19, 
-      adjust = "CR2",
-      seed = 12345
-    )
-  )
+#y_test <- 
+#  try(
+#    Wald_test_cwb(
+#      full_model = prereg_obj,
+#      constraints = constrain_equal(1:2),
+#      R = 19, 
+#      adjust = "CR2",
+#      seed = 12345
+#    )
+#  )
 
 
 ```
@@ -252,9 +265,10 @@ y_test <-
     
     covariates <- if (str_detect(covars, ";")) stringr::str_split_1(covars, pattern = ";") else covars 
     
-    formula <- reformulate(covariates, response = yi, intercept = FALSE)
     
     if (stringr::str_detect(model, "SCE")) {
+      
+      formula <- reformulate(covariates, response = yi, intercept = FALSE)
       
       main_pred <- labels(terms(formula))[1]
       
@@ -291,6 +305,8 @@ y_test <-
       
     } else if (model == "CHE") {
       
+      formula <- reformulate(covariates, response = yi, intercept = TRUE)
+      
       res <- 
         tibble::tibble(
           formula = list(formula),
@@ -313,11 +329,11 @@ tbl_test <-
   .rma_arg_tbl(
     yi = "gt_pop", 
     vi = "vgt_pop", 
-    covars = "outcome_type",
-    model = "SCEp",
+    covars = "male_c",
+    model = "CHE",
     r = 0.8, 
     data = reint_ma_dat,
-    type = "theory"
+    type = "continuous"
 ); tbl_test
 
 
@@ -417,16 +433,18 @@ arg_tbl_alt_es <-
 arg_tbl_all <- 
   rbind(arg_tbl, arg_tbl_alt_es)
 
+
+# For SCE models
 arg_list_tbl <- 
   pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 19,
-    seed = 26082025
+    R = 10L,
+    seed = 26082025L
   )
 
 ################################################################################
-# Makign Wald_test_cwb_fun
+# Making Wald_test_cwb_fun
 ################################################################################
 .Wald_test_cwb_fun <- 
   function(rma_fun_obj, seq_c, reps, seed_num){
@@ -496,7 +514,7 @@ arg_list_tbl <-
 ## Making SCE RVE function
 ################################################################################
 .SCE_RVE <- 
-  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE){
+  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE, CWB = FALSE){
     
   if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
     
@@ -543,7 +561,8 @@ arg_list_tbl <-
       data = as.name(data_name), 
       random = random_lang, 
       struct = struct_lang, 
-      sparse = TRUE
+      sparse = TRUE,
+      .ns = "metafor"
     )
   
   raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
@@ -578,6 +597,8 @@ arg_list_tbl <-
   # Wald test comparison sequence
   seq_con <- 1:length(moderators)
   
+  if(CWB){
+    
   wald_cwb_res <-
     .Wald_test_cwb_fun(
       rma_fun_obj = raw_res,
@@ -586,27 +607,31 @@ arg_list_tbl <-
       seed_num = seed
     )
   
-  
-  
   wald_pval <- wald_cwb_res$p_val
+  last_val_string <- NA_character_
   
-  # Estimating HTZ wald test 
-#  wald_htz_res <- 
-#    clubSandwich::Wald_test(
-#      raw_res,
-#      constraints = clubSandwich::constrain_equal(c(seq_con)),
-#      vcov = "CR2"
-#    )
-#  
-#  # Obtaning HTZ wald test p values
-#  wald_pval <- wald_htz_res$p_val
-#  
-#  # F stat info
-#  F_value_str <- paste0(
-#    "F(", round(wald_htz_res$df_num, 2), ", ", 
-#    round(wald_htz_res$df_denom, 2), ") = ", 
-#    round(wald_htz_res$Fstat, 2)
-#  )
+  res <- wald_cwb_res
+   
+  } else {
+
+    wald_htz_res <- 
+      clubSandwich::Wald_test(
+        raw_res,
+        constraints = clubSandwich::constrain_equal(c(seq_con)),
+        vcov = "CR2"
+      )
+    
+    # Obtaning HTZ wald test p values
+    wald_pval <- wald_htz_res$p_val 
+    
+    last_val_string <- paste0(
+      "F(", round(wald_htz_res$df_num, 2), ", ", 
+      round(wald_htz_res$df_denom, 2), ") = ", 
+      round(wald_htz_res$Fstat, 2)
+    )
+    
+  }
+   
   
   # Readable moderator name removing _ and making upper-case letter for first word
   mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
@@ -626,9 +651,9 @@ arg_list_tbl <-
       effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
       avg_effect_ci = 
         c(
-          NA_real_, 
+          NA_character_, 
           paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
-          NA_real_
+          last_val_string
       ),
       pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 3),
       df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
@@ -652,66 +677,73 @@ arg_list_tbl <-
   
 }
 
+
+
+arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
+
+#x_test <- 
+#  pmap(
+#    .l = arg_list_tbl_rho08[1:2,], 
+#    .f = .SCE_RVE, 
+#    return_rma_obj = FALSE,
+#    CWB = TRUE
+#  ); x_test
+
+
 opts <- furrr::furrr_options(
   stdout = FALSE,        # don't forward cat/print output
   conditions = NULL,      # don't forward messages/warnings
   seed = TRUE
 )
 
-arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
+n_workers <- max(1L, future::availableCores() - 1L)
 
-
-
-plan(multisession, workers = availableCores() - 1)
+future::plan(future::multisession, workers = n_workers)
 tic()
-x_test <- pmap(.l = arg_list_tbl_rho08[1,], .f = .SCE_RVE, return_rma_obj = FALSE); x_test
+x_test <- 
+  future_pmap(
+    .l = arg_list_tbl_rho08, 
+    .f = .SCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = TRUE,
+    .options = opts,
+    .progress = TRUE
+  ); x_test
 toc()
 
-plan(sequential)
+future::plan(future::sequential)
+future::plan()
 
-#plan(multisession)
-#res_dat <- future_pmap(.l = arg_list_tbl, .f = .SCE_RVE, .options = opts) |> list_rbind(); res_dat
-#plan(sequential)
 
-#plan(multisession, workers = availableCores() - 1)
-#.Wald_test_cwb_fun(
-#  rma_fun_obj = x_test[[1]],
-#  seq_c = 1:7,
-#  reps = 19,
-#  seed_num = 26082025
-#)
-#plan(sequential)
+#V_mat <- 
+#  metafor::vcalc(
+#    vi = vgt_pop, 
+#    cluster = study, 
+#    obs = esid, 
+#    data = reint_ma_dat, 
+#    rho = rho
+#  )
 #
+#future::plan(future::multisession, workers = n_workers)
+#wildmeta::Wald_test_cwb(
+#  full_model = outcome_obj,
+#  constraints = wildmeta::constrain_equal(1:7),
+#  R = 10,
+#  seed = 26082025L
+#)
+#future::plan(future::sequential)
+#future::plan()
 
-V_mat <- 
-  vcalc(
-    vi = vgt_pop, 
-    cluster = study, 
-    obs = esid, 
-    data = reint_ma_dat, 
-    rho = rho
-  )
-
-plan(multisession)
-tic()
-Wald_test_cwb(
-  full_model = outcome_obj,
-  constraints = constrain_equal(1:7),
-  R = 19,
-  seed = 26082025,
-  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
-)
-toc()
-plan(sequential)
 ```
 
 ```{r table-test}
 #| eval: false 
 wider_dat_theory_factors <- 
   x_test |> 
+  list_rbind() |> 
   filter(table == "theory") |> 
   select(Characteric:SD_total, controls) |> 
-  pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |> 
+  pivot_wider(names_from = controls, values_from = c(avg_effect_ci:SD_total)) |> 
   relocate(contains("no",  ignore.case = TRUE), .after = effects) |>          
   relocate(contains("yes", ignore.case = TRUE), .after = last_col())
 
@@ -726,11 +758,11 @@ main_res_table <-
   cols_label(
     studies = "Studes",
     effects = "Effects",
-    avg_effect_F_No  = html("Est [95% CI]<br>F stats"),
+    avg_effect_ci_No  = html("Est [95% CI]<br>F stats"),
     pval_No = "Sig.",
     df_satt_No = "Satt. df",
     SD_total_No = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2"),
-    avg_effect_F_Yes  = html("Est [95% CI]<br>F stats"),
+    avg_effect_ci_Yes  = html("Est [95% CI]<br>F stats"),
     pval_Yes = "Sig.",
     df_satt_Yes = "Satt. df",
     SD_total_Yes = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2")
@@ -744,9 +776,10 @@ main_res_table <-
 
 wider_dat_methods_factors <- 
   x_test |> 
+  list_rbind() |> 
   filter(table == "methods") |> 
   select(Characteric:SD_total, controls) |> 
-  pivot_wider(names_from = controls, values_from = c(avg_effect_F:SD_total)) |> 
+  pivot_wider(names_from = controls, values_from = c(avg_effect_ci:SD_total)) |> 
   relocate(contains("no",  ignore.case = TRUE), .after = effects) |>          
   relocate(contains("yes", ignore.case = TRUE), .after = last_col())
 
@@ -761,11 +794,11 @@ methods_res_table <-
   cols_label(
     studies = "Studes",
     effects = "Effects",
-    avg_effect_F_No  = html("Est [95% CI]<br>F stats"),
+    avg_effect_ci_No  = html("Est [95% CI]<br>F stats"),
     pval_No = "Sig.",
     df_satt_No = "Satt. df",
     SD_total_No = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2"),
-    avg_effect_F_Yes  = html("Est [95% CI]<br>F stats"),
+    avg_effect_ci_Yes  = html("Est [95% CI]<br>F stats"),
     pval_Yes = "Sig.",
     df_satt_Yes = "Satt. df",
     SD_total_Yes = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2")
@@ -779,6 +812,282 @@ methods_res_table <-
 
 ```
 
+# Making CHE function for overall effects   
+
+```{r}
+
+.CHE_RVE <- function(data, study_out, studyid = study, rho = 0.8,  pred_int = 80){
+  
+  if (missing(study_out)) {
+    dat <- data
+  } else{
+    dat <- data |> 
+      filter(study != study_out)
+  }
+  
+  studyid_class <- substitute(studyid)
+  
+  if (!is.character(studyid_class)) {
+    dat$study <- data |> dplyr::pull({{ study }})
+  } else {
+    dat$study <- data[[study]]
+  }
+  
+  V_mat <- vcalc(vi = vgt, cluster = study, obs = esid, data = dat, rho = rho) 
+  
+  optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+  overall_res <- "Non-converged"
+  i <- 1L
+  
+  while (!inherits(overall_res, "rma.mv") & i <= 4L) {
+    
+    overall_res <- tryCatch( 
+      suppressWarnings(
+        rma.mv(
+          gt, 
+          V = V_mat,
+          random = ~ 1 | study / esid,
+          data = dat
+        ) |> 
+          robust(cluster = study, clubSandwich = TRUE) 
+      ),
+      error = function(e) "Non-converged"
+    )
+  } 
+  # I2 calcution
+  # See https://www.metafor-project.org/doku.php/tips:i2_multilevel_multivariate?s[]=i2
+  W <- solve(V_mat)
+  X <- model.matrix(overall_res)
+  P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
+  
+  I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
+                                                   (overall_res$k - overall_res$p)/sum(diag(P))), 2)
+  
+  pred <- predict(overall_res, level = pred_int)
+  
+  pi_lb_name <- paste0("pi_lb_", pred_int)
+  pi_ub_name <- paste0("pi_ub_", pred_int)
+  
+  res <- 
+    tibble(
+      rho = rho, 
+      studies = overall_res$n,
+      effects = overall_res$k,
+      avg_effect = as.numeric(overall_res$b),
+      se = overall_res$se,
+      LL = overall_res$ci.lb,
+      UL = overall_res$ci.ub,
+      !!pi_lb_name := pred$pi.lb,  
+      !!pi_ub_name := pred$pi.ub,  
+      pval = overall_res$pval,
+      df_satt = overall_res$dfs,
+      tau = sqrt(overall_res$sigma2[1]), 
+      omega = sqrt(overall_res$sigma2[2]), 
+      sd_total = sqrt(sum(overall_res$sigma2)),
+      QE = overall_res$QE,
+      I2 = I2_tot,
+      tau2 = overall_res$sigma2[1],
+      omega2 = overall_res$sigma2[2]
+    )
+  
+  if (!missing(study_out)) res <- res |> mutate(omitted_study = study_out)
+  
+  res
+  
+}
+
+study_names <- unique(reint_ma_dat$study) |> as.character()
+
+map(.x = study_names, .f = .CHE_RVE, data = reint_ma_dat)
+
+```
+
+# CHE-RVE for meta-regression
+
+```{r che-rve-meta-regression}
+
+cor_val <- 0:10/10
+cor_val <- cor_val[seq(1L, 10L, 2L)]
+
+arg_tbl_contin <- 
+  tibble::tibble(
+    yi = "gt_pop",
+    vi = "vgt_pop",
+    
+    covars = rep(
+      c(
+        "age_c", 
+        paste0(
+          "age_c;outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
+          "male_c;sessions_c;duration_c;fu_time_c"
+        ),
+        
+        "male_c",
+        paste0(
+          "male_c;schizophrenia_in_sample;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
+          "age_c;sessions_c;duration_c;fu_time_c"
+        ),
+        
+        "sessions_c",
+        paste0(
+          "sessions_c;CBT_intervention;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizo_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
+          "age_c;male_c;duration_c;fu_time_c"
+        ),
+        
+        "duration_c", 
+        paste0(
+          "duration_c;prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizo_c;cbt_c;clinical_c;tot_c;qes_c;crt_grp_c;", 
+          "age_c;male_c;sessions_c;fu_time_c"
+        ),
+        
+        "fu_time_c",
+        paste0(
+          "fu_time_c;test_type;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizo_c;cbt_c;prereg_c;tot_c;qes_c;crt_grp_c;", 
+          "age_c;male_c;sessions_c;duration_c"
+        )
+      
+      ),
+      each = 5),
+    
+    model = "CHE",
+    
+    r = rep(cor_val, 10),
+    
+    type = "Continuous"
+  )
+
+es_names <- list("gt", "g", "d", "gt_post")
+var_es_names <-  list("vgt", "vg", "vd", "vgt_post")
+
+arg_tbl_alt_es_contin <- 
+  map2(es_names, var_es_names, ~ {
+    arg_tbl_contin |> 
+      filter(r == 0.8) |> 
+      mutate(
+        yi = .x,
+        vi = .y
+      )
+  } ) |> 
+  list_rbind()
+
+arg_tbl_all_contin <- 
+  rbind(arg_tbl_contin, arg_tbl_alt_es_contin)
+
+
+
+# Model type to replicate with function
+
+rho <- 0.8
+
+V_mat <- 
+  metafor::vcalc(
+    vi = vgt_pop, 
+    cluster = study, 
+    obs = esid, 
+    data = reint_ma_dat, 
+    rho = rho
+  )
+
+male_obj <- 
+  metafor::rma.mv(
+    gt_pop ~ male_c, 
+    V = V_mat, 
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(
+    cluster = study, 
+    clubSandwich = TRUE
+  )
+
+
+
+
+.CHE_meta_reg <- 
+  function(
+    formula, 
+    es, 
+    var, 
+    rand, 
+    rho, 
+    data, 
+    model, 
+    table, 
+    return_rma_obj = FALSE
+    ){
+    
+      if (!stringr::str_detect(model, "CHE")) stop("This function only fits CHE models")
+    
+    data$vi <- data[[var]]
+    data_name <- attr(data, "data_name")
+    
+    # Variance-Covariance Matrix
+    V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+    
+    # Strategy for overcoming non-convergence 
+    optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+    raw_res <- "Non-converged"
+    i <- 1L
+    
+    # Fitting the main model
+    while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+      
+      raw_res <- tryCatch(
+        suppressWarnings(
+          metafor::rma.mv(
+            formula,
+            V = V_mat,
+            random = rand, 
+            data = data,
+            sparse = TRUE,
+            control = list(optimizer=optimizers[i])
+          )
+        ),
+        error = function(e) "Non-converged"
+      )
+      i <- i + 1L
+      
+    }
+    
+    paste0(rand, collapse = "") |> str2lang()
+    
+    #Re-constructiong the call
+    random_lang <- paste0(rand, collapse = "") |> str2lang()
+    
+    raw_res$call <- 
+      rlang::call2(
+        "rma.mv", 
+        yi = formula, 
+        V = as.name("V_mat"), 
+        data = as.name(data_name), 
+        random = random_lang, 
+        sparse = TRUE,
+        .ns = "metafor"
+      )
+    
+    raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
+   
+    # Returning main rma.mv object which can later be used with wald_test_cwb()
+    if (return_rma_obj) return(raw_res)
+     
+    # Getting robust results
+    robu_res <- raw_res |> metafor::robust(cluster = study, clubSandwich = TRUE)
+    
+    # Making character variable with all covariates 
+    all_covariates <- all.vars(delete.response(terms(formula)))
+    
+  }
+
+
+z_text <- pmap(.l = tbl_test, .f = .CHE_meta_reg, return_rma_obj = FALSE)    
+    
+    
+```
 
 
 
