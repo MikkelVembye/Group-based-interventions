@@ -8,6 +8,8 @@
 rm(list = ls())
 gc()
 
+RNGkind("L'Ecuyer-CMRG") 
+
 ## prepare data for
 ## metafor::rma.mv()
 DT <- metafor::escalc(

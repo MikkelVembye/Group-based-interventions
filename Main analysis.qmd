@@ -38,7 +38,7 @@ bibliography: bibliography.bib
 Below, we load the R package and data used for you main analyses. You can find the generated datasets and the corresponding variables in the PRIMED workflow document. 
 
 ```{r packages-and-source-file}
-RNGkind("L'Ecuyer-CMRG") 
+RNGkind("L'Ecuyer-CMRG") # My naive try to steer seed across OS
 
 library(dplyr)
 library(tibble)
@@ -702,10 +702,10 @@ future::plan(future::multisession, workers = n_workers)
 tic()
 x_test <- 
   future_pmap(
-    .l = arg_list_tbl_rho08, 
+    .l = arg_list_tbl_rho08[1,], 
     .f = .SCE_RVE, 
-    return_rma_obj = FALSE,
-    CWB = TRUE,
+    return_rma_obj = TRUE,
+    CWB = FALSE,
     .options = opts,
     .progress = TRUE
   ); x_test
@@ -803,7 +803,7 @@ methods_res_table <-
     df_satt_Yes = "Satt. df",
     SD_total_Yes = html("SD total<br>&radic;&tau;<sup>2</sup>+&omega;<sup>2")
   ) |>
-    sub_missing(
+  sub_missing(
     columns = everything(),   
     missing_text = ""         
   ); methods_res_table
@@ -906,7 +906,7 @@ map(.x = study_names, .f = .CHE_RVE, data = reint_ma_dat)
 
 ```{r che-rve-meta-regression}
 
-cor_val <- 0:10/10
+cor_val <- 0L:10L/10L
 cor_val <- cor_val[seq(1L, 10L, 2L)]
 
 arg_tbl_contin <- 
@@ -917,45 +917,21 @@ arg_tbl_contin <-
     covars = rep(
       c(
         "age_c", 
-        paste0(
-          "age_c;outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
-          "male_c;sessions_c;duration_c;fu_time_c"
-        ),
-        
         "male_c",
-        paste0(
-          "male_c;schizophrenia_in_sample;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
-          "age_c;sessions_c;duration_c;fu_time_c"
-        ),
-        
         "sessions_c",
-        paste0(
-          "sessions_c;CBT_intervention;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;",
-          "age_c;male_c;duration_c;fu_time_c"
-        ),
-        
-        "duration_c", 
-        paste0(
-          "duration_c;prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;clinical_c;tot_c;qes_c;crt_grp_c;", 
-          "age_c;male_c;sessions_c;fu_time_c"
-        ),
-        
+        "duration_c",
         "fu_time_c",
+        
         paste0(
-          "fu_time_c;test_type;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;tot_c;qes_c;crt_grp_c;", 
-          "age_c;male_c;sessions_c;duration_c"
+          "age_c;male_c;sessions_c;duration_c;fu_time_c;",
+          "outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c"
         )
-      
       ),
       each = 5),
     
     model = "CHE",
     
-    r = rep(cor_val, 10),
+    r = rep(cor_val, 6),
     
     type = "Continuous"
   )
@@ -1028,6 +1004,7 @@ male_obj <-
     
     # Variance-Covariance Matrix
     V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+    V_mat
     
     # Strategy for overcoming non-convergence 
     optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
@@ -1071,22 +1048,213 @@ male_obj <-
       )
     
     raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
-   
-    # Returning main rma.mv object which can later be used with wald_test_cwb()
-    if (return_rma_obj) return(raw_res)
+  
      
     # Getting robust results
-    robu_res <- raw_res |> metafor::robust(cluster = study, clubSandwich = TRUE)
+    robu_res <- 
+      raw_res |> 
+      metafor::robust(cluster = study, clubSandwich = TRUE, digits = 4L)
+    
+    # Returning main rma.mv object which can later be used with wald_test_cwb()
+    if (return_rma_obj) return(robu_res)
     
     # Making character variable with all covariates 
     all_covariates <- all.vars(delete.response(terms(formula)))
     
-  }
+    stars <- 
+      as.character(
+        stats::symnum(
+          robu_res$pval, corr = FALSE, na = FALSE,
+          cutpoints = c(0, .001, .01, .05, 1),
+          symbols   = c("***","**","*","")
+        )
+      )
+      
+    low_df <- dplyr::if_else(robu_res$dfs < 4, "L", "")
+    
+    column_names <- c(
+      "Age",
+      "% Male",
+      "Sessions",
+      "Duration",
+      "Follow-up timing",
+      NA_character_,
+      "Intercept",
+      "Study-level SD",
+      "Effect-level SD",
+      "Total SD",
+      "Number of effects",
+      "Number of studies"
+    )
+    
+    effects <- {
+      if (length(all_covariates) == 1L && stringr::str_detect(all_covariates, "age")) {
+        c(
+          paste0(round(robu_res$b[-1], 3L), " (", round(robu_res$se[-1], 3L), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 5L),
+          paste0(round(robu_res$b[1L], 3L), " (", round(robu_res$se[1], 3L), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1L]), 3L),
+          round(sqrt(robu_res$sigma2[2L]), 3L),
+          round(sqrt(sum(robu_res$sigma2)), 3L),
+          robu_res$s.nlevels[2L],
+          robu_res$s.nlevels[1L]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "male")) {
+        c(
+          NA_character_,
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 4),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "sessions")) {
+        c(
+          rep(NA_character_, 2),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 3),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "duration")) {
+        c(
+          rep(NA_character_, 3),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 2),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "fu_")) {
+        c(
+          rep(NA_character_, 4),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          NA_character_,
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) > 1) {
+        c(
+          paste0(round(robu_res$b[2:6], 3), " (", round(robu_res$se[2:6], 3), ")", stars[2:6], low_df[2:6]),
+          NA_character_,
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } 
+    }
+  
+    res <- tibble(
+      Moderators = column_names,
+      Coef = effects
+    )
+    
+    res
+  
+  
+}
 
 
-z_text <- pmap(.l = tbl_test, .f = .CHE_meta_reg, return_rma_obj = FALSE)    
+
+arg_list_tbl_contin <- 
+  pmap(.l = arg_tbl_contin, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+  list_rbind() 
+
+
+
+continuous_res_reint <- 
+  purrr::pmap(
+    #subset to main specification
+    .l = arg_list_tbl_contin[arg_list_tbl_contin$rho == 0.8,], 
+    .f = .CHE_meta_reg, 
+    return_rma_obj = FALSE
     
-    
+  ) |> 
+  purrr::list_rbind(names_to = "Model") |> 
+  dplyr::mutate(
+    Model = paste("Model", Model)
+  ) |> 
+  tidyr::pivot_wider(
+    names_from = Model,               
+    values_from = Coef
+  )  
+
+continuous_res_reint
+
+#rho <- 0.8
+#
+#V_mat <- 
+#  metafor::vcalc(
+#    vi = vgt_pop, 
+#    cluster = study, 
+#    obs = esid, 
+#    data = reint_ma_dat, 
+#    rho = rho
+#  )
+#
+#all_in_one_obj <- 
+#  metafor::rma.mv(
+#    arg_list_tbl_contin$formula[26][[1]], 
+#    V = V_mat, 
+#    random = ~ 1 | study / esid,
+#    data = reint_ma_dat,
+#    sparse = TRUE
+#  ) |> 
+#  robust(
+#    cluster = study, 
+#    clubSandwich = TRUE
+#  )
+
+
+
+
+
+
+```
+
+```{r making-gt-tables-contin}
+
+reint_contin_res_table <- 
+  continuous_res_reint |> 
+  gt() |> 
+  sub_missing(
+    columns = everything(),   
+    missing_text = ""         
+  ) |> 
+  cols_align(align = "left", columns = gt::everything()) |> 
+  tab_style(
+    style = cell_text(weight = "bold", align = "left"),
+    locations = cells_column_labels(columns = gt::everything())
+  ) |> 
+  tab_style(
+    style = cell_borders(sides = "top", color = "black", weight = px(1)),
+    locations = list(
+      cells_stub(rows  = Moderators == "Study-level SD"),
+      cells_body(rows  = Moderators == "Study-level SD")
+    )
+  )
+
+reint_contin_res_table
+
+#reint_contin_res_table |> gtsave("reint_contin_res_table.docx")
+
 ```
 
 

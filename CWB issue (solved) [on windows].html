@@ -1,0 +1,2431 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.39">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>CWB issue SOLVED (window results)</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="CWB issue (solved) [on windows]_files/libs/clipboard/clipboard.min.js"></script>
+<script src="CWB issue (solved) [on windows]_files/libs/quarto-html/quarto.js"></script>
+<script src="CWB issue (solved) [on windows]_files/libs/quarto-html/popper.min.js"></script>
+<script src="CWB issue (solved) [on windows]_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="CWB issue (solved) [on windows]_files/libs/quarto-html/anchor.min.js"></script>
+<link href="CWB issue (solved) [on windows]_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="CWB issue (solved) [on windows]_files/libs/quarto-html/quarto-syntax-highlighting-e26003cea8cd680ca0c55a263523d882.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="CWB issue (solved) [on windows]_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="CWB issue (solved) [on windows]_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="CWB issue (solved) [on windows]_files/libs/bootstrap/bootstrap-8a79a254b8e706d3c925cde0a310d4f0.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="CWB issue (solved) [on windows]_files/libs/kePrint-0.0.1/kePrint.js"></script>
+
+<link href="CWB issue (solved) [on windows]_files/libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#solved-prbloem" id="toc-solved-prbloem" class="nav-link active" data-scroll-target="#solved-prbloem">Solved prbloem</a>
+  <ul class="collapse">
+  <li><a href="#r-packages-and-data" id="toc-r-packages-and-data" class="nav-link" data-scroll-target="#r-packages-and-data">R packages and data</a></li>
+  </ul></li>
+  <li><a href="#fitting-models-and-estimation" id="toc-fitting-models-and-estimation" class="nav-link" data-scroll-target="#fitting-models-and-estimation">Fitting models and estimation</a>
+  <ul class="collapse">
+  <li><a href="#out-of-function-results" id="toc-out-of-function-results" class="nav-link" data-scroll-target="#out-of-function-results">Out-of-function results</a></li>
+  <li><a href="#in-function-results" id="toc-in-function-results" class="nav-link" data-scroll-target="#in-function-results">In-function results</a>
+  <ul class="collapse">
+  <li><a href="#equal-calls" id="toc-equal-calls" class="nav-link" data-scroll-target="#equal-calls">Equal calls</a></li>
+  <li><a href="#wald_test_cwb-in-function" id="toc-wald_test_cwb-in-function" class="nav-link" data-scroll-target="#wald_test_cwb-in-function">Wald_test_cwb in function</a></li>
+  </ul></li>
+  </ul></li>
+  <li><a href="#equal-results" id="toc-equal-results" class="nav-link" data-scroll-target="#equal-results">Equal results</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">CWB issue SOLVED (window results)</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="solved-prbloem" class="level1">
+<h1>Solved prbloem</h1>
+<p>I just wanted to let you know that we have figured out the problem concerning the diffence between CWB results when <code>Wald_tets_cwb()</code> was used in vs.&nbsp;outside a function. The problem was that the object call was not exactly replicated in our function. I provide the soultion below.</p>
+<section id="r-packages-and-data" class="level2">
+<h2 class="anchored" data-anchor-id="r-packages-and-data">R packages and data</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RNGkind</span>(<span class="st">"L'Ecuyer-CMRG"</span>) <span class="co"># My naive try to steer seed across OS</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(metafor)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(clubSandwich)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wildmeta)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(future)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>mental_health_dat <span class="ot">&lt;-</span> </span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">readRDS</span>(<span class="st">"mental_health_dat.rds"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">esid =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    study, esid, N_t, N_c, gt_pop, vgt_pop,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">outcome =</span> analysis_plan, prereg_chr</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Later used to re-construct rma_object$call</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="fu">attr</span>(mental_health_dat, <span class="st">"data_name"</span>) <span class="ot">&lt;-</span> <span class="st">"mental_health_dat"</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>mental_health_dat <span class="sc">|&gt;</span> </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits=</span><span class="dv">3</span>)  <span class="sc">|&gt;</span> </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"hover"</span>),</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">font_size =</span> <span class="dv">10</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">width =</span> <span class="st">"100%"</span>, <span class="at">height =</span> <span class="st">"500px"</span>, <span class="at">fixed_thead =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped table-hover caption-top table-sm small" data-quarto-postprocess="true">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">study</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">esid</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">N_t</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">N_c</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">gt_pop</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">vgt_pop</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">outcome</th>
+<th data-quarto-table-cell-role="th" style="text-align: left; position: sticky; top: 0; background-color: #FFFFFF;">prereg_chr</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Acarturk et al. 2022</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0.534</td>
+<td style="text-align: right;">0.087</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Acarturk et al. 2022</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0.257</td>
+<td style="text-align: right;">0.093</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Acarturk et al. 2022</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0.559</td>
+<td style="text-align: right;">0.135</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Acarturk et al. 2022</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0.339</td>
+<td style="text-align: right;">0.134</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Bækkelund et al. 2022</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.112</td>
+<td style="text-align: right;">0.163</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Bækkelund et al. 2022</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.100</td>
+<td style="text-align: right;">0.140</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">315</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">0.906</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">315</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">0.755</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">315</td>
+<td style="text-align: right;">316</td>
+<td style="text-align: right;">0.611</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">273</td>
+<td style="text-align: right;">238</td>
+<td style="text-align: right;">0.493</td>
+<td style="text-align: right;">0.004</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">273</td>
+<td style="text-align: right;">238</td>
+<td style="text-align: right;">0.434</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">273</td>
+<td style="text-align: right;">238</td>
+<td style="text-align: right;">0.467</td>
+<td style="text-align: right;">0.009</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">0.552</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">0.466</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">229</td>
+<td style="text-align: right;">204</td>
+<td style="text-align: right;">0.459</td>
+<td style="text-align: right;">0.010</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">208</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">0.580</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">208</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">0.450</td>
+<td style="text-align: right;">0.003</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Cano-Vindel et al. 2021</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">208</td>
+<td style="text-align: right;">180</td>
+<td style="text-align: right;">0.551</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Craigie &amp; Nathan 2009</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">-0.498</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Craigie &amp; Nathan 2009</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">157</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">-0.549</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Crawford et al. 2012</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">0.155</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Crawford et al. 2012</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">0.007</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Crawford et al. 2012</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.152</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Crawford et al. 2012</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.024</td>
+<td style="text-align: right;">0.041</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Dyck et al. 2000</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">0.145</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gestel-Timmermans et al. 2012</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">134</td>
+<td style="text-align: right;">116</td>
+<td style="text-align: right;">0.184</td>
+<td style="text-align: right;">0.014</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gestel-Timmermans et al. 2012</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">0.076</td>
+<td style="text-align: right;">0.016</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gatz et al. 2007</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">136</td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">-0.052</td>
+<td style="text-align: right;">0.011</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gatz et al. 2007</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">136</td>
+<td style="text-align: right;">177</td>
+<td style="text-align: right;">-0.216</td>
+<td style="text-align: right;">0.016</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gonzalez &amp; Prihoda 2007</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0.596</td>
+<td style="text-align: right;">0.205</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Gordon et al. 2018</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Gutman et al. 2019</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1.140</td>
+<td style="text-align: right;">0.070</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hagen et al. 2005</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.407</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hagen et al. 2005</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.521</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hagen et al. 2005</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.355</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Haslam et al. 2019</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">-0.033</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Haslam et al. 2019</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">-0.478</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Hilden et al. 2021</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">-0.337</td>
+<td style="text-align: right;">0.142</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Hilden et al. 2021</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">-0.202</td>
+<td style="text-align: right;">0.141</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.597</td>
+<td style="text-align: right;">0.086</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.385</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.379</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.564</td>
+<td style="text-align: right;">0.086</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.628</td>
+<td style="text-align: right;">0.086</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.729</td>
+<td style="text-align: right;">0.088</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">46</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.827</td>
+<td style="text-align: right;">0.089</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Himle et al. 2014</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.297</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Jacob et al. 2010</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">0.482</td>
+<td style="text-align: right;">0.114</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Jacob et al. 2010</td>
+<td style="text-align: right;">49</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">24</td>
+<td style="text-align: right;">0.379</td>
+<td style="text-align: right;">0.113</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">James et al. 2004</td>
+<td style="text-align: right;">50</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.783</td>
+<td style="text-align: right;">0.088</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">James et al. 2004</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.465</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Kanie et al. 2019</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">0.037</td>
+<td style="text-align: right;">0.078</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Kanie et al. 2019</td>
+<td style="text-align: right;">53</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">-0.041</td>
+<td style="text-align: right;">0.078</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lim et al. 2020</td>
+<td style="text-align: right;">54</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">0.667</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lim et al. 2020</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">-0.084</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lim et al. 2020</td>
+<td style="text-align: right;">56</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">0.695</td>
+<td style="text-align: right;">0.144</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lim et al. 2020</td>
+<td style="text-align: right;">57</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">-0.644</td>
+<td style="text-align: right;">0.143</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lim et al. 2020</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">0.574</td>
+<td style="text-align: right;">0.142</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lloyd-Evans et al. 2020</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.501</td>
+<td style="text-align: right;">0.162</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lloyd-Evans et al. 2020</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.456</td>
+<td style="text-align: right;">0.157</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">42</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">62</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">-0.122</td>
+<td style="text-align: right;">0.088</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">40</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.065</td>
+<td style="text-align: right;">0.088</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">64</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">-0.024</td>
+<td style="text-align: right;">0.106</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">32</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">0.156</td>
+<td style="text-align: right;">0.101</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Madigan et al. 2013</td>
+<td style="text-align: right;">66</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: right;">0.133</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">McCay et al. 2006</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.171</td>
+<td style="text-align: right;">0.115</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">McCay et al. 2006</td>
+<td style="text-align: right;">68</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.633</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Michalak et al. 2015</td>
+<td style="text-align: right;">69</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.253</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Michalak et al. 2015</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.577</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Michalak et al. 2015</td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.830</td>
+<td style="text-align: right;">0.074</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Michalak et al. 2015</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.526</td>
+<td style="text-align: right;">0.067</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Morley et al. 2014</td>
+<td style="text-align: right;">73</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">-0.475</td>
+<td style="text-align: right;">0.028</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Morley et al. 2014</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.027</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Morley et al. 2014</td>
+<td style="text-align: right;">75</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">-0.205</td>
+<td style="text-align: right;">0.028</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Morton et al. 2012</td>
+<td style="text-align: right;">76</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.758</td>
+<td style="text-align: right;">0.103</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Morton et al. 2012</td>
+<td style="text-align: right;">77</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.554</td>
+<td style="text-align: right;">0.052</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Morton et al. 2012</td>
+<td style="text-align: right;">78</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.280</td>
+<td style="text-align: right;">0.049</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Morton et al. 2012</td>
+<td style="text-align: right;">79</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.481</td>
+<td style="text-align: right;">0.051</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.451</td>
+<td style="text-align: right;">0.166</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.962</td>
+<td style="text-align: right;">0.178</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">82</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.449</td>
+<td style="text-align: right;">0.166</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">83</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.625</td>
+<td style="text-align: right;">0.169</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.558</td>
+<td style="text-align: right;">0.168</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">85</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.874</td>
+<td style="text-align: right;">0.176</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">86</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.563</td>
+<td style="text-align: right;">0.168</td>
+<td style="text-align: left;">Symptoms of psychosis</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Patterson et al. 2003</td>
+<td style="text-align: right;">87</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">0.739</td>
+<td style="text-align: right;">0.172</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Popolo et al. 2019</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.421</td>
+<td style="text-align: right;">0.329</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Popolo et al. 2019</td>
+<td style="text-align: right;">89</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.876</td>
+<td style="text-align: right;">0.269</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Rabenstein et al. 2016</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">153</td>
+<td style="text-align: right;">148</td>
+<td style="text-align: right;">-0.367</td>
+<td style="text-align: right;">0.018</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Rabenstein et al. 2016</td>
+<td style="text-align: right;">91</td>
+<td style="text-align: right;">153</td>
+<td style="text-align: right;">148</td>
+<td style="text-align: right;">-0.421</td>
+<td style="text-align: right;">0.017</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Rüsch et al. 2019</td>
+<td style="text-align: right;">92</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.648</td>
+<td style="text-align: right;">0.092</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Rüsch et al. 2019</td>
+<td style="text-align: right;">93</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">0.366</td>
+<td style="text-align: right;">0.183</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sacks et al. 2011</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">-0.048</td>
+<td style="text-align: right;">0.066</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sacks et al. 2011</td>
+<td style="text-align: right;">95</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">-0.064</td>
+<td style="text-align: right;">0.068</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">96</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">0.234</td>
+<td style="text-align: right;">0.039</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">97</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">65</td>
+<td style="text-align: right;">0.302</td>
+<td style="text-align: right;">0.040</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">0.212</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: right;">51</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">0.104</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">0.108</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sajatovic et al. 2009</td>
+<td style="text-align: right;">101</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">0.189</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Saloheimo et al. 2016</td>
+<td style="text-align: right;">102</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">0.482</td>
+<td style="text-align: right;">0.075</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schrank et al. 2016</td>
+<td style="text-align: right;">103</td>
+<td style="text-align: right;">43</td>
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">0.151</td>
+<td style="text-align: right;">0.062</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">104</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.081</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">105</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.162</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">106</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.210</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">107</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.186</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">108</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.032</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.283</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">110</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.137</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.103</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">112</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.296</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">113</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.182</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">114</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.080</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.102</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">116</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">-0.050</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">-0.089</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">118</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.190</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">119</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">-0.110</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">115</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">0.035</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Schäfer et al. 2019</td>
+<td style="text-align: right;">121</td>
+<td style="text-align: right;">111</td>
+<td style="text-align: right;">117</td>
+<td style="text-align: right;">-0.026</td>
+<td style="text-align: right;">0.023</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Somers et al. 2017</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">90</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">-0.142</td>
+<td style="text-align: right;">0.034</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Tjaden et al. 2021</td>
+<td style="text-align: right;">123</td>
+<td style="text-align: right;">70</td>
+<td style="text-align: right;">67</td>
+<td style="text-align: right;">-0.046</td>
+<td style="text-align: right;">0.038</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Tjaden et al. 2021</td>
+<td style="text-align: right;">124</td>
+<td style="text-align: right;">63</td>
+<td style="text-align: right;">58</td>
+<td style="text-align: right;">-0.061</td>
+<td style="text-align: right;">0.043</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">125</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.046</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">126</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.021</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">127</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.000</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">128</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.153</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">129</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">-0.131</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.025</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">131</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">-0.043</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">132</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.033</td>
+<td style="text-align: right;">0.047</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Valiente et al. 2022</td>
+<td style="text-align: right;">133</td>
+<td style="text-align: right;">52</td>
+<td style="text-align: right;">61</td>
+<td style="text-align: right;">0.157</td>
+<td style="text-align: right;">0.048</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Volpe et al. 2015</td>
+<td style="text-align: right;">134</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.213</td>
+<td style="text-align: right;">0.127</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Volpe et al. 2015</td>
+<td style="text-align: right;">135</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.125</td>
+<td style="text-align: right;">0.124</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Not preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wojtalik et al. 2022</td>
+<td style="text-align: right;">136</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">0.084</td>
+<td style="text-align: right;">0.022</td>
+<td style="text-align: left;">General mental health</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Wuthrich &amp; Rapee 2013</td>
+<td style="text-align: right;">137</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">1.654</td>
+<td style="text-align: right;">0.113</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Smith et al. 2021</td>
+<td style="text-align: right;">138</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">1.346</td>
+<td style="text-align: right;">0.105</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Smith et al. 2021</td>
+<td style="text-align: right;">139</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">1.801</td>
+<td style="text-align: right;">0.119</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Wuthrich &amp; Rapee 2013</td>
+<td style="text-align: right;">140</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.811</td>
+<td style="text-align: right;">0.095</td>
+<td style="text-align: left;">Depression</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Wuthrich &amp; Rapee 2013</td>
+<td style="text-align: right;">141</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">35</td>
+<td style="text-align: right;">0.462</td>
+<td style="text-align: right;">0.091</td>
+<td style="text-align: left;">Anxiety</td>
+<td style="text-align: left;">Preregistered</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+</section>
+<section id="fitting-models-and-estimation" class="level1">
+<h1>Fitting models and estimation</h1>
+<section id="out-of-function-results" class="level2">
+<h2 class="anchored" data-anchor-id="out-of-function-results">Out-of-function results</h2>
+<div class="cell" data-renv.ignore="true">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>V_mat <span class="ot">&lt;-</span> </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  metafor<span class="sc">::</span><span class="fu">vcalc</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">vi =</span> vgt_pop, </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">cluster =</span> study, </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">obs =</span> esid, </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> mental_health_dat, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">rho =</span> <span class="fl">0.8</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>rma_obj <span class="ot">&lt;-</span> </span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  metafor<span class="sc">::</span><span class="fu">rma.mv</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">yi =</span> gt_pop <span class="sc">~</span> prereg_chr <span class="sc">-</span> <span class="dv">1</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">V =</span> V_mat, </span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">random =</span> <span class="fu">list</span>(<span class="sc">~</span> prereg_chr <span class="sc">|</span> study, <span class="sc">~</span> prereg_chr <span class="sc">|</span> esid),</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">struct =</span> <span class="fu">c</span>(<span class="st">"DIAG"</span>, <span class="st">"DIAG"</span>),</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> mental_health_dat,</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">sparse=</span><span class="cn">TRUE</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>rma_obj</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Multivariate Meta-Analysis Model (k = 141; method: REML)
+
+Variance Components:
+
+outer factor: study      (nlvls = 41)
+inner factor: prereg_chr (nlvls = 2)
+
+            estim    sqrt  k.lvl  fixed              level 
+tau^2.1    0.1011  0.3180     20     no  Not preregistered 
+tau^2.2    0.0757  0.2752     21     no      Preregistered 
+
+outer factor: esid       (nlvls = 141)
+inner factor: prereg_chr (nlvls = 2)
+
+              estim    sqrt  k.lvl  fixed              level 
+gamma^2.1    0.0283  0.1684     57     no  Not preregistered 
+gamma^2.2    0.0162  0.1273     84     no      Preregistered 
+
+Test for Residual Heterogeneity:
+QE(df = 139) = 833.3642, p-val &lt; .0001
+
+Test of Moderators (coefficients 1:2):
+QM(df = 2) = 12.7879, p-val = 0.0017
+
+Model Results:
+
+                             estimate      se    zval    pval    ci.lb   ci.ub     
+prereg_chrNot preregistered    0.1626  0.0965  1.6856  0.0919  -0.0265  0.3517   . 
+prereg_chrPreregistered        0.2520  0.0799  3.1538  0.0016   0.0954  0.4086  ** 
+
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>n_workers <span class="ot">&lt;-</span> <span class="fu">max</span>(<span class="dv">1</span>L, future<span class="sc">::</span><span class="fu">availableCores</span>() <span class="sc">-</span> <span class="dv">1</span>L)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(future<span class="sc">::</span>multisession, <span class="at">workers =</span> n_workers)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>cwb_obj <span class="ot">&lt;-</span> </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  wildmeta<span class="sc">::</span><span class="fu">Wald_test_cwb</span>(</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">full_model =</span> rma_obj,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">constraints =</span> wildmeta<span class="sc">::</span><span class="fu">constrain_equal</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">R =</span> <span class="dv">19</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">seed =</span> <span class="dv">080725</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span> </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Supresses the metafor package message when running in parallel </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">suppressPackageStartupMessages</span>() </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(sequential) </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#saveRDS(cwb_obj, file = "cwb_res_1999.rds")</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>cwb_obj</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Test Adjustment CR_type Statistic  R     p_val
+1  CWB        CR0     CR0   Naive-F 19 0.4210526</code></pre>
+</div>
+</div>
+</section>
+<section id="in-function-results" class="level2">
+<h2 class="anchored" data-anchor-id="in-function-results">In-function results</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>.arg_tbl <span class="ot">&lt;-</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    yi, vi, covars, r, model, data</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  ){</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    covariates <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">str_detect</span>(covars, <span class="st">";"</span>)) <span class="fu">str_split_1</span>(covars, <span class="at">pattern =</span> <span class="st">";"</span>) <span class="cf">else</span> covars </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    formula <span class="ot">&lt;-</span> <span class="fu">reformulate</span>(covariates, <span class="at">response =</span> yi, <span class="at">intercept =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">str_detect</span>(model, <span class="st">"SCE"</span>)) {</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>      main_pred <span class="ot">&lt;-</span> <span class="fu">labels</span>(<span class="fu">terms</span>(formula))[<span class="dv">1</span>]</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>      outer_form <span class="ot">&lt;-</span> </span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="fu">substitute</span>(</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>          <span class="sc">~</span> moderator <span class="sc">|</span> study, </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>          <span class="fu">list</span>(<span class="at">moderator =</span> <span class="fu">as.name</span>(main_pred))</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.formula</span>()</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>      inner_form <span class="ot">&lt;-</span> </span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">substitute</span>(</span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>          <span class="sc">~</span> moderator <span class="sc">|</span> esid, </span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>          <span class="fu">list</span>(<span class="at">moderator =</span> <span class="fu">as.name</span>(main_pred))</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>        ) <span class="sc">|&gt;</span> </span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>        <span class="fu">as.formula</span>()</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>      random <span class="ot">&lt;-</span>  <span class="cf">if</span> (model <span class="sc">==</span> <span class="st">"SCEp"</span>) <span class="fu">list</span>(outer_form, inner_form) <span class="cf">else</span> <span class="fu">list</span>(outer_form)</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>      struct <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="st">"DIAG"</span>, <span class="fu">length</span>(random))</span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>      res <span class="ot">&lt;-</span> </span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>          <span class="at">formula =</span> <span class="fu">list</span>(formula),</span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>          <span class="at">var =</span> vi,</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>          <span class="at">rand =</span> <span class="fu">list</span>(random),</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>          <span class="at">structure =</span> <span class="fu">list</span>(struct),</span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>          <span class="at">rho =</span> r,</span>
+<span id="cb6-38"><a href="#cb6-38" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> <span class="fu">list</span>(data)</span>
+<span id="cb6-39"><a href="#cb6-39" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-40"><a href="#cb6-40" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-41"><a href="#cb6-41" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> <span class="cf">if</span> (model <span class="sc">==</span> <span class="st">"CHE"</span>) {</span>
+<span id="cb6-42"><a href="#cb6-42" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-43"><a href="#cb6-43" aria-hidden="true" tabindex="-1"></a>      res <span class="ot">&lt;-</span> </span>
+<span id="cb6-44"><a href="#cb6-44" aria-hidden="true" tabindex="-1"></a>        <span class="fu">tibble</span>(</span>
+<span id="cb6-45"><a href="#cb6-45" aria-hidden="true" tabindex="-1"></a>          <span class="at">formula =</span> <span class="fu">list</span>(formula),</span>
+<span id="cb6-46"><a href="#cb6-46" aria-hidden="true" tabindex="-1"></a>          <span class="at">var =</span> vi,</span>
+<span id="cb6-47"><a href="#cb6-47" aria-hidden="true" tabindex="-1"></a>          <span class="at">rand =</span> <span class="fu">list</span>(<span class="sc">~</span> <span class="dv">1</span> <span class="sc">|</span> study <span class="sc">/</span> esid),</span>
+<span id="cb6-48"><a href="#cb6-48" aria-hidden="true" tabindex="-1"></a>          <span class="at">rho =</span> r,</span>
+<span id="cb6-49"><a href="#cb6-49" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> <span class="fu">list</span>(data)</span>
+<span id="cb6-50"><a href="#cb6-50" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-51"><a href="#cb6-51" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb6-52"><a href="#cb6-52" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb6-53"><a href="#cb6-53" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-54"><a href="#cb6-54" aria-hidden="true" tabindex="-1"></a>    res</span>
+<span id="cb6-55"><a href="#cb6-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-56"><a href="#cb6-56" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-57"><a href="#cb6-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-58"><a href="#cb6-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Testing .arg_tbl function</span></span>
+<span id="cb6-59"><a href="#cb6-59" aria-hidden="true" tabindex="-1"></a>rma_args <span class="ot">&lt;-</span> <span class="fu">.arg_tbl</span>(</span>
+<span id="cb6-60"><a href="#cb6-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">yi =</span> <span class="st">"gt_pop"</span>, </span>
+<span id="cb6-61"><a href="#cb6-61" aria-hidden="true" tabindex="-1"></a>  <span class="at">vi =</span> <span class="st">"vgt_pop"</span>, </span>
+<span id="cb6-62"><a href="#cb6-62" aria-hidden="true" tabindex="-1"></a>  <span class="at">covars =</span> <span class="st">"prereg_chr"</span>, </span>
+<span id="cb6-63"><a href="#cb6-63" aria-hidden="true" tabindex="-1"></a>  <span class="at">model =</span> <span class="st">"SCEp"</span>, </span>
+<span id="cb6-64"><a href="#cb6-64" aria-hidden="true" tabindex="-1"></a>  <span class="at">r =</span> <span class="fl">0.8</span>,</span>
+<span id="cb6-65"><a href="#cb6-65" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> mental_health_dat</span>
+<span id="cb6-66"><a href="#cb6-66" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb6-67"><a href="#cb6-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-68"><a href="#cb6-68" aria-hidden="true" tabindex="-1"></a><span class="co"># Updated function - recreating rma call</span></span>
+<span id="cb6-69"><a href="#cb6-69" aria-hidden="true" tabindex="-1"></a>.rma_fun <span class="ot">&lt;-</span> <span class="cf">function</span>(formula, var, rand, structure, rho, data){</span>
+<span id="cb6-70"><a href="#cb6-70" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-71"><a href="#cb6-71" aria-hidden="true" tabindex="-1"></a>  data<span class="sc">$</span>vi <span class="ot">&lt;-</span> data[[var]]</span>
+<span id="cb6-72"><a href="#cb6-72" aria-hidden="true" tabindex="-1"></a>  data_name <span class="ot">&lt;-</span> <span class="fu">attr</span>(data, <span class="st">"data_name"</span>)</span>
+<span id="cb6-73"><a href="#cb6-73" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-74"><a href="#cb6-74" aria-hidden="true" tabindex="-1"></a>  V_mat <span class="ot">&lt;-</span> metafor<span class="sc">::</span><span class="fu">vcalc</span>(<span class="at">vi =</span> vi, <span class="at">cluster =</span> study, <span class="at">obs =</span> esid, <span class="at">data =</span> data, <span class="at">rho =</span> rho)</span>
+<span id="cb6-75"><a href="#cb6-75" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-76"><a href="#cb6-76" aria-hidden="true" tabindex="-1"></a>  res <span class="ot">&lt;-</span> metafor<span class="sc">::</span><span class="fu">rma.mv</span>(</span>
+<span id="cb6-77"><a href="#cb6-77" aria-hidden="true" tabindex="-1"></a>    formula,</span>
+<span id="cb6-78"><a href="#cb6-78" aria-hidden="true" tabindex="-1"></a>    <span class="at">V =</span> V_mat, </span>
+<span id="cb6-79"><a href="#cb6-79" aria-hidden="true" tabindex="-1"></a>    <span class="at">rand =</span> rand,</span>
+<span id="cb6-80"><a href="#cb6-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">struct =</span> structure,</span>
+<span id="cb6-81"><a href="#cb6-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> data,</span>
+<span id="cb6-82"><a href="#cb6-82" aria-hidden="true" tabindex="-1"></a>    <span class="at">sparse=</span><span class="cn">TRUE</span></span>
+<span id="cb6-83"><a href="#cb6-83" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-84"><a href="#cb6-84" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-85"><a href="#cb6-85" aria-hidden="true" tabindex="-1"></a>  struct_lang <span class="ot">&lt;-</span> <span class="fu">str2lang</span>(<span class="st">'c("DIAG", "DIAG")'</span>)</span>
+<span id="cb6-86"><a href="#cb6-86" aria-hidden="true" tabindex="-1"></a>  random_lang <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"list("</span>, <span class="fu">paste0</span>(rand, <span class="at">collapse =</span> <span class="st">", "</span>), <span class="st">")"</span>) <span class="sc">|&gt;</span> <span class="fu">str2lang</span>()</span>
+<span id="cb6-87"><a href="#cb6-87" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-88"><a href="#cb6-88" aria-hidden="true" tabindex="-1"></a>  res<span class="sc">$</span>call <span class="ot">&lt;-</span> rlang<span class="sc">::</span><span class="fu">call2</span>(</span>
+<span id="cb6-89"><a href="#cb6-89" aria-hidden="true" tabindex="-1"></a>    <span class="st">"rma.mv"</span>, </span>
+<span id="cb6-90"><a href="#cb6-90" aria-hidden="true" tabindex="-1"></a>    <span class="at">yi =</span> formula, </span>
+<span id="cb6-91"><a href="#cb6-91" aria-hidden="true" tabindex="-1"></a>    <span class="at">V =</span> <span class="fu">as.name</span>(<span class="st">"V_mat"</span>), </span>
+<span id="cb6-92"><a href="#cb6-92" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> <span class="fu">as.name</span>(data_name), </span>
+<span id="cb6-93"><a href="#cb6-93" aria-hidden="true" tabindex="-1"></a>    <span class="at">random =</span> random_lang, </span>
+<span id="cb6-94"><a href="#cb6-94" aria-hidden="true" tabindex="-1"></a>    <span class="at">struct =</span> struct_lang, </span>
+<span id="cb6-95"><a href="#cb6-95" aria-hidden="true" tabindex="-1"></a>    <span class="at">sparse =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb6-96"><a href="#cb6-96" aria-hidden="true" tabindex="-1"></a>    <span class="at">.ns =</span> <span class="st">"metafor"</span></span>
+<span id="cb6-97"><a href="#cb6-97" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb6-98"><a href="#cb6-98" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-99"><a href="#cb6-99" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Thanks to Rasmus Klokker for providing this solution</span></span>
+<span id="cb6-100"><a href="#cb6-100" aria-hidden="true" tabindex="-1"></a>  res<span class="sc">$</span>call<span class="sc">$</span>yi <span class="ot">&lt;-</span> <span class="fu">as</span>(res<span class="sc">$</span>call<span class="sc">$</span>yi, <span class="at">Class =</span> <span class="st">"call"</span>) </span>
+<span id="cb6-101"><a href="#cb6-101" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-102"><a href="#cb6-102" aria-hidden="true" tabindex="-1"></a>  res</span>
+<span id="cb6-103"><a href="#cb6-103" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb6-104"><a href="#cb6-104" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb6-105"><a href="#cb6-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-106"><a href="#cb6-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-107"><a href="#cb6-107" aria-hidden="true" tabindex="-1"></a>list_che_res_obj <span class="ot">&lt;-</span> <span class="fu">pmap</span>(<span class="at">.l =</span> rma_args, <span class="at">.f =</span> .rma_fun)</span>
+<span id="cb6-108"><a href="#cb6-108" aria-hidden="true" tabindex="-1"></a>list_che_res_obj[[<span class="dv">1</span>]] </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Multivariate Meta-Analysis Model (k = 141; method: REML)
+
+Variance Components:
+
+outer factor: study      (nlvls = 41)
+inner factor: prereg_chr (nlvls = 2)
+
+            estim    sqrt  k.lvl  fixed              level 
+tau^2.1    0.1011  0.3180     20     no  Not preregistered 
+tau^2.2    0.0757  0.2752     21     no      Preregistered 
+
+outer factor: esid       (nlvls = 141)
+inner factor: prereg_chr (nlvls = 2)
+
+              estim    sqrt  k.lvl  fixed              level 
+gamma^2.1    0.0283  0.1684     57     no  Not preregistered 
+gamma^2.2    0.0162  0.1273     84     no      Preregistered 
+
+Test for Residual Heterogeneity:
+QE(df = 139) = 833.3642, p-val &lt; .0001
+
+Test of Moderators (coefficients 1:2):
+QM(df = 2) = 12.7879, p-val = 0.0017
+
+Model Results:
+
+                             estimate      se    zval    pval    ci.lb   ci.ub     
+prereg_chrNot preregistered    0.1626  0.0965  1.6856  0.0919  -0.0265  0.3517   . 
+prereg_chrPreregistered        0.2520  0.0799  3.1538  0.0016   0.0954  0.4086  ** 
+
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<section id="equal-calls" class="level3">
+<h3 class="anchored" data-anchor-id="equal-calls">Equal calls</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rma_obj<span class="sc">$</span>call</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>metafor::rma.mv(yi = gt_pop ~ prereg_chr - 1, V = V_mat, data = mental_health_dat, 
+    random = list(~prereg_chr | study, ~prereg_chr | esid), struct = c("DIAG", 
+        "DIAG"), sparse = TRUE)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>list_che_res_obj[[<span class="dv">1</span>]]<span class="sc">$</span>call</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>metafor::rma.mv(yi = gt_pop ~ prereg_chr - 1, V = V_mat, data = mental_health_dat, 
+    random = list(~prereg_chr | study, ~prereg_chr | esid), struct = c("DIAG", 
+        "DIAG"), sparse = TRUE)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(rma_obj<span class="sc">$</span>call, list_che_res_obj[[<span class="dv">1</span>]]<span class="sc">$</span>call)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="wald_test_cwb-in-function" class="level3">
+<h3 class="anchored" data-anchor-id="wald_test_cwb-in-function">Wald_test_cwb in function</h3>
+<div class="cell" data-renv.ignore="true">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quick and dirty function</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>.Wald_test_cwb_fun <span class="ot">&lt;-</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">function</span>(rma_fun_obj, <span class="at">R =</span> <span class="dv">19</span>, <span class="at">seed =</span> <span class="dv">080725</span>){</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    V_mat <span class="ot">&lt;-</span> rma_fun_obj<span class="sc">$</span>V</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">assign</span>(<span class="st">"V_mat"</span>, V_mat, <span class="at">envir =</span> .GlobalEnv)</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    cwb_res <span class="ot">&lt;-</span> </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>      <span class="fu">Wald_test_cwb</span>(</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">full_model =</span> rma_fun_obj,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">constraints =</span> <span class="fu">constrain_equal</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>),</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">R =</span> R,</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">seed =</span> seed</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>      )</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rm</span>(V_mat, <span class="at">envir =</span> .GlobalEnv)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(cwb_res)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="fu">availableCores</span>() <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>in_fun_res <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="at">.x =</span> list_che_res_obj, <span class="at">.f =</span> .Wald_test_cwb_fun) <span class="sc">|&gt;</span> <span class="fu">list_rbind</span>()</span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a><span class="fu">plan</span>(sequential)</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>in_fun_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  Test Adjustment CR_type Statistic  R     p_val
+1  CWB        CR0     CR0   Naive-F 19 0.4210526</code></pre>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="equal-results" class="level1">
+<h1>Equal results</h1>
+<p>After tweaking the call the results now replicate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">`</span><span class="at">In-function CWB p value</span><span class="st">`</span> <span class="ot">=</span> in_fun_res<span class="sc">$</span>p_val, <span class="st">`</span><span class="at">Out-of-function p value</span><span class="st">`</span> <span class="ot">=</span> cwb_obj<span class="sc">$</span>p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>In-function CWB p value Out-of-function p value 
+              0.4210526               0.4210526 </code></pre>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="Session Information">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Session Information
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="cell-output cell-output-stdout">
+<pre><code>─ Session info ───────────────────────────────────────────────────────────────────────────────────
+ setting  value
+ version  R version 4.5.1 (2025-06-13 ucrt)
+ os       Windows 11 x64 (build 22631)
+ system   x86_64, mingw32
+ ui       RTerm
+ language (EN)
+ collate  Danish_Denmark.utf8
+ ctype    Danish_Denmark.utf8
+ tz       Europe/Copenhagen
+ date     2025-09-01
+ pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
+
+─ Packages ───────────────────────────────────────────────────────────────────────────────────────
+ ! package      * version    date (UTC) lib source
+ P cli            3.6.5      2025-04-23 []  CRAN (R 4.5.0)
+ P clubSandwich * 0.6.0      2025-04-01 []  CRAN (R 4.5.0)
+ P codetools      0.2-20     2024-03-31 []  CRAN (R 4.5.1)
+ P digest         0.6.37     2024-08-19 []  CRAN (R 4.5.0)
+ P dplyr        * 1.1.4      2023-11-17 []  CRAN (R 4.5.0)
+ P evaluate       1.0.4      2025-06-18 []  CRAN (R 4.5.0)
+ P farver         2.1.2      2024-05-13 []  CRAN (R 4.5.0)
+ P fastmap        1.2.0      2024-05-15 []  CRAN (R 4.5.0)
+ P forcats      * 1.0.0      2023-01-29 []  CRAN (R 4.5.0)
+ P future       * 1.67.0     2025-07-29 []  RSPM
+ P future.apply   1.20.0     2025-06-06 []  CRAN (R 4.5.0)
+ P generics       0.1.4      2025-05-09 []  CRAN (R 4.5.0)
+ P ggplot2      * 3.5.2      2025-04-09 []  CRAN (R 4.5.0)
+ P globals        0.18.0     2025-05-08 []  CRAN (R 4.5.0)
+ P glue           1.8.0      2024-09-30 []  CRAN (R 4.5.0)
+ P gtable         0.3.6      2024-10-25 []  CRAN (R 4.5.0)
+ P hms            1.1.3      2023-03-21 []  CRAN (R 4.5.0)
+ P htmltools      0.5.8.1    2024-04-04 []  CRAN (R 4.5.0)
+ P htmlwidgets    1.6.4      2023-12-06 []  CRAN (R 4.5.0)
+ P jsonlite       2.0.0      2025-03-27 []  CRAN (R 4.5.0)
+ P kableExtra   * 1.4.0      2024-01-24 []  CRAN (R 4.5.0)
+ P knitr        * 1.50       2025-03-16 []  CRAN (R 4.5.0)
+ P lattice        0.22-7     2025-04-02 []  CRAN (R 4.5.1)
+ P lifecycle      1.0.4      2023-11-07 []  CRAN (R 4.5.0)
+ P listenv        0.9.1      2024-01-29 []  CRAN (R 4.5.0)
+ P lubridate    * 1.9.4      2024-12-08 []  CRAN (R 4.5.0)
+ P magrittr       2.0.3      2022-03-30 []  CRAN (R 4.5.0)
+ P mathjaxr       1.8-0      2025-04-30 []  CRAN (R 4.5.0)
+ P Matrix       * 1.7-3      2025-03-11 []  CRAN (R 4.5.1)
+ P metadat      * 1.4-0      2025-02-04 []  CRAN (R 4.5.0)
+ P metafor      * 4.8-0      2025-01-28 []  CRAN (R 4.5.0)
+ P nlme           3.1-168    2025-03-31 []  CRAN (R 4.5.1)
+ P numDeriv     * 2016.8-1.1 2019-06-06 []  CRAN (R 4.5.0)
+ P parallelly     1.45.0     2025-06-02 []  CRAN (R 4.5.0)
+ P pillar         1.10.2     2025-04-05 []  CRAN (R 4.5.0)
+ P pkgconfig      2.0.3      2019-09-22 []  CRAN (R 4.5.0)
+ P purrr        * 1.0.4      2025-02-05 []  CRAN (R 4.5.0)
+ P R6             2.6.1      2025-02-15 []  CRAN (R 4.5.0)
+ P RColorBrewer   1.1-3      2022-04-03 []  CRAN (R 4.5.0)
+ P readr        * 2.1.5      2024-01-10 []  CRAN (R 4.5.0)
+   renv           1.1.5      2025-07-24 []  CRAN (R 4.5.1)
+ P rlang        * 1.1.6      2025-04-11 []  CRAN (R 4.5.0)
+ P rmarkdown      2.29       2024-11-04 []  CRAN (R 4.5.0)
+ P robumeta       2.1        2023-03-28 []  CRAN (R 4.5.0)
+ P rstudioapi     0.17.1     2024-10-22 []  CRAN (R 4.5.0)
+ P sandwich       3.1-1      2024-09-15 []  CRAN (R 4.5.0)
+ P scales         1.4.0      2025-04-24 []  CRAN (R 4.5.0)
+ P sessioninfo    1.2.3      2025-02-05 []  CRAN (R 4.5.0)
+ P stringi        1.8.7      2025-03-27 []  CRAN (R 4.5.0)
+ P stringr      * 1.5.1      2023-11-14 []  CRAN (R 4.5.0)
+ P svglite        2.2.1      2025-05-12 []  CRAN (R 4.5.0)
+ P systemfonts    1.2.3      2025-04-30 []  CRAN (R 4.5.0)
+ P textshaping    1.0.1      2025-05-01 []  CRAN (R 4.5.0)
+ P tibble       * 3.3.0      2025-06-08 []  CRAN (R 4.5.0)
+ P tidyr        * 1.3.1      2024-01-24 []  CRAN (R 4.5.0)
+ P tidyselect     1.2.1      2024-03-11 []  CRAN (R 4.5.0)
+ P tidyverse    * 2.0.0      2023-02-22 []  CRAN (R 4.5.0)
+ P timechange     0.3.0      2024-01-18 []  CRAN (R 4.5.0)
+ P tzdb           0.5.0      2025-03-15 []  CRAN (R 4.5.0)
+ P vctrs          0.6.5      2023-12-01 []  CRAN (R 4.5.0)
+ P viridisLite    0.4.2      2023-05-02 []  CRAN (R 4.5.0)
+ P wildmeta     * 0.3.2      2023-03-08 []  CRAN (R 4.5.0)
+ P withr          3.0.2      2024-10-28 []  CRAN (R 4.5.0)
+ P xfun           0.52       2025-04-02 []  CRAN (R 4.5.0)
+ P xml2           1.3.8      2025-03-14 []  CRAN (R 4.5.0)
+ P yaml           2.3.10     2024-07-26 []  CRAN (R 4.5.0)
+ P zoo            1.8-14     2025-04-10 []  CRAN (R 4.5.0)
+
+
+ * ── Packages attached to the search path.
+ P ── Loaded and on-disk path mismatch.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
