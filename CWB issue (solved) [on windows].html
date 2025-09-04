@@ -129,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="r-packages-and-data" class="level2">
 <h2 class="anchored" data-anchor-id="r-packages-and-data">R packages and data</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">RNGkind</span>(<span class="st">"L'Ecuyer-CMRG"</span>) <span class="co"># My naive try to steer seed across OS</span></span>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">10</span>, <span class="at">kind =</span> <span class="st">"Mersenne-Twister"</span>, <span class="at">normal.kind =</span> <span class="st">"Inversion"</span>) <span class="co"># My naive try to steer seed across OS</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rlang)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
@@ -1673,7 +1673,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>cwb_obj</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Test Adjustment CR_type Statistic  R     p_val
-1  CWB        CR0     CR0   Naive-F 19 0.4210526</code></pre>
+1  CWB        CR0     CR0   Naive-F 19 0.2631579</code></pre>
 </div>
 </div>
 </section>
@@ -1878,7 +1878,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>in_fun_res</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  Test Adjustment CR_type Statistic  R     p_val
-1  CWB        CR0     CR0   Naive-F 19 0.4210526</code></pre>
+1  CWB        CR0     CR0   Naive-F 19 0.2631579</code></pre>
 </div>
 </div>
 </section>
@@ -1891,7 +1891,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="st">`</span><span class="at">In-function CWB p value</span><span class="st">`</span> <span class="ot">=</span> in_fun_res<span class="sc">$</span>p_val, <span class="st">`</span><span class="at">Out-of-function p value</span><span class="st">`</span> <span class="ot">=</span> cwb_obj<span class="sc">$</span>p_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>In-function CWB p value Out-of-function p value 
-              0.4210526               0.4210526 </code></pre>
+              0.2631579               0.2631579 </code></pre>
 </div>
 </div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled" title="Session Information">
@@ -1918,7 +1918,7 @@ Session Information
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-01
+ date     2025-09-04
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 

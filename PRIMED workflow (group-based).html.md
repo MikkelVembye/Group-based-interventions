@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-08-15"
+date: "2025-09-04"
 format:
   html: 
     keep-md: true
@@ -7338,6 +7338,80 @@ group_based_dat |>
 
 
 
+
+## Average pre-posttest correlation
+
+::: {.columns}
+
+::: {.column width="95%"}
+### Reintegrational outcome
+
+
+::: {.cell}
+
+```{.r .cell-code}
+reintegation_dat |> 
+  filter(
+    str_detect(
+      ppcor_method, regex("Cal", ignore_case = TRUE), 
+    ) |
+    str_detect(
+      ppcor_method, regex("From study", ignore_case = TRUE), 
+    ) 
+  ) |> 
+  select(contains("ppcor")) |> 
+  pull(ppcor) |> 
+  mean()
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 0.6229602
+```
+
+
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+### Mental health
+
+
+::: {.cell}
+
+```{.r .cell-code}
+mental_health_dat|> 
+  filter(
+    str_detect(
+      ppcor_method, regex("Cal", ignore_case = TRUE), 
+    ) |
+    str_detect(
+      ppcor_method, regex("From study", ignore_case = TRUE), 
+    ) 
+  ) |> 
+  select(contains("ppcor")) |> 
+  pull(ppcor) |> 
+  mean()
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] 0.5071045
+```
+
+
+:::
+:::
+
+
+:::
+
+:::
 
 ## Number of effect size estimates per study
 
@@ -17840,101 +17914,105 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-08-15
+ date     2025-09-04
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
- package      * version    date (UTC) lib source
- base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.5.0)
- cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.0)
- clubSandwich * 0.6.0      2025-04-01 [1] CRAN (R 4.5.0)
- data.table     1.17.6     2025-06-17 [1] CRAN (R 4.5.0)
- digest         0.6.37     2024-08-19 [1] CRAN (R 4.5.0)
- dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.5.0)
- evaluate       1.0.4      2025-06-18 [1] CRAN (R 4.5.0)
- farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.0)
- fastDummies  * 1.7.5      2025-01-20 [1] CRAN (R 4.5.0)
- fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.0)
- forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.5.0)
- generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.0)
- GGally       * 2.2.1      2024-02-14 [1] CRAN (R 4.5.0)
- ggExtra      * 0.10.1     2023-08-21 [1] CRAN (R 4.5.0)
- ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.5.0)
- ggplot2      * 3.5.2      2025-04-09 [1] CRAN (R 4.5.0)
- ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.0)
- ggridges     * 0.5.6      2024-01-23 [1] CRAN (R 4.5.0)
- ggstats        0.9.0      2025-03-10 [1] CRAN (R 4.5.0)
- glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.0)
- gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.0)
- hms            1.1.3      2023-03-21 [1] CRAN (R 4.5.0)
- htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.5.0)
- htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.0)
- httpuv         1.6.16     2025-04-16 [1] CRAN (R 4.5.0)
- igraph       * 2.1.4      2025-01-23 [1] CRAN (R 4.5.0)
- janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.5.0)
- jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.0)
- kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.5.0)
- knitr        * 1.50       2025-03-16 [1] CRAN (R 4.5.0)
- labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.0)
- later          1.4.2      2025-04-08 [1] CRAN (R 4.5.0)
- lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.1)
- lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.0)
- lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.0)
- magrittr       2.0.3      2022-03-30 [1] CRAN (R 4.5.0)
- mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.0)
- Matrix       * 1.7-3      2025-03-11 [1] CRAN (R 4.5.1)
- metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.0)
- metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.5.0)
- MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.5.0)
- mgcv           1.9-3      2025-04-04 [1] CRAN (R 4.5.1)
- mime           0.13       2025-03-17 [1] CRAN (R 4.5.0)
- miniUI         0.1.2      2025-04-17 [1] CRAN (R 4.5.0)
- nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.1)
- numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.0)
- patchwork    * 1.3.1      2025-06-21 [1] CRAN (R 4.5.0)
- pillar         1.10.2     2025-04-05 [1] CRAN (R 4.5.0)
- pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.0)
- plyr           1.8.9      2023-10-02 [1] CRAN (R 4.5.0)
- promises       1.3.3      2025-05-29 [1] CRAN (R 4.5.0)
- purrr        * 1.0.4      2025-02-05 [1] CRAN (R 4.5.0)
- R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.0)
- RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.0)
- Rcpp           1.0.14     2025-01-12 [1] CRAN (R 4.5.0)
- readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.5.0)
- repr           1.1.7      2024-03-22 [1] CRAN (R 4.5.0)
- rlang        * 1.1.6      2025-04-11 [1] CRAN (R 4.5.0)
- rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.5.0)
- rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.5.0)
- sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.0)
- scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.0)
- sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.0)
- shiny          1.11.0     2025-06-24 [1] CRAN (R 4.5.0)
- skimr        * 2.1.5      2022-12-23 [1] CRAN (R 4.5.0)
- snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.5.0)
- stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.0)
- stringr      * 1.5.1      2023-11-14 [1] CRAN (R 4.5.0)
- svglite        2.2.1      2025-05-12 [1] CRAN (R 4.5.0)
- systemfonts    1.2.3      2025-04-30 [1] CRAN (R 4.5.0)
- textshaping    1.0.1      2025-05-01 [1] CRAN (R 4.5.0)
- tibble       * 3.3.0      2025-06-08 [1] CRAN (R 4.5.0)
- tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.5.0)
- tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.0)
- tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.0)
- timechange     0.3.0      2024-01-18 [1] CRAN (R 4.5.0)
- tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.0)
- utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.0)
- vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.0)
- viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.5.0)
- withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.0)
- xfun           0.52       2025-04-02 [1] CRAN (R 4.5.0)
- xml2           1.3.8      2025-03-14 [1] CRAN (R 4.5.0)
- xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.0)
- yaml           2.3.10     2024-07-26 [1] CRAN (R 4.5.0)
- zoo            1.8-14     2025-04-10 [1] CRAN (R 4.5.0)
+ ! package      * version    date (UTC) lib source
+ P base64enc      0.1-3      2015-07-28 [?] CRAN (R 4.5.0)
+ P cli            3.6.5      2025-04-23 [?] CRAN (R 4.5.0)
+ P clubSandwich * 0.6.0      2025-04-01 [?] CRAN (R 4.5.0)
+ P data.table     1.17.6     2025-06-17 [?] CRAN (R 4.5.0)
+ P digest         0.6.37     2024-08-19 [?] CRAN (R 4.5.0)
+ P dplyr        * 1.1.4      2023-11-17 [?] CRAN (R 4.5.0)
+ P evaluate       1.0.4      2025-06-18 [?] CRAN (R 4.5.0)
+ P farver         2.1.2      2024-05-13 [?] CRAN (R 4.5.0)
+ P fastDummies  * 1.7.5      2025-01-20 [?] CRAN (R 4.5.0)
+ P fastmap        1.2.0      2024-05-15 [?] CRAN (R 4.5.0)
+ P forcats      * 1.0.0      2023-01-29 [?] CRAN (R 4.5.0)
+ P generics       0.1.4      2025-05-09 [?] CRAN (R 4.5.0)
+ P GGally       * 2.2.1      2024-02-14 [?] CRAN (R 4.5.0)
+ P ggExtra      * 0.10.1     2023-08-21 [?] CRAN (R 4.5.0)
+ P ggh4x        * 0.3.1      2025-05-30 [?] CRAN (R 4.5.0)
+ P ggplot2      * 3.5.2      2025-04-09 [?] CRAN (R 4.5.0)
+ P ggrepel      * 0.9.6      2024-09-07 [?] CRAN (R 4.5.0)
+ P ggridges     * 0.5.6      2024-01-23 [?] CRAN (R 4.5.0)
+ P ggstats        0.9.0      2025-03-10 [?] CRAN (R 4.5.0)
+ P glue           1.8.0      2024-09-30 [?] CRAN (R 4.5.0)
+ P gtable         0.3.6      2024-10-25 [?] CRAN (R 4.5.0)
+ P hms            1.1.3      2023-03-21 [?] CRAN (R 4.5.0)
+ P htmltools      0.5.8.1    2024-04-04 [?] CRAN (R 4.5.0)
+ P htmlwidgets    1.6.4      2023-12-06 [?] CRAN (R 4.5.0)
+ P httpuv         1.6.16     2025-04-16 [?] CRAN (R 4.5.0)
+ P igraph       * 2.1.4      2025-01-23 [?] CRAN (R 4.5.0)
+ P janitor      * 2.2.1      2024-12-22 [?] CRAN (R 4.5.0)
+ P jsonlite       2.0.0      2025-03-27 [?] CRAN (R 4.5.0)
+ P kableExtra   * 1.4.0      2024-01-24 [?] CRAN (R 4.5.0)
+ P knitr        * 1.50       2025-03-16 [?] CRAN (R 4.5.0)
+ P labeling       0.4.3      2023-08-29 [?] CRAN (R 4.5.0)
+ P later          1.4.2      2025-04-08 [?] CRAN (R 4.5.0)
+ P lattice        0.22-7     2025-04-02 [?] CRAN (R 4.5.1)
+ P lifecycle      1.0.4      2023-11-07 [?] CRAN (R 4.5.0)
+ P lubridate    * 1.9.4      2024-12-08 [?] CRAN (R 4.5.0)
+ P magrittr       2.0.3      2022-03-30 [?] CRAN (R 4.5.0)
+ P mathjaxr       1.8-0      2025-04-30 [?] CRAN (R 4.5.0)
+ P Matrix       * 1.7-3      2025-03-11 [?] CRAN (R 4.5.1)
+ P metadat      * 1.4-0      2025-02-04 [?] CRAN (R 4.5.0)
+ P metafor      * 4.8-0      2025-01-28 [?] CRAN (R 4.5.0)
+ P MetBrewer    * 0.2.0      2022-03-21 [?] CRAN (R 4.5.0)
+ P mgcv           1.9-3      2025-04-04 [?] CRAN (R 4.5.1)
+ P mime           0.13       2025-03-17 [?] CRAN (R 4.5.0)
+ P miniUI         0.1.2      2025-04-17 [?] CRAN (R 4.5.0)
+ P nlme           3.1-168    2025-03-31 [?] CRAN (R 4.5.1)
+ P numDeriv     * 2016.8-1.1 2019-06-06 [?] CRAN (R 4.5.0)
+ P patchwork    * 1.3.1      2025-06-21 [?] CRAN (R 4.5.0)
+ P pillar         1.10.2     2025-04-05 [?] CRAN (R 4.5.0)
+ P pkgconfig      2.0.3      2019-09-22 [?] CRAN (R 4.5.0)
+ P plyr           1.8.9      2023-10-02 [?] CRAN (R 4.5.0)
+ P promises       1.3.3      2025-05-29 [?] CRAN (R 4.5.0)
+ P purrr        * 1.0.4      2025-02-05 [?] CRAN (R 4.5.0)
+ P R6             2.6.1      2025-02-15 [?] CRAN (R 4.5.0)
+ P RColorBrewer   1.1-3      2022-04-03 [?] CRAN (R 4.5.0)
+ P Rcpp           1.0.14     2025-01-12 [?] CRAN (R 4.5.0)
+ P readr        * 2.1.5      2024-01-10 [?] CRAN (R 4.5.0)
+   renv           1.1.5      2025-07-24 [1] CRAN (R 4.5.1)
+ P repr           1.1.7      2024-03-22 [?] CRAN (R 4.5.0)
+ P rlang        * 1.1.6      2025-04-11 [?] CRAN (R 4.5.0)
+ P rmarkdown      2.29       2024-11-04 [?] CRAN (R 4.5.0)
+ P rstudioapi     0.17.1     2024-10-22 [?] CRAN (R 4.5.0)
+ P sandwich       3.1-1      2024-09-15 [?] CRAN (R 4.5.0)
+ P scales         1.4.0      2025-04-24 [?] CRAN (R 4.5.0)
+ P sessioninfo    1.2.3      2025-02-05 [?] CRAN (R 4.5.0)
+ P shiny          1.11.0     2025-06-24 [?] CRAN (R 4.5.0)
+ P skimr        * 2.1.5      2022-12-23 [?] CRAN (R 4.5.0)
+ P snakecase      0.11.1     2023-08-27 [?] CRAN (R 4.5.0)
+ P stringi        1.8.7      2025-03-27 [?] CRAN (R 4.5.0)
+ P stringr      * 1.5.1      2023-11-14 [?] CRAN (R 4.5.0)
+ P svglite        2.2.1      2025-05-12 [?] CRAN (R 4.5.0)
+ P systemfonts    1.2.3      2025-04-30 [?] CRAN (R 4.5.0)
+ P textshaping    1.0.1      2025-05-01 [?] CRAN (R 4.5.0)
+ P tibble       * 3.3.0      2025-06-08 [?] CRAN (R 4.5.0)
+ P tidyr        * 1.3.1      2024-01-24 [?] CRAN (R 4.5.0)
+ P tidyselect     1.2.1      2024-03-11 [?] CRAN (R 4.5.0)
+ P tidyverse    * 2.0.0      2023-02-22 [?] CRAN (R 4.5.0)
+ P timechange     0.3.0      2024-01-18 [?] CRAN (R 4.5.0)
+ P tzdb           0.5.0      2025-03-15 [?] CRAN (R 4.5.0)
+ P utf8           1.2.6      2025-06-08 [?] CRAN (R 4.5.0)
+ P vctrs          0.6.5      2023-12-01 [?] CRAN (R 4.5.0)
+ P viridisLite    0.4.2      2023-05-02 [?] CRAN (R 4.5.0)
+ P withr          3.0.2      2024-10-28 [?] CRAN (R 4.5.0)
+ P xfun           0.52       2025-04-02 [?] CRAN (R 4.5.0)
+ P xml2           1.3.8      2025-03-14 [?] CRAN (R 4.5.0)
+ P xtable         1.8-4      2019-04-21 [?] CRAN (R 4.5.0)
+ P yaml           2.3.10     2024-07-26 [?] CRAN (R 4.5.0)
+ P zoo            1.8-14     2025-04-10 [?] CRAN (R 4.5.0)
 
- [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.1/library
+ [1] C:/Users/B199526/Desktop/GitHub repos/Group-based-interventions/renv/library/windows/R-4.5/x86_64-w64-mingw32
+ [2] C:/Users/B199526/AppData/Local/R/cache/R/renv/sandbox/windows/R-4.5/x86_64-w64-mingw32/47177883
+
  * ── Packages attached to the search path.
+ P ── Loaded and on-disk path mismatch.
 
 ──────────────────────────────────────────────────────────────────────────────────────────────────
 ```

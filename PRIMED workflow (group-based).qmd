@@ -2690,6 +2690,48 @@ group_based_dat |>
 ```
 
 
+## Average pre-posttest correlation
+
+::: {.columns}
+
+::: {.column width="95%"}
+### Reintegrational outcome
+```{r pre-posttest-cor}
+reintegation_dat |> 
+  filter(
+    str_detect(
+      ppcor_method, regex("Cal", ignore_case = TRUE), 
+    ) |
+    str_detect(
+      ppcor_method, regex("From study", ignore_case = TRUE), 
+    ) 
+  ) |> 
+  select(contains("ppcor")) |> 
+  pull(ppcor) |> 
+  mean()
+```
+:::
+
+::: {.column-margin}
+### Mental health
+```{r, pre-posttest-cor-mental}
+mental_health_dat|> 
+  filter(
+    str_detect(
+      ppcor_method, regex("Cal", ignore_case = TRUE), 
+    ) |
+    str_detect(
+      ppcor_method, regex("From study", ignore_case = TRUE), 
+    ) 
+  ) |> 
+  select(contains("ppcor")) |> 
+  pull(ppcor) |> 
+  mean()
+```
+:::
+
+:::
+
 ## Number of effect size estimates per study
 
 ### Overall per study

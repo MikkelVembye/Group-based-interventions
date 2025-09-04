@@ -28,7 +28,7 @@ I just wanted to let you know that we have figured out the problem concerning th
 ## R packages and data
 
 ```{r r-pack-plus-data}
-RNGkind("L'Ecuyer-CMRG") # My naive try to steer seed across OS
+set.seed(10, kind = "Mersenne-Twister", normal.kind = "Inversion") # My naive try to steer seed across OS
 
 library(rlang)
 library(tidyverse)
