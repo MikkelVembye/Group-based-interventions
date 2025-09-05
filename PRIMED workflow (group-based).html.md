@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-04"
+date: "2025-09-05"
 format:
   html: 
     keep-md: true
@@ -113,7 +113,9 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
   filter(!(authors == "Barbic et al." & test_name == "The Empowerment Scale")) |> 
   mutate(
     author_year = paste(authors, year),
-    study = paste(authors, year)
+    study = paste(authors, year),
+    study = stringi::stri_trans_general(study, "Latin-ASCII"),
+    study = fct_relevel(study, sort)
   ) |> 
  # Remove unused outcomes
  filter(!str_detect(analysis_plan, "Unused"))
@@ -359,7 +361,7 @@ gb_dat <-
      # Mental health outcomes
      c("General mental health", "Anxiety",
        "Depression", "Symptoms of psychosis") ~ "Mental health outcome",
-     .default = "Reintegational outcome"
+     .default = "Reintegrational outcome"
    ),
    
    # Changing to numeric vectors
@@ -441,14 +443,14 @@ A general overview of the main data, we use for analyses of reintegrational outc
 ::: {#tbl-reint-dat .cell .tbl-cap-location-top tbl-cap='Data with reintegration outcomes.'}
 
 ```{.r .cell-code}
-reintegation_dat <- 
+reintegration_dat <- 
   gb_dat |> 
-  filter(outcome_construct == "Reintegational outcome") 
+  filter(outcome_construct == "Reintegrational outcome") 
 
-#saveRDS(reintegation_dat, file = "reintegation_dat.rds")
+saveRDS(reintegration_dat, file = "reintegration_dat.rds")
 
 reint_overview <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   select(
     study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, Wse, 
     prereg_chr, conventional, analysis_plan, Overall, D5, D7, timing
@@ -583,7 +585,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Bækkelund et al. 2022 </td>
+   <td style="text-align:left;"> Baekkelund et al. 2022 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
@@ -596,7 +598,7 @@ reint_overview |>
    <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Bækkelund et al. 2022 </td>
+   <td style="text-align:left;"> Baekkelund et al. 2022 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> Social functioning (degree of impairment) </td>
@@ -2325,7 +2327,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2338,7 +2340,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2351,7 +2353,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2364,7 +2366,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Self-esteem </td>
@@ -2377,7 +2379,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2390,7 +2392,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2403,7 +2405,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2416,7 +2418,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2429,7 +2431,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Self-esteem </td>
@@ -2442,7 +2444,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Hope, empowerment &amp; self-efficacy </td>
@@ -2598,7 +2600,7 @@ reint_overview |>
    <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2611,7 +2613,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2624,7 +2626,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2637,7 +2639,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2650,7 +2652,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2663,7 +2665,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2676,7 +2678,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2689,7 +2691,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2702,7 +2704,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2715,7 +2717,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2728,7 +2730,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2741,7 +2743,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2754,7 +2756,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2767,7 +2769,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2780,7 +2782,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2793,7 +2795,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2806,7 +2808,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -2819,7 +2821,7 @@ reint_overview |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Alcohol and drug abuse/misuse </td>
@@ -3140,7 +3142,7 @@ mental_health_dat <-
   gb_dat |> 
   filter(outcome_construct == "Mental health outcome") 
 
-#saveRDS(mental_health_dat, file = "mental_health_dat.rds")
+saveRDS(mental_health_dat, file = "mental_health_dat.rds")
 
 mental_overview_dat <- 
   mental_health_dat |> 
@@ -3239,7 +3241,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> High </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Bækkelund et al. 2022 </td>
+   <td style="text-align:left;"> Baekkelund et al. 2022 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -3252,7 +3254,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Bækkelund et al. 2022 </td>
+   <td style="text-align:left;"> Baekkelund et al. 2022 </td>
    <td style="text-align:right;"> 29 </td>
    <td style="text-align:right;"> 30 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4370,7 +4372,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Moderate </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 17 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4383,7 +4385,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Rüsch et al. 2019 </td>
+   <td style="text-align:left;"> Rusch et al. 2019 </td>
    <td style="text-align:right;"> 20 </td>
    <td style="text-align:right;"> 13 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4526,7 +4528,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Low </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4539,7 +4541,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4552,7 +4554,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4565,7 +4567,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4578,7 +4580,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4591,7 +4593,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> Depression </td>
@@ -4604,7 +4606,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4617,7 +4619,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4630,7 +4632,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4643,7 +4645,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4656,7 +4658,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4669,7 +4671,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4682,7 +4684,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4695,7 +4697,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4708,7 +4710,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4721,7 +4723,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4734,7 +4736,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 115 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -4747,7 +4749,7 @@ mental_overview_dat |>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
-   <td style="text-align:left;"> Schäfer et al. 2019 </td>
+   <td style="text-align:left;"> Schafer et al. 2019 </td>
    <td style="text-align:right;"> 111 </td>
    <td style="text-align:right;"> 117 </td>
    <td style="text-align:left;"> General mental health </td>
@@ -5048,21 +5050,21 @@ Note that in plots where the number of studies appears on the x-axis, some bars 
 ```{.r .cell-code}
 rho <- 0.8
 
-V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintegation_dat, rho = rho) 
+V_mat <- metafor::vcalc(vi = vgt_pop, cluster = study, obs = esid, data = reintegration_dat, rho = rho) 
 
 rma_res <- 
   metafor::rma.mv(
     gt_pop, 
     V = V_mat,
     random = ~ 1 | study / esid,
-    data = reintegation_dat
+    data = reintegration_dat
   )
 
 tau2 <- rma_res$sigma2[1]
 omega2<- rma_res$sigma2[2]
 
 reint_rob2_dat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -5754,7 +5756,7 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 ```{.r .cell-code}
 reint_rob2_subgrp_dat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -6564,7 +6566,7 @@ rob_unweight_pct_effects_subgrp_mental
 
 ```{.r .cell-code}
 reint_robinsi_dat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   mutate(
     kj = n(),
     sigma2j = mean(vgt_pop),
@@ -7350,7 +7352,7 @@ group_based_dat |>
 ::: {.cell}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   filter(
     str_detect(
       ppcor_method, regex("Cal", ignore_case = TRUE), 
@@ -7464,10 +7466,10 @@ es_plot_per_study
 ::: {.cell}
 
 ```{.r .cell-code}
-reintegation_dat |>
+reintegration_dat |>
 ggplot(aes(y = study, fill = gt_pop >= 0)) + 
-geom_bar(data = subset(reintegation_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
-geom_bar(data = subset(reintegation_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegration_dat, gt_pop >= 0), aes(x = after_stat(count)), stat = "count") + 
+geom_bar(data = subset(reintegration_dat, gt_pop < 0), aes(x = -after_stat(count)), stat = "count") + 
 theme_minimal() +
 scale_x_continuous(labels = abs, breaks = scales::breaks_width(5), limits = c(-10, 30)) +
 scale_y_discrete(limits=rev) +
@@ -7715,14 +7717,14 @@ gb_dat |>
 ```{.r .cell-code}
 # Multi-arms studies
 multi_arm_studies_reint <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(trt_id > 1) |> 
   reframe(study = unique(study))
   
 
 # Multi-time-points studies
 follow_up_studies_reint <- 
-  reintegation_dat |>
+  reintegration_dat |>
   summarise(
     time_points = length(unique(time_after_end_intervention_weeks)),
     .by = c(study, trt_id, ctr_id)
@@ -7731,7 +7733,7 @@ follow_up_studies_reint <-
 
 # Preregistered studies
 prereg_studies_reint <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   summarise(
     prereg_chr = unique(prereg_chr),
     n_es = n(),
@@ -7744,7 +7746,7 @@ prereg_studies_reint <-
   )
 
 study_sample_sizes_reint <- 
-  reintegation_dat |>
+  reintegration_dat |>
   group_by(study, trt_id, ctr_id) |>
   summarise(
     effects = n(),
@@ -8013,7 +8015,7 @@ kable(
 ::: {.cell}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   summarise(
     es_count = n(),
     .by = study
@@ -8251,7 +8253,7 @@ label_cat_hist_ridge(
 ```{.r .cell-code}
 # Used when describing the treatment group sample sizes
 N_t_stud_trtid <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   reframe(N_treat = max(N_t), .by = c(study, trt_id)) 
 
 N_t_total <- 
@@ -8259,7 +8261,7 @@ N_t_total <-
   summarise(N_t_total = sum(N_treat), .by = study)
 
 N_c_total <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   summarise(N_c_total = max(N_c), .by = study)
 
 N_total_dat <- 
@@ -8805,7 +8807,7 @@ control_sizes_plot_mental
 
 ```{.r .cell-code}
 plot <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   summarise(effects = n(), .by = study) |> 
   left_join(N_total_dat, by = join_by(study)) |> 
   relocate(effects, .after = N_total) |> 
@@ -8891,7 +8893,7 @@ cat_dat_cross <- function(variable, study_id, data) {
 
 ```{.r .cell-code}
 outcome_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = analysis_plan,
   study_id = study
 )
@@ -9063,7 +9065,7 @@ outcome_dat_cross |>
 
 ```{.r .cell-code}
 outcome_subgroup_dat_cross <- cat_dat_cross(
-  data = filter(reintegation_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
+  data = filter(reintegration_dat, str_detect(analysis_plan, "Alco|Hope|Social|Well")),
   variable = analysis_plan,
   study_id = study
 )
@@ -9284,7 +9286,7 @@ cat_ridge <- function(data, es, v, variable) {
 
 ```{.r .cell-code}
 analyzed_outcomes <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -9304,7 +9306,7 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 
 ```{.r .cell-code}
 not_analyzed_outcomes <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
 
 cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
@@ -9449,7 +9451,7 @@ text(
 
 ```{.r .cell-code}
 diagnosis_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = schizophrenia,
   study_id = study
 )
@@ -9581,7 +9583,7 @@ diagnosis_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = schizophrenia, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -9622,7 +9624,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 
 ```{.r .cell-code}
 cbt_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = CBT_int,
   study_id = study
 )
@@ -9753,7 +9755,7 @@ cbt_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = CBT_int, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -9797,7 +9799,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 
 ```{.r .cell-code}
 egm_dat_reint <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   summarise(
     n = n(),
     n_studies = factor(n_distinct(study), levels = c(1:4)),
@@ -10023,7 +10025,7 @@ egm_dat_mental |>
 
 ```{.r .cell-code}
 test_type_dat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(test_type != "Raw events")
 
 test_type_dat_cross <- cat_dat_cross(
@@ -10239,7 +10241,7 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 
 ```{.r .cell-code}
 strategy_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = analysis_strategy,
   study_id = study
 )
@@ -10376,7 +10378,7 @@ strategy_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = analysis_strategy, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -10416,7 +10418,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 
 ```{.r .cell-code}
 design_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = QES_design,
   study_id = study
 )
@@ -10551,7 +10553,7 @@ design_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = QES_design, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -10591,7 +10593,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 
 ```{.r .cell-code}
 control_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = control,
   study_id = study
 )
@@ -10765,7 +10767,7 @@ control_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = control, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = control, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -10806,7 +10808,7 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 
 ```{.r .cell-code}
 rob_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = overall_rob,
   study_id = study
 )
@@ -10959,7 +10961,7 @@ rob_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -10999,7 +11001,7 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 
 ```{.r .cell-code}
 prereg_subgroup_dat_cross <- cat_dat_cross(
-  data = reintegation_dat,
+  data = reintegration_dat,
   variable = prereg_chr,
   study_id = study
 )
@@ -11134,7 +11136,7 @@ prereg_subgroup_dat_cross_mental |>
 ::: {.cell}
 
 ```{.r .cell-code}
-cat_ridge(data = reintegation_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
+cat_ridge(data = reintegration_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -11209,7 +11211,7 @@ var_labels <- c(
 )
 
 continuous_descriptives <- 
- reintegation_dat |> 
+ reintegration_dat |> 
   summarise(
     age = mean(age_mean),
     male_pct = mean(male_pct),
@@ -11729,7 +11731,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
-reintegation_dat |>
+reintegration_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
   arrange(desc(duration_in_weeks)) |> 
@@ -11852,7 +11854,7 @@ mental_health_dat |>
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
-reintegation_dat |>
+reintegration_dat |>
   select(study, time_after_end_intervention_weeks, N_total) |> 
   arrange(desc(study)) |> 
   mutate(study = factor(study, levels = unique(study))) |> 
@@ -11911,7 +11913,7 @@ mental_health_dat |>
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   select(study, gt_pop, vgt_pop, time_after_end_intervention_weeks) |> 
   ggplot() +
   aes(x = time_after_end_intervention_weeks, y = gt_pop, color = study) +
@@ -11984,7 +11986,7 @@ mental_health_dat |>
 
 ```{.r .cell-code}
 multivariate_dat_reint <- 
-  reintegation_dat |>
+  reintegration_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -12065,7 +12067,7 @@ multivariate_pairs_mental
 
 ```{.r .cell-code}
 multivariate_dat_reint_method <- 
-  reintegation_dat |>
+  reintegration_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Strategy` = analysis_strategy,
@@ -12147,7 +12149,7 @@ multivariate_pairs_mental_method
 
 ```{.r .cell-code}
 multivariate_dat_reint_method_theo <- 
-  reintegation_dat |>
+  reintegration_dat |>
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well")) |> 
   select(
     `Outcome` = analysis_plan,
@@ -12242,7 +12244,7 @@ multivariate_pairs_mental_method_theo
 
 ```{.r .cell-code}
 cor_mat_dat_cat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     plan = analysis_plan,
@@ -12262,7 +12264,7 @@ cat_dummy_dat <-
 
 
 cor_mat_dat_con <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Alco|Hope|Social|Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -13321,7 +13323,7 @@ Excluded factors due to no variation: type of sample (schizophania vs. rest), lo
 
 ```{.r .cell-code}
 cor_mat_dat_cat_alcohol <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     treat = CBT_int,
@@ -13339,7 +13341,7 @@ cat_dummy_dat_alcohol <-
 
 
 cor_mat_dat_con_alcohol <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Alco") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -13914,7 +13916,7 @@ Excluded factors due to no variation: type of intervention (CBT vs. rest) and ty
 
 ```{.r .cell-code}
 cor_mat_dat_cat_hope <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -13933,7 +13935,7 @@ cat_dummy_dat_hope <-
 
 
 cor_mat_dat_con_hope <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Hope") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -14551,7 +14553,7 @@ Excluded factors due to no appearance: waitlist-only
 
 ```{.r .cell-code}
 cor_mat_dat_cat_social <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -14570,7 +14572,7 @@ cat_dummy_dat_social <-
 
 
 cor_mat_dat_con_social <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Social") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -15338,7 +15340,7 @@ Excluded factors due to no appearance: waitlist-only
 
 ```{.r .cell-code}
 cor_mat_dat_cat_well <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     samp = schizophrenia,
@@ -15357,7 +15359,7 @@ cat_dummy_dat_well <-
 
 
 cor_mat_dat_con_well <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(str_detect(analysis_plan, "Well") & test_type != "Raw events") |> 
   select(
     age = age_mean,
@@ -17273,7 +17275,7 @@ This forest plot shows the within- and between study variation of standard error
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -17334,7 +17336,7 @@ mental_health_dat |>
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   arrange(desc(study)) |>
   mutate(
     study = factor(study, unique(study)),
@@ -17404,7 +17406,7 @@ iscw <-
 rho_val <- round(seq(0, 0.8, 0.2), 1)
 
 ISCW_plot <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   expand_grid(rho = rho_val) |> 
   group_by(study, rho) |> 
   summarise(
@@ -17497,7 +17499,7 @@ ISCW_plot_mental
 ::: {.cell}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   mutate(segt_pop = sqrt(vgt_pop)) |> 
   ggplot(aes(N_total, segt_pop)) + 
   geom_point() +
@@ -17548,7 +17550,7 @@ mental_health_dat |>
 ::: {.cell}
 
 ```{.r .cell-code}
-reintegation_dat |> 
+reintegration_dat |> 
   mutate(
     sample_above_100 = if_else(N_total >100, "Sample > 100", "Sample < 100"),
     sample_above_100 = factor(sample_above_100, levels = c( "Sample > 100", "Sample < 100")),
@@ -17636,7 +17638,7 @@ mental_health_dat |>
 ::: {.cell .tbl-cap-location-top}
 
 ```{.r .cell-code}
-reintegation_dat$gt_pop |> 
+reintegration_dat$gt_pop |> 
   skim() |>
   select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
   rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) |>
@@ -17752,12 +17754,12 @@ mental_health_dat$gt_pop |>
 ::: {.cell}
 
 ```{.r .cell-code}
-qrtls <- quantile(reintegation_dat$gt_pop, c(.25, .75), na.rm = TRUE)
+qrtls <- quantile(reintegration_dat$gt_pop, c(.25, .75), na.rm = TRUE)
 fences <-  qrtls + 3 * diff(qrtls) * c(-1, 1)
 fence_dat <- data.frame(qrtl = qrtls, fence = fences)
 
 es_dist_plot <- 
-  ggplot(reintegation_dat, aes(gt_pop)) + 
+  ggplot(reintegration_dat, aes(gt_pop)) + 
   geom_density(fill = "cornflowerblue", alpha = 0.8) + 
   geom_vline(data = fence_dat, aes(xintercept = qrtl), linetype = "solid") + 
   geom_vline(data = fence_dat, aes(xintercept = fence), linetype = "dashed") + 
@@ -17820,7 +17822,7 @@ es_dist_plot_mental
 
 ```{.r .cell-code}
 outcomes_reint_dat <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   group_by(analysis_plan) |> 
   reframe(
@@ -17831,7 +17833,7 @@ outcomes_reint_dat <-
 
 
 reintegration_outcome_plot <- 
-  reintegation_dat |> 
+  reintegration_dat |> 
   #Has only one data point
   filter(!str_detect(analysis_plan, "Psychiatric")) |> 
   ggplot(aes(x = gt_pop, fill = analysis_plan)) + 
@@ -17914,7 +17916,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-04
+ date     2025-09-05
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
