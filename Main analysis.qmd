@@ -81,9 +81,13 @@ In this section, we manipulate all variables used in meta-regression analyses.
 # Read: reint_ma_dat = reintegrational meta-analysis data
 reint_ma_dat <- 
   reintegration_dat |> 
+  mutate(
+    outcome_time = paste(outcome, time, sep = "_"),
+  ) |> 
   select(
     # Various types of effect size estimates 
     study, gt_pop, vgt_pop, Wgt_pop, gt, vgt, Wgt, g, vg, d, vd, gt_post, vgt_post,
+    
     
     # Categorical moderators and control variables 
     analysis_plan, schizophrenia, CBT_intervention = CBT_int, prereg_chr, conventional, 
@@ -91,7 +95,13 @@ reint_ma_dat <-
     
     # Continuous moderators and control variables
     age_mean, male_pct, total_number_of_sessions, sessions_per_week, duration_in_weeks,
-    time_after_end_intervention_weeks, time_from_baseline_weeks
+    time_after_end_intervention_weeks, time_from_baseline_weeks,
+    
+    # For vcalc
+    outcome, outcome_time, N_t, N_c, trt_name, trt_id, control, ctr_id,
+    
+    # Miscellaneous 
+    vary_id, varifier, time
     
   ) |> 
   mutate(
@@ -170,6 +180,14 @@ reint_ma_dat <-
     across(where(is.integer), as.integer)
   )
 
+#reint_ma_dat <- 
+#  reint_ma_dat |> 
+#  metafor::escalc(
+#    data = _, 
+#    yi = gt_pop, 
+#    vi = vgt_pop
+#  )
+
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 
 #saveRDS(reint_ma_dat, "reint_ma_dat.rds")
@@ -183,12 +201,21 @@ rho <- 0.8
 
 V_mat <- 
   metafor::vcalc(
+    data = reint_ma_dat,
     vi = vgt_pop, 
-    cluster = study, 
-    obs = esid, 
-    data = reint_ma_dat, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
     rho = rho
   )
+
+# Checking correct v_mat
+#blsplit(V_mat, reint_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 outcome_obj <- 
   metafor::rma.mv(
@@ -200,7 +227,7 @@ outcome_obj <-
     sparse=TRUE
   )
 
-saveRDS(outcome_obj, file = "outcome_obj.rds")
+#saveRDS(outcome_obj, file = "outcome_obj.rds")
 
 outcome_obj_robu <- 
   outcome_obj |> 
@@ -521,8 +548,30 @@ arg_list_tbl <-
   data$vi <- data[[var]]
   data_name <- attr(data, "data_name")
 
+  #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+  #  data = reint_ma_dat,
+  #  vi = vgt_pop, 
+  #  cluster = study,
+  #  type = outcome_time, 
+  #  grp1 = trt_name,
+  #  w1 = N_t, 
+  #  grp2 = control,
+  #  w2 = N_c, 
+  #  rho = rho
+  
   # Variance-Covariance Matrix
-  V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+  V_mat <- 
+    metafor::vcalc(
+      data = data,
+      vi = vi, 
+      cluster = study,
+      type = outcome_time,
+      grp1 = trt_name,
+      w1 = N_t,
+      grp2 = control,
+      w2 = N_c, 
+      rho = rho
+    )
   
   # Strategy for overcoming non-convergence 
   optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
@@ -681,13 +730,13 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-#x_test <- 
-#  pmap(
-#    .l = arg_list_tbl_rho08[1:2,], 
-#    .f = .SCE_RVE, 
-#    return_rma_obj = FALSE,
-#    CWB = TRUE
-#  ); x_test
+x_test <- 
+  pmap(
+    .l = arg_list_tbl_rho08[1,], 
+    .f = .SCE_RVE, 
+    return_rma_obj = TRUE,
+    CWB = FALSE
+  ); x_test
 
 
 opts <- furrr::furrr_options(

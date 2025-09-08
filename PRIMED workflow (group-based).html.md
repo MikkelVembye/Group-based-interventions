@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-05"
+date: "2025-09-08"
 format:
   html: 
     keep-md: true
@@ -28,6 +28,7 @@ knitr:
       width: 100
       knitr.kable.NA: "-"
       dplyr.summarise.inform: FALSE
+      pillar.print_max: 50
 reference-location: margin
 citation-location: margin
 bibliography: bibliography.bib  
@@ -259,6 +260,8 @@ gb_dat <-
     
     studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
     
+    trt_id = if_else(str_detect(study, "Schaf") & trt_name == "Relapse Prevention Training", 2, trt_id),
+    
     cnt = if_else(cnt == "USA", "US", cnt),
     
     design = if_else(design  == "QES-pretest", "QES", design),
@@ -426,6 +429,113 @@ gb_dat <-
   filter(!c(str_detect(study, "Cano|Craigie|Woj") & analysis_strategy == "ITT")) 
 ```
 :::
+
+::: {.cell}
+
+```{.r .cell-code}
+time_vcalc <- c(
+  # Acarturk
+  1,2,1,2,1,2,
+  # Barbic
+  1,1,1,
+  # Bond
+  1,1, 
+  # Baekkelund, 
+  1,1,2,2,
+  # Cano-Vindel
+  rep(c(1:4), each = 10),
+  # Craigie & Nathan
+  1,1,1,
+  # Crawford (multi-treatment)
+  rep(c(1,2), each = 2, 4),
+  # Druss 2010
+  1,1,
+  #Druss 2018
+  1,1,1,2,2,2,
+  # Dyck
+  1, 
+  # Gestel-Timmermans
+  rep(c(1,2), 5),
+  # Gatz
+  rep(1,5),
+  # Gonzalaez
+  rep(1,2),
+  # Gordon 
+  rep(1,4),
+  # Gutman
+  rep(1,2),
+  # Hagen
+  rep(1,4),
+  # Haslem
+  rep(1,3),
+  # Hilden
+  rep(1,7),
+  # Himle
+  rep(c(1,2), each = 6),
+  #Jacob
+  rep(c(1,2), each = 5),
+  #James
+  rep(1,5),
+  # Kanie
+  rep(1,4),
+  # Lim
+  rep(1,6),
+  # Llyod-Evans
+  rep(1,4),
+  # Madigan
+  rep(c(1,2), each = 6),
+  # McCay 2006
+  rep(1,4),
+  # McCay 2007
+  rep(1,3),
+  # Michalak (multi-treatment)
+  rep(1,14),
+  # Morley 
+  rep(1,4),
+  # Morton
+  rep(1,5),
+  # Patterson
+  rep(c(1,2), each = 5),
+  # Popolo
+  rep(1,2),
+  # Rabenstein
+  rep(1,3),
+  # Rosenblum 
+  rep(1,4),
+  # Russinova 
+  rep(c(1,2), each = 5),
+  # Rusch
+  rep(c(1,2), each = 6),
+  # Sacks
+  rep(1,5),
+  # Sajatovic
+  rep(c(1:3), each = 3),
+  # Saloheimo
+  1, 
+  # Schrank
+  rep(1,6),
+  # Schafer (multi-treatment)
+  rep(c(2,3,1), each = 2, 6),
+  # Somers
+  rep(1,5),
+  # Tjaden
+  rep(c(1,2), each = 4),
+  # Valiente 
+  rep(1,16),
+  # Volpe
+  rep(1,4),
+  # Wojtalik 
+  rep(1,2),
+  #Wuthrich
+  rep(1,4),
+  # Smith 
+  rep(1,3)
+) 
+
+gb_dat$time <- time_vcalc
+```
+:::
+
 
 
 
@@ -17916,7 +18026,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-05
+ date     2025-09-08
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
