@@ -212,6 +212,16 @@ V_mat <-
     rho = rho
   )
 
+#V_mat2 <- 
+#  metafor::vcalc(
+#    data = reint_ma_dat,
+#    vi = vgt_pop, 
+#    cluster = study,
+#    obs = esid, 
+#    rho = rho
+#  )
+
+
 # Checking correct v_mat
 #blsplit(V_mat, reint_ma_dat$study) |> 
 #  lapply(cov2cor) |> 
@@ -283,6 +293,7 @@ prereg_obj
 ## Function building for analysis
 
 ```{r}
+#| renv.ignore: true
 # Read: rma_arg_tbl = rma argument tibble
 
 .rma_arg_tbl <- 
@@ -540,7 +551,7 @@ arg_list_tbl <-
 ################################################################################
 ## Making SCE RVE function
 ################################################################################
-.SCE_RVE <- 
+.PESCE_RVE <- 
   function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE, CWB = FALSE){
     
   if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
@@ -730,13 +741,13 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-x_test <- 
-  pmap(
-    .l = arg_list_tbl_rho08[1,], 
-    .f = .SCE_RVE, 
-    return_rma_obj = TRUE,
-    CWB = FALSE
-  ); x_test
+#x_test <- 
+#  pmap(
+#    .l = arg_list_tbl_rho08[1,], 
+#    .f = .PESCE_RVE, 
+#    return_rma_obj = FALSE,
+#    CWB = FALSE
+#  ); x_test
 
 
 opts <- furrr::furrr_options(
@@ -747,29 +758,36 @@ opts <- furrr::furrr_options(
 
 n_workers <- max(1L, future::availableCores() - 1L)
 
+
 future::plan(future::multisession, workers = n_workers)
 tic()
-x_test <- 
+main_res <- 
   future_pmap(
-    .l = arg_list_tbl_rho08[1,], 
-    .f = .SCE_RVE, 
-    return_rma_obj = TRUE,
+    .l = arg_list_tbl_rho08[1:2,], 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
     CWB = FALSE,
     .options = opts,
     .progress = TRUE
-  ); x_test
+  ); main_res
 toc()
 
 future::plan(future::sequential)
 future::plan()
 
 
+#rho <- 0.8
+#
 #V_mat <- 
 #  metafor::vcalc(
+#    data = reint_ma_dat,
 #    vi = vgt_pop, 
-#    cluster = study, 
-#    obs = esid, 
-#    data = reint_ma_dat, 
+#    cluster = study,
+#    type = outcome_time, 
+#    grp1 = trt_name,
+#    w1 = N_t, 
+#    grp2 = control,
+#    w2 = N_c, 
 #    rho = rho
 #  )
 #
@@ -864,8 +882,18 @@ methods_res_table <-
 # Making CHE function for overall effects   
 
 ```{r}
+#| renv.ignore: true
 
-.CHE_RVE <- function(data, study_out, studyid = study, rho = 0.8,  pred_int = 80){
+.PECHE_RVE <- function(
+    data, 
+    study_out, 
+    es = "gt_pop", 
+    var = "vgt_pop", 
+    studyid = "study", 
+    rho = 0.8,  
+    pred_int = 80
+    ){
+  
   
   if (missing(study_out)) {
     dat <- data
@@ -877,12 +905,30 @@ methods_res_table <-
   studyid_class <- substitute(studyid)
   
   if (!is.character(studyid_class)) {
-    dat$study <- data |> dplyr::pull({{ study }})
+    dat$study <- dat |> dplyr::pull({{ studyid }})
   } else {
-    dat$study <- data[[study]]
+    dat$study <- dat[[studyid]]
   }
   
-  V_mat <- vcalc(vi = vgt, cluster = study, obs = esid, data = dat, rho = rho) 
+  
+  dat$vi <- dat[[var]]
+  dat$yi <- dat[[es]]
+  
+  V_mat <- metafor::vcalc(vi = vgt, cluster = study, obs = esid, data = dat, rho = rho) 
+  
+  # Variance-Covariance Matrix
+  V_mat <- 
+    metafor::vcalc(
+      data = dat,
+      vi = vi, 
+      cluster = study,
+      type = outcome_time,
+      grp1 = trt_name,
+      w1 = N_t,
+      grp2 = control,
+      w2 = N_c, 
+      rho = rho
+    )
   
   optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
   overall_res <- "Non-converged"
@@ -893,7 +939,7 @@ methods_res_table <-
     overall_res <- tryCatch( 
       suppressWarnings(
         rma.mv(
-          gt, 
+          yi, 
           V = V_mat,
           random = ~ 1 | study / esid,
           data = dat
@@ -945,15 +991,18 @@ methods_res_table <-
   
 }
 
+.PECHE_RVE(data = reint_ma_dat)
+
 study_names <- unique(reint_ma_dat$study) |> as.character()
 
-map(.x = study_names, .f = .CHE_RVE, data = reint_ma_dat)
+map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat)
 
 ```
 
 # CHE-RVE for meta-regression
 
 ```{r che-rve-meta-regression}
+
 
 cor_val <- 0L:10L/10L
 cor_val <- cor_val[seq(1L, 10L, 2L)]
@@ -1010,10 +1059,14 @@ rho <- 0.8
 
 V_mat <- 
   metafor::vcalc(
+    data = reint_ma_dat,
     vi = vgt_pop, 
-    cluster = study, 
-    obs = esid, 
-    data = reint_ma_dat, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
     rho = rho
   )
 
@@ -1032,8 +1085,7 @@ male_obj <-
 
 
 
-
-.CHE_meta_reg <- 
+.PECHE_meta_reg <- 
   function(
     formula, 
     es, 
@@ -1052,8 +1104,21 @@ male_obj <-
     data_name <- attr(data, "data_name")
     
     # Variance-Covariance Matrix
-    V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
-    V_mat
+    #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+    
+    # Variance-Covariance Matrix
+    V_mat <- 
+      metafor::vcalc(
+        data = data,
+        vi = vi, 
+        cluster = study,
+        type = outcome_time,
+        grp1 = trt_name,
+        w1 = N_t,
+        grp2 = control,
+        w2 = N_c, 
+        rho = rho
+      )
     
     # Strategy for overcoming non-convergence 
     optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
