@@ -22,45 +22,48 @@ source_path2 <- if (isTRUE(getOption('knitr.in.progress'))) "pub-bias-test-helpe
 source(source_path)
 source(source_path2)
 
-
-# Loading data set
-reint_dat <- 
-  if (isTRUE(getOption('knitr.in.progress'))) {
-    readRDS("reintergation_dat.rds")
-  } else {
-    readRDS("ES calc/reintergation_dat.rds")
-  }
-
 # Data
-reint_dat <- readRDS("ES calc/reintergation_dat.rds") 
-mental_health_dat <- readRDS("ES calc/mental_health_dat.rds") 
+reint_ma_dat <- readRDS("reint_ma_dat.rds") 
+mental_health_dat <- readRDS("mental_health_dat.rds") 
 
 ## Select relevant variables
 
 
-reintergation_dat <- 
-  reint_dat |> 
-  mutate(esid = 1:n()) |> 
-  select(
-    study, eppi_id, esid, N_t, N_c, N_total, inv_sample_size, gt, vgt, Wgt, Wse, 
-    prereg_chr, conventional, analysis_plan, rob_tool:Overall, timing
+reint_ma_dat <- 
+  reint_ma_dat |> 
+  mutate(
+    esid = 1:n(),
+    se_gt_pop = sqrt(vgt_pop), 
+    Wse_pop = sqrt(Wgt_pop) # Change to Wgt_pop when created
   )
  
 
 ## Overall average effect
 
+rho <- 0.8
+
 # CHE-ISCW
-V_mat <- metafor::vcalc(vi = Wgt, cluster = study, obs = esid, data = reintergation_dat, rho = 0.8)
+V_mat <- metafor::vcalc(
+  data = reint_ma_dat,
+  vi = Wgt_pop, 
+  cluster = study,
+  type = outcome_time, 
+  grp1 = trt_name,
+  w1 = N_t, 
+  grp2 = control,
+  w2 = N_c, 
+  rho = rho
+)
 
 W <- solve(V_mat)
 
 # CHE
 che <- 
   rma.mv(
-    yi = gt,
+    yi = gt_pop,
     V = V_mat,
     random = ~ 1 | study / esid,
-    data = reintergation_dat,
+    data = reint_ma_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
@@ -68,35 +71,46 @@ che <-
 # ISCW
 
 # CHE-ISCW-RVE
-che_iscw <- rma.mv(
-  yi = gt,
-  V = V_mat,
-  W = W,
-  mods = ~ Wse,
-  random = ~ 1 | study / esid,
-  data = reintergation_dat,
-  sparse = TRUE
-) |> 
+che_iscw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    W = W,
+    mods = ~ prereg_chr + Wse_pop - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
   robust(cluster = study, clubSandwich = TRUE)
 
 
 ## Preregistered vs. not preregistered 
 
-
 prereg_dat <-  
-  reintergation_dat |> 
+  reint_ma_dat |> 
   filter(conventional == 0)
 
-V_mat_prereg <- metafor::vcalc(vi = Wgt, cluster = study, obs = esid, data = prereg_dat, rho = 0.8)
+V_mat_prereg <- 
+  metafor::vcalc(
+    data = prereg_dat,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 W_prereg <- solve(V_mat_prereg)
 
 egg_prereg <-
   rma.mv(
-    yi = gt,
+    yi = gt_pop,
     V = V_mat_prereg,
     W = W_prereg,
-    mods = ~ Wse,
+    mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
     data = prereg_dat,
     sparse = TRUE
@@ -111,20 +125,31 @@ egg_prereg_res <-
   )
 
 notprereg_dat <-  
-  reintergation_dat |> 
+  reint_ma_dat |> 
   filter(conventional == 1)
 
 
-V_mat_notprereg <- metafor::vcalc(vi = Wgt, cluster = study, obs = esid, data = notprereg_dat, rho = 0.8)
+V_mat_notprereg <-  
+  metafor::vcalc(
+    data = notprereg_dat,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 W_notprereg <- solve(V_mat_notprereg)
 
 egg_notprereg <-
   rma.mv(
-    yi = gt,
+    yi = gt_pop,
     V = V_mat_notprereg,
     W = W_notprereg,
-    mods = ~ Wse,
+    mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
     data = notprereg_dat,
     sparse = TRUE
@@ -143,7 +168,7 @@ egg_res_subgrouped <- bind_rows(egg_prereg_res, egg_notprereg_res)
 egg_res_subgrouped
 
 # SCEp+ 
-subgroup_means <- .SCEp(mod = prereg_chr, data = reintergation_dat)
+subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
 
 subgroup_dat <- 
   reintergation_dat |> 
@@ -600,63 +625,5 @@ mental_outcome_plot <-
 
 mental_outcome_plot
 
-# RIDGE PLOT
-.cat_ridge <- function(data, es, v, variable, var_name) {
-  require(dplyr)
-  require(rlang)
-  require(tidyr)
-  require(ggplot2)
-  
-  es_exp <- enquo(es)
-  var_exp <- enquo(variable)
-  v_exp <- enquo(v)
-  
-  suppressWarnings(
-    data |> 
-      mutate(
-        !!var_exp := fct_rev(!!var_exp),
-        var_group := !!var_name,
-      ) |> 
-      ggplot(aes(
-        x = !!es_exp,
-        y = !!var_exp,
-        fill = !!var_exp
-      )) +
-      geom_density_ridges(
-        aes(
-          point_colour = !!var_exp,
-          point_size = 1 / !!v_exp
-        ),
-        alpha = .2,
-        point_alpha = 0.5,
-        jittered_points = TRUE
-      ) +
-      facet_grid(~var_group) +
-      theme_minimal() +
-      labs(y = "", x = "Standardized Mean Difference (Hedges' g)") +
-      theme(
-        legend.position = "none",
-        strip.background = element_rect(colour = "black", fill = "white")
-      )
-  )
-}
 
-reint_ridge <- 
-  .cat_ridge(
-    data = reintergation_dat, 
-    es = gt_pop, 
-    variable = analysis_plan, 
-    v = vgt_pop, 
-    var_name = "Reintegrational Outcomes"
-  ) +
-  ggplot2::scale_x_continuous(breaks = seq(-1, 2, 1), limits = c(-1, 2))
 
-mental_ridge <- .cat_ridge(
-  data = mental_health_dat, 
-  es = gt_pop, 
-  variable = analysis_plan, 
-  v = vgt_pop, 
-  var_name = "Mental Health Outcomes"
-) 
-
-reint_ridge + mental_ridge

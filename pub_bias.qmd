@@ -58,14 +58,10 @@ source("pub-bias-test-helpers.R")
 ```{r load-data}
 #| code-fold: false
 
-reintergation_dat <- 
-  readRDS("reintergation_dat.rds") |> 
+reint_ma_dat <- 
+  readRDS("reint_ma_dat.rds") |> 
   mutate(
     esid = 1:n(),
-    outcome = case_when(
-      str_detect(analysis_plan, "Alco|Hope|Social|Well", negate = TRUE) ~ "Other",
-    .default = analysis_plan
-    ),
     se_gt_pop = sqrt(vgt_pop), 
     Wse_pop = sqrt(Wgt_pop) # Change to Wgt_pop when created
   )
@@ -85,14 +81,25 @@ mental_health_dat <-
 ```{r, main-res}
 rho <- 0.8
 
-V_mat <- vcalc(vgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+V_mat <- 
+  metafor::vcalc(
+    data = reint_ma_dat,
+    vi = vgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 overall_res <- 
   rma.mv(
-    gt_pop ~ + 1,
+    gt_pop,
     V = V_mat, 
     random = ~ 1 | study / esid,
-    data = reintergation_dat,
+    data = reint_ma_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
@@ -101,42 +108,55 @@ overall_res
 
 sub_res <- 
   rma.mv(
-    gt_pop ~ -1 + outcome,
+    gt_pop ~ outcome_type - 1,
     V = V_mat, 
-    random = list(~ outcome | study, ~ outcome | esid),
+    random = list(~ outcome_type | study, ~ outcome_type | esid),
     struct = c("DIAG", "DIAG"),
-    data = reintergation_dat,
-    sparse = TRUE
-  )
-
-sub_res
-
-# Mental health
-V_mat_mental <- vcalc(vgt_pop, cluster = study, obs = esid, data = mental_health_dat, rho = rho)
-
-overall_res_mental <- 
-  rma.mv(
-    gt_pop ~ + 1,
-    V = V_mat_mental, 
-    random = ~ 1 | study / esid,
-    data = mental_health_dat,
+    data = reint_ma_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
 
-overall_res_mental
+sub_res
 
-sub_res_mental <- 
-  rma.mv(
-    gt_pop ~ -1 + analysis_plan,
-    V = V_mat_mental, 
-    random = list(~ analysis_plan | study, ~ analysis_plan | esid),
-    struct = c("DIAG", "DIAG"),
-    data = mental_health_dat,
-    sparse = TRUE
-  )
+# Mental health
+# MHV: Conduct these tests, when the main analyses has been made
 
-sub_res_mental
+#V_mat_mental <- metafor::vcalc(
+#    data = mental_health_dat,
+#    vi = vgt_pop, 
+#    cluster = study,
+#    type = outcome_time, 
+#    grp1 = trt_name,
+#    w1 = N_t, 
+#    grp2 = control,
+#    w2 = N_c, 
+#    rho = rho
+#  )
+#
+#overall_res_mental <- 
+#  rma.mv(
+#    gt_pop ~ + 1,
+#    V = V_mat_mental, 
+#    random = ~ 1 | study / esid,
+#    data = mental_health_dat,
+#    sparse = TRUE
+#  ) |> 
+#  robust(cluster = study, clubSandwich = TRUE)
+#
+#overall_res_mental
+#
+#sub_res_mental <- 
+#  rma.mv(
+#    gt_pop ~ -1 + analysis_plan,
+#    V = V_mat_mental, 
+#    random = list(~ analysis_plan | study, ~ analysis_plan | esid),
+#    struct = c("DIAG", "DIAG"),
+#    data = mental_health_dat,
+#    sparse = TRUE
+#  )
+#
+#sub_res_mental
 
 
 ```
@@ -162,7 +182,7 @@ reg_color = "blue"
 
 overall_mean <- as.numeric(overall_res$b)
       
-y_lim_exp1 <- max(reintergation_dat$se_gt_pop) + 0.02 
+y_lim_exp1 <- max(reint_ma_dat$se_gt_pop) + 0.02 
 
 funnel_exp1 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
@@ -173,7 +193,19 @@ funnel_exp1 <-  tribble(
 ) 
 
 # Egg CHE-ISCW-RVE ------------
-V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+#V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintegration_dat, rho = rho)
+
+V_mat_ISCW <- metafor::vcalc(
+    data = reint_ma_dat,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 W_ISCW <- solve(V_mat_ISCW)
 
@@ -184,14 +216,14 @@ egg_ISCW <-
     W = W_ISCW,
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
-    data = reintergation_dat,
+    data = reint_ma_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
 #----------------------------------
 
 
-reintergation_dat |> 
+reint_ma_dat |> 
   ggplot() + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
@@ -204,7 +236,7 @@ reintergation_dat |>
   geom_point(aes(se_gt_pop, gt_pop), alpha = 1, size = 1.2) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
-  facet_grid2(~ outcome_construct) +
+  facet_wrap2(~ outcome_type, ) +
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
   #scale_y_continuous(breaks = breaks_y) + 
   theme_bw() + 
@@ -220,6 +252,7 @@ reintergation_dat |>
 
 ## Mental health
 ```{r reint-overall-fp-mental}
+#| eval: false
 #| label: fig-reint-overall-fp-mental
 #| fig-cap: "Funnel plot across all mental health outcomes"
 #| fig.width: 9
@@ -240,7 +273,7 @@ funnel_exp1 <-  tribble(
 ) 
 
 # Egg CHE-ISCW-RVE ------------
-V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintergation_dat, rho = rho)
+V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintegration_dat, rho = rho)
 
 W_ISCW <- solve(V_mat_ISCW)
 
@@ -251,14 +284,14 @@ egg_ISCW <-
     W = W_ISCW,
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
-    data = reintergation_dat,
+    data = reintegration_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
 #----------------------------------
 
 
-reintergation_dat |> 
+reintegration_dat |> 
   ggplot() + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
