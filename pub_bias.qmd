@@ -44,6 +44,7 @@ library(kableExtra)
 library(ggh4x)
 
 library(puniform)
+library(PublicationBias)
 library(tidyverse) # for tidying
 library(janitor)   # for tidying variable names
 library(boot)      # for bootstrapping
@@ -63,22 +64,24 @@ reint_ma_dat <-
   mutate(
     esid = 1:n(),
     se_gt_pop = sqrt(vgt_pop), 
-    Wse_pop = sqrt(Wgt_pop) # Change to Wgt_pop when created
+    Wse_pop = sqrt(Wgt_pop),
+    t_i = gt_pop/sqrt(Wgt)
   )
 
 #Secondary analysis
-mental_health_dat <- 
-  readRDS("mental_health_dat.rds") |> 
-  mutate(
-    esid = 1:n(),
-    se_gt_pop = sqrt(vgt_pop), 
-    Wse_pop = sqrt(Wgt_pop)
-    )
+#mental_health_dat <- 
+#  readRDS("mental_health_dat.rds") |> 
+#  mutate(
+#    esid = 1:n(),
+#    se_gt_pop = sqrt(vgt_pop), 
+#    Wse_pop = sqrt(Wgt_pop)
+#    )
 ```
 
 
 # Funnel plots
 ```{r, main-res}
+#| eval: false
 rho <- 0.8
 
 V_mat <- 
@@ -173,30 +176,61 @@ sub_res
 #| fig.retina: 2
 #| message: false
 
-alpha_line = 0.5
-polygon_fill = c("grey", "grey10", "lightcyan")
-mean_line = "dashed"
-reg_test = TRUE
-reg_line = "longdash"
-reg_color = "blue"
+## Overall average effect
 
-overall_mean <- as.numeric(overall_res$b)
-      
-y_lim_exp1 <- max(reint_ma_dat$se_gt_pop) + 0.02 
+rho <- 0.8
 
-funnel_exp1 <-  tribble(
-  ~ x90, ~ x95, ~ x99, ~ y,
-  0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
-  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
-  0,     0,     0,     0
-) 
+# CHE-ISCW
+V_mat <- metafor::vcalc(
+  data = reint_ma_dat,
+  vi = Wgt_pop, 
+  cluster = study,
+  type = outcome_time, 
+  grp1 = trt_name,
+  w1 = N_t, 
+  grp2 = control,
+  w2 = N_c, 
+  rho = rho
+)
 
-# Egg CHE-ISCW-RVE ------------
-#V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintegration_dat, rho = rho)
+W <- solve(V_mat)
 
-V_mat_ISCW <- metafor::vcalc(
+# CHE
+che <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    random = ~ 1 | study / esid,
     data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+# ISCW
+
+# CHE-ISCW-RVE
+che_iscw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    W = W,
+    mods = ~ prereg_chr + Wse_pop - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+## Preregistered vs. not preregistered 
+
+prereg_dat <-  
+  reint_ma_dat |> 
+  filter(conventional == 0)
+
+V_mat_prereg <- 
+  metafor::vcalc(
+    data = prereg_dat,
     vi = Wgt_pop, 
     cluster = study,
     type = outcome_time, 
@@ -207,43 +241,404 @@ V_mat_ISCW <- metafor::vcalc(
     rho = rho
   )
 
-W_ISCW <- solve(V_mat_ISCW)
+W_prereg <- solve(V_mat_prereg)
 
-egg_ISCW <-
+egg_prereg <-
   rma.mv(
     yi = gt_pop,
-    V = V_mat_ISCW,
-    W = W_ISCW,
+    V = V_mat_prereg,
+    W = W_prereg,
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
-    data = reint_ma_dat,
+    data = prereg_dat,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
-#----------------------------------
+
+egg_prereg_res <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg$b[1]),
+    egg_slope = as.numeric(egg_prereg$b[2])
+  )
+
+notprereg_dat <-  
+  reint_ma_dat |> 
+  filter(conventional == 1)
 
 
-reint_ma_dat |> 
+V_mat_notprereg <-  
+  metafor::vcalc(
+    data = notprereg_dat,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+W_notprereg <- solve(V_mat_notprereg)
+
+egg_notprereg <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_notprereg,
+    W = W_notprereg,
+    mods = ~ Wse_pop,
+    random = ~ 1 | study / esid,
+    data = notprereg_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+egg_notprereg_res <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg$b[1]),
+    egg_slope = as.numeric(egg_notprereg$b[2])
+  )
+
+egg_res_subgrouped <- bind_rows(egg_prereg_res, egg_notprereg_res)
+egg_res_subgrouped
+
+
+# PESCE+ model
+
+prereg_arg <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "prereg_chr",
+    model = "SCEp",
+    r = 0.8, 
+    data = reint_ma_dat,
+    type = "categorical"
+  ); prereg_arg
+
+# PESCEp+ 
+subgroup_means <- pmap(.l = prereg_arg, .f = .PESCE_RVE) |> list_rbind()
+
+#subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
+
+subgroup_dat <- 
+  reint_ma_dat |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means[c(3,2), c(2, 14:18)], egg_res_subgrouped) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
+
+
+
+y_lim_exp1 <- max(reint_ma_dat$Wse_pop) + 0.02 
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+
+
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+es_level_fp <- 
+  reint_ma_dat |> 
+  mutate(
+    level = "Effect size level",
+    report_bias = case_when(
+      rob_tool == "RoB2" & D5 == "Low" ~ "Low",
+      rob_tool == "RoB2" & str_detect(D5, "Some") ~ "Moderate",
+      rob_tool == "RoB2" & str_detect(D5, "High") ~ "Serious",
+      .default = D7
+    ),
+    
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious"))
+    
+  ) |> 
   ggplot() + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
   geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
-  geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
-  geom_hline(yintercept = overall_mean, linetype = mean_line, alpha = alpha_line) +  
-  geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
-  geom_abline(slope = as.numeric(egg_ISCW$b[2]), intercept = as.numeric(egg_ISCW$b[1]), linetype = reg_line, color = reg_color) +
-  # Add prereg and rob to plot 
-  geom_point(aes(se_gt_pop, gt_pop), alpha = 1, size = 1.2) +
-  scale_color_brewer(type = "qual", palette = 2) + 
+  geom_abline(data = subgroup_dat, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop, color = report_bias), alpha = 1, size = 1.5) +
   coord_flip() +
-  facet_wrap2(~ outcome_type, ) +
+  facet_grid(level~prereg_chr) +
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
-  #scale_y_continuous(breaks = breaks_y) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  scale_color_manual(
+    values = c("Low" = "green3", "Moderate" = "yellow", "Serious" = "red")
+  ) + 
   theme_bw() + 
-  labs(x = "Standard error (adjusted)", 
+  labs(x = "Modified standard error", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
-  theme(legend.position = "bottom")
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) +
+  labs(color = "Risk of bias due to selective reporting (D5/D7)") +
+  guides(col = guide_legend(nrow = 1))
+
+
+# Make aggregate plot
+
+reint_dat_agg <- 
+  reint_ma_dat |> 
+  escalc(measure = "SMD", yi = gt_pop, vi = Wgt_pop, data = _) |> 
+  aggregate.escalc(cluster = study, rho = 0.8) |> 
+  mutate(
+    Wse_pop = sqrt(vi)
+  )
+
+prereg_dat_agg <-  
+  reint_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 0)
+
+egg_prereg_agg <- 
+  rma(yi = yi, vi = vi, data = prereg_dat_agg, control=list(stepadj=0.5, maxiter=1000)) |> 
+  regtest()
+
+egg_prereg_agg_res <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_agg$fit$b[1]),
+    egg_slope = as.numeric(egg_prereg_agg$fit$b[2])
+  )
+
+notprereg_dat_agg <-  
+  reint_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 1)
+
+egg_notprereg_agg <- 
+  rma(yi = yi, vi = vi, data = notprereg_dat_agg) |> 
+  regtest()
+
+egg_notprereg_agg_res <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg_agg$fit$b[1]),
+    egg_slope = as.numeric(egg_notprereg_agg$fit$b[2])
+  )
+
+egg_res_agg_subgrouped <- bind_rows(egg_notprereg_agg_res, egg_prereg_agg_res)
+egg_res_agg_subgrouped
+
+means_agg <- 
+  rma(yi, vi, mods = ~ prereg_chr - 1, data = reint_dat_agg) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+subgroup_means_agg <- 
+  tibble(
+    Moderator = c("Not preregistered", "Preregistered"),
+    avg_effect = as.numeric(means_agg$b), 
+    LL = as.numeric(means_agg$ci.lb), 
+    UL = as.numeric(means_agg$ci.ub)
+  )
+
+subgroup_dat_agg <- 
+  reint_dat_agg |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  arrange(prereg_chr) |> 
+  bind_cols(subgroup_means_agg, egg_res_agg_subgrouped) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Study level") 
+
+
+#subgroup_dat <- 
+#  reintergation_dat |> 
+#  summarise(
+#    gt = mean(gt),
+#    Wse = mean(Wse),
+#    analysis_plan = analysis_plan[1],
+#    .by = prereg_chr
+#  ) |> 
+#  bind_cols(subgroup_means[2:3,], egg_res_subgrouped) |> 
+#  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
+
+
+
+y_lim_exp2 <- max(reint_dat_agg$Wse_pop) + 0.02 
+y_lim_exp2  
+
+funnel_exp2 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp2, qnorm(0.025) * y_lim_exp2, qnorm(0.005) * y_lim_exp2, y_lim_exp2,
+  qnorm(0.95) * y_lim_exp2, qnorm(0.975) * y_lim_exp2, qnorm(0.995) * y_lim_exp2, y_lim_exp2,
+  0,     0,     0,     0
+) 
+
+study_level_fp <- 
+  reint_dat_agg |> 
+  mutate(level = "Study level") |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_agg, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_agg, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_agg, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_agg, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop), alpha = 1, size = 1.5) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(level~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp2, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() +
+  theme(
+    axis.title = element_blank()
+  )
+
+ylab <- es_level_fp$labels$x
+
+study_level_fp$labels$x <- es_level_fp$labels$x <- "" 
+
+#png("plots/funnel plots (overall effect) across types of registration.png", width = 8, height = 5.5, res = 300, unit = "in")
+study_level_fp / es_level_fp
+grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
+#dev.off()
+
+```
+
+## Investigating the impact of Cano-Vindel et al.
+
+```{r reint-overall-fp}
+prereg_dat_cano <-  
+  reint_ma_dat |> 
+  filter(conventional == 0) |>
+  mutate(
+    cano_vindel = if_else(str_detect(study, "Cano"), 1, 0),
+    cano_vindel = factor(cano_vindel)
+  )
+
+V_mat_prereg_cano <- 
+  metafor::vcalc(
+    data = prereg_dat_cano,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+W_prereg_cano <- solve(V_mat_prereg_cano)
+
+egg_prereg_cano <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_prereg_cano,
+    W = W_prereg_cano,
+    mods = ~ Wse_pop + cano_vindel,
+    random = ~ 1 | study / esid,
+    data = prereg_dat_cano,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+egg_prereg_res_cano <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_cano $b[1]),
+    egg_slope = as.numeric(egg_prereg_cano$b[2])
+  )
+
+
+subgroup_dat_cano <- 
+  prereg_dat_cano |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means[3, c(2, 14:18)], egg_prereg_res_cano) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975)) 
+
+
+
+y_lim_exp_cano <- max(prereg_dat_cano$Wse_pop) + 0.02 
+y_lim_exp_cano  
+
+funnel_exp_cano <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp_cano, qnorm(0.025) * y_lim_exp_cano, qnorm(0.005) * y_lim_exp_cano, y_lim_exp_cano,
+  qnorm(0.95) * y_lim_exp_cano, qnorm(0.975) * y_lim_exp_cano, qnorm(0.995) * y_lim_exp_cano, y_lim_exp_cano,
+  0,     0,     0,     0
+) 
+
+
+
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+cano_fp <- 
+  prereg_dat_cano |> 
+  mutate(alpha_val = if_else(cano_vindel == 1, 0.9, 1)) |>
+  ggplot() + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_cano, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop, col = cano_vindel, alpha = alpha_val), size = 1.5) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp_cano, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Modified standard error", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(
+    legend.position = "bottom"
+  ) +
+  labs(color = "Cano-vindel") +
+  guides(col = "none", alpha = "none")
+
+#png("plots/funnel plots (overall effect) without Cano-Vindel.png", width = 8, height = 5.5, res = 300, unit = "in")
+cano_fp
+#dev.off()
+
 
 
 
@@ -313,6 +708,478 @@ reintegration_dat |>
        color = "", shape = "") +
   theme(legend.position = "bottom")
 
+
+
+```
+
+:::
+ 
+ 
+## Funnel plot across outcomes
+
+```{r, tab-func-overall-pub-bias}
+
+.pubbias_overall_tab <- 
+  function(
+    rma_obj, 
+    test,
+    studies = n_distinct(reint_ma_dat$study), 
+    effects = nrow(reint_ma_dat)
+  ){
+    
+    tibble(
+    test = test,
+    J = studies,
+    K = effects,
+    est_ci = paste0(
+      round(as.numeric(rma_obj$b[1]), 3), 
+      " [", 
+      round(rma_obj$ci.lb[1], 3),
+      ", ",
+      round(rma_obj$ci.ub[1], 3),
+      "]"
+    ),
+    pval = rma_obj$pval[1],
+    tau = round(sqrt(rma_obj$sigma2[1]), 3),
+    omega = round(sqrt(rma_obj$sigma2[2]), 3),
+    total_SD = sqrt(sum(rma_obj$sigma2))
+  )
+
+}
+
+
+
+```
+
+
+# HYEMA
+
+```{r}
+hyema_overall <- readRDS("Boostrap results/hyema_overall_reint.rds")
+
+hyema_tab_res <- 
+  tibble(
+    test = "Robust HYEMA",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(hyema_overall$Est[1]), 3), 
+      " [", 
+      round(hyema_overall$CIL_bootstrap[1], 3),
+      ", ",
+      round(hyema_overall$CIU_bootstrap[2], 3),
+      "]"
+    ),
+    pval = NA_real_,
+    tau = round(hyema_overall$Est[2], 3),
+    omega = NA_real_,
+    total_SD = hyema_overall$Est[2]
+  )
+
+```
+
+# Puniform*
+
+```{r puniform}
+# Not corrected for clustering as it has showed acceptable performance in
+# dependent effect size data
+puniform_star_res <- 
+  puniform::puni_star(
+    tobs = reint_ma_dat$t_i, 
+    n1i = reint_ma_dat$N_t, 
+    n2i = reint_ma_dat$N_c, 
+    side = "right"
+  )
+
+puniform_tab_res <- 
+  tibble(
+    test = "puniform star",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(puniform_star_res$est), 3), 
+      " [", 
+      round(puniform_star_res$ci.lb, 3),
+      ", ",
+      round(puniform_star_res$ci.ub, 3),
+      "]"
+    ),
+    pval = puniform_star_res$pval.0,
+    tau = round(sqrt(puniform_star_res$tau2), 3),
+    omega = NA_real_,
+    total_SD = tau
+    
+  )
+
+
+
+```
+
+
+# Worst-case meta-analysis
+
+## Reintegration
+```{r}
+
+worst_dat_reint <- 
+  reint_ma_dat |>  
+  mutate(
+    pval = 2 * ( 1 - pnorm( abs(gt_pop) / sqrt(vgt_pop) ) ),
+    affirmativity = if_else(pval < .05 & gt_pop > 0, "affirmative", "nonaffirmative")
+    
+  ) %>% 
+  filter(affirmativity == "nonaffirmative")
+
+```
+
+```{r}
+
+res_PubBias <- 
+  pubbias_svalue(
+  yi = reint_ma_dat$gt_pop,
+  vi = reint_ma_dat$Wgt_pop,
+  cluster = reint_ma_dat$study,
+  q = 0,
+  model_type = "robust",
+  favor_positive = TRUE,
+  return_worst_meta = TRUE
+)
+
+res_PubBias$stats
+
+rho <- 0.8
+
+#wc = worst_case
+V_mat_wc <- 
+  metafor::vcalc(
+    data = worst_dat_reint ,
+    vi = vgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+wc_overall<- 
+  rma.mv(
+    gt_pop,
+    V = V_mat_wc, 
+    random = ~ 1 | study / esid,
+    data = worst_dat_reint,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+wc_overall
+
+wc_tab_res <- 
+  .pubbias_overall_tab(rma_obj = wc_overall, test = "Worst case") |> 
+  mutate(
+    J = n_distinct(worst_dat_reint$study),
+    K = nrow(worst_dat_reint)
+  )
+
+
+# Pregreg
+wc_overall_prereg <- 
+  rma.mv(
+    gt_pop ~ prereg_chr - 1,
+    V = V_mat_wc, 
+    random = ~ 1 | study / esid,
+    data = worst_dat_reint ,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+wc_overall_prereg
+
+wc_prereg <- 
+  rma.mv(
+    gt_pop ~ prereg_chr - 1,
+    V = V_mat_wc, 
+    random = list(~ prereg_chr | study, ~ prereg_chr | esid),
+    struct = c("DIAG", "DIAG"),
+    data = worst_dat_reint,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+wc_prereg
+
+wc_outcome <- 
+  rma.mv(
+    gt_pop ~ outcome_type + prereg_c - 1,
+    V = V_mat_wc, 
+    random = list(~ outcome_type | study, ~ outcome_type | esid),
+    struct = c("DIAG", "DIAG"),
+    data = worst_dat_reint,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+wc_outcome
+
+pubbias_plot <- 
+  PublicationBias::significance_funnel(
+  yi = reint_ma_dat$gt_pop,
+  vi = reint_ma_dat$Wgt_pop,
+  favor_positive = TRUE,
+  alpha_select = 0.05
+)
+
+pubbias_plot
+
+```
+
+
+
+# Regression models
+
+```{r che-iscw}
+
+rho <- 0.8
+
+V_mat <- metafor::vcalc(
+  data = reint_ma_dat,
+  vi = Wgt_pop, 
+  cluster = study,
+  type = outcome_time, 
+  grp1 = trt_name,
+  w1 = N_t, 
+  grp2 = control,
+  w2 = N_c, 
+  rho = rho
+)
+
+W <- solve(V_mat)
+
+# CHE-ISCW
+
+che_iscw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    W = W,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+iscw_tab_res <- .pubbias_overall_tab(rma_obj = che_iscw, test = "CHE-ISCW")
+
+
+che_pet <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    W = W,
+    mods = ~ Wse_pop + prereg_c,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+che_peese <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat,
+    W = W,
+    mods = ~ Wgt_pop + prereg_c,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+pet_peese <- if (che_pet$pval[1] < 0.1 & as.numeric(che_pet$b[1]) > 0) che_peese else che_pet
+
+pet_peese_tab_res <- .pubbias_overall_tab(rma_obj = pet_peese, test = "PET/PEESE")
+
+
+```
+
+# Selection models
+
+```{r, selmodel}
+
+#library(future)
+#
+## Overall reintegration
+#plan(multisession, workers = 4L)
+#
+#mod_3PSM_mod_overall <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_3PSM_mod_overall, "Boostrap results/mod_3PSM_mod_overall.rds")
+
+mod_3PSM_overall <- readRDS("Boostrap results/mod_3PSM_mod_overall.rds")
+mod_3PSM_overall
+
+#selection_plot(mod_3PSM_overall)
+
+plan(multisession, workers = 4L)
+
+#mod_4PSM_mod_overall <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = c(0.025, 0.500),
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_4PSM_mod_overall, "Boostrap results/mod_4PSM_mod_overall.rds")
+
+
+
+mod_4PSM_overall <- readRDS("Boostrap results/mod_4PSM_mod_overall.rds")
+mod_4PSM_overall
+
+#save(
+#  mod_3PSM_overall,
+#  mod_4PSM_overall,
+#  file = "selmodel_res.RData"
+#)
+
+```
+
+
+```{r tab-metaselection}
+
+PSM3_tab_res <- 
+  tibble(
+    test = "Cluster selmodel (3PSM)",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_3PSM_overall$est$Est[1]), 3), 
+      " [", 
+      round(mod_3PSM_overall$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_3PSM_overall$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = NA_real_,
+    tau = sqrt(mod_3PSM_overall$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau
+  )
+
+PSM4_tab_res <- 
+  tibble(
+    test = "Cluster selmodel (4PSM)",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_4PSM_overall$est$Est[1]), 3), 
+      " [", 
+      round(mod_4PSM_overall$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_4PSM_overall$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = NA_real_,
+    tau = sqrt(mod_4PSM_overall$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau
+  )
+
+```
+
+
+
+#Publication and small study bias tests for overall average effects
+::: {.panel-tabset}
+## Reintegration
+```{r pub-bias-tab-overall-eff-reint}
+#| label: tab-pub-bias-tab-overall-eff-reint
+#| fig-cap: "Overall average effect size estimates corrected for publication bias"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+overall_pub_bias_tab <- 
+  list(
+    hyema_tab_res,
+    puniform_tab_res,
+    wc_tab_res,
+    iscw_tab_res,
+    pet_peese_tab_res,
+    PSM3_tab_res,
+    PSM4_tab_res
+  ) |> 
+  list_rbind() |> 
+  mutate(
+    across(pval:total_SD, ~ round(.x, 3))
+  )
+
+gt_tab_overall <- 
+  overall_pub_bias_tab |> 
+  gt() |> 
+  sub_missing(
+    columns = everything(),   
+    missing_text = ""         
+  )
+
+gt_tab_overall
+
+gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
+```
+
+:::
+ 
+# Publication and small study bias tests across types of registration
+::: {.panel-tabset}
+## Reintegration
+```{r pub-bias-tab-prereg-reint}
+#| label: tab-pub-bias-tab-prereg-reint
+#| fig-cap: "Preregistration subgroup estimates corrected for publication bias"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+```
+
+:::
+
+
+# Publication and small study bias tests across types of outcomes
+::: {.panel-tabset}
+## Reintegration
+```{r pub-bias-tab-outcome-reint}
+#| label: tab-pub-bias-tab-outcome-reint
+#| fig-cap: "Outcome subgroup estimates corrected for publication bias"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
 
 
 ```

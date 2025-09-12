@@ -396,3 +396,331 @@ forest_plot_de <-
 
 #reintegration_sce_res |> 
 #  filter(str_detect(Moderator, base::regex(outcome_group[3], ignore_case = TRUE)))
+
+# FINAL VERSIONS OF MODEL FUNCTIONS
+.rma_arg_tbl <- 
+  function(
+    yi, vi, covars, r, model, data, type
+  ){
+    
+    covariates <- if (str_detect(covars, ";")) stringr::str_split_1(covars, pattern = ";") else covars 
+    
+    
+    if (stringr::str_detect(model, "SCE")) {
+      
+      formula <- reformulate(covariates, response = yi, intercept = FALSE)
+      
+      main_pred <- labels(terms(formula))[1]
+      
+      outer_form <- 
+        substitute(
+          ~ moderator | study, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      inner_form <- 
+        substitute(
+          ~ moderator | esid, 
+          list(moderator = as.name(main_pred))
+        ) |> 
+        as.formula()
+      
+      random <-  if (model == "SCEp") list(outer_form, inner_form) else list(outer_form)
+      
+      struct <- rep("DIAG", length(random))
+      
+      res <- 
+        tibble::tibble(
+          formula = list(formula),
+          es = yi, 
+          var = vi,
+          rand = list(random),
+          structure = list(struct),
+          rho = r,
+          data = list(data),
+          model = model,
+          table = type
+        )
+      
+    } else if (model == "CHE") {
+      
+      formula <- reformulate(covariates, response = yi, intercept = TRUE)
+      
+      res <- 
+        tibble::tibble(
+          formula = list(formula),
+          es = yi, 
+          var = vi,
+          rand = list(~ 1 | study / esid),
+          rho = r,
+          data = list(data),
+          model = model,
+          table = type
+        )
+      
+    }
+    
+    return(res)
+    
+  }
+
+
+.Wald_test_cwb_fun <- 
+  function(rma_fun_obj, seq_c, reps, seed_num){
+    
+    # Thanks to Rasmus Klokker for providing this solution
+    #rma_fun_obj$call$yi <- as(rma_fun_obj$call$yi, Class = "call") 
+    #rma_fun_obj$call$data <- as(rma_fun_obj$call$data, Class = "call") 
+    
+    V_mat <- rma_fun_obj$V
+    assign("V_mat", V_mat, envir = .GlobalEnv)
+    
+    reint_ma_dat <- rma_fun_obj$data
+    assign("reint_ma_dat", reint_ma_dat, envir = .GlobalEnv)
+    
+    auxiliary_dist <- c("Rademacher", "Mammen", "Webb six", "uniform", "standard normal")
+    cwb_res <- list()
+    i <- 1L
+    
+    while (!inherits(cwb_res, "Wald_test_wildmeta") & i <= length(auxiliary_dist)) {
+      cwb_res <- try( 
+        wildmeta::Wald_test_cwb(
+          full_model = rma_fun_obj,
+          constraints = wildmeta::constrain_equal(seq_c),
+          R = reps,
+          auxiliary_dist = auxiliary_dist[i],
+          # "we see it as reasonable to use CWB without adjustment because it" 
+          # "is conceptually and algorithmically simpler than CWB Adjusted." Joshi et al. 2022, p. 474
+          adjust = "CR0",
+          seed = seed_num,
+          future_args = list(future.stdout = FALSE, future.conditions = character(0L))
+        )
+      )
+      
+      i <- i + 1L
+      
+    }
+    
+    if (inherits(cwb_res, 'try-error')) {
+      
+      cwb_res <- 
+        data.frame(
+          Test = "Non-converged", 
+          Adjustment = as.character(attr(cwb_res, "condition")), 
+          CR_type = NA_character_, 
+          Statistic = NA_character_,
+          R = NA_real_,
+          p_val = NA_real_
+        )
+      
+    }
+    
+    rm(V_mat, envir = .GlobalEnv)
+    #rm(reint_ma_dat, envir = .GlobalEnv)
+    
+    return(cwb_res)
+    
+  }
+
+#plan(multisession)
+#.Wald_test_cwb_fun(
+#  rma_fun_obj = x_test[[1]],
+#  seq_con = 1:2
+#)
+#plan(sequential)
+
+################################################################################
+## Making SCE RVE function
+################################################################################
+.PESCE_RVE <- 
+  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE, CWB = FALSE){
+    
+    if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
+    
+    data$vi <- data[[var]]
+    data_name <- attr(data, "data_name")
+    
+    #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+    #  data = reint_ma_dat,
+    #  vi = vgt_pop, 
+    #  cluster = study,
+    #  type = outcome_time, 
+    #  grp1 = trt_name,
+    #  w1 = N_t, 
+    #  grp2 = control,
+    #  w2 = N_c, 
+    #  rho = rho
+    
+    # Variance-Covariance Matrix
+    V_mat <- 
+      metafor::vcalc(
+        data = data,
+        vi = vi, 
+        cluster = study,
+        type = outcome_time,
+        grp1 = trt_name,
+        w1 = N_t,
+        grp2 = control,
+        w2 = N_c, 
+        rho = rho
+      )
+    
+    # Strategy for overcoming non-convergence 
+    optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+    raw_res <- "Non-converged"
+    i <- 1L
+    
+    # Fitting the main model
+    while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+      
+      raw_res <- tryCatch(
+        suppressWarnings(
+          metafor::rma.mv(
+            formula,
+            V = V_mat,
+            random = rand, 
+            struct = structure,
+            data = data,
+            sparse = TRUE,
+            control = list(optimizer=optimizers[i])
+          )
+        ),
+        error = function(e) "Non-converged"
+      )
+      i <- i + 1L
+      
+    }
+    
+    struct_lang <- if(model == "SCEp") str2lang('c("DIAG", "DIAG")') else str2lang('"DIAG"')
+    random_lang <- paste0("list(", paste0(rand, collapse = ", "), ")") |> str2lang()
+    
+    raw_res$call <- 
+      rlang::call2(
+        "rma.mv", 
+        yi = formula, 
+        V = as.name("V_mat"), 
+        data = as.name(data_name), 
+        random = random_lang, 
+        struct = struct_lang, 
+        sparse = TRUE,
+        .ns = "metafor"
+      )
+    
+    raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
+    
+    # Returning main rma.mv object which can later be used with wald_test_cwb()
+    if (return_rma_obj) return(raw_res)
+    
+    # Getting robust results
+    robu_res <- raw_res |> metafor::robust(cluster = study, clubSandwich = TRUE)
+    
+    # Making character variable with all covariates 
+    all_covariates <- all.vars(delete.response(terms(formula)))
+    
+    # Model control info
+    if (length(all_covariates) > 1) {
+      
+      controlled <- "Yes"
+      control_vars <- paste0(all_covariates[-1], collapse = ";")
+      
+    } else {
+      
+      controlled <- "No"
+      control_vars <- "None"
+      
+    }
+    
+    # Getting name of main predictor variables
+    mod_string <- all_covariates[1]
+    # Getting name of each category of the main predictor variables
+    moderators <- robu_res$g.levels.f[[1]]
+    
+    # Wald test comparison sequence
+    seq_con <- 1:length(moderators)
+    
+    if(CWB){
+      
+      wald_cwb_res <-
+        .Wald_test_cwb_fun(
+          rma_fun_obj = raw_res,
+          seq_c = seq_con,
+          reps = R,
+          seed_num = seed
+        )
+      
+      wald_pval <- wald_cwb_res$p_val
+      last_val_string <- NA_character_
+      
+      #res <- wald_cwb_res
+      
+      wald_type <- "Wald test (CWB)"
+      
+    } else {
+      
+      wald_htz_res <- 
+        clubSandwich::Wald_test(
+          raw_res,
+          constraints = clubSandwich::constrain_equal(c(seq_con)),
+          vcov = "CR2"
+        )
+      
+      # Obtaning HTZ wald test p values
+      wald_pval <- wald_htz_res$p_val 
+      
+      last_val_string <- paste0(
+        "F(", round(wald_htz_res$df_num, 2), ", ", 
+        round(wald_htz_res$df_denom, 2), ") = ", 
+        round(wald_htz_res$Fstat, 2)
+      )
+      
+      wald_type <- "Wald test (HTZ)"
+      
+    }
+    
+    
+    # Readable moderator name removing _ and making upper-case letter for first word
+    mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
+    mod_string_table <- sub("^(\\w)(\\w*)", "\\U\\1\\L\\2", mod_string_table, perl = TRUE)
+    
+    # Moderator effects and CIs
+    mod_effects <- round(as.numeric(robu_res$b[1:length(moderators)]), 2)
+    mod_cil <- round(robu_res$ci.lb[1:length(moderators)], 2)
+    mod_ciu <- round(robu_res$ci.ub[1:length(moderators)], 2)
+    
+    # Results in ready to publish format
+    res <- 
+      tibble(
+        Characteric = mod_string,
+        Moderator = c(mod_string_table, moderators, wald_type),
+        studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
+        effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
+        avg_effect_ci = 
+          c(
+            NA_character_, 
+            paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
+            last_val_string
+          ),
+        pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 3),
+        df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
+        SD_total = round(c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_), 2),
+        rho = rho,
+        wald_compared = c(rep(NA_real_, length(moderators) + 1), paste(seq_con, collapse = ",")),
+        controls = controlled,
+        control_vars = control_vars,
+        optimizer = raw_res$control$optimizer,
+        avg_effect = round(c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_), 2),
+        LL = round(c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_), 2),
+        UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),
+        tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),
+        omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),
+        t_val = c(NA_real_, robu_res$zval[1:length(moderators)], NA_real_),
+        table = table,
+        effect_size = es
+      )
+    
+    res
+    
+  }
+
+

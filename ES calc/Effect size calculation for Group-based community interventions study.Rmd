@@ -11942,9 +11942,9 @@ group_based_dat <-
 #D <- group_based_dat |> 
 #  select(Author, vary_id, varifier)
 
-#write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
-#saveRDS(group_based_dat, file = "Group-based interventions data.RDS")
-#save(group_based_dat, file = "Group-based interventions data.RData")
+write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
+saveRDS(group_based_dat, file = "Group-based interventions data.RDS")
+save(group_based_dat, file = "Group-based interventions data.RData")
 ```
 
 ## **Using extant data to estimate population standard deviations**

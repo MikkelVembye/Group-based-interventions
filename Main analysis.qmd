@@ -101,7 +101,7 @@ reint_ma_dat <-
     outcome, outcome_time, N_t, N_c, trt_name, trt_id, control, ctr_id,
     
     # Miscellaneous 
-    vary_id, varifier, time
+    vary_id, varifier, time, rob_tool
     
   ) |> 
   mutate(
@@ -190,7 +190,7 @@ reint_ma_dat <-
 
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 
-#saveRDS(reint_ma_dat, "reint_ma_dat.rds")
+saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 ```
 

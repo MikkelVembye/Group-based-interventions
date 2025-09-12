@@ -15,16 +15,13 @@ library(janitor)   # for tidying variable names
 library(boot)      # for bootstrapping
 library(tictoc) 
 
-# Loading in helper function used to calculate effect size and conduct the analysis
-source_path <- if (isTRUE(getOption('knitr.in.progress'))) "Helpers.R" else "ES calc/Helpers.R"
-source_path2 <- if (isTRUE(getOption('knitr.in.progress'))) "pub-bias-test-helpers.R" else "ES calc/pub-bias-test-helpers.R"
 
-source(source_path)
-source(source_path2)
+source("Helpers.R")
+
 
 # Data
 reint_ma_dat <- readRDS("reint_ma_dat.rds") 
-mental_health_dat <- readRDS("mental_health_dat.rds") 
+#mental_health_dat <- readRDS("mental_health_dat.rds") 
 
 ## Select relevant variables
 
@@ -167,23 +164,39 @@ egg_notprereg_res <-
 egg_res_subgrouped <- bind_rows(egg_prereg_res, egg_notprereg_res)
 egg_res_subgrouped
 
-# SCEp+ 
-subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
+
+# PESCE+ model
+
+prereg_arg <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "prereg_chr",
+    model = "SCEp",
+    r = 0.8, 
+    data = reint_ma_dat,
+    type = "categorical"
+  ); prereg_arg
+
+# PESCEp+ 
+subgroup_means <- pmap(.l = prereg_arg, .f = .PESCE_RVE) |> list_rbind()
+
+#subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
 
 subgroup_dat <- 
-  reintergation_dat |> 
+  reint_ma_dat |> 
   summarise(
-    gt = mean(gt),
-    Wse = mean(Wse),
-    analysis_plan = analysis_plan[1],
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
     .by = prereg_chr
   ) |> 
-  bind_cols(subgroup_means[2:3,], egg_res_subgrouped) |> 
+  bind_cols(subgroup_means[c(3,2), c(2, 14:18)], egg_res_subgrouped) |> 
   mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
 
 
 
-y_lim_exp1 <- max(reintergation_dat$Wse) + 0.02 
+y_lim_exp1 <- max(reint_ma_dat$Wse_pop) + 0.02 
 
 funnel_exp1 <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
@@ -205,7 +218,7 @@ breaks_y <- seq(-3, 3, 0.5)
 
 
 es_level_fp <- 
-  reintergation_dat |> 
+  reint_ma_dat |> 
   mutate(
     level = "Effect size level",
     report_bias = case_when(
@@ -226,7 +239,7 @@ es_level_fp <-
   geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse, gt, color = report_bias), alpha = 1, size = 1.5) +
+  geom_point(aes(Wse_pop, gt_pop, color = report_bias), alpha = 1, size = 1.5) +
   coord_flip() +
   facet_grid(level~prereg_chr) +
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
@@ -235,7 +248,7 @@ es_level_fp <-
     values = c("Low" = "green3", "Moderate" = "yellow", "Serious" = "red")
   ) + 
   theme_bw() + 
-  labs(x = "Standard error (modified)", 
+  labs(x = "Modified standard error", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(
@@ -247,16 +260,16 @@ es_level_fp <-
 
 # Make aggregate plot
 
-reintergation_dat_agg <- 
-  reintergation_dat |> 
-  escalc(measure = "SMD", yi = gt, vi = Wgt, data = _) |> 
+reint_dat_agg <- 
+  reint_ma_dat |> 
+  escalc(measure = "SMD", yi = gt_pop, vi = Wgt_pop, data = _) |> 
   aggregate.escalc(cluster = study, rho = 0.8) |> 
   mutate(
-    Wse = sqrt(vi)
+    Wse_pop = sqrt(vi)
   )
 
 prereg_dat_agg <-  
-  reintergation_dat_agg |> 
+  reint_dat_agg |> 
   as_tibble() |> 
   dplyr::filter(conventional == 0)
 
@@ -272,7 +285,7 @@ egg_prereg_agg_res <-
   )
 
 notprereg_dat_agg <-  
-  reintergation_dat_agg |> 
+  reint_dat_agg |> 
   as_tibble() |> 
   dplyr::filter(conventional == 1)
 
@@ -291,7 +304,7 @@ egg_res_agg_subgrouped <- bind_rows(egg_notprereg_agg_res, egg_prereg_agg_res)
 egg_res_agg_subgrouped
 
 means_agg <- 
-  rma(yi, vi, mods = ~ -1 +prereg_chr, data = reintergation_dat_agg) |> 
+  rma(yi, vi, mods = ~ prereg_chr - 1, data = reint_dat_agg) |> 
   robust(cluster = study, clubSandwich = TRUE)
 
 subgroup_means_agg <- 
@@ -303,11 +316,11 @@ subgroup_means_agg <-
   )
 
 subgroup_dat_agg <- 
-  reintergation_dat_agg |> 
+  reint_dat_agg |> 
   summarise(
-    gt = mean(gt),
-    Wse = mean(Wse),
-    analysis_plan = analysis_plan[1],
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
     .by = prereg_chr
   ) |> 
   arrange(prereg_chr) |> 
@@ -328,7 +341,7 @@ subgroup_dat_agg <-
 
 
 
-y_lim_exp2 <- max(reintergation_dat_agg$Wse) + 0.02 
+y_lim_exp2 <- max(reint_dat_agg$Wse_pop) + 0.02 
 y_lim_exp2  
 
 funnel_exp2 <-  tribble(
@@ -340,7 +353,7 @@ funnel_exp2 <-  tribble(
 ) 
 
 study_level_fp <- 
-  reintergation_dat_agg |> 
+  reint_dat_agg |> 
   mutate(level = "Study level") |> 
   ggplot() + 
   geom_polygon(data = funnel_exp2, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
@@ -350,7 +363,7 @@ study_level_fp <-
   geom_hline(data = subgroup_dat_agg, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat_agg, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat_agg, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse, gt), alpha = 1, size = 1.5) +
+  geom_point(aes(Wse_pop, gt_pop), alpha = 1, size = 1.5) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
   facet_grid(level~prereg_chr) +
@@ -375,23 +388,34 @@ grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
 
 
 prereg_dat_cano <-  
-  reintergation_dat |> 
+  reint_ma_dat |> 
   filter(conventional == 0) |>
   mutate(
     cano_vindel = if_else(str_detect(study, "Cano"), 1, 0),
     cano_vindel = factor(cano_vindel)
   )
 
-V_mat_prereg_cano <- metafor::vcalc(vi = Wgt, cluster = study, obs = esid, data = prereg_dat_cano, rho = 0.8)
+V_mat_prereg_cano <- 
+  metafor::vcalc(
+    data = prereg_dat_cano,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 W_prereg_cano <- solve(V_mat_prereg_cano)
 
 egg_prereg_cano <-
   rma.mv(
-    yi = gt,
+    yi = gt_pop,
     V = V_mat_prereg_cano,
     W = W_prereg_cano,
-    mods = ~ Wse + cano_vindel,
+    mods = ~ Wse_pop + cano_vindel,
     random = ~ 1 | study / esid,
     data = prereg_dat_cano,
     sparse = TRUE
@@ -405,22 +429,21 @@ egg_prereg_res_cano <-
     egg_slope = as.numeric(egg_prereg_cano$b[2])
   )
 
-subgroup_means <- .SCEp(mod = prereg_chr, data = reintergation_dat)
 
 subgroup_dat_cano <- 
   prereg_dat_cano |> 
   summarise(
-    gt = mean(gt),
-    Wse = mean(Wse),
-    analysis_plan = analysis_plan[1],
+    gt_pop = mean(gt_pop),
+    Wse = mean(Wse_pop),
+    outcome_type = outcome_type[1],
     .by = prereg_chr
   ) |> 
-  bind_cols(subgroup_means[3,], egg_prereg_res_cano) |> 
+  bind_cols(subgroup_means[3, c(2, 14:18)], egg_prereg_res_cano) |> 
   mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975)) 
 
 
 
-y_lim_exp_cano <- max(prereg_dat_cano$Wse) + 0.02 
+y_lim_exp_cano <- max(prereg_dat_cano$Wse_pop) + 0.02 
 y_lim_exp_cano  
 
 funnel_exp_cano <-  tribble(
@@ -453,14 +476,14 @@ cano_fp <-
   geom_hline(data = subgroup_dat_cano, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat_cano, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat_cano, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse, gt, col = cano_vindel, alpha = alpha_val), size = 1.5) +
+  geom_point(aes(Wse_pop, gt_pop, col = cano_vindel, alpha = alpha_val), size = 1.5) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
   facet_grid(~prereg_chr) +
   scale_x_reverse(limits = c(y_lim_exp_cano, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
   theme_bw() + 
-  labs(x = "Standard error (modified)", 
+  labs(x = "Modified standard error", 
        y = "Standardized mean difference (Hedges' g)", 
        color = "", shape = "") +
   theme(

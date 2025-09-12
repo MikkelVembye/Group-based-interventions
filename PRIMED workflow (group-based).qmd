@@ -335,6 +335,8 @@ gb_dat <-
     analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
    
     conventional = if_else(protocol != "Yes", 1, 0),
+    # Smith et al. 2021 drew on a retropective protocol
+    conventional = if_else(study == "Smith et al. 2021", 1, conventional),
     prereg_chr = if_else(conventional == 0, "Preregistered", "Not preregistered"),
    
    # For publication/selection/small study bias testing
@@ -412,7 +414,6 @@ gb_dat <-
 ```
 
 ```{r time-variable-vcalc}
-#| eval: false
 
 time_vcalc <- c(
   # Acarturk

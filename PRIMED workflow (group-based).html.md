@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-08"
+date: "2025-09-11"
 format:
   html: 
     keep-md: true
@@ -353,6 +353,8 @@ gb_dat <-
     analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
    
     conventional = if_else(protocol != "Yes", 1, 0),
+    # Smith et al. 2021 drew on a retropective protocol
+    conventional = if_else(study == "Smith et al. 2021", 1, conventional),
     prereg_chr = if_else(conventional == 0, "Preregistered", "Not preregistered"),
    
    # For publication/selection/small study bias testing
@@ -3213,7 +3215,7 @@ reint_overview |>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
    <td style="text-align:right;"> 0.026 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
   </tr>
   <tr>
@@ -5089,7 +5091,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
    <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
@@ -5102,7 +5104,7 @@ mental_overview_dat |>
    <td style="text-align:right;"> 0.089 </td>
    <td style="text-align:right;"> 0.298 </td>
    <td style="text-align:right;"> 0.000 </td>
-   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> Some concerns </td>
   </tr>
   <tr>
@@ -7780,7 +7782,7 @@ kable(
    <td style="text-align:right;"> 4.5 </td>
    <td style="text-align:right;"> 40 </td>
    <td style="text-align:right;"> 5527 </td>
-   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:right;"> 23 </td>
   </tr>
 </tbody>
 </table>
@@ -7954,7 +7956,7 @@ kable(
    <td style="text-align:right;"> 3 </td>
    <td style="text-align:right;"> 28 </td>
    <td style="text-align:right;"> 5390 </td>
-   <td style="text-align:right;"> 23 </td>
+   <td style="text-align:right;"> 22 </td>
   </tr>
 </tbody>
 </table>
@@ -8102,7 +8104,7 @@ kable(
    <td style="text-align:right;"> 2 </td>
    <td style="text-align:right;"> 18 </td>
    <td style="text-align:right;"> 4663 </td>
-   <td style="text-align:right;"> 21 </td>
+   <td style="text-align:right;"> 20 </td>
   </tr>
 </tbody>
 </table>
@@ -11149,13 +11151,13 @@ prereg_subgroup_dat_cross |>
 <tbody>
   <tr>
    <td style="text-align:left;font-weight: bold;"> Not preregistered </td>
-   <td style="text-align:left;"> 22 (61) </td>
+   <td style="text-align:left;"> 23 (62) </td>
    <td style="text-align:left;"> - </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> Preregistered </td>
    <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 23 (141) </td>
+   <td style="text-align:left;"> 22 (140) </td>
   </tr>
 </tbody>
 <tfoot><tr><td style="padding: 0; " colspan="100%">
@@ -11215,13 +11217,13 @@ prereg_subgroup_dat_cross_mental |>
 <tbody>
   <tr>
    <td style="text-align:left;font-weight: bold;"> Not preregistered </td>
-   <td style="text-align:left;"> 20 (57) </td>
+   <td style="text-align:left;"> 21 (59) </td>
    <td style="text-align:left;"> - </td>
   </tr>
   <tr>
    <td style="text-align:left;font-weight: bold;"> Preregistered </td>
    <td style="text-align:left;"> - </td>
-   <td style="text-align:left;"> 21 (84) </td>
+   <td style="text-align:left;"> 20 (82) </td>
   </tr>
 </tbody>
 <tfoot><tr><td style="padding: 0; " colspan="100%">
@@ -16450,8 +16452,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
    <td style="text-align:left;"> <span style="     ">0.02</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
    <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
@@ -16482,8 +16484,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
    <td style="text-align:left;"> <span style="     ">0.19</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
@@ -16514,8 +16516,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
    <td style="text-align:left;"> <span style="     ">0.01</span> </td>
@@ -16546,8 +16548,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
    <td style="text-align:left;"> <span style="     ">0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
    <td style="text-align:left;"> <span style="     ">0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">0.33</span> </td>
    <td style="text-align:left;"> <span style="     ">0.17</span> </td>
@@ -16642,8 +16644,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.09</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">0.17</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
@@ -16674,8 +16676,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
    <td style="text-align:left;"> <span style="     ">0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">0.06</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">0.32</span> </td>
@@ -16706,8 +16708,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">0.01</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
    <td style="text-align:left;"> <span style="     ">0.15</span> </td>
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
@@ -16738,8 +16740,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">0.07</span> </td>
@@ -16770,8 +16772,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
    <td style="text-align:left;"> <span style="     ">0.26</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.32</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">0.16</span> </td>
@@ -16802,8 +16804,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.2</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">0.32</span> </td>
    <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
@@ -16834,8 +16836,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.33</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.67</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.44</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">0.15</span> </td>
@@ -16866,8 +16868,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">0.33</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.67</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
@@ -16898,8 +16900,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
    <td style="text-align:left;"> <span style="     ">0.31</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
@@ -16930,8 +16932,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.25</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.41</span> </td>
    <td style="text-align:left;"> <span style="     ">0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
    <td style="text-align:left;"> <span style="     ">0.03</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
@@ -16962,8 +16964,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">0.2</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.11</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.55</span> </td>
    <td style="text-align:left;"> <span style="     ">0</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
@@ -17026,8 +17028,8 @@ kbl(
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.66</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
    <td style="text-align:left;"> <span style="     ">0.02</span> </td>
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">0.3</span> </td>
@@ -17058,8 +17060,8 @@ kbl(
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.66</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.54</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
@@ -17090,8 +17092,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-0.54</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">0.07</span> </td>
@@ -17101,67 +17103,67 @@ kbl(
   </tr>
   <tr>
    <td style="text-align:left;"> prereg </td>
-   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
    <td style="text-align:left;"> <span style="     ">0.12</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.44</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.48</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
   </tr>
   <tr>
    <td style="text-align:left;"> conventional </td>
-   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.02</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.31</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.03</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.12</span> </td>
    <td style="text-align:left;"> <span style="     ">0.12</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.17</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.13</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.45</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.14</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.16</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.06</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.44</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.44</span> </td>
    <td style="text-align:left;"> <span style="     ">0.08</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.48</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.19</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.28</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.17</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.07</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.49</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">-1</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
   </tr>
   <tr>
    <td style="text-align:left;"> age </td>
@@ -17186,8 +17188,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.02</span> </td>
    <td style="text-align:left;"> <span style="     ">0.13</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.19</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.29</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.29</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.2</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.2</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
    <td style="text-align:left;"> <span style="     ">0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
@@ -17218,8 +17220,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.21</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.22</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.22</span> </td>
    <td style="text-align:left;"> <span style="     ">0.05</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
@@ -17250,8 +17252,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.3</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.31</span> </td>
    <td style="text-align:left;"> <span style="     ">0.07</span> </td>
-   <td style="text-align:left;"> <span style="     ">0</span> </td>
-   <td style="text-align:left;"> <span style="     ">0</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.01</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.01</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.21</span> </td>
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">1</span> </td>
@@ -17282,8 +17284,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
    <td style="text-align:left;"> <span style="     ">0.16</span> </td>
    <td style="text-align:left;"> <span style="     ">0.07</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.27</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.27</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.26</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.26</span> </td>
    <td style="text-align:left;"> <span style="     ">0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">0</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
@@ -17314,8 +17316,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">0.19</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.05</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.08</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.08</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.1</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.09</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.14</span> </td>
    <td style="text-align:left;"> <span style="     ">0.18</span> </td>
@@ -17346,8 +17348,8 @@ kbl(
    <td style="text-align:left;"> <span style="     ">-0.02</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.15</span> </td>
    <td style="text-align:left;"> <span style="     ">0.22</span> </td>
-   <td style="text-align:left;"> <span style="     ">-0.25</span> </td>
-   <td style="text-align:left;"> <span style="     ">0.25</span> </td>
+   <td style="text-align:left;"> <span style="     ">-0.24</span> </td>
+   <td style="text-align:left;"> <span style="     ">0.24</span> </td>
    <td style="text-align:left;"> <span style="     ">-0.1</span> </td>
    <td style="text-align:left;"> <span style="     ">0</span> </td>
    <td style="text-align:left;"> <span style=" font-weight: bold;    ">0.72</span> </td>
@@ -18026,7 +18028,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-08
+ date     2025-09-11
  pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 

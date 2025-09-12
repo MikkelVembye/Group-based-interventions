@@ -166,7 +166,18 @@ ci_tau$percent[4:5]
 
 #-------------------------------------------------------------------------------
 # Make it work on the reintegration data
-reint_dat <- readRDS(file = "reintergation_dat.rds")
+reint_dat <- readRDS(file = "reint_ma_dat.rds")
+
+hybrid_reint <- 
+  hybrid(
+    yi = reint_dat$gt_pop, 
+    vi = reint_dat$Wgt_pop, 
+    conventional = reint_dat$conventional, 
+    side = "right",
+    control = list(optimizer = "Nelder-Mead")
+  )
+
+c(beta = hybrid_reint$est, tau = sqrt(hybrid_reint$tau2))
 
 fit_hybrid_model2 <- 
   function(
@@ -212,11 +223,11 @@ fit_hybrid_model2 <-
     
     
     # fit selection model, return vector
-    run_hybrid_model(g = boot_dat$gt, vg = boot_dat$Wgt, boot_dat$conventional)
+    run_hybrid_model(g = boot_dat$gt_pop, vg = boot_dat$Wgt_pop, boot_dat$conventional)
     
 }
 
-reint_dat_nested <- nest_by(reint_dat, author_year, .key = "data")
+reint_dat_nested <- nest_by(reint_dat, study, .key = "data")
 #red_romance_femalep_nested |> glimpse()
 
 fit_hybrid_model2(reint_dat_nested)
@@ -229,7 +240,7 @@ ncpus <- parallel::detectCores() - 1
 tic()
 
 # Make work in parallell
-boots <- boot(
+boots_overall <- boot(
   data = reint_dat_nested,    # nested dataset
   statistic = fit_hybrid_model2,         # function for fitting selection model
   R = 99,                             # number of bootstraps
@@ -238,28 +249,34 @@ boots <- boot(
 
 time_seq <- toc()
 
-est <- boots$t0
+est <- boots_overall$t0
 
-boot_SE <- apply(boots$t, 2, sd, na.rm = TRUE)  
+boot_SE <- apply(boots_overall$t, 2, sd, na.rm = TRUE)  
+boot_pval_overall <- sum(abs(boots_overall$t[,1]-1) > abs(boots_overall$t0[1]-1))/(1+boots_overall$R)
 
-model_SE <- with(hybrid_red, c(se[1], se[2] / (2 * sqrt(tau2))))
+model_SE <- with(hybrid_reint, c(se[1], se[2] / (2 * sqrt(tau2))))
 
-res <- tibble(
-  Parameter = names(est),
-  Est = est,
-  `SE(bootstrap)` = boot_SE,
-  `SE(model)` = model_SE,
-  `SE(bootstrap) / SE(model)` = boot_SE / model_SE
-)
-
-res
-
-# Est
-ci_est <- boot.ci(boots, type = "perc", index = 1) # For overall average ES
+ci_est <- boot.ci(boots_overall, type = "perc", index = 1) # For overall average ES
 ci_est$percent[4:5] 
 # Tau
-ci_tau <- boot.ci(boots, type = "perc", index = 2) # For heterogeneity
+ci_tau <- boot.ci(boots_overall, type = "perc", index = 2) # For heterogeneity
 ci_tau$percent[4:5]
+
+
+hyema_overall <- tibble(
+  Parameter = names(est),
+  Est = est,
+  SE_bootstrap = boot_SE,
+  CIL_bootstrap = c(ci_est$percent[4], ci_tau$percent[4]),
+  CIU_bootstrap = c(ci_est$percent[5], ci_tau$percent[5]),
+  p_val_bootstrap = boot_pval_overall,
+  SE_model = model_SE,
+  SE_bootstrap_vs_SE_model = boot_SE / model_SE
+  
+)
+
+hyema_overall
+
 
 
 # Make work with moderator
@@ -366,7 +383,17 @@ fit_hybrid_reintegration <-
       
       #Naive-F
       F_naive <- Q/q
-      c(F_val = F_naive, Alchohol = beta_hat[1], Hope = beta_hat[2], Social = beta_hat[3], Wellbeing = beta_hat[4])
+      c(
+        F_val = F_naive, 
+        Alchohol = beta_hat[1], 
+        Hope = beta_hat[2], 
+        Lone = beta_hat[3],
+        Selfest = beta_hat[4],
+        Social = beta_hat[5], 
+        Wellbeing = beta_hat[6],
+        Other = beta_hat[7]
+      )
+      
       #c(betaone = mod$est[1], betatwo = mod$est[2], tau = sqrt(mod$tau2))
       
     }
@@ -376,15 +403,15 @@ fit_hybrid_reintegration <-
     
     # fit selection model, return vector
     run_hybrid_model(
-      g = boot_dat$gt, 
+      g = boot_dat$gt_pop, 
       vg = boot_dat$Wgt, 
       conventional =  boot_dat$conventional,
-      moderator = boot_dat$analysis_plan
+      moderator = boot_dat$outcome_type
       )
     
 }
 
-reint_dat_nested <- nest_by(reint_dat, author_year, .key = "data")
+reint_dat_nested <- nest_by(reint_dat, study, .key = "data")
 #red_romance_femalep_nested |> glimpse()
 
 fit_hybrid_reintegration(reint_dat_nested)
@@ -399,7 +426,7 @@ tic()
 R <- 12
 
 # Make work in parallell
-boots <- boot(
+boots_outcome <- boot(
   data = reint_dat_nested,               # nested dataset
   statistic = fit_hybrid_reintegration,  # function for fitting selection model
   R = R,                                # number of bootstraps
@@ -408,12 +435,19 @@ boots <- boot(
 
 time_seq <- toc()
 
-F_boot_pval <- (1/R)*sum(boots$t[,1] > boots$t0[1])
-F_boot_pval
+F_boot_pval_outcome <- (1/R)*sum(boots_outcome$t[,1] > boots_outcome$t0[1])
+F_boot_pval_outcome
 
-est <- boots$t0
+est_outcome <- boots_outcome$t0
 
-boot_SE <- apply(boots$t[,2:5], 2, sd, na.rm = TRUE)  
+boot_SE_outcome <- apply(boots_outcome$t[,2:8], 2, sd, na.rm = TRUE)  
+
+boot_pval_outcome <- 
+  map(
+    2:8, ~ {
+    sum(abs(boots_outcome$t[,.x]-1) > abs(boots_outcome$t0[.x]-1))/(1+boots_outcome$R)  
+  }) |> 
+  list_c()
 
 #
 #model_SE <- with(hybrid_red, c(se[1], se[2] / (2 * sqrt(tau2))))
@@ -429,13 +463,13 @@ boot_SE <- apply(boots$t[,2:5], 2, sd, na.rm = TRUE)
 #res
 
 # Est
-cis_l <- map(2:5, ~ {
-  obj <- boot.ci(boots, type = "perc", index = .x) |> suppressWarnings()
+cis_l_outcome <- map(2:8, ~ {
+  obj <- boot.ci(boots_outcome, type = "perc", index = .x) |> suppressWarnings()
   obj$percent[4]
 }) |> list_c()
 
-cis_u <- map(2:5, ~ {
-  obj <- boot.ci(boots, type = "perc", index = .x) |> suppressWarnings()
+cis_u_outcome <- map(2:8, ~ {
+  obj <- boot.ci(boots_outcome, type = "perc", index = .x) |> suppressWarnings()
   obj$percent[5]
 }) |> list_c()
 
@@ -451,16 +485,19 @@ cis_u <- map(2:5, ~ {
 #ci_well <- boot.ci(boots, type = "perc", index = 5) 
 #ci_well$percent[4:5]
 
-res <- tibble(
-  Parameter = names(est[2:5]),
-  Est = est[2:5],
-  `SE(bootstrap)` = boot_SE,
-  `CIL(bootstrap)` = cis_l,
-  `CIU(bootstrap)` = cis_u
+hyema_overcome <- tibble(
+  Parameter = names(est_outcome[2:8]),
+  Est = est_outcome[2:8],
+  SE_bootstrap = boot_SE_outcome,
+  CIL_bootstrap = cis_l_outcome,
+  CIU_bootstrap = cis_u_outcome, 
+  p_val_bootstrap = boot_pval_outcome,
+  R = R
 )
-res
 
-F_boot_pval
+hyema_overcome
+
+F_boot_pval_outcome
 
 
 
