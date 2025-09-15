@@ -11,7 +11,7 @@ library(tictoc)
 
 #-------------------------------------------------------------------------------
 # Make it work on the reintegration data
-reint_dat <- readRDS(file = "GitHub repos/Group-based-interventions/reint_ma_dat.rds")
+reint_dat <- readRDS("reint_ma_dat.rds")
 
 hybrid_reint <- 
   hybrid(
@@ -238,20 +238,21 @@ fit_hybrid_reintegration <-
         Selfest = beta_hat[4],
         Social = beta_hat[5], 
         Wellbeing = beta_hat[6],
-        Other = beta_hat[7]
+        Other = beta_hat[7],
+        tau = sqrt(mod$tau2)
       )
       
       #c(betaone = mod$est[1], betatwo = mod$est[2], tau = sqrt(mod$tau2))
       
     }
     
-    run_hybrid_model <- purrr::possibly(run_hybrid_model, otherwise = rep(NA_real_, 8))
+    run_hybrid_model <- purrr::possibly(run_hybrid_model, otherwise = rep(NA_real_, 9))
     
     
     # fit selection model, return vector
     run_hybrid_model(
       g = boot_dat$gt_pop, 
-      vg = boot_dat$Wgt, 
+      vg = boot_dat$Wgt_pop, 
       conventional =  boot_dat$conventional,
       moderator = boot_dat$outcome_type
       )
@@ -283,9 +284,10 @@ boots_outcome <-
     ncpus = ncpus
   )
 
+
 time_seq <- toc()
 
-F_boot_pval_outcome <- (1/R)*sum(boots_outcome$t[,1] > boots_outcome$t0[1])
+F_boot_pval_outcome <- (1/R)*sum(boots_outcome$t[,1] > boots_outcome$t0[1], na.rm = TRUE)
 F_boot_pval_outcome
 
 est_outcome <- boots_outcome$t0
@@ -295,7 +297,7 @@ boot_SE_outcome <- apply(boots_outcome$t[,2:8], 2, sd, na.rm = TRUE)
 boot_pval_outcome <- 
   map(
     2:8, ~ {
-    sum(abs(boots_outcome$t[,.x]-1) > abs(boots_outcome$t0[.x]-1))/(1+boots_outcome$R)  
+    sum(abs(boots_outcome$t[,.x]-1) > abs(boots_outcome$t0[.x]-1), na.rm = TRUE)/(1+boots_outcome$R)  
   }) |> 
   list_c()
 
@@ -350,7 +352,7 @@ hyema_overcome
 F_boot_pval_outcome
 
 saveRDS(boots_outcome, file = "GitHub repos/Group-based-interventions/Boostrap results/boots_outcome_reint.rds")
-saveRDS(hyema_overcome, file = "GitHub repos/Group-based-interventions/Boostrap results/boots_outcome_reint.rds")
-saveRDS(F_boot_pval_outcome, "GitHub repos/Group-based-interventions/Boostrap results/boots_outcome_reint.rds")
+saveRDS(hyema_overcome, file = "GitHub repos/Group-based-interventions/Boostrap results/hyema_overcome.rds")
+saveRDS(F_boot_pval_outcome, "GitHub repos/Group-based-interventions/Boostrap results/F_boot_pval_outcome.rds")
 
 

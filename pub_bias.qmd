@@ -42,6 +42,7 @@ library(metaselection)
 library(DT)
 library(kableExtra)
 library(ggh4x)
+library(future)
 
 library(puniform)
 library(PublicationBias)
@@ -181,7 +182,7 @@ sub_res
 rho <- 0.8
 
 # CHE-ISCW
-V_mat <- metafor::vcalc(
+V_mat_mod <- metafor::vcalc(
   data = reint_ma_dat,
   vi = Wgt_pop, 
   cluster = study,
@@ -193,13 +194,13 @@ V_mat <- metafor::vcalc(
   rho = rho
 )
 
-W <- solve(V_mat)
+W <- solve(V_mat_mod)
 
 # CHE
 che <- 
   rma.mv(
     yi = gt_pop,
-    V = V_mat,
+    V = V_mat_mod,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
     sparse = TRUE
@@ -212,7 +213,7 @@ che <-
 che_iscw <- 
   rma.mv(
     yi = gt_pop,
-    V = V_mat,
+    V = V_mat_mod,
     W = W,
     mods = ~ prereg_chr + Wse_pop - 1,
     random = ~ 1 | study / esid,
@@ -380,13 +381,13 @@ es_level_fp <-
   geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
-  geom_point(aes(Wse_pop, gt_pop, color = report_bias), alpha = 1, size = 1.5) +
+  geom_point(aes(Wse_pop, gt_pop, color = overall_rob), alpha = 1, size = 1.5) +
   coord_flip() +
   facet_grid(level~prereg_chr) +
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
   scale_color_manual(
-    values = c("Low" = "green3", "Moderate" = "yellow", "Serious" = "red")
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow", "Serious/High" = "red")
   ) + 
   theme_bw() + 
   labs(x = "Modified standard error", 
@@ -396,7 +397,7 @@ es_level_fp <-
     legend.position = "bottom",
     strip.text.x = element_blank()
   ) +
-  labs(color = "Risk of bias due to selective reporting (D5/D7)") +
+  labs(color = "Overall risk of bias") +
   guides(col = guide_legend(nrow = 1))
 
 
@@ -443,7 +444,7 @@ egg_notprereg_agg_res <-
   )
 
 egg_res_agg_subgrouped <- bind_rows(egg_notprereg_agg_res, egg_prereg_agg_res)
-egg_res_agg_subgrouped
+
 
 means_agg <- 
   rma(yi, vi, mods = ~ prereg_chr - 1, data = reint_dat_agg) |> 
@@ -520,10 +521,10 @@ ylab <- es_level_fp$labels$x
 
 study_level_fp$labels$x <- es_level_fp$labels$x <- "" 
 
-#png("plots/funnel plots (overall effect) across types of registration.png", width = 8, height = 5.5, res = 300, unit = "in")
+png("plots/funnel plots (overall effect) across type of registration.png", width = 6.5, height = 5, res = 300, unit = "in")
 study_level_fp / es_level_fp
 grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
-#dev.off()
+dev.off()
 
 ```
 
@@ -742,12 +743,10 @@ reintegration_dat |>
     pval = rma_obj$pval[1],
     tau = round(sqrt(rma_obj$sigma2[1]), 3),
     omega = round(sqrt(rma_obj$sigma2[2]), 3),
-    total_SD = sqrt(sum(rma_obj$sigma2))
+    total_SD = round(sqrt(sum(rma_obj$sigma2)), 3)
   )
 
 }
-
-
 
 ```
 
@@ -755,8 +754,9 @@ reintegration_dat |>
 # HYEMA
 
 ```{r}
-hyema_overall <- readRDS("Boostrap results/hyema_overall_reint.rds")
+hyema_overall <- readRDS("Bootstrap results/hyema_overall_reint.rds")
 
+# Overall res (Robust HYEMA)
 hyema_tab_res <- 
   tibble(
     test = "Robust HYEMA",
@@ -775,6 +775,48 @@ hyema_tab_res <-
     omega = NA_real_,
     total_SD = hyema_overall$Est[2]
   )
+
+# HYEMA across outcome
+hyema_outcome <- readRDS("Bootstrap results/hyema_overcome.rds")
+hyema_outcome_f_stat <- readRDS("Bootstrap results/F_boot_pval_outcome.rds")
+
+# To temporarily get tau
+hyema_obj <- 
+  puniform::hybrid(
+    yi = reint_ma_dat$gt_pop, 
+    vi = reint_ma_dat$Wgt_pop, 
+    conventional = reint_ma_dat$conventional, 
+    side = "right",
+    mods = ~ reint_ma_dat$outcome_type -1
+  ) |> 
+  suppressWarnings()
+
+hyema_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"),
+    est_ci = c(
+      paste0(
+        round(as.numeric(hyema_outcome$Est), 3), 
+        " [", 
+        round(hyema_outcome$CIL_bootstrap, 3),
+        ", ",
+        round(hyema_outcome$CIU_bootstrap, 3),
+        "]"
+      ),
+      as.character(round(hyema_outcome_f_stat, 3)),
+      as.character(round(sqrt(hyema_obj$tau2), 3)),
+      NA_character_,
+      as.character(round(sqrt(hyema_obj$tau2), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "hyema"
+    
+  )
+
+
 
 ```
 
@@ -815,10 +857,11 @@ puniform_tab_res <-
 
 ```
 
-
-# Worst-case meta-analysis
+# Regression-based methods
 
 ## Reintegration
+## Worst-case meta-analysis
+
 ```{r}
 
 worst_dat_reint <- 
@@ -829,6 +872,41 @@ worst_dat_reint <-
     
   ) %>% 
   filter(affirmativity == "nonaffirmative")
+
+wc_prereg_studies <- 
+  worst_dat_reint |> 
+  summarise(
+    n = n(), 
+    .by = c(prereg_chr, study)
+  ) |> 
+  summarise(
+    n_studies = n(),
+    .by = prereg_chr
+  ) |> 
+  arrange(prereg_chr)
+
+wc_prereg_es <- 
+  worst_dat_reint |> 
+  summarise(n_effects = n(), .by = prereg_chr) |> 
+  arrange(prereg_chr) 
+
+# Outcome
+wc_outcome_studies <- 
+  worst_dat_reint |> 
+  summarise(
+    n = n(), 
+    .by = c(outcome_type, study)
+  ) |> 
+  summarise(
+    n_studies = n(),
+    .by = outcome_type
+  ) |> 
+  arrange(outcome_type)
+
+wc_outcome_es <- 
+  worst_dat_reint |> 
+  summarise(n_effects = n(), .by = outcome_type) |> 
+  arrange(outcome_type) 
 
 ```
 
@@ -852,7 +930,7 @@ rho <- 0.8
 #wc = worst_case
 V_mat_wc <- 
   metafor::vcalc(
-    data = worst_dat_reint ,
+    data = worst_dat_reint,
     vi = vgt_pop, 
     cluster = study,
     type = outcome_time, 
@@ -862,6 +940,10 @@ V_mat_wc <-
     w2 = N_c, 
     rho = rho
   )
+
+#############
+# Overall res
+#############
 
 wc_overall<- 
   rma.mv(
@@ -882,45 +964,121 @@ wc_tab_res <-
     K = nrow(worst_dat_reint)
   )
 
-
+###########
 # Pregreg
-wc_overall_prereg <- 
+###########
+
+wc_prereg_raw <- 
   rma.mv(
     gt_pop ~ prereg_chr - 1,
     V = V_mat_wc, 
     random = ~ 1 | study / esid,
-    data = worst_dat_reint ,
-    sparse = TRUE
-  ) |> 
-  robust(cluster = study, clubSandwich = TRUE)
-
-wc_overall_prereg
-
-wc_prereg <- 
-  rma.mv(
-    gt_pop ~ prereg_chr - 1,
-    V = V_mat_wc, 
-    random = list(~ prereg_chr | study, ~ prereg_chr | esid),
-    struct = c("DIAG", "DIAG"),
     data = worst_dat_reint,
     sparse = TRUE
-  ) |> 
+  ) 
+
+wc_prereg <- 
+  wc_prereg_raw |> 
   robust(cluster = study, clubSandwich = TRUE)
 
-wc_prereg
+#tic()
+#plan(multisession)
+#wc_prereg_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = wc_prereg_raw,
+#    constraints = constrain_equal(1:2),
+#    R = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(wc_prereg_cwb, "Bootstrap results/wc_prereg_cwb.rds")
+wc_prereg_cwb <- readRDS("Bootstrap results/wc_prereg_cwb.rds")
 
-wc_outcome <- 
+wc_prereg_tab <- 
+   tibble(
+    coefficient = c(
+      "Not preregistered", "Preregistered", 
+      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(wc_prereg$b[1:2]), 3), 
+        " [", 
+        round(wc_prereg$ci.lb[1:2], 3),
+        ", ",
+        round(wc_prereg$ci.ub[1:2], 3),
+        "]"
+      ),
+      as.character(round(wc_prereg_cwb$p_val, 3)),
+      as.character(round(sqrt(wc_prereg$sigma2[1]), 3)),
+      as.character(round(sqrt(wc_prereg$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(wc_prereg$sigma2)), 3)),
+      as.character(n_distinct(worst_dat_reint$study)),
+      as.character(nrow(worst_dat_reint))
+    ),
+    
+    method = "worstcase"
+    
+  )
+
+############
+# wc outcome
+############
+wc_outcome_raw <- 
   rma.mv(
     gt_pop ~ outcome_type + prereg_c - 1,
     V = V_mat_wc, 
-    random = list(~ outcome_type | study, ~ outcome_type | esid),
-    struct = c("DIAG", "DIAG"),
+    random = ~ 1 | study / esid,
     data = worst_dat_reint,
     sparse = TRUE
-  ) |> 
+  ) 
+
+wc_outcome <- 
+  wc_outcome_raw |> 
   robust(cluster = study, clubSandwich = TRUE)
 
-wc_outcome
+# CWB
+#tic()
+#plan(multisession, workers = 7L)
+#wc_outcome_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = wc_outcome_raw,
+#    constraints = constrain_equal(1:7),
+#    R = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(wc_outcome_cwb, "Bootstrap results/wc_outcome_cwb.rds")
+wc_outcome_cwb <- readRDS("Bootstrap results/wc_outcome_cwb.rds")
+
+wc_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(wc_outcome$b[-8]), 3), 
+        " [", 
+        round(wc_outcome$ci.lb[-8], 3),
+        ", ",
+        round(wc_outcome$ci.ub[-8], 3),
+        "]"
+      ),
+      as.character(round(wc_outcome_cwb$p_val, 3)),
+      as.character(round(sqrt(wc_outcome$sigma2[1]), 3)),
+      as.character(round(sqrt(wc_outcome$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(wc_outcome$sigma2)), 3)),
+      as.character(n_distinct(worst_dat_reint$study)),
+      as.character(nrow(worst_dat_reint))
+    ),
+    
+    method = "worstcase"
+    
+  )
+
 
 pubbias_plot <- 
   PublicationBias::significance_funnel(
@@ -935,14 +1093,12 @@ pubbias_plot
 ```
 
 
-
-# Regression models
+## CHE-ISCW 
 
 ```{r che-iscw}
-
 rho <- 0.8
 
-V_mat <- metafor::vcalc(
+V_mat_mod <- metafor::vcalc(
   data = reint_ma_dat,
   vi = Wgt_pop, 
   cluster = study,
@@ -954,14 +1110,14 @@ V_mat <- metafor::vcalc(
   rho = rho
 )
 
-W <- solve(V_mat)
+W <- solve(V_mat_mod)
 
 # CHE-ISCW
-
+## Overall
 che_iscw <- 
   rma.mv(
     yi = gt_pop,
-    V = V_mat,
+    V = V_mat_mod,
     W = W,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
@@ -971,11 +1127,130 @@ che_iscw <-
 
 iscw_tab_res <- .pubbias_overall_tab(rma_obj = che_iscw, test = "CHE-ISCW")
 
+## Preregistration
+che_iscw_prereg_raw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mod,
+    W = W,
+    mods = ~ prereg_chr - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) 
 
+che_iscw_prereg <- 
+  che_iscw_prereg_raw |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+#tic()
+#plan(multisession, workers = 7L)
+#che_iscw_prereg_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = che_iscw_prereg_raw,
+#    constraints = constrain_equal(1:2),
+#    R = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(che_iscw_prereg_cwb, "Bootstrap results/che_iscw_prereg_cwb.rds")
+che_iscw_prereg_cwb <- readRDS("Bootstrap results/che_iscw_prereg_cwb.rds")
+
+che_iscw_prereg_tab <- 
+  tibble(
+    coefficient = c(
+      "Not preregistered", "Preregistered", 
+      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(che_iscw_prereg$b[1:2]), 3), 
+        " [", 
+        round(che_iscw_prereg$ci.lb[1:2], 3),
+        ", ",
+        round(che_iscw_prereg$ci.ub[1:2], 3),
+        "]"
+      ),
+      as.character(round(che_iscw_prereg_cwb$p_val, 3)),
+      as.character(round(sqrt(che_iscw_prereg$sigma2[1]), 3)),
+      as.character(round(sqrt(che_iscw_prereg$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(che_iscw_prereg$sigma2)), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "iscw"
+    
+  )
+
+
+## Outcome
+che_iscw_outcome_raw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mod,
+    W = W,
+    mods = ~ outcome_type + prereg_c - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) 
+
+che_iscw_outcome <- 
+  che_iscw_outcome_raw |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+#tic()
+#plan(multisession, workers = 7L)
+#che_iscw_outcome_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = che_iscw_outcome_raw,
+#    constraints = constrain_equal(1:7),
+#    R = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(che_iscw_outcome_cwb, "Bootstrap results/che_iscw_outcome_cwb.rds")
+che_iscw_outcome_cwb <- readRDS("Bootstrap results/che_iscw_outcome_cwb.rds")
+
+che_iscw_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(che_iscw_outcome$b[-8]), 3), 
+        " [", 
+        round(che_iscw_outcome$ci.lb[-8], 3),
+        ", ",
+        round(che_iscw_outcome$ci.ub[-8], 3),
+        "]"
+      ),
+      as.character(round(che_iscw_outcome_cwb$p_val, 3)), 
+      as.character(round(sqrt(che_iscw_outcome$sigma2[1]), 3)),
+      as.character(round(sqrt(che_iscw_outcome$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(che_iscw_outcome$sigma2)), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "iscw"
+    
+  )
+```
+
+## PET/PEESE
+
+```{r che-iscw}
+
+## PET/PEESE overall
 che_pet <- 
   rma.mv(
     yi = gt_pop,
-    V = V_mat,
+    V = V_mat_mod,
     W = W,
     mods = ~ Wse_pop + prereg_c,
     random = ~ 1 | study / esid,
@@ -987,7 +1262,7 @@ che_pet <-
 che_peese <- 
   rma.mv(
     yi = gt_pop,
-    V = V_mat,
+    V = V_mat_mod,
     W = W,
     mods = ~ Wgt_pop + prereg_c,
     random = ~ 1 | study / esid,
@@ -1000,6 +1275,123 @@ pet_peese <- if (che_pet$pval[1] < 0.1 & as.numeric(che_pet$b[1]) > 0) che_peese
 
 pet_peese_tab_res <- .pubbias_overall_tab(rma_obj = pet_peese, test = "PET/PEESE")
 
+## PET/PEESE preregistration
+che_pet_prereg_raw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mod,
+    W = W,
+    mods = ~ prereg_chr + Wse_pop - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) 
+
+che_pet_prereg <- 
+  che_pet_prereg_raw |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+
+#tic()
+#plan(multisession, workers = 7L)
+#che_pet_prereg_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = che_pet_prereg_raw,
+#    constraints = constrain_equal(1:2),
+#    R  = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(che_pet_prereg_cwb, "Bootstrap results/che_pet_prereg_cwb.rds")
+che_pet_prereg_cwb <- readRDS("Bootstrap results/che_pet_prereg_cwb.rds")
+
+che_pet_prereg_tab <- 
+  tibble(
+    coefficient = c(
+      "Not preregistered", "Preregistered",
+      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(che_pet_prereg$b[1:2]), 3), 
+        " [", 
+        round(che_pet_prereg$ci.lb[1:2], 3),
+        ", ",
+        round(che_pet_prereg$ci.ub[1:2], 3),
+        "]"
+      ),
+      as.character(round(che_pet_prereg_cwb$p_val,3)),
+      as.character(round(sqrt(che_pet_prereg$sigma2[1]), 3)),
+      as.character(round(sqrt(che_pet_prereg$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(che_pet_prereg$sigma2)), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "petpesse"
+    
+  )
+
+
+## PET/PEESE outcome
+che_pet_outcome_raw <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mod,
+    W = W,
+    mods = ~ outcome_type + Wse_pop + prereg_c - 1,
+    random = ~ 1 | study / esid,
+    data = reint_ma_dat,
+    sparse = TRUE
+  ) 
+
+che_pet_outcome <- 
+  che_pet_outcome_raw |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+
+#tic()
+#plan(multisession, workers = 7L)
+#che_pet_outcome_cwb <- 
+#  wildmeta::Wald_test_cwb(
+#    full_model = che_pet_outcome_raw,
+#    constraints = constrain_equal(1:7),
+#    R  = 1999
+#  )
+#plan(sequential)
+#toc()
+#
+#saveRDS(che_pet_outcome_cwb, "Bootstrap results/che_pet_outcome_cwb.rds")
+che_pet_outcome_cwb <- readRDS("Bootstrap results/che_pet_outcome_cwb.rds")
+
+che_pet_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(as.numeric(che_pet_outcome$b[-c(8:9)]), 3), 
+        " [", 
+        round(che_pet_outcome$ci.lb[-c(8:9)], 3),
+        ", ",
+        round(che_pet_outcome$ci.ub[-c(8:9)], 3),
+        "]"
+      ),
+      as.character(round(che_pet_outcome_cwb$p_val, 3)),
+      as.character(round(sqrt(che_pet_outcome$sigma2[1]), 3)),
+      as.character(round(sqrt(che_pet_outcome$sigma2[2]), 3)),
+      as.character(round(sqrt(sum(che_pet_outcome$sigma2)), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "petpesse"
+    
+  )
 
 ```
 
@@ -1007,12 +1399,14 @@ pet_peese_tab_res <- .pubbias_overall_tab(rma_obj = pet_peese, test = "PET/PEESE
 
 ```{r, selmodel}
 
-#library(future)
+set.seed(15092025)
+
+library(future)
+
+# Overall reintegration
+#plan(multisession, workers = 7L)
 #
-## Overall reintegration
-#plan(multisession, workers = 4L)
-#
-#mod_3PSM_mod_overall <- 
+#mod_3PSM_overall <- 
 #  metaselection::selection_model(
 #    data = reint_ma_dat, 
 #    yi = gt_pop,
@@ -1028,16 +1422,14 @@ pet_peese_tab_res <- .pubbias_overall_tab(rma_obj = pet_peese, test = "PET/PEESE
 #  )
 #plan(sequential)
 #
-#saveRDS(mod_3PSM_mod_overall, "Boostrap results/mod_3PSM_mod_overall.rds")
-
-mod_3PSM_overall <- readRDS("Boostrap results/mod_3PSM_mod_overall.rds")
-mod_3PSM_overall
+#saveRDS(mod_3PSM_overall, "Bootstrap results/mod_3PSM_overall.rds")
+mod_3PSM_overall <- readRDS("Bootstrap results/mod_3PSM_overall.rds")
 
 #selection_plot(mod_3PSM_overall)
 
-plan(multisession, workers = 4L)
-
-#mod_4PSM_mod_overall <- 
+#plan(multisession, workers = 7L)
+#
+#mod_4PSM_overall <- 
 #  metaselection::selection_model(
 #    data = reint_ma_dat, 
 #    yi = gt_pop,
@@ -1053,18 +1445,155 @@ plan(multisession, workers = 4L)
 #  )
 #plan(sequential)
 #
-#saveRDS(mod_4PSM_mod_overall, "Boostrap results/mod_4PSM_mod_overall.rds")
+#saveRDS(mod_4PSM_overall, "Bootstrap results/mod_4PSM_overall.rds")
+mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 
-
-
-mod_4PSM_overall <- readRDS("Boostrap results/mod_4PSM_mod_overall.rds")
-mod_4PSM_overall
 
 #save(
 #  mod_3PSM_overall,
 #  mod_4PSM_overall,
 #  file = "selmodel_res.RData"
 #)
+
+##############################
+# Across type of registration
+##############################
+
+## Only not preregistered outcome
+#plan(multisession, workers = 7L)
+#
+#mod_3PSM_not_prereg <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    R = 1999,
+#    subset = conventional == 1
+#  )
+#plan(sequential)
+#
+#plan(multisession, workers = 7L)
+#
+#mod_3PSM_not_prereg <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    R = 1999,
+#    subset = conventional == 0
+#  )
+#plan(sequential)
+
+## Prereg_chr as subgroup factor
+
+#plan(multisession, workers = 7L)
+#
+#mod_3PSM_prereg <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    mean_mods = ~ prereg_chr - 1,
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_3PSM_prereg, "Bootstrap results/mod_3PSM_prereg.rds")
+mod_3PSM_prereg <- readRDS("Bootstrap results/mod_3PSM_prereg.rds")
+
+
+#plan(multisession, workers = 7L)
+#
+#mod_4PSM_prereg <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = c(0.025, 0.500),
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    mean_mods = ~ prereg_chr - 1,
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_4PSM_prereg, "Bootstrap results/mod_4PSM_prereg.rds")
+mod_4PSM_prereg <- readRDS("Bootstrap results/mod_4PSM_prereg.rds")
+
+###################
+# Across outcomes
+###################
+
+#plan(multisession, workers = 7L)
+#
+#mod_3PSM_outcome <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    mean_mods = ~ outcome_type + prereg_c - 1,
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_3PSM_outcome, "Bootstrap results/mod_3PSM_outcome.rds")
+mod_3PSM_outcome <- readRDS("Bootstrap results/mod_3PSM_outcome.rds")
+
+#selection_plot(mod_3PSM_overall)
+
+#plan(multisession, workers = 7L)
+#
+#mod_4PSM_outcome <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = c(0.025, 0.500),
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = "percentile",
+#    bootstrap = "two-stage",
+#    mean_mods = ~ outcome_type + prereg_c - 1,
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_4PSM_outcome, "Bootstrap results/mod_4PSM_outcome.rds")
+mod_4PSM_outcome <- readRDS("Bootstrap results/mod_4PSM_outcome.rds")
 
 ```
 
@@ -1109,6 +1638,115 @@ PSM4_tab_res <-
     total_SD = tau
   )
 
+# Prereg
+PSM3_prereg_tab <- 
+  tibble(
+    coefficient = c(
+      "Not preregistered", "Preregistered", 
+      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(mod_3PSM_prereg$est$Est[1:2], 3), 
+        " [", 
+        round(mod_3PSM_prereg$est$percentile_lower[1:2], 3),
+        ", ",
+        round(mod_3PSM_prereg$est$percentile_upper[1:2], 3),
+        "]"
+      ),
+      NA_character_,
+      as.character(round(sqrt(mod_3PSM_prereg$predictions$tausq), 3)),
+      NA_character_,
+      as.character(round(sqrt(mod_3PSM_prereg$predictions$tausq), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "PSM3"
+    
+  )
+
+PSM4_prereg_tab <- 
+  tibble(
+    coefficient = c(
+      "Not preregistered", "Preregistered", 
+      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(mod_4PSM_prereg$est$Est[1:2], 3), 
+        " [", 
+        round(mod_4PSM_prereg$est$percentile_lower[1:2], 3),
+        ", ",
+        round(mod_4PSM_prereg$est$percentile_upper[1:2], 3),
+        "]"
+      ),
+      NA_character_,
+      as.character(round(sqrt(mod_4PSM_prereg$predictions$tausq), 3)),
+      NA_character_,
+      as.character(round(sqrt(mod_4PSM_prereg$predictions$tausq), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "PSM4"
+    
+  )
+
+
+# Outcome
+PSM3_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(mod_3PSM_outcome$est$Est[1:7], 3), 
+        " [", 
+        round(mod_3PSM_outcome$est$percentile_lower[1:7], 3),
+        ", ",
+        round(mod_3PSM_outcome$est$percentile_upper[1:7], 3),
+        "]"
+      ),
+      NA_character_,
+      as.character(round(sqrt(mod_3PSM_outcome$predictions$tausq), 3)),
+      NA_character_,
+      as.character(round(sqrt(mod_3PSM_outcome$predictions$tausq), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "PSM3"
+    
+  )
+
+PSM4_outcome_tab <- 
+  tibble(
+    coefficient = c(
+      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      ),
+    est_ci = c(
+      paste0(
+        round(mod_4PSM_outcome$est$Est[1:7], 3), 
+        " [", 
+        round(mod_4PSM_outcome$est$percentile_lower[1:7], 3),
+        ", ",
+        round(mod_4PSM_outcome$est$percentile_upper[1:7], 3),
+        "]"
+      ),
+      NA_character_,
+      as.character(round(sqrt(mod_4PSM_mod_outcome$predictions$tausq), 3)),
+      NA_character_,
+      as.character(round(sqrt(mod_4PSM_mod_outcome$predictions$tausq), 3)),
+      as.character(n_distinct(reint_ma_dat$study)),
+      as.character(nrow(reint_ma_dat))
+    ),
+    
+    method = "PSM4"
+    
+  )
+
 ```
 
 
@@ -1149,12 +1787,12 @@ gt_tab_overall <-
 
 gt_tab_overall
 
-gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
+#gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
 ```
 
 :::
  
-# Publication and small study bias tests across types of registration
+# Publication and small study bias tests across type of registration
 ::: {.panel-tabset}
 ## Reintegration
 ```{r pub-bias-tab-prereg-reint}
@@ -1165,6 +1803,27 @@ gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
 #| fig.retina: 2
 #| message: false
 
+prereg_tab_pub_bias <- 
+  list(
+  wc_prereg_tab,
+  che_iscw_prereg_tab,
+  che_pet_prereg_tab,
+  PSM3_prereg_tab,
+  PSM4_prereg_tab
+) |> 
+list_rbind() |> 
+pivot_wider(names_from = method, values_from = est_ci)
+
+prereg_tab_pub_bias_gt <- 
+  prereg_tab_pub_bias  |> 
+  gt() |> 
+  sub_missing(
+    columns = everything(),   
+    missing_text = ""         
+  )
+
+prereg_tab_pub_bias_gt
+#prereg_tab_pub_bias_gt |> gtsave(file = "Tables/Publication bias table across type of registration.docx")
 ```
 
 :::
@@ -1181,6 +1840,28 @@ gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
 #| fig.retina: 2
 #| message: false
 
+outcome_tab_pub_bias <- 
+  list(
+  hyema_outcome_tab,
+  wc_outcome_tab,
+  che_iscw_outcome_tab,
+  che_pet_outcome_tab,
+  PSM3_outcome_tab,
+  PSM4_outcome_tab
+) |> 
+list_rbind() |> 
+pivot_wider(names_from = method, values_from = est_ci)
+
+outcome_tab_pub_bias_gt <- 
+  outcome_tab_pub_bias |> 
+  gt() |> 
+  sub_missing(
+    columns = everything(),   
+    missing_text = ""         
+  )
+  
+outcome_tab_pub_bias_gt
+#outcome_tab_pub_bias_gt |> gtsave(file = "Tables/Publication bias table across outcomes.docx")
 
 ```
 
