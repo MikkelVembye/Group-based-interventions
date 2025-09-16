@@ -911,7 +911,6 @@ wc_outcome_es <-
 ```
 
 ```{r}
-
 res_PubBias <- 
   pubbias_svalue(
   yi = reint_ma_dat$gt_pop,
@@ -927,6 +926,19 @@ res_PubBias$stats
 
 rho <- 0.8
 
+pubbias_plot <- 
+  PublicationBias::significance_funnel(
+  yi = reint_ma_dat$gt_pop,
+  vi = reint_ma_dat$Wgt_pop,
+  favor_positive = TRUE,
+  alpha_select = 0.05
+)
+
+pubbias_plot
+```
+
+
+```{r}
 #wc = worst_case
 V_mat_wc <- 
   metafor::vcalc(
@@ -1022,6 +1034,21 @@ wc_prereg_tab <-
     
   )
 
+# Sensitivity analysis of prereg using the PESCE+ model. 
+wc_prereg_raw_sensi <- 
+  rma.mv(
+    gt_pop ~ prereg_chr - 1,
+    V = V_mat_wc, 
+    random = list(~ prereg_chr | study, ~ prereg_chr | esid),
+    struct = c("DIAG", "DIAG"),
+    data = worst_dat_reint,
+    sparse = TRUE
+  ) 
+
+wc_prereg_sensi <- 
+  wc_prereg_raw_sensi |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
 ############
 # wc outcome
 ############
@@ -1079,16 +1106,23 @@ wc_outcome_tab <-
     
   )
 
+# Sensitivity analyses using the PESCE+ model
 
-pubbias_plot <- 
-  PublicationBias::significance_funnel(
-  yi = reint_ma_dat$gt_pop,
-  vi = reint_ma_dat$Wgt_pop,
-  favor_positive = TRUE,
-  alpha_select = 0.05
-)
+wc_outcome_raw_sensi <- 
+  rma.mv(
+    gt_pop ~ outcome_type + prereg_c - 1,
+    V = V_mat_wc, 
+    random = list(~ outcome_type | study, ~ outcome_type | esid),
+    struct = c("DIAG", "DIAG"),
+    data = worst_dat_reint,
+    sparse = TRUE
+  ) 
 
-pubbias_plot
+wc_outcome_sensi <- 
+  wc_outcome_raw_sensi |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
 
 ```
 
