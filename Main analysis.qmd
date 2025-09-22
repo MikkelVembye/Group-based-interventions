@@ -31,6 +31,8 @@ knitr:
 reference-location: margin
 citation-location: margin
 bibliography: bibliography.bib 
+editor_options: 
+  chunk_output_type: console
 ---
 
 ## Loading R packages and data
@@ -204,6 +206,7 @@ V_mat <-
     data = reint_ma_dat,
     vi = vgt_pop, 
     cluster = study,
+    subgroup = outcome_type,
     type = outcome_time, 
     grp1 = trt_name,
     w1 = N_t, 
@@ -223,9 +226,9 @@ V_mat <-
 
 
 # Checking correct v_mat
-#blsplit(V_mat, reint_ma_dat$study) |> 
-#  lapply(cov2cor) |> 
-#  map(~ round(.x, 2))
+blsplit(V_mat, reint_ma_dat$study) |> 
+  lapply(cov2cor) |> 
+  map(~ round(.x, 2))
 
 outcome_obj <- 
   metafor::rma.mv(
@@ -293,7 +296,6 @@ prereg_obj
 ## Function building for analysis
 
 ```{r}
-#| renv.ignore: true
 # Read: rma_arg_tbl = rma argument tibble
 
 .rma_arg_tbl <- 
@@ -333,6 +335,7 @@ prereg_obj
           formula = list(formula),
           es = yi, 
           var = vi,
+          subgrp = main_pred,
           rand = list(random),
           structure = list(struct),
           rho = r,
@@ -367,11 +370,11 @@ tbl_test <-
   .rma_arg_tbl(
     yi = "gt_pop", 
     vi = "vgt_pop", 
-    covars = "male_c",
-    model = "CHE",
+    covars = "outcome_type",
+    model = "SCEp",
     r = 0.8, 
     data = reint_ma_dat,
-    type = "continuous"
+    type = "category"
 ); tbl_test
 
 
@@ -552,11 +555,24 @@ arg_list_tbl <-
 ## Making SCE RVE function
 ################################################################################
 .PESCE_RVE <- 
-  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE, CWB = FALSE){
+  function(
+    formula, 
+    es, var, 
+    subgrp, 
+    rand, structure, 
+    rho, 
+    data, 
+    model, 
+    table, 
+    R, 
+    seed, 
+    return_rma_obj = FALSE, 
+    CWB = FALSE){
     
   if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
     
   data$vi <- data[[var]]
+  data$subgrp <- data[[subgrp]]
   data_name <- attr(data, "data_name")
 
   #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
@@ -576,6 +592,7 @@ arg_list_tbl <-
       data = data,
       vi = vi, 
       cluster = study,
+      subgroup = subgrp,
       type = outcome_time,
       grp1 = trt_name,
       w1 = N_t,
@@ -657,40 +674,44 @@ arg_list_tbl <-
   # Wald test comparison sequence
   seq_con <- 1:length(moderators)
   
-  if(CWB){
-    
-  wald_cwb_res <-
-    .Wald_test_cwb_fun(
-      rma_fun_obj = raw_res,
-      seq_c = seq_con,
-      reps = R,
-      seed_num = seed
-    )
-  
-  wald_pval <- wald_cwb_res$p_val
-  last_val_string <- NA_character_
-  
-  res <- wald_cwb_res
-   
-  } else {
-
-    wald_htz_res <- 
-      clubSandwich::Wald_test(
-        raw_res,
-        constraints = clubSandwich::constrain_equal(c(seq_con)),
-        vcov = "CR2"
+   if(CWB){
+      
+      wald_cwb_res <-
+        .Wald_test_cwb_fun(
+          rma_fun_obj = raw_res,
+          seq_c = seq_con,
+          reps = R,
+          seed_num = seed
+        )
+      
+      wald_pval <- wald_cwb_res$p_val
+      last_val_string <- NA_character_
+      
+      #res <- wald_cwb_res
+      
+      wald_type <- "Wald test (CWB)"
+      
+    } else {
+      
+      wald_htz_res <- 
+        clubSandwich::Wald_test(
+          raw_res,
+          constraints = clubSandwich::constrain_equal(c(seq_con)),
+          vcov = "CR2"
+        )
+      
+      # Obtaning HTZ wald test p values
+      wald_pval <- wald_htz_res$p_val 
+      
+      last_val_string <- paste0(
+        "F(", round(wald_htz_res$df_num, 2), ", ", 
+        round(wald_htz_res$df_denom, 2), ") = ", 
+        round(wald_htz_res$Fstat, 2)
       )
-    
-    # Obtaning HTZ wald test p values
-    wald_pval <- wald_htz_res$p_val 
-    
-    last_val_string <- paste0(
-      "F(", round(wald_htz_res$df_num, 2), ", ", 
-      round(wald_htz_res$df_denom, 2), ") = ", 
-      round(wald_htz_res$Fstat, 2)
-    )
-    
-  }
+      
+      wald_type <- "Wald test (HTZ)"
+      
+    }
    
   
   # Readable moderator name removing _ and making upper-case letter for first word
@@ -703,35 +724,35 @@ arg_list_tbl <-
   mod_ciu <- round(robu_res$ci.ub[1:length(moderators)], 2)
   
   # Results in ready to publish format
-  res <- 
-    tibble(
-      Characteric = mod_string,
-      Moderator = c(mod_string_table, moderators, "Wald test (CWB)"),
-      studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
-      effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
-      avg_effect_ci = 
-        c(
-          NA_character_, 
-          paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
-          last_val_string
-      ),
-      pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 3),
-      df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
-      SD_total = round(c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_), 2),
-      rho = rho,
-      wald_compared = c(rep(NA_real_, length(moderators) + 1), paste(seq_con, collapse = ",")),
-      controls = controlled,
-      control_vars = control_vars,
-      optimizer = raw_res$control$optimizer,
-      avg_effect = round(c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_), 2),
-      LL = round(c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_), 2),
-      UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),
-      tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),
-      omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),
-      t_val = c(NA_real_, robu_res$zval[1:length(moderators)], NA_real_),
-      table = table,
-      effect_size = es
-    )
+   res <- 
+      tibble(
+        Characteric = mod_string,
+        Moderator = c(mod_string_table, moderators, wald_type),
+        studies = c(robu_res$n, robu_res$g.levels.k, NA_real_),
+        effects = c(robu_res$k, robu_res$h.levels.k, NA_real_),
+        avg_effect_ci = 
+          c(
+            NA_character_, 
+            paste0(mod_effects, " [", mod_cil, ", ", mod_ciu, "]"), 
+            last_val_string
+          ),
+        pval = round(c(NA_real_, robu_res$pval[1:length(moderators)], wald_pval), 3),
+        df_satt = round(c(NA_real_, robu_res$dfs[1:length(moderators)], NA_real_), 1),
+        SD_total = round(c(NA_real_, sqrt(robu_res$tau2 + robu_res$gamma2), NA_real_), 2),
+        rho = rho,
+        wald_compared = c(rep(NA_real_, length(moderators) + 1), paste(seq_con, collapse = ",")),
+        controls = controlled,
+        control_vars = control_vars,
+        optimizer = raw_res$control$optimizer,
+        avg_effect = round(c(NA_real_, as.numeric(robu_res$b[1:length(moderators)]), NA_real_), 2),
+        LL = round(c(NA_real_, robu_res$ci.lb[1:length(moderators)], NA_real_), 2),
+        UL = round(c(NA_real_, robu_res$ci.ub[1:length(moderators)], NA_real_), 2),
+        tau2 = round(c(NA_real_, robu_res$tau2, NA_real_), 2),
+        omega2 = round(c(NA_real_, robu_res$gamma2, NA_real_), 2),
+        t_val = c(NA_real_, robu_res$zval[1:length(moderators)], NA_real_),
+        table = table,
+        effect_size = es
+      )
   
   res
   
@@ -741,13 +762,17 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-#x_test <- 
-#  pmap(
-#    .l = arg_list_tbl_rho08[1,], 
-#    .f = .PESCE_RVE, 
-#    return_rma_obj = FALSE,
-#    CWB = FALSE
-#  ); x_test
+x_test <- 
+  pmap(
+    .l = arg_list_tbl_rho08[1:2,], 
+    .f = .PESCE_RVE, 
+    return_rma_obj = TRUE,
+    CWB = FALSE
+  ); x_test
+
+#blsplit(x_test[[1]], reint_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 
 opts <- furrr::furrr_options(

@@ -23,6 +23,8 @@ knitr:
       dplyr.summarise.inform: FALSE
       scipen: 10
       pillar.sigfig: 4 
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Used package
@@ -110,10 +112,25 @@ overall_res <-
 
 overall_res
 
+V_mat_outcome <- 
+  metafor::vcalc(
+    data = reint_ma_dat,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = outcome_type,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+
 sub_res <- 
   rma.mv(
     gt_pop ~ outcome_type - 1,
-    V = V_mat, 
+    V = V_mat_outcome, 
     random = list(~ outcome_type | study, ~ outcome_type | esid),
     struct = c("DIAG", "DIAG"),
     data = reint_ma_dat,
