@@ -244,7 +244,7 @@ GBD_effect <-
 ```{r}
 sample_size_dat <- 
   GBD_effect |> 
-  group_by(year, studyid, sample_id) |> 
+  group_by(year, study) |> 
   summarise_at(
     vars(N_t, N_c, N_total), list(mean = mean)
   )

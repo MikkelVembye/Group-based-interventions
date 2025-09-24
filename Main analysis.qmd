@@ -100,7 +100,7 @@ reint_ma_dat <-
     time_after_end_intervention_weeks, time_from_baseline_weeks,
     
     # For vcalc
-    outcome, outcome_time, N_t, N_c, trt_name, trt_id, control, ctr_id,
+    outcome, outcome_time, N_t, N_c, N_total, trt_name, trt_id, control, ctr_id,
     
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
@@ -251,6 +251,22 @@ outcome_obj_robu
 club_wald_test <- Wald_test(outcome_obj, constraints = constrain_equal(1:3), vcov = "CR2")
 club_wald_test
 
+
+tic()
+plan(multisession, workers = parallel::detectCores()-1)
+
+cwb_test <- 
+  try(
+    Wald_test_cwb(
+      full_model = outcome_obj,
+      constraints = constrain_equal(1:7),
+      R = 19, 
+      seed = 26082025L
+    )
+  ); cwb_test
+
+plan(sequential)
+toc()
 
 # Continuous model
 
@@ -463,7 +479,7 @@ var_es_names <-  list("vgt", "vg", "vd", "vgt_post")
 arg_tbl_alt_es <- 
   map2(es_names, var_es_names, ~ {
     arg_tbl |> 
-      filter(r == 0.8) |> 
+      #filter(r == 0.8) |> 
       mutate(
         yi = .x,
         vi = .y
@@ -480,7 +496,7 @@ arg_list_tbl <-
   pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 10L,
+    R = 19L,
     seed = 26082025L
   )
 
@@ -762,14 +778,17 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
+tic()
+plan(multisession)
 x_test <- 
   pmap(
-    .l = arg_list_tbl_rho08[1:2,], 
+    .l = arg_list_tbl_rho08[1,], 
     .f = .PESCE_RVE, 
-    return_rma_obj = TRUE,
-    CWB = FALSE
+    return_rma_obj = FALSE,
+    CWB = TRUE
   ); x_test
-
+plan(sequential)
+toc()
 #blsplit(x_test[[1]], reint_ma_dat$study) |> 
 #  lapply(cov2cor) |> 
 #  map(~ round(.x, 2))

@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-11"
+date: "2025-09-23"
 format:
   html: 
     keep-md: true
@@ -59,7 +59,6 @@ bibliography: bibliography.bib
 :::
 
 
-
 # Introduction 
 
 This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
@@ -67,7 +66,6 @@ This document contains the preliminary data analysis for the meta-analyses with 
 
 ## R packages
 Below, we present the R package we use in this document. For exact R package versions, see the [Session Information](#session-info) at the bottom of this document. 
-
 
 
 ::: {.cell}
@@ -96,13 +94,11 @@ library(ggh4x)
 :::
 
 
-
 # Data manipulation - prepare data sets
 
 In the following section, we create all the variables that are used in the main analyses of the review. Unfold the below code to see this exact manipulations. 
 
 ## Loading data
-
 
 ::: {.cell}
 
@@ -124,10 +120,8 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
 :::
 
 
-
 ## Main variable manipulation
 Unfold the below code, to find the primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes. 
-
 
 
 ::: {.cell}
@@ -432,6 +426,8 @@ gb_dat <-
 ```
 :::
 
+
+
 ::: {.cell}
 
 ```{.r .cell-code}
@@ -540,7 +536,6 @@ gb_dat$time <- time_vcalc
 
 
 
-
 ## Creating primary and secondary data
 
 Below, we separate the data by reintegrational (primary analysis) and mental health outcomes (secondary analyses)
@@ -549,7 +544,6 @@ Below, we separate the data by reintegrational (primary analysis) and mental hea
 ## Reintegration data
 
 A general overview of the main data, we use for analyses of reintegrational outcomes can be found in the scroll box below.
-
 
 
 ::: {#tbl-reint-dat .cell .tbl-cap-location-top tbl-cap='Data with reintegration outcomes.'}
@@ -586,7 +580,6 @@ reint_overview |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:600px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -3235,16 +3228,13 @@ reint_overview |>
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 ## Mental health data
 
 A general overview of the main data, we use for analyses of mental health outcomes can be found the scroll box  below.
-
 
 
 ::: {#tbl-mental-dat .cell .tbl-cap-location-top tbl-cap='Data with mental health outcomes.'}
@@ -3281,7 +3271,6 @@ mental_overview_dat |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:300px; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -5137,10 +5126,8 @@ mental_overview_dat |>
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 
@@ -5155,7 +5142,6 @@ Note that in plots where the number of studies appears on the x-axis, some bars 
 :::
 
 ## RoB2
-
 
 ::: {.cell}
 
@@ -5303,7 +5289,6 @@ rob_sum_mental <-
 ```
 :::
 
-
 ### Overall (Not preregistered vs. preregistered)
 ::: {.column width="130%"}
 
@@ -5312,7 +5297,6 @@ rob_sum_mental <-
 
 ::: {.panel-tabset}
 #### Number of studies/effects
-
 
 ::: {.cell}
 
@@ -5409,9 +5393,7 @@ rob_pct_studies / rob_pct_effects
 
 
 
-
 #### Weighted percentage
-
 
 ::: {.cell}
 
@@ -5496,9 +5478,7 @@ rob_pct_studies_weight / rob_pct_effects_weight
 
 
 
-
 #### Raw percentage
-
 
 ::: {.cell}
 
@@ -5582,13 +5562,11 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 :::
 
 
-
 :::
 
 ### Mental health
 ::: {.panel-tabset}
 #### Number of studies/effects
-
 
 ::: {.cell}
 
@@ -5679,9 +5657,7 @@ rob_pct_studies_mental / rob_pct_effects_mental
 
 
 
-
 #### Weighted percentage
-
 
 ::: {.cell}
 
@@ -5766,9 +5742,7 @@ rob_pct_studies_weight_mental / rob_pct_effects_weight_mental
 
 
 
-
 #### Raw percentage
-
 
 ::: {.cell}
 
@@ -5853,7 +5827,6 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 
 
-
 :::
 
 :::
@@ -5862,7 +5835,6 @@ rob_pct_studies_unweight / rob_pct_effects_unweight
 
 
 ### Subgrouped risk of bias plots 
-
 
 ::: {.cell}
 
@@ -5998,7 +5970,6 @@ rob_sum_subgrp_mental <-
 :::
 
 
-
 ::: {.columns}
 
 ::: {.column width="130%"}
@@ -6011,7 +5982,6 @@ rob_sum_subgrp_mental <-
 
 ::: {.panel-tabset}
 #### Number of studies
-
 
 ::: {.cell}
 
@@ -6065,9 +6035,7 @@ rob_studies_subgrp
 :::
 :::
 
-
 #### Weighted percentage of studies
-
 
 ::: {.cell}
 
@@ -6116,9 +6084,7 @@ rob_weight_pct_studies_subgrp
 :::
 
 
-
 #### Unweighted percentage of studies
-
 
 ::: {.cell}
 
@@ -6166,13 +6132,11 @@ rob_unweight_pct_studies_subgrp
 :::
 :::
 
-
 :::
 
 #### Outcome-level
 ::: {.panel-tabset}
 #### Number of effects
-
 
 ::: {.cell}
 
@@ -6228,9 +6192,7 @@ rob_effects_subgrp
 :::
 :::
 
-
 #### Weighted percentage of effects
-
 
 ::: {.cell}
 
@@ -6279,9 +6241,7 @@ rob_weight_pct_effects_subgrp
 :::
 
 
-
 #### Unweighted percentage of effects
-
 
 ::: {.cell}
 
@@ -6329,7 +6289,6 @@ rob_unweight_pct_effects_subgrp
 :::
 :::
 
-
 :::
 
 :::
@@ -6341,7 +6300,6 @@ rob_unweight_pct_effects_subgrp
 
 ::: {.panel-tabset}
 #### Number of studies
-
 
 ::: {.cell}
 
@@ -6396,9 +6354,7 @@ rob_studies_subgrp_mental
 :::
 :::
 
-
 #### Weighted percentage of studies
-
 
 ::: {.cell}
 
@@ -6447,9 +6403,7 @@ rob_weight_pct_studies_subgrp_mental
 :::
 
 
-
 #### Unweighted percentage of studies
-
 
 ::: {.cell}
 
@@ -6497,13 +6451,11 @@ rob_unweight_pct_studies_subgrp_mental
 :::
 :::
 
-
 :::
 
 #### Outcome-level
 ::: {.panel-tabset}
 #### Number of effects
-
 
 ::: {.cell}
 
@@ -6558,9 +6510,7 @@ rob_effects_subgrp_mental
 :::
 :::
 
-
 #### Weighted percentage of effects
-
 
 ::: {.cell}
 
@@ -6609,9 +6559,7 @@ rob_weight_pct_effects_subgrp_mental
 :::
 
 
-
 #### Unweighted percentage of effects
-
 
 ::: {.cell}
 
@@ -6659,7 +6607,6 @@ rob_unweight_pct_effects_subgrp_mental
 :::
 :::
 
-
 :::
 
 :::
@@ -6671,7 +6618,6 @@ rob_unweight_pct_effects_subgrp_mental
 :::
 
 ## ROBINS-I
-
 
 
 ::: {.cell}
@@ -6793,7 +6739,6 @@ robinsi_sum_mental <-
 :::
 
 
-
 ::: {.column width="130%"}
 
 ::: {.panel-tabset}
@@ -6801,7 +6746,6 @@ robinsi_sum_mental <-
 
 ::: {.panel-tabset}
 ### Raw numbers
-
 
 ::: {.cell}
 
@@ -6890,9 +6834,7 @@ robin_effects <-
 :::
 :::
 
-
 ### Weighted percentage
-
 
 ::: {.cell}
 
@@ -6982,9 +6924,7 @@ robin_pct_effects_weight <-
 :::
 
 
-
 ### Unweighted percentage
-
 
 ::: {.cell}
 
@@ -7075,14 +7015,12 @@ robin_pct_effects_unweight <-
 :::
 :::
 
-
 :::
 
 ### Mental health
 
 ::: {.panel-tabset}
 ### Raw numbers
-
 
 ::: {.cell}
 
@@ -7172,9 +7110,7 @@ robin_effects_mental <-
 :::
 
 
-
 ### Weighted percentage
-
 
 ::: {.cell}
 
@@ -7264,9 +7200,7 @@ robin_pct_effects_weight_mental <-
 :::
 
 
-
 ### Unweighted percentage
-
 
 ::: {.cell}
 
@@ -7357,7 +7291,6 @@ robin_pct_effects_unweight_mental <-
 :::
 :::
 
-
 :::
 
 :::
@@ -7367,7 +7300,6 @@ robin_pct_effects_unweight_mental <-
 # Descriptives and Dependence Structures
 
 ## Timeline
-
 
 
 ::: {.cell}
@@ -7415,9 +7347,7 @@ timeline_plot
 
 
 
-
 ## Number effects across effect size metrics 
-
 
 
 ::: {.cell}
@@ -7452,14 +7382,12 @@ group_based_dat |>
 
 
 
-
 ## Average pre-posttest correlation
 
 ::: {.columns}
 
 ::: {.column width="95%"}
 ### Reintegrational outcome
-
 
 ::: {.cell}
 
@@ -7488,12 +7416,10 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
 ### Mental health
-
 
 ::: {.cell}
 
@@ -7522,7 +7448,6 @@ mental_health_dat|>
 :::
 :::
 
-
 :::
 
 :::
@@ -7530,7 +7455,6 @@ mental_health_dat|>
 ## Number of effect size estimates per study
 
 ### Overall per study
-
 
 
 
@@ -7566,13 +7490,11 @@ es_plot_per_study
 
 
 
-
 ### Across outcome subgroups per study
 
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 
 ::: {.cell}
@@ -7605,11 +7527,9 @@ theme(
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -7641,13 +7561,11 @@ theme(
 :::
 :::
 
-
 :::
 
 :::
 
 ### Overall across all studies and outcomes
-
 
 
 ::: {.cell}
@@ -7730,6 +7648,8 @@ n_studies <- sample_size_summary$studies
 ```
 :::
 
+
+
 ::: {#tbl-es-structure .cell .tbl-cap-location-top tbl-cap='Data structure for the all data.'}
 
 ```{.r .cell-code}
@@ -7754,7 +7674,6 @@ kable(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -7788,9 +7707,11 @@ kable(
 </table>
 
 `````
+:::
+:::
 
-:::
-:::
+
+
 
 ::: {.cell}
 
@@ -7815,13 +7736,11 @@ gb_dat |>
 :::
 
 
-
 ### Across outcome subgroups 
 
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 
 ::: {.cell}
@@ -7904,6 +7823,8 @@ n_studies_reint <- sample_size_summary_reint$studies
 ```
 :::
 
+
+
 ::: {#tbl-es-structure-reint .cell .tbl-cap-location-top tbl-cap='Data structure for the reintegrational data.'}
 
 ```{.r .cell-code}
@@ -7928,7 +7849,6 @@ kable(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -7962,15 +7882,12 @@ kable(
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8052,6 +7969,8 @@ n_studies_mental <- sample_size_summary_mental$studies
 ```
 :::
 
+
+
 ::: {#tbl-es-structure-mental .cell .tbl-cap-location-top tbl-cap='Data structure for the mental health data.'}
 
 ```{.r .cell-code}
@@ -8076,7 +7995,6 @@ kable(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8110,10 +8028,8 @@ kable(
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -8122,7 +8038,6 @@ kable(
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -8148,11 +8063,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8178,13 +8091,11 @@ mental_health_dat |>
 :::
 :::
 
-
 :::
 
 :::
 
 ## Data structure by outcome constructs
-
 
 
 ::: {.cell}
@@ -8228,13 +8139,11 @@ label_cat_hist_ridge <- function(data, n_es, variable, label_map, level_order) {
 :::
 
 
-
 The following plot shows the effect size estimates distribution within each outcome construct.
 
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -8293,11 +8202,9 @@ label_cat_hist_ridge(
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8345,7 +8252,6 @@ label_cat_hist_ridge(
 :::
 :::
 
-
 :::
 
 :::
@@ -8358,7 +8264,6 @@ label_cat_hist_ridge(
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-sample-size .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for reintegrational outcomes'}
 
@@ -8396,7 +8301,6 @@ primary_sample_size_descriptive |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8424,15 +8328,12 @@ primary_sample_size_descriptive |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin} 
-
 
 ::: {#tbl-sample-size-mental .cell .tbl-cap-location-top tbl-cap='Distribution of primary study sample sizes at post test for mental health outcomes'}
 
@@ -8470,7 +8371,6 @@ primary_sample_size_descriptive_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8498,10 +8398,8 @@ primary_sample_size_descriptive_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -8512,7 +8410,6 @@ The following plot displays the distribution of study sample sizes at post-test.
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -8533,11 +8430,9 @@ study_sizes_plot_reint
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8558,7 +8453,6 @@ study_sizes_plot_mental
 :::
 :::
 
-
 :::
 
 :::
@@ -8568,7 +8462,6 @@ study_sizes_plot_mental
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-sample-size-treatment .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for reintegrational outcomes'}
 
@@ -8588,7 +8481,6 @@ treatment_sample_size_descriptive |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8616,15 +8508,12 @@ treatment_sample_size_descriptive |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin} 
-
 
 ::: {#tbl-sample-size-treatment-mental .cell .tbl-cap-location-top tbl-cap='Distribution of treatment sample sizes at post test for mental health outcomes'}
 
@@ -8644,7 +8533,6 @@ treatment_sample_size_descriptive_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8672,10 +8560,8 @@ treatment_sample_size_descriptive_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -8686,7 +8572,6 @@ The following plot displays the distribution of treatment sample sizes at post-t
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -8707,11 +8592,9 @@ treatment_sizes_plot_reint
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8732,7 +8615,6 @@ treatment_sizes_plot_mental
 :::
 :::
 
-
 :::
 
 :::
@@ -8742,7 +8624,6 @@ treatment_sizes_plot_mental
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-sample-size-control .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for reintegrational outcomes'}
 
@@ -8762,7 +8643,6 @@ control_sample_size_descriptive |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8790,15 +8670,12 @@ control_sample_size_descriptive |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin} 
-
 
 ::: {#tbl-sample-size-control-mental .cell .tbl-cap-location-top tbl-cap='Distribution of control group sample sizes at post test for mental health outcomes'}
 
@@ -8818,7 +8695,6 @@ control_sample_size_descriptive_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -8846,10 +8722,8 @@ control_sample_size_descriptive_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -8860,7 +8734,6 @@ The following plot displays the distribution of control sample sizes at post-tes
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -8881,11 +8754,9 @@ control_sizes_plot_reint
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -8906,13 +8777,11 @@ control_sizes_plot_mental
 :::
 :::
 
-
 :::
 
 :::
 
 ## Study sample sizes versus number of effect size estimates per study
-
 
 
 ::: {.cell}
@@ -8946,9 +8815,7 @@ ggMarginal(plot, type = "density")
 :::
 
 
-
 # Moderators
-
 
 ::: {.cell}
 
@@ -8994,11 +8861,9 @@ cat_dat_cross <- function(variable, study_id, data) {
 :::
 
 
-
 ## Categorical moderators
 
 ### Outcome measure
-
 
 
 ::: {#tbl-outcome .cell .tbl-cap-location-top tbl-cap='Dependency table for preregistration status (reintegration)'}
@@ -9029,7 +8894,6 @@ outcome_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9161,17 +9025,14 @@ outcome_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 
 
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-outcome-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (reintegration)'}
 
@@ -9201,7 +9062,6 @@ outcome_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9248,15 +9108,12 @@ outcome_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-outcome-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for outcome used for subgroup analysis (mental health)'}
 
@@ -9286,7 +9143,6 @@ outcome_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9333,10 +9189,8 @@ outcome_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -9344,7 +9198,6 @@ outcome_subgroup_dat_cross_mental |>
 
 
 ##### Ridge plot of effect size estimates
-
 
 
 ::: {.cell}
@@ -9385,14 +9238,12 @@ cat_ridge <- function(data, es, v, variable) {
 
 
 
-
 ::: {.columns}
 
 ::: {.column width="95%"}
 
 ::: {.panel-tabset}
 ###### Subgroup analyzed
-
 
 ::: {.cell}
 
@@ -9410,9 +9261,7 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 :::
 
 
-
 ###### Not subgroup analyzed
-
 
 ::: {.cell}
 
@@ -9429,13 +9278,11 @@ cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v
 :::
 :::
 
-
 :::
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -9448,14 +9295,12 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_plan, v = v
 :::
 :::
 
-
 :::
 
 :::
 
 ##### Network plot for outcome construct
 The following plot shows the network structure of outcomes constructs. Each node represent an outcome construct, the edge between a pair of nodes indicates that there is at least one study that examined the contracts between that pair of constructs The width of the edges indicates the number of studies that compare that pair of constructs. The size of the node corresponds to the number of studies measure that construct.  
-
 
 
 
@@ -9551,13 +9396,11 @@ text(
 :::
 
 
-
 ### Diagnosis (schizophrenia vs. rest of the effects)
 
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-diagnosis-subgroup-reint .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (reintegration)'}
 
@@ -9586,7 +9429,6 @@ diagnosis_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9613,15 +9455,12 @@ diagnosis_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-diagnosis-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for diagnosis (mental health)'}
 
@@ -9650,7 +9489,6 @@ diagnosis_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9677,10 +9515,8 @@ diagnosis_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -9690,7 +9526,6 @@ diagnosis_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -9703,11 +9538,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = schizophrenia, v = v
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -9720,7 +9553,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 :::
 :::
 
-
 :::
 
 :::
@@ -9730,7 +9562,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = schizophrenia, v = v
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-cbt-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (reintegration)'}
 
@@ -9759,7 +9590,6 @@ cbt_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9786,15 +9616,12 @@ cbt_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-cbt-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of intervention (mental health)'}
 
@@ -9823,7 +9650,6 @@ cbt_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -9850,10 +9676,8 @@ cbt_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -9862,7 +9686,6 @@ cbt_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -9875,11 +9698,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -9891,7 +9712,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 ![Distribution of effect size estimates, by type of intervention (mental health).](PRIMED-workflow--group-based-_files/figure-html/fig-cbt-ridge-mental-1.png){#fig-cbt-ridge-mental fig-pos='H' width=672}
 :::
 :::
-
 
 :::
 
@@ -9905,7 +9725,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = CBT_int, v = vgt_pop
 
 ::: {.panel-tabset}
 ##### Reintegrational outcomes
-
 
 ::: {.cell}
 
@@ -10014,9 +9833,7 @@ egm_dat_reint |>
 :::
 
 
-
 ##### Mental health outcomes
-
 
 ::: {.cell}
 
@@ -10118,7 +9935,6 @@ egm_dat_mental |>
 :::
 
 
-
 :::
 
 :::
@@ -10131,7 +9947,6 @@ egm_dat_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-test-type-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (reintegration)'}
 
@@ -10164,7 +9979,6 @@ test_type_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10191,15 +10005,12 @@ test_type_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-test-type-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of test (mental health)'}
 
@@ -10233,7 +10044,6 @@ test_type_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10260,10 +10070,8 @@ test_type_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -10272,7 +10080,6 @@ test_type_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -10285,11 +10092,9 @@ cat_ridge(data = test_type_dat, es = gt_pop, variable = test_type, v = vgt_pop)
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -10302,7 +10107,6 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 :::
 :::
 
-
 :::
 
 :::
@@ -10310,7 +10114,6 @@ cat_ridge(data = test_type_dat_mental, es = gt_pop, variable = test_type, v = vg
 ::: {.columns}
 
 ::: {.column width="130%"}
-
 
 ::: {.cell}
 
@@ -10338,7 +10141,6 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 :::
 :::
 
-
 :::
 
 :::
@@ -10347,7 +10149,6 @@ labs(x = "p values", y = "Effect sizes (Hedges' g)")
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-strategy-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (reintegration)'}
 
@@ -10379,7 +10180,6 @@ strategy_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10406,15 +10206,12 @@ strategy_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-strategy-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for estimation strategy (mental health)'}
 
@@ -10446,7 +10243,6 @@ strategy_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10473,10 +10269,8 @@ strategy_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -10485,7 +10279,6 @@ strategy_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -10498,11 +10291,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = analysis_strategy, v
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -10515,7 +10306,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 :::
 :::
 
-
 :::
 
 :::
@@ -10524,7 +10314,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = analysis_strategy, v
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-design-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (reintegration)'}
 
@@ -10555,7 +10344,6 @@ design_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10582,15 +10370,12 @@ design_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-design-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of research design (mental health)'}
 
@@ -10621,7 +10406,6 @@ design_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10648,10 +10432,8 @@ design_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -10660,7 +10442,6 @@ design_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -10673,11 +10454,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = QES_design, v = vgt_
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -10690,7 +10469,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 :::
 :::
 
-
 :::
 
 :::
@@ -10699,7 +10477,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = QES_design, v = vgt_
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-control-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (reintegration)'}
 
@@ -10731,7 +10508,6 @@ control_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10778,15 +10554,12 @@ control_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-control-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table for type of control group (mental health)'}
 
@@ -10815,7 +10588,6 @@ control_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10862,10 +10634,8 @@ control_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -10874,7 +10644,6 @@ control_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -10887,11 +10656,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = control, v = vgt_pop
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -10904,7 +10671,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 :::
 :::
 
-
 :::
 
 :::
@@ -10914,7 +10680,6 @@ cat_ridge(data = mental_health_dat, es = gt_pop, variable = control, v = vgt_pop
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-rob-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (reintegration)'}
 
@@ -10945,7 +10710,6 @@ rob_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -10981,15 +10745,12 @@ rob_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-rob-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table across overall risk of bias assessments (mental health)'}
 
@@ -11020,7 +10781,6 @@ rob_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -11056,10 +10816,8 @@ rob_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -11068,7 +10826,6 @@ rob_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -11081,11 +10838,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = overall_rob, v = vgt
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -11098,7 +10853,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 :::
 :::
 
-
 :::
 
 :::
@@ -11107,7 +10861,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop)
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-prereg-subgroup .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (reintegration)'}
 
@@ -11138,7 +10891,6 @@ prereg_subgroup_dat_cross |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -11165,15 +10917,12 @@ prereg_subgroup_dat_cross |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-prereg-subgroup-mental .cell .tbl-cap-location-top tbl-cap='Dependency table by type of registration (mental health)'}
 
@@ -11204,7 +10953,6 @@ prereg_subgroup_dat_cross_mental |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
  <thead>
@@ -11231,10 +10979,8 @@ prereg_subgroup_dat_cross_mental |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -11243,7 +10989,6 @@ prereg_subgroup_dat_cross_mental |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -11256,11 +11001,9 @@ cat_ridge(data = reintegration_dat, es = gt_pop, variable = prereg_chr, v = vgt_
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -11273,7 +11016,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 :::
 :::
 
-
 :::
 
 :::
@@ -11281,7 +11023,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = prereg_chr, v = vgt_pop)
 ::: {.columns}
 
 ::: {.column width="130%"}
-
 
 ::: {.cell}
 
@@ -11298,7 +11039,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
 :::
 :::
 
-
 :::
 
 :::
@@ -11307,7 +11047,6 @@ cat_ridge(data = gb_dat, es = gt_pop, variable = overall_rob, v = vgt_pop) +
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {#tbl-continuous-characteristics-reint .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (reintegration)'}
 
@@ -11370,7 +11109,6 @@ knitr::kable(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -11468,15 +11206,12 @@ knitr::kable(
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin}
-
 
 ::: {#tbl-continuous-characteristics-mental .cell .tbl-cap-location-top tbl-cap='Distribution of continuous moderators (mental health)'}
 
@@ -11539,7 +11274,6 @@ knitr::kable(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
  <thead>
@@ -11637,17 +11371,14 @@ knitr::kable(
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 :::
 
 ### Age distribution across studies
-
 
 ::: {.cell}
 
@@ -11674,11 +11405,9 @@ density_plot <- function(variable, x_title, data, color = "cornflowerblue") {
 :::
 
 
-
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -11693,11 +11422,9 @@ age_density + expand_limits(x = 70)
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -11712,7 +11439,6 @@ age_density_mental + expand_limits(x = 70)
 :::
 :::
 
-
 :::
 
 :::
@@ -11721,7 +11447,6 @@ age_density_mental + expand_limits(x = 70)
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -11735,11 +11460,9 @@ male_density
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -11753,13 +11476,11 @@ male_density_mental
 :::
 :::
 
-
 :::
 
 :::
 
 ### Total number of sessions
-
 
 
 
@@ -11793,11 +11514,9 @@ hist_plot <- function(variable, x_title, data, color = "cornflowerblue") {
 
 
 
-
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -11811,11 +11530,9 @@ sessions_hist + labs(title = "Reintegration") + theme(plot.title = element_text(
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -11829,7 +11546,6 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 :::
 :::
 
-
 :::
 
 :::
@@ -11838,7 +11554,6 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -11893,11 +11608,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -11951,7 +11664,6 @@ mental_health_dat |>
 :::
 :::
 
-
 ::: 
 
 :::
@@ -11961,7 +11673,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -11984,11 +11695,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -12011,7 +11720,6 @@ mental_health_dat |>
 :::
 :::
 
-
 ::: 
 
 :::
@@ -12020,7 +11728,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -12044,11 +11751,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -12072,7 +11777,6 @@ mental_health_dat |>
 :::
 :::
 
-
 :::
 
 :::
@@ -12091,7 +11795,6 @@ mental_health_dat |>
 
 ::: {.panel-tabset}
 #### Reintegration (across subgroup analyzed outcomes)
-
 
 
 ::: {.cell}
@@ -12128,9 +11831,7 @@ multivariate_pairs_reint
 
 
 
-
 #### Mental health
-
 
 ::: {.cell}
 
@@ -12164,7 +11865,6 @@ multivariate_pairs_mental
 :::
 
 
-
 :::
 
 
@@ -12172,7 +11872,6 @@ multivariate_pairs_mental
 
 ::: {.panel-tabset}
 #### Reintegration (across subgroup analyzed outcomes)
-
 
 
 ::: {.cell}
@@ -12209,9 +11908,7 @@ multivariate_pairs_reint_method
 :::
 
 
-
 #### Mental health
-
 
 ::: {.cell}
 
@@ -12246,7 +11943,6 @@ multivariate_pairs_mental_method
 :::
 
 
-
 :::
 
 
@@ -12254,7 +11950,6 @@ multivariate_pairs_mental_method
 
 ::: {.panel-tabset}
 #### Reintegration (across subgroup analyzed outcomes)
-
 
 
 ::: {.cell}
@@ -12290,9 +11985,7 @@ multivariate_pairs_reint_method_theo
 :::
 
 
-
 #### Mental health
-
 
 ::: {.cell}
 
@@ -12331,7 +12024,6 @@ multivariate_pairs_mental_method_theo
 :::
 
 
-
 :::
 
 :::
@@ -12350,7 +12042,6 @@ multivariate_pairs_mental_method_theo
 
 ::: {.panel-tabset}
 #### Across all outcomes
-
 
 ::: {#tbl-cor-matix-reint .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all reintegration outcomes.'}
 
@@ -12451,7 +12142,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -13421,15 +13111,12 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 #### Alcohol and drug abuse/misuse
 Excluded factors due to no variation: type of sample (schizophania vs. rest), low risk of bias.
-
 
 ::: {#tbl-cor-matix-alcohol .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on alcohol outcome only.'}
 
@@ -13520,7 +13207,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -14013,16 +13699,13 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 
 #### Hope, empowerment & self-efficacy
 Excluded factors due to no variation: type of intervention (CBT vs. rest) and type of test.
-
 
 ::: {#tbl-cor-matix-hope .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on hope, empowerment & self-efficacy outcomes only.'}
 
@@ -14113,7 +13796,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -14651,15 +14333,12 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 #### Social functioning (degree of impairment)
 Excluded factors due to no appearance: waitlist-only
-
 
 ::: {#tbl-cor-matix-social .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on social functioning outcomes only.'}
 
@@ -14753,7 +14432,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -15438,15 +15116,12 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 #### Wellbeing and quality of life
 Excluded factors due to no appearance: waitlist-only
-
 
 ::: {#tbl-cor-matix-wellbeing .cell .tbl-cap-location-top tbl-cap='Correlation matrix based on wellbeing and quality of life outcomes only.'}
 
@@ -15541,7 +15216,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -16279,16 +15953,13 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 :::
 
 ### Mental health outcomes
-
 
 
 ::: {#tbl-cor-matix-mental .cell .tbl-cap-location-top tbl-cap='Correlation matrix across all mental health outcomes.'}
@@ -16391,7 +16062,6 @@ kbl(
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:100%; overflow-x: scroll; width:100%; "><table class="table table-striped table-hover" style="font-size: 10px; margin-left: auto; margin-right: auto;">
  <thead>
@@ -17361,10 +17031,8 @@ kbl(
 </table></div>
 
 `````
-
 :::
 :::
-
 
 
 :::
@@ -17382,7 +17050,6 @@ This forest plot shows the within- and between study variation of standard error
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17406,11 +17073,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17434,7 +17099,6 @@ mental_health_dat |>
 :::
 :::
 
-
 :::
 
 :::
@@ -17443,7 +17107,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17467,11 +17130,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17495,7 +17156,6 @@ mental_health_dat |>
 :::
 :::
 
-
 :::
 
 :::
@@ -17504,7 +17164,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17552,11 +17211,9 @@ ISCW_plot
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell fig.topcaption='true'}
 
@@ -17596,7 +17253,6 @@ ISCW_plot_mental
 :::
 :::
 
-
 :::
 
 :::
@@ -17606,7 +17262,6 @@ ISCW_plot_mental
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -17625,11 +17280,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -17648,7 +17301,6 @@ mental_health_dat |>
 :::
 :::
 
-
 :::
 
 :::
@@ -17657,7 +17309,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -17693,11 +17344,9 @@ reintegration_dat |>
 :::
 :::
 
-
 :::
 
 ::: {.column-margin}
-
 
 ::: {.cell}
 
@@ -17734,7 +17383,6 @@ mental_health_dat |>
 :::
 
 
-
 :::
 
 :::
@@ -17745,7 +17393,6 @@ mental_health_dat |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell .tbl-cap-location-top}
 
@@ -17763,7 +17410,6 @@ reintegration_dat$gt_pop |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>Marginal distribution of effect size estimates</caption>
@@ -17792,15 +17438,12 @@ reintegration_dat$gt_pop |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
 ::: {.column-margin} 
-
 
 ::: {.cell .tbl-cap-location-top}
 
@@ -17818,7 +17461,6 @@ mental_health_dat$gt_pop |>
 ```
 
 ::: {.cell-output-display}
-
 `````{=html}
 <table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>Marginal distribution of effect size estimates</caption>
@@ -17847,10 +17489,8 @@ mental_health_dat$gt_pop |>
 </table>
 
 `````
-
 :::
 :::
-
 
 :::
 
@@ -17861,7 +17501,6 @@ mental_health_dat$gt_pop |>
 ::: {.columns}
 
 ::: {.column width="95%"}
-
 
 ::: {.cell}
 
@@ -17888,11 +17527,9 @@ es_dist_plot
 :::
 :::
 
-
 :::
 
 ::: {.column-margin} 
-
 
 ::: {.cell}
 
@@ -17919,7 +17556,6 @@ es_dist_plot_mental
 :::
 :::
 
-
 :::
 
 :::
@@ -17928,7 +17564,6 @@ es_dist_plot_mental
 
 ::: {.panel-tabset}
 ## Reintegrational outcomes
-
 
 ::: {.cell}
 
@@ -17966,9 +17601,7 @@ reintegration_outcome_plot <-
 
 
 
-
 ## Mental health outcomes
-
 
 ::: {.cell}
 
@@ -18002,7 +17635,6 @@ mental_health_outcomes_plot <-
 :::
 
 
-
 :::
 
 
@@ -18010,7 +17642,6 @@ mental_health_outcomes_plot <-
 # Colophon
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false #session-info}
-
 
 
 
@@ -18028,105 +17659,101 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-11
- pandoc   3.4 @ C:/RStudio-2025.05.1-513/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
- quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
+ date     2025-09-23
+ pandoc   3.6.3 @ C:/RStudio-2025.09.0-387/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   NA @ C:\\RSTUDI~1.0-3\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
- ! package      * version    date (UTC) lib source
- P base64enc      0.1-3      2015-07-28 [?] CRAN (R 4.5.0)
- P cli            3.6.5      2025-04-23 [?] CRAN (R 4.5.0)
- P clubSandwich * 0.6.0      2025-04-01 [?] CRAN (R 4.5.0)
- P data.table     1.17.6     2025-06-17 [?] CRAN (R 4.5.0)
- P digest         0.6.37     2024-08-19 [?] CRAN (R 4.5.0)
- P dplyr        * 1.1.4      2023-11-17 [?] CRAN (R 4.5.0)
- P evaluate       1.0.4      2025-06-18 [?] CRAN (R 4.5.0)
- P farver         2.1.2      2024-05-13 [?] CRAN (R 4.5.0)
- P fastDummies  * 1.7.5      2025-01-20 [?] CRAN (R 4.5.0)
- P fastmap        1.2.0      2024-05-15 [?] CRAN (R 4.5.0)
- P forcats      * 1.0.0      2023-01-29 [?] CRAN (R 4.5.0)
- P generics       0.1.4      2025-05-09 [?] CRAN (R 4.5.0)
- P GGally       * 2.2.1      2024-02-14 [?] CRAN (R 4.5.0)
- P ggExtra      * 0.10.1     2023-08-21 [?] CRAN (R 4.5.0)
- P ggh4x        * 0.3.1      2025-05-30 [?] CRAN (R 4.5.0)
- P ggplot2      * 3.5.2      2025-04-09 [?] CRAN (R 4.5.0)
- P ggrepel      * 0.9.6      2024-09-07 [?] CRAN (R 4.5.0)
- P ggridges     * 0.5.6      2024-01-23 [?] CRAN (R 4.5.0)
- P ggstats        0.9.0      2025-03-10 [?] CRAN (R 4.5.0)
- P glue           1.8.0      2024-09-30 [?] CRAN (R 4.5.0)
- P gtable         0.3.6      2024-10-25 [?] CRAN (R 4.5.0)
- P hms            1.1.3      2023-03-21 [?] CRAN (R 4.5.0)
- P htmltools      0.5.8.1    2024-04-04 [?] CRAN (R 4.5.0)
- P htmlwidgets    1.6.4      2023-12-06 [?] CRAN (R 4.5.0)
- P httpuv         1.6.16     2025-04-16 [?] CRAN (R 4.5.0)
- P igraph       * 2.1.4      2025-01-23 [?] CRAN (R 4.5.0)
- P janitor      * 2.2.1      2024-12-22 [?] CRAN (R 4.5.0)
- P jsonlite       2.0.0      2025-03-27 [?] CRAN (R 4.5.0)
- P kableExtra   * 1.4.0      2024-01-24 [?] CRAN (R 4.5.0)
- P knitr        * 1.50       2025-03-16 [?] CRAN (R 4.5.0)
- P labeling       0.4.3      2023-08-29 [?] CRAN (R 4.5.0)
- P later          1.4.2      2025-04-08 [?] CRAN (R 4.5.0)
- P lattice        0.22-7     2025-04-02 [?] CRAN (R 4.5.1)
- P lifecycle      1.0.4      2023-11-07 [?] CRAN (R 4.5.0)
- P lubridate    * 1.9.4      2024-12-08 [?] CRAN (R 4.5.0)
- P magrittr       2.0.3      2022-03-30 [?] CRAN (R 4.5.0)
- P mathjaxr       1.8-0      2025-04-30 [?] CRAN (R 4.5.0)
- P Matrix       * 1.7-3      2025-03-11 [?] CRAN (R 4.5.1)
- P metadat      * 1.4-0      2025-02-04 [?] CRAN (R 4.5.0)
- P metafor      * 4.8-0      2025-01-28 [?] CRAN (R 4.5.0)
- P MetBrewer    * 0.2.0      2022-03-21 [?] CRAN (R 4.5.0)
- P mgcv           1.9-3      2025-04-04 [?] CRAN (R 4.5.1)
- P mime           0.13       2025-03-17 [?] CRAN (R 4.5.0)
- P miniUI         0.1.2      2025-04-17 [?] CRAN (R 4.5.0)
- P nlme           3.1-168    2025-03-31 [?] CRAN (R 4.5.1)
- P numDeriv     * 2016.8-1.1 2019-06-06 [?] CRAN (R 4.5.0)
- P patchwork    * 1.3.1      2025-06-21 [?] CRAN (R 4.5.0)
- P pillar         1.10.2     2025-04-05 [?] CRAN (R 4.5.0)
- P pkgconfig      2.0.3      2019-09-22 [?] CRAN (R 4.5.0)
- P plyr           1.8.9      2023-10-02 [?] CRAN (R 4.5.0)
- P promises       1.3.3      2025-05-29 [?] CRAN (R 4.5.0)
- P purrr        * 1.0.4      2025-02-05 [?] CRAN (R 4.5.0)
- P R6             2.6.1      2025-02-15 [?] CRAN (R 4.5.0)
- P RColorBrewer   1.1-3      2022-04-03 [?] CRAN (R 4.5.0)
- P Rcpp           1.0.14     2025-01-12 [?] CRAN (R 4.5.0)
- P readr        * 2.1.5      2024-01-10 [?] CRAN (R 4.5.0)
-   renv           1.1.5      2025-07-24 [1] CRAN (R 4.5.1)
- P repr           1.1.7      2024-03-22 [?] CRAN (R 4.5.0)
- P rlang        * 1.1.6      2025-04-11 [?] CRAN (R 4.5.0)
- P rmarkdown      2.29       2024-11-04 [?] CRAN (R 4.5.0)
- P rstudioapi     0.17.1     2024-10-22 [?] CRAN (R 4.5.0)
- P sandwich       3.1-1      2024-09-15 [?] CRAN (R 4.5.0)
- P scales         1.4.0      2025-04-24 [?] CRAN (R 4.5.0)
- P sessioninfo    1.2.3      2025-02-05 [?] CRAN (R 4.5.0)
- P shiny          1.11.0     2025-06-24 [?] CRAN (R 4.5.0)
- P skimr        * 2.1.5      2022-12-23 [?] CRAN (R 4.5.0)
- P snakecase      0.11.1     2023-08-27 [?] CRAN (R 4.5.0)
- P stringi        1.8.7      2025-03-27 [?] CRAN (R 4.5.0)
- P stringr      * 1.5.1      2023-11-14 [?] CRAN (R 4.5.0)
- P svglite        2.2.1      2025-05-12 [?] CRAN (R 4.5.0)
- P systemfonts    1.2.3      2025-04-30 [?] CRAN (R 4.5.0)
- P textshaping    1.0.1      2025-05-01 [?] CRAN (R 4.5.0)
- P tibble       * 3.3.0      2025-06-08 [?] CRAN (R 4.5.0)
- P tidyr        * 1.3.1      2024-01-24 [?] CRAN (R 4.5.0)
- P tidyselect     1.2.1      2024-03-11 [?] CRAN (R 4.5.0)
- P tidyverse    * 2.0.0      2023-02-22 [?] CRAN (R 4.5.0)
- P timechange     0.3.0      2024-01-18 [?] CRAN (R 4.5.0)
- P tzdb           0.5.0      2025-03-15 [?] CRAN (R 4.5.0)
- P utf8           1.2.6      2025-06-08 [?] CRAN (R 4.5.0)
- P vctrs          0.6.5      2023-12-01 [?] CRAN (R 4.5.0)
- P viridisLite    0.4.2      2023-05-02 [?] CRAN (R 4.5.0)
- P withr          3.0.2      2024-10-28 [?] CRAN (R 4.5.0)
- P xfun           0.52       2025-04-02 [?] CRAN (R 4.5.0)
- P xml2           1.3.8      2025-03-14 [?] CRAN (R 4.5.0)
- P xtable         1.8-4      2019-04-21 [?] CRAN (R 4.5.0)
- P yaml           2.3.10     2024-07-26 [?] CRAN (R 4.5.0)
- P zoo            1.8-14     2025-04-10 [?] CRAN (R 4.5.0)
+ package      * version    date (UTC) lib source
+ base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.5.0)
+ cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.1)
+ clubSandwich * 0.6.1      2025-07-30 [1] CRAN (R 4.5.1)
+ data.table     1.17.8     2025-07-10 [1] CRAN (R 4.5.1)
+ digest         0.6.37     2024-08-19 [1] CRAN (R 4.5.1)
+ dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.5.1)
+ evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.5.1)
+ farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.1)
+ fastDummies  * 1.7.5      2025-01-20 [1] CRAN (R 4.5.1)
+ fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.1)
+ forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.5.1)
+ generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.1)
+ GGally       * 2.4.0      2025-08-23 [1] CRAN (R 4.5.1)
+ ggExtra      * 0.11.0     2025-09-01 [1] CRAN (R 4.5.1)
+ ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.5.1)
+ ggplot2      * 4.0.0      2025-09-11 [1] CRAN (R 4.5.1)
+ ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.1)
+ ggridges     * 0.5.7      2025-08-27 [1] CRAN (R 4.5.1)
+ ggstats        0.11.0     2025-09-15 [1] CRAN (R 4.5.1)
+ glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.1)
+ gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.1)
+ hms            1.1.3      2023-03-21 [1] CRAN (R 4.5.1)
+ htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.5.1)
+ htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.1)
+ httpuv         1.6.16     2025-04-16 [1] CRAN (R 4.5.1)
+ igraph       * 2.1.4      2025-01-23 [1] CRAN (R 4.5.1)
+ janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.5.1)
+ jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.1)
+ kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.5.1)
+ knitr        * 1.50       2025-03-16 [1] CRAN (R 4.5.1)
+ labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.0)
+ later          1.4.4      2025-08-27 [1] CRAN (R 4.5.1)
+ lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.1)
+ lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.1)
+ lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.1)
+ magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.1)
+ mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.1)
+ Matrix       * 1.7-3      2025-03-11 [1] CRAN (R 4.5.1)
+ metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.1)
+ metafor      * 4.9-18     2025-09-22 [1] Github (wviechtb/metafor@6cc5a0a)
+ MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.5.1)
+ mgcv           1.9-3      2025-04-04 [1] CRAN (R 4.5.1)
+ mime           0.13       2025-03-17 [1] CRAN (R 4.5.0)
+ miniUI         0.1.2      2025-04-17 [1] CRAN (R 4.5.1)
+ nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.1)
+ numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.0)
+ patchwork    * 1.3.2      2025-08-25 [1] CRAN (R 4.5.1)
+ pillar         1.11.1     2025-09-17 [1] CRAN (R 4.5.1)
+ pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.1)
+ promises       1.3.3      2025-05-29 [1] CRAN (R 4.5.1)
+ purrr        * 1.1.0      2025-07-10 [1] CRAN (R 4.5.1)
+ R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.1)
+ RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.0)
+ Rcpp           1.1.0      2025-07-02 [1] CRAN (R 4.5.1)
+ readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.5.1)
+ repr           1.1.7      2024-03-22 [1] CRAN (R 4.5.1)
+ rlang        * 1.1.6      2025-04-11 [1] CRAN (R 4.5.1)
+ rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.5.1)
+ rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.5.1)
+ S7             0.2.0      2024-11-07 [1] CRAN (R 4.5.1)
+ sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.1)
+ scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.1)
+ sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.1)
+ shiny          1.11.1     2025-07-03 [1] CRAN (R 4.5.1)
+ skimr        * 2.2.1      2025-07-26 [1] CRAN (R 4.5.1)
+ snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.5.1)
+ stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.0)
+ stringr      * 1.5.2      2025-09-08 [1] CRAN (R 4.5.1)
+ svglite        2.2.1      2025-05-12 [1] CRAN (R 4.5.1)
+ systemfonts    1.2.3      2025-04-30 [1] CRAN (R 4.5.1)
+ textshaping    1.0.3      2025-09-02 [1] CRAN (R 4.5.1)
+ tibble       * 3.3.0      2025-06-08 [1] CRAN (R 4.5.1)
+ tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.5.1)
+ tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.1)
+ tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.1)
+ timechange     0.3.0      2024-01-18 [1] CRAN (R 4.5.1)
+ tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.1)
+ utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.1)
+ vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.1)
+ viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.5.1)
+ withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.1)
+ xfun           0.53       2025-08-19 [1] CRAN (R 4.5.1)
+ xml2           1.4.0      2025-08-20 [1] CRAN (R 4.5.1)
+ xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.1)
+ yaml           2.3.10     2024-07-26 [1] CRAN (R 4.5.0)
+ zoo            1.8-14     2025-04-10 [1] CRAN (R 4.5.1)
 
- [1] C:/Users/B199526/Desktop/GitHub repos/Group-based-interventions/renv/library/windows/R-4.5/x86_64-w64-mingw32
- [2] C:/Users/B199526/AppData/Local/R/cache/R/renv/sandbox/windows/R-4.5/x86_64-w64-mingw32/47177883
-
+ [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.1/library
  * ── Packages attached to the search path.
- P ── Loaded and on-disk path mismatch.
 
 ──────────────────────────────────────────────────────────────────────────────────────────────────
 ```
@@ -18134,7 +17761,6 @@ mental_health_outcomes_plot <-
 
 :::
 :::
-
 
 
 :::
