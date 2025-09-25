@@ -37,30 +37,6 @@ bibliography: bibliography.bib
 ---
 
 
-::: {.cell}
-<style type="text/css">
-
-.panel-tabset .nav-tabs {
-  border-bottom: none;
-}
-
-.panel-tabset .nav-tabs .nav-link {
-  border: 1px solid #555;
-  border-radius: 5px 5px 0 0;
-  margin-right: 5px;
-  padding: 6px 12px;
-  border-bottom: none; 
-}
-
-/* Style for the active tab */
-.panel-tabset .nav-tabs .nav-link.active {
-  background-color: #F5F5F5; 
-  border-bottom: 1px solid white; 
-}
-</style>
-:::
-
-
 # Introduction 
 
 This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
