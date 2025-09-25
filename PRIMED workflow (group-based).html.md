@@ -2,7 +2,7 @@
 title: "PRIMED Workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-23"
+date: "2025-09-25"
 format:
   html: 
     keep-md: true
@@ -13,6 +13,8 @@ format:
     code-summary: "Show the code"
     toc: true
     toc-location: left
+    toc-depth: 3 
+    toc-expand: 2
 pdf-engine: pdflatex
 execute: 
   echo: true
@@ -135,7 +137,7 @@ gb_dat <-
     es_id = 1:n(),
     esid = es_id,
     
-     # Main covariate adjusted effect cluster adjusted 
+    # Main covariate adjusted effect cluster adjusted 
     gt_pop = if_else(!is.na(gt_post), gt_post, NA_real_),
     gt_pop = if_else(!is.na(gt_DD), gt_DD, gt_pop),
     gt_pop = if_else(!is.na(gt_adj), gt_adj, gt_pop),
@@ -250,6 +252,8 @@ gb_dat <-
     
     inv_sample_size = (1/N_t + 1/N_c),
     
+    posttest_only = if_else(ppcor_method == "Posttest only", "Posttest only ES", "Pre-posttest adj. ES", missing = "Pre-posttest adj. ES"),
+    
     # ESS = round(4/vgt), # Using cluster bias corrected sampling variance
     
     studyid = if_else(authors == "Gonzalez & Prihoda", 500, studyid), 
@@ -266,54 +270,54 @@ gb_dat <-
     assessment = if_else(assessment == "Self  assesment", "Self assesment", assessment),
     
     randomization = if_else(randomization == "Simple Block Randomization", "Block randomized",
-                           randomization),
+                            randomization),
     randomization = if_else(randomization == "Simple with permuted blocks, stratified by site",
-                           "Stratified randomization", randomization),
-   
+                            "Stratified randomization", randomization),
+    
     randomization = if_else(randomization == "Stratified?",
-                           "Stratified randomization", randomization),
-   
+                            "Stratified randomization", randomization),
+    
     randomization = if_else(is.na(randomization) & studyid == 102, 
                             "Stratified randomization", randomization),
-   
+    
     randomization = if_else(randomization == "Ratio and block randomized",
-                           "Block randomized", randomization),
-   
+                            "Block randomized", randomization),
+    
     randomization = if_else(randomization == "Block randomized stratified by site",
-                           "Block randomized", randomization),
+                            "Block randomized", randomization),
     
     randomization = if_else(randomization == "Resticted and adapted randomization (i.e. minimization)",
-                           "Stratified randomization", randomization),
-   
+                            "Stratified randomization", randomization),
+    
     randomization = if_else(randomization == "Unequal simple randomization",
-                           "Block randomized", randomization),
-   
+                            "Block randomized", randomization),
+    
     randomization = if_else(randomization == "Within-site basis and unequal allocation ratio",
-                           "Stratified randomization", randomization),
+                            "Stratified randomization", randomization),
     
     trt_type = if_else(trt_type == "Group-based  Cognitive Behavioral Therapy", 
-                      "Group based Cognitive Behavioural Therapy", trt_type),
+                       "Group based Cognitive Behavioural Therapy", trt_type),
     trt_type = if_else(trt_type == "Group-based Cognitive Behavioral Therapy", 
-                      "Group based Cognitive Behavioural Therapy", trt_type),
+                       "Group based Cognitive Behavioural Therapy", trt_type),
     trt_type = if_else(trt_type =="Group psychoeducation & Social skill training", 
-                      "Group psychoeducation & Social Skill Training", trt_type),
+                       "Group psychoeducation & Social Skill Training", trt_type),
     trt_type = if_else(trt_type =="Group psychoeducation", 
-                      "Group Psychoeducation", trt_type),
+                       "Group Psychoeducation", trt_type),
     trt_type = if_else(trt_type =="Group psychoeducation & Social Skill Training", 
-                      "Group Psychoeducation & Social Skill Training", trt_type),
+                       "Group Psychoeducation & Social Skill Training", trt_type),
     trt_type = if_else(trt_type =="Education and Illness Management", 
-                      "Group Psychoeducation & Social Skill Training", trt_type),
+                       "Group Psychoeducation & Social Skill Training", trt_type),
     trt_type = if_else(trt_type =="Illness management", 
-                      "Illness Management", trt_type),
+                       "Illness Management", trt_type),
     
     sample_factors = if_else(sample_factors =="Older with depression and anxiety", 
-                            "Mixed", sample_factors), 
+                             "Mixed", sample_factors), 
     sample_factors = if_else(sample_factors =="All suffered from severe mental illness", 
-                            "Shared Social problem(s)/challenge(s)", sample_factors),
+                             "Shared Social problem(s)/challenge(s)", sample_factors),
     sample_factors = if_else(sample_factors =="Shared origin and psychological distress", 
-                            "Mixed", sample_factors),
+                             "Mixed", sample_factors),
     sample_factors = if_else(sample_factors =="persons with major psychiatric problems", 
-                            "Shared Social problem(s)/challenge(s)", sample_factors),
+                             "Shared Social problem(s)/challenge(s)", sample_factors),
     
     analysis_plan = if_else(analysis_plan == "Unused", "Unused outcomes", analysis_plan), 
     analysis_plan = case_match(
@@ -335,69 +339,75 @@ gb_dat <-
     test_type = if_else(test_type == "Self-reported via diagnostic interview", "Self-reported", test_type), 
     
     measure_type = if_else(measure_type == "Pre-post with controls", "Post-intervention", measure_type),
-   
+    
     cluster_treatment = if_else(cluster_treatment == "Hierarchical mixed models", "Mixed-model", cluster_treatment),
-   
+    
     cluster_treatment = if_else(cluster_treatment == "Multilevel analysis and clustered standard errors", 
-                        "Multilevel analysis", cluster_treatment),
-   
+                                "Multilevel analysis", cluster_treatment),
+    
     rob_tool = if_else(rob_tool == "Rob2", "RoB2", rob_tool),
     rob_tool = if_else(rob_tool == "Rob2 CRCT", "RoB2", rob_tool),
-   
+    
     analysis_strategy = if_else(str_detect(study, "Michalak"), "ITT", analysis_strategy),
-   
+    
     conventional = if_else(protocol != "Yes", 1, 0),
     # Smith et al. 2021 drew on a retropective protocol
     conventional = if_else(study == "Smith et al. 2021", 1, conventional),
     prereg_chr = if_else(conventional == 0, "Preregistered", "Not preregistered"),
-   
-   # For publication/selection/small study bias testing
+    
+    # For publication/selection/small study bias testing
     Wse = sqrt(Wgt),
     t_i = gt/sqrt(Wgt),
-   
-   outcome_construct = case_match(
-     analysis_plan,
-     # Mental health outcomes
-     c("General mental health", "Anxiety",
-       "Depression", "Symptoms of psychosis") ~ "Mental health outcome",
-     .default = "Reintegrational outcome"
-   ),
-   
-   # Changing to numeric vectors
-   across(c(age_mean_sample:male_pct_t, sessions_per_week), ~as.numeric(.x)),
-   
-   # Make weighted mean weighted by the group sample size 
-   age_mean = if_else(
-     is.na(age_mean_sample), 
-     (age_mean_t*N_t + age_mean_c*N_c)/(N_t + N_c), 
-     age_mean_sample
+    
+    ESS_t = round(N_t/(1+(avg_cl_size - 1)*0.1)),
+    ESS_c = round(N_c/(1+(avg_cl_size - 1)*0.1)),
+    ESS_total = round(N_total/(1+(avg_cl_size - 1)*0.1)),
+    
+    outcome_construct = case_match(
+      analysis_plan,
+      # Mental health outcomes
+      c("General mental health", "Anxiety",
+        "Depression", "Symptoms of psychosis") ~ "Mental health outcome",
+      .default = "Reintegrational outcome"
     ),
-   
-   male_pct = if_else(
-     is.na(male_pct_sample),
-     (male_pct_t*N_t + male_pct_c*N_c)/(N_t + N_c),
-     male_pct_sample
-   ),
-   
-   # duration_weeks has extract errors
-   duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
-   total_number_of_sessions = round(sessions_per_week * duration_in_weeks),
-   
-   CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
-   
-   QES_design = if_else(design == "QES", "QES", "RCT"),
-   
-   overall_rob = case_match(
-     Overall, 
-     c("Serious", "High") ~ "Serious/High",
-     c("Some concerns", "Moderate") ~ "Some concerns/Moderate",
-     .default = "Low"
+    
+    # Changing to numeric vectors
+    across(c(age_mean_sample:male_pct_t, sessions_per_week), ~as.numeric(.x)),
+    
+    # Make weighted mean weighted by the group sample size 
+    age_mean = if_else(
+      is.na(age_mean_sample), 
+      (age_mean_t*N_t + age_mean_c*N_c)/(N_t + N_c), 
+      age_mean_sample
     ),
-   
-   overall_rob = factor(overall_rob, levels = c("Low", "Some concerns/Moderate", "Serious/High")),
-   
-   across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0))
-   
+    
+    male_pct = if_else(
+      is.na(male_pct_sample),
+      (male_pct_t*N_t + male_pct_c*N_c)/(N_t + N_c),
+      male_pct_sample
+    ),
+    
+    # duration_weeks has extract errors
+    duration_in_weeks = time_from_baseline_weeks - time_after_end_intervention_weeks,
+    total_number_of_sessions = round(sessions_per_week * duration_in_weeks),
+    
+    CBT_int = if_else(trt_group == "group-based CBT", "CBT", "Other"), 
+    
+    QES_design = if_else(design == "QES", "QES", "RCT"),
+    
+    overall_rob = case_match(
+      Overall, 
+      c("Serious", "High") ~ "Serious/High",
+      c("Some concerns", "Moderate") ~ "Some concerns/Moderate",
+      .default = "Low"
+    ),
+    
+    overall_rob = factor(overall_rob, levels = c("Low", "Some concerns/Moderate", "Serious/High")),
+    
+    across(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder, ~ replace_na(.x, 0)),
+    handle_multilevel = as.numeric(if_any(adj_fct_DD:adj_fct_reg, ~ grepl("gamma", .))),
+    handle_multilevel = if_else(handle_multilevel == 1, "Yes", "No")
+    
  ) |> 
   rowwise() |> 
   mutate(
@@ -5332,7 +5342,13 @@ rob_pct_studies <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   )  + 
   facetted_pos_scales(
     x = list(
@@ -5373,7 +5389,12 @@ rob_pct_effects <-
   theme_bw() + 
   theme(
     legend.position = "bottom",
-    strip.text.x = element_blank()
+    strip.text.x = element_blank(),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) + 
   facetted_pos_scales(
     x = list(
@@ -5382,8 +5403,9 @@ rob_pct_effects <-
     )
   )
 
-
+#png(filename = "Figures/rob2_reint.png", width = 12, height = 7, units = "in", res = 600)
 rob_pct_studies / rob_pct_effects
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -5602,7 +5624,13 @@ rob_pct_studies_mental <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   )  + 
   facetted_pos_scales(
     x = list(
@@ -5643,11 +5671,17 @@ rob_pct_effects_mental <-
   theme_bw() + 
   theme(
     legend.position = "bottom",
-    strip.text.x = element_blank()
+    strip.text.x = element_blank(),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
-
+#png(filename = "Figures/rob2_mental.png", width = 12, height = 7, units = "in", res = 600)
 rob_pct_studies_mental / rob_pct_effects_mental
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -6783,7 +6817,13 @@ robin_studies <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 robin_effects <- 
@@ -6821,12 +6861,19 @@ robin_effects <-
   theme(
     legend.position = "bottom",
     axis.ticks.y = element_blank(),
-    axis.text.y = element_blank()
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 
+#png(filename = "Figures/ROBINSI_reint.png", width = 12, height = 5, units = "in", res = 600)
 (robin_studies + robin_effects) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -7058,7 +7105,13 @@ robin_studies_mental <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    strip.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 robin_effects_mental <- 
@@ -7096,12 +7149,18 @@ robin_effects_mental <-
   theme(
     legend.position = "bottom",
     axis.ticks.y = element_blank(),
-    axis.text.y = element_blank()
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
-
+#png(filename = "Figures/RONINSI_mental.png", width = 12, height = 5, units = "in", res = 600)
 (robin_studies_mental + robin_effects_mental) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -17659,7 +17718,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-23
+ date     2025-09-25
  pandoc   3.6.3 @ C:/RStudio-2025.09.0-387/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.0-3\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 

@@ -13,6 +13,8 @@ format:
     code-summary: "Show the code"
     toc: true
     toc-location: left
+    toc-depth: 3 
+    toc-expand: 2
 pdf-engine: pdflatex
 execute: 
   echo: true
@@ -814,7 +816,13 @@ rob_pct_studies <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   )  + 
   facetted_pos_scales(
     x = list(
@@ -855,7 +863,12 @@ rob_pct_effects <-
   theme_bw() + 
   theme(
     legend.position = "bottom",
-    strip.text.x = element_blank()
+    strip.text.x = element_blank(),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) + 
   facetted_pos_scales(
     x = list(
@@ -864,8 +877,9 @@ rob_pct_effects <-
     )
   )
 
-
+#png(filename = "Figures/rob2_reint.png", width = 12, height = 7, units = "in", res = 600)
 rob_pct_studies / rob_pct_effects
+#dev.off()
 
 ```
 
@@ -1081,7 +1095,13 @@ rob_pct_studies_mental <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "none"
+    legend.position = "none",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   )  + 
   facetted_pos_scales(
     x = list(
@@ -1122,12 +1142,17 @@ rob_pct_effects_mental <-
   theme_bw() + 
   theme(
     legend.position = "bottom",
-    strip.text.x = element_blank()
+    strip.text.x = element_blank(),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
-
+#png(filename = "Figures/rob2_mental.png", width = 12, height = 7, units = "in", res = 600)
 rob_pct_studies_mental / rob_pct_effects_mental
-
+#dev.off()
 ```
 
 
@@ -2240,7 +2265,13 @@ robin_studies <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    strip.text.x = element_text(size = 14),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 robin_effects <- 
@@ -2278,13 +2309,19 @@ robin_effects <-
   theme(
     legend.position = "bottom",
     axis.ticks.y = element_blank(),
-    axis.text.y = element_blank()
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 
+#png(filename = "Figures/ROBINSI_reint.png", width = 12, height = 5, units = "in", res = 600)
 (robin_studies + robin_effects) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
-
+#dev.off()
 ```
 ### Weighted percentage
 ```{r robins-i-weighted}
@@ -2513,7 +2550,13 @@ robin_studies_mental <-
   guides(fill = guide_legend(reverse = TRUE)) + 
   theme_bw() + 
   theme(
-    legend.position = "bottom"
+    legend.position = "bottom",
+    strip.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
 robin_effects_mental <- 
@@ -2551,13 +2594,18 @@ robin_effects_mental <-
   theme(
     legend.position = "bottom",
     axis.ticks.y = element_blank(),
-    axis.text.y = element_blank()
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
   ) 
 
-
+#png(filename = "Figures/RONINSI_mental.png", width = 12, height = 5, units = "in", res = 600)
 (robin_studies_mental + robin_effects_mental) +
   plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
-
+#dev.off()
 ```
 
 ### Weighted percentage

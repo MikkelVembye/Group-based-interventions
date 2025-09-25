@@ -1,0 +1,51 @@
+---
+title: "Sensitivity analyses for Group-Based Review"
+author: "Mikkel H. Vembye"
+subtitle: ""
+date: "`r Sys.Date()`"
+format:
+  html: 
+    keep-md: true
+    self-contained: true
+    grid: 
+      margin-width: 350px
+    code-fold: true
+    code-summary: "Show the code"
+    toc: true
+    toc-location: left
+pdf-engine: pdflatex
+execute: 
+  echo: true
+  warning: false
+  message: false
+knitr:
+  opts_chunk: 
+    fig.pos: "H"
+    fig.retina: 2
+    cache: FALSE
+    R.options:
+      knitr.graphics.auto_pdf: true
+      width: 100
+      knitr.kable.NA: "-"
+      dplyr.summarise.inform: FALSE
+      pillar.print_max: 50
+reference-location: margin
+citation-location: margin
+bibliography: bibliography.bib  
+---
+
+[@Dalgaard2025]
+
+# Colophon
+
+::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false #session-info}
+
+
+```{r colophon}
+#| code-fold: false
+#| echo: false 
+sessioninfo::session_info()
+```
+
+:::
+
