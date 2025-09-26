@@ -1,7 +1,8 @@
 library(dplyr)
 library(tibble)
 
-data <- data.frame(
+Halperin2000 <- 
+  tibble(
   outcome = c("BSPS", "SIAS", "CDSS", "GSI", "Q-LES-Q", "AUDIT"),
   
   N_t = 7,

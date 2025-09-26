@@ -3888,6 +3888,150 @@ dat <-
   bind_rows(Hagen2005_est) 
 ```
 
+### **Halperin et al. [-@Halperin2000] (Quality-checked)**
+
+```{r Halperin et al 2000}
+
+Halperin2000 <- 
+  tibble(
+  outcome = c("BSPS", "SIAS", "CDSS", "GSI", "Q_LES_Q", "AUDIT"),
+  
+  N_t = 7,
+  N_c = 9,
+  
+  m_pre_t = c(47.29, 45.14, 10.71, 71.86, 52.22, 11.29),
+  m_post_t = c(38.14, 37.43, 4.57, 64.86, 58.75, 8.43),
+  
+  sd_pre_t = c(10.63, 11.26, 2.43, 5.73, 11.85, 9.14),
+  sd_post_t = c(6.23, 11.89, 3.26, 10.56, 10.65, 5.68),
+  
+  m_pre_c = c(37.56, 41.11, 8.56, 64.00, 54.79, 6.67),
+  m_post_c = c(37.00, 40.88, 9.33, 64.71, 54.50, 7.11),
+  
+  sd_pre_c = c(13.58, 12.61, 3.50, 6.12, 12.35, 8.83),
+  sd_post_c = c(13.63, 11.39, 2.70, 7.55, 11.32, 9.24),
+  
+  F_val = c(6.54, 6.95, 39.75, 9.26, 17.50, 1.43),
+  
+  analysis_plan = c(
+    "All mental health outcomes",
+    "Social functioning (degree of impairment)",
+    "All mental health outcomes/Depression",
+    "All mental health outcomes",
+    "Wellbeing and Quality of Life",
+    "Alcohol and drug abuse/misuse"
+  )
+  
+)
+
+Halperin2000_est <- 
+  Halperin2000 |> 
+  mutate(
+    
+    effect_size = "SMD",
+    sd_used = "Pooled posttest SD",
+    
+    study = "Halperin 2000",
+    main_es_method = "Raw diff-in-diffs",
+    
+    ppcor_method = "F test values used",
+    
+    N_total = N_t + N_c, 
+    df_ind = N_total,
+    
+    m_post = if_else(outcome == "Q_LES_Q", m_post_t - m_post_c, (m_post_t - m_post_c) * -1),
+    sd_pool = sqrt(((N_t-1)*sd_post_t^2 + (N_c-1)*sd_post_c^2)/(N_t + N_c - 2)),  
+    
+    d_post = m_post/sd_pool, 
+    vd_post = (1/N_t + 1/N_c) + d_post^2/(2*df_ind),
+    Wd_post = (1/N_t + 1/N_c), 
+    
+    J = 1 - 3/(4*df_ind-1),
+    
+    g_post = J * d_post,
+    vg_post = (1/N_t + 1/N_c) + g_post^2/(2*df_ind),
+    Wg_post = Wd_post,
+    
+    # Account for the fact that some outcomes are on different scales
+    m_diff_t = if_else(outcome == "Q_LES_Q", m_post_t - m_pre_t, (m_post_t - m_pre_t) * -1),
+    m_diff_c = if_else(outcome == "Q_LES_Q", m_post_c - m_pre_c, (m_post_c - m_pre_c) * -1),
+    
+    d_DD = (m_diff_t - m_diff_c)/sd_pool,
+    vd_DD = d_DD^2/F_val + d_DD^2/(2*df_ind),
+    Wd_DD = d_DD^2/F_val,
+    
+    g_DD = J * d_DD, 
+    vg_DD = g_DD^2/F_val + g_DD^2/(2*df_ind),
+    Wg_DD = g_DD^2/F_val
+    
+  )|> 
+  rowwise() |> 
+  mutate(
+    
+    # Average cluster size in treatment group
+    # "groups consisted of between 5 to 12 patients" p. 306
+    avg_cl_size = 7, 
+    avg_cl_type = "From study (p. 812)",
+    
+    # Imputed icc value
+    icc = ICC_01,
+    icc_type = "Imputed",
+    
+    n_covariates = 1,
+    
+    # Find info about the function via ?VIVECampbell::gamma_1armcluster
+    gamma_sqrt = VIVECampbell::gamma_1armcluster(
+      N_total = N_total, Nc = N_c, avg_grp_size = avg_cl_size, ICC = icc
+      ),
+    
+    # Calculated via Eq. 7 (Hedges & Citkowicz, 2015)
+    df_adj = df_h_1armcluster(N_total = N_total, ICC = icc, N_grp = N_t, avg_grp_size = grp_size_imp),
+    omega = 1 - 3/(4*df_adj-1),
+    
+    
+    # Cluster-adjusting g_post
+    gt_post = omega * d_post * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_post, 
+      model = "posttest",
+      cluster_adj = FALSE,
+      add_name_to_vars = "_post",
+      vars = vgt_post:Wgt_post
+      ),
+    
+    gt_DD = omega * d_DD * gamma_sqrt,
+    VIVECampbell::vgt_smd_1armcluster(
+      N_cl_grp = N_t, 
+      N_ind_grp = N_c, 
+      avg_grp_size = avg_cl_size, 
+      ICC = icc, 
+      g = gt_DD, 
+      model = "DiD",
+      cluster_adj = FALSE,
+      F_val = F_val,
+      q = n_covariates,
+      add_name_to_vars = "_DD",
+      vars = -var_term1_DD
+      ),
+    
+    vary_id = outcome
+    
+  ) |> 
+  ungroup(); Halperin2000_est
+
+```
+
+```{r, echo=FALSE}
+# Adding Halperin to data
+dat <- 
+  dat |> 
+  bind_rows(Halperin2000_est) 
+```
+
 ### **Haslam et al. [-@Haslam2019] (Quality-checked)**
 
 Entering data from Table 2 (p. 794)
@@ -11940,7 +12084,7 @@ group_based_dat <-
 
 # To check the symmetry between R-file and Excel-extraction sheet
 #D <- group_based_dat |> 
-#  select(Author, vary_id, varifier)
+#  select(Author, test_name, vary_id, varifier)
 
 write_xlsx(group_based_dat, "Group-based interventions data.xlsx")
 saveRDS(group_based_dat, file = "Group-based interventions data.RDS")
