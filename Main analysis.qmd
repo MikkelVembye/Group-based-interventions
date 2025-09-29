@@ -549,7 +549,7 @@ main_res_table <-
     missing_text = ""         
   ); main_res_table
 
-main_res_table |> gtsave("Tables/main_res_table_reint.docx")
+#main_res_table |> gtsave("Tables/main_res_table_reint.docx")
 
 wider_dat_methods_factors <- 
   x_test |> 
@@ -585,7 +585,7 @@ methods_res_table <-
     missing_text = ""         
   ); methods_res_table
 
-methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
+#methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
 
 ```
 
@@ -857,33 +857,23 @@ mental_ma_dat <-
     study = as.character(study)
   )
 
-reint_ma_dat <- 
-  fastDummies::dummy_cols(reint_ma_dat, select_columns = "outcome_type", omit_colname_prefix = TRUE) |> 
+mental_ma_dat <- 
+  fastDummies::dummy_cols(mental_ma_dat, select_columns = "outcome_type", omit_colname_prefix = TRUE) |> 
   rename(
-    alcohol = `Alcohol and drug abuse/misuse`, 
-    hope = `Hope, empowerment & self-efficacy`, 
-    lonely = Loneliness,
-    self_est = `Self-esteem`,
-    social_fun = `outcome_type_Social functioning (degree of impairment)`,
-    wellbeing = `Wellbeing and quality of life`,
-    other = Other
+    anxiety = Anxiety, 
+    depression = Depression, 
+    gen_mental = `General mental health`,
+    symptoms = `Symptoms of psychosis`
   ) |> 
   mutate(
     across(where(is.double), as.double),
     across(where(is.integer), as.integer)
   )
 
-#reint_ma_dat <- 
-#  reint_ma_dat |> 
-#  metafor::escalc(
-#    data = _, 
-#    yi = gt_pop, 
-#    vi = vgt_pop
-#  )
 
-attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
+attr(mental_ma_dat, "data_name") <- "mental_ma_dat"
 
-saveRDS(reint_ma_dat, "reint_ma_dat.rds")
+saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ```
 
@@ -891,9 +881,7 @@ saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 ```{r}
 
-
-
-.PECHE_RVE(data = reint_ma_dat)
+.PECHE_RVE(data = mental_ma_dat)
 
 #study_names <- unique(reint_ma_dat$study) |> as.character()
 #
@@ -903,12 +891,12 @@ saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 
 ### Outcome
-```{r outcome-test}
+```{r outcome-test-mental}
 rho <- 0.8
 
-V_mat <- 
+V_mat_mental <- 
   metafor::vcalc(
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     vi = vgt_pop, 
     cluster = study,
     subgroup = outcome_type,
@@ -920,90 +908,81 @@ V_mat <-
     rho = rho
   )
 
-#V_mat2 <- 
-#  metafor::vcalc(
-#    data = reint_ma_dat,
-#    vi = vgt_pop, 
-#    cluster = study,
-#    obs = esid, 
-#    rho = rho
-#  )
-
 
 # Checking correct v_mat
-blsplit(V_mat, reint_ma_dat$study) |> 
+blsplit(V_mat_mental, mental_ma_dat$study) |> 
   lapply(cov2cor) |> 
   map(~ round(.x, 2))
 
-outcome_obj <- 
+outcome_obj_mental <- 
   metafor::rma.mv(
     yi = gt_pop ~ outcome_type - 1,
-    V = V_mat, 
+    V = V_mat_mental, 
     random = list(~ outcome_type | study, ~ outcome_type | esid),
     struct = c("DIAG", "DIAG"),
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     sparse=TRUE
   )
 
 #saveRDS(outcome_obj, file = "outcome_obj.rds")
 
-outcome_obj_robu <- 
-  outcome_obj |> 
+outcome_obj_mental_robu <- 
+  outcome_obj_mental |> 
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
-outcome_obj_robu
+outcome_obj_mental_robu
 
-club_wald_test <- Wald_test(outcome_obj, constraints = constrain_equal(1:3), vcov = "CR2")
+club_wald_test <- Wald_test(outcome_obj_mental, constraints = constrain_equal(1:4), vcov = "CR2")
 club_wald_test
 
 
 tic()
 plan(multisession, workers = parallel::detectCores()-1)
 
-cwb_test <- 
+cwb_test_mental <- 
   try(
     Wald_test_cwb(
-      full_model = outcome_obj,
+      full_model = outcome_obj_mental,
       constraints = constrain_equal(1:7),
       R = 19, 
       seed = 26082025L
     )
-  ); cwb_test
+  ); cwb_test_mental
 
 plan(sequential)
 toc()
 
 # Continuous model
 
-age_obj <- 
+age_obj_mental <- 
   rma.mv(
     yi = gt_pop ~ age_c + prereg_chr - 1,
-    V = V_mat, 
+    V = V_mat_mental, 
     random = ~ 1 | study / esid,
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     sparse = TRUE
   ) |> 
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
-age_obj
+age_obj_mental
 
-prereg_obj <- 
+prereg_obj_mental <- 
     rma.mv(
     yi = gt_pop ~ prereg_chr + male_c - 1,
-    V = V_mat, 
+    V = V_mat_mental, 
     random = list(~ prereg_chr | study, ~ prereg_chr | esid),
     struct = c("DIAG", "DIAG"),
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     sparse=TRUE
   ) |> 
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
-prereg_obj
+prereg_obj_mental
 
 #y_test <- 
 #  try(
 #    Wald_test_cwb(
-#      full_model = prereg_obj,
+#      full_model = prereg_obj_mental,
 #      constraints = constrain_equal(1:2),
 #      R = 19, 
 #      adjust = "CR2",
@@ -1016,7 +995,7 @@ prereg_obj
 ### Theory and methods tables
 ```{r reint-table-data}
 
-arg_tbl <- 
+arg_tbl_mental <- 
   tibble::tibble(
     yi = "gt_pop",
     vi = "vgt_pop",
@@ -1025,63 +1004,63 @@ arg_tbl <-
       c(
         "outcome_type", 
         paste0(
-          "outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
+          "outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "schizophrenia_in_sample",
         paste0(
-          "schizophrenia_in_sample;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
+          "schizophrenia_in_sample;anxiety;depression;gen_mental;symptoms;",
+          "cbt_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "CBT_intervention",
         paste0(
-          "CBT_intervention;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
+          "CBT_intervention;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "prereg_chr", 
         paste0(
-          "prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;", 
+          "prereg_chr;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "test_type",
         paste0(
-          "test_type;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;tot_c;qes_c;crt_grp_c;rob_c;", 
+          "test_type;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;prereg_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "analysis_strategy",
         paste0(
-          "analysis_strategy;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;crt_grp_c;rob_c;", 
+          "analysis_strategy;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "QES_design",
         paste0(
-          "QES_design;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;crt_grp_c;rob_c;", 
+          "QES_design;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "control_modified",
         paste0(
-          "control_modified;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;rob_c;", 
+          "control_modified;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "risk_of_bias", 
         paste0(
-          "risk_of_bias;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
-          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;", 
+          "risk_of_bias;anxiety;depression;gen_mental;symptoms;",
+          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         )
         
@@ -1098,9 +1077,9 @@ arg_tbl <-
 es_names <- list("gt", "g", "d", "gt_post")
 var_es_names <-  list("vgt", "vg", "vd", "vgt_post")
 
-arg_tbl_alt_es <- 
+arg_tbl_alt_es_mental <- 
   map2(es_names, var_es_names, ~ {
-    arg_tbl |> 
+    arg_tbl_mental |> 
       #filter(r == 0.8) |> 
       mutate(
         yi = .x,
@@ -1109,13 +1088,13 @@ arg_tbl_alt_es <-
   } ) |> 
   list_rbind()
 
-arg_tbl_all <- 
-  rbind(arg_tbl, arg_tbl_alt_es)
+arg_tbl_all_mental <- 
+  rbind(arg_tbl_mental, arg_tbl_alt_es_mental)
 
 
-# For SCE models
-arg_list_tbl <- 
-  pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+# For PESCE models
+arg_list_tbl_mental <- 
+  pmap(.l = arg_tbl_all_mental, .f = .rma_arg_tbl, data = mental_ma_dat) |> 
   list_rbind() |> 
   mutate(
     R = 19L,
@@ -1123,23 +1102,19 @@ arg_list_tbl <-
   )
 
 
-arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
+arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "vgt_pop")
 
 tic()
 plan(multisession)
-x_test <- 
+res_mental <- 
   pmap(
-    .l = arg_list_tbl_rho08, 
+    .l = arg_list_tbl_rho08_mental, 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = FALSE
-  ); x_test
+  ); res_mental
 plan(sequential)
 toc()
-
-#blsplit(x_test[[1]], reint_ma_dat$study) |> 
-#  lapply(cov2cor) |> 
-#  map(~ round(.x, 2))
 
 
 #opts <- furrr::furrr_options(
@@ -1155,7 +1130,7 @@ toc()
 #tic()
 #main_res <- 
 #  future_pmap(
-#    .l = arg_list_tbl_rho08[1:2,], 
+#    .l = arg_list_tbl_rho08_mental[1:2,], 
 #    .f = .PESCE_RVE, 
 #    return_rma_obj = FALSE,
 #    CWB = FALSE,
@@ -1170,11 +1145,12 @@ toc()
 
 #rho <- 0.8
 #
-#V_mat <- 
+#V_mat_mental <- 
 #  metafor::vcalc(
-#    data = reint_ma_dat,
+#    data = mental_ma_dat,
 #    vi = vgt_pop, 
 #    cluster = study,
+#    subgroup = outcome_type,
 #    type = outcome_time, 
 #    grp1 = trt_name,
 #    w1 = N_t, 
@@ -1185,8 +1161,8 @@ toc()
 #
 #future::plan(future::multisession, workers = n_workers)
 #wildmeta::Wald_test_cwb(
-#  full_model = outcome_obj,
-#  constraints = wildmeta::constrain_equal(1:7),
+#  full_model = outcome_obj_mental,
+#  constraints = wildmeta::constrain_equal(1:4),
 #  R = 10,
 #  seed = 26082025L
 #)
@@ -1196,9 +1172,10 @@ toc()
 ```
 
 ```{r tables-reint}
-#| eval: false 
-wider_dat_theory_factors <- 
-  x_test |> 
+#| eval: false
+
+wider_dat_theory_factors_mental <- 
+  res_mental |> 
   list_rbind() |> 
   filter(table == "theory") |> 
   select(Characteric:SD_total, controls) |> 
@@ -1207,8 +1184,8 @@ wider_dat_theory_factors <-
   relocate(contains("yes", ignore.case = TRUE), .after = last_col())
 
 
-main_res_table <- 
-  wider_dat_theory_factors |> 
+main_res_table_mental <- 
+  wider_dat_theory_factors_mental |> 
   select(-1) |> 
   gt() |> 
   tab_spanner(label = "Subgroup analyses", columns = c("Moderator", "studies", "effects")) |> 
@@ -1229,12 +1206,12 @@ main_res_table <-
     sub_missing(
     columns = everything(),   
     missing_text = ""         
-  ); main_res_table
+  ); main_res_table_mental
 
-main_res_table |> gtsave("Tables/main_res_table_reint.docx")
+#main_res_table_mental |> gtsave("Tables/main_res_table_mental.docx")
 
-wider_dat_methods_factors <- 
-  x_test |> 
+wider_dat_methods_factors_mental <- 
+  res_mental |> 
   list_rbind() |> 
   filter(table == "methods") |> 
   select(Characteric:SD_total, controls) |> 
@@ -1243,8 +1220,8 @@ wider_dat_methods_factors <-
   relocate(contains("yes", ignore.case = TRUE), .after = last_col())
 
 
-methods_res_table <- 
-  wider_dat_methods_factors |> 
+methods_res_table_mental <- 
+  wider_dat_methods_factors_mental |> 
   select(-1) |> 
   gt() |> 
   tab_spanner(label = "Subgroup analyses", columns = c("Moderator", "studies", "effects")) |> 
@@ -1265,21 +1242,21 @@ methods_res_table <-
   sub_missing(
     columns = everything(),   
     missing_text = ""         
-  ); methods_res_table
+  ); methods_res_table_mental
 
-methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
+#methods_res_table_mental |> gtsave("Tables/methods_res_table_mental.docx")
 
 ```
 
 
 ### PECHE-RVE for meta-regression
-
-```{r che-rve-meta-regression}
+## Continue from HERE
+```{r}
 
 cor_val <- 0L:10L/10L
 cor_val <- cor_val[seq(1, 10L, 2L)]
 
-arg_tbl_contin <- 
+arg_tbl_contin_mental <- 
   tibble::tibble(
     yi = "gt_pop",
     vi = "vgt_pop",
@@ -1325,7 +1302,7 @@ arg_tbl_all_contin <-
 
 
 
-# Model type to replicate with function
+#Model type to replicate with function
 
 rho <- 0.8
 
