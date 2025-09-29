@@ -435,6 +435,7 @@ forest_plot_de <-
           formula = list(formula),
           es = yi, 
           var = vi,
+          subgrp = main_pred,
           rand = list(random),
           structure = list(struct),
           rho = r,
@@ -465,6 +466,21 @@ forest_plot_de <-
     
   }
 
+#tbl_test <- 
+#  .rma_arg_tbl(
+#    yi = "gt_pop", 
+#    vi = "vgt_pop", 
+#    covars = "outcome_type",
+#    model = "SCEp",
+#    r = 0.8, 
+#    data = reint_ma_dat,
+#    type = "category"
+#  ); tbl_test
+
+
+################################################################################
+# Making Wald_test_cwb_fun
+################################################################################
 
 .Wald_test_cwb_fun <- 
   function(rma_fun_obj, seq_c, reps, seed_num){
@@ -523,6 +539,7 @@ forest_plot_de <-
     
   }
 
+
 #plan(multisession)
 #.Wald_test_cwb_fun(
 #  rma_fun_obj = x_test[[1]],
@@ -531,26 +548,30 @@ forest_plot_de <-
 #plan(sequential)
 
 ################################################################################
-## Making SCE RVE function
+## Making PESCE+(RVE) function
 ################################################################################
 .PESCE_RVE <- 
-  function(formula, es, var, rand, structure, rho, data, model, table, R, seed, return_rma_obj = FALSE, CWB = FALSE){
+  function(
+    formula, 
+    es, var, 
+    subgrp, 
+    rand, structure, 
+    rho, 
+    data, 
+    model, 
+    table, 
+    R, 
+    seed, 
+    return_rma_obj = FALSE, 
+    CWB = FALSE){
     
     if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
     
     data$vi <- data[[var]]
+    data$subgrp <- data[[subgrp]]
     data_name <- attr(data, "data_name")
     
     #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
-    #  data = reint_ma_dat,
-    #  vi = vgt_pop, 
-    #  cluster = study,
-    #  type = outcome_time, 
-    #  grp1 = trt_name,
-    #  w1 = N_t, 
-    #  grp2 = control,
-    #  w2 = N_c, 
-    #  rho = rho
     
     # Variance-Covariance Matrix
     V_mat <- 
@@ -558,6 +579,7 @@ forest_plot_de <-
         data = data,
         vi = vi, 
         cluster = study,
+        subgroup = subgrp,
         type = outcome_time,
         grp1 = trt_name,
         w1 = N_t,
@@ -721,6 +743,316 @@ forest_plot_de <-
     
     res
     
-  }
+}
 
+
+
+## PECHE_RVE
+.PECHE_RVE <- function(
+    data, 
+    study_out, 
+    es = "gt_pop", 
+    var = "vgt_pop", 
+    studyid = "study", 
+    rho = 0.8,  
+    pred_int = 80
+){
+  
+  
+  if (missing(study_out)) {
+    dat <- data
+  } else{
+    dat <- data |> 
+      filter(study != study_out)
+  }
+  
+  studyid_class <- substitute(studyid)
+  
+  if (!is.character(studyid_class)) {
+    dat$study <- dat |> dplyr::pull({{ studyid }})
+  } else {
+    dat$study <- dat[[studyid]]
+  }
+  
+  
+  dat$vi <- dat[[var]]
+  dat$yi <- dat[[es]]
+  
+  #V_mat <- metafor::vcalc(vi = vgt, cluster = study, obs = esid, data = dat, rho = rho) 
+  
+  # Variance-Covariance Matrix
+  V_mat <- 
+    metafor::vcalc(
+      data = dat,
+      vi = vi, 
+      cluster = study,
+      type = outcome_time,
+      grp1 = trt_name,
+      w1 = N_t,
+      grp2 = control,
+      w2 = N_c, 
+      rho = rho
+    )
+  
+  optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+  overall_res <- "Non-converged"
+  i <- 1L
+  
+  while (!inherits(overall_res, "rma.mv") & i <= 4L) {
+    
+    overall_res <- tryCatch( 
+      suppressWarnings(
+        rma.mv(
+          yi, 
+          V = V_mat,
+          random = ~ 1 | study / esid,
+          data = dat
+        ) |> 
+          robust(cluster = study, clubSandwich = TRUE) 
+      ),
+      error = function(e) "Non-converged"
+    )
+  } 
+  # I2 calcution
+  # See https://www.metafor-project.org/doku.php/tips:i2_multilevel_multivariate?s[]=i2
+  W <- solve(V_mat)
+  X <- model.matrix(overall_res)
+  P <- W - W %*% X %*% solve(t(X) %*% W %*% X) %*% t(X) %*% W
+  
+  I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
+                                                   (overall_res$k - overall_res$p)/sum(diag(P))), 2)
+  
+  pred <- predict(overall_res, level = pred_int)
+  
+  pi_lb_name <- paste0("pi_lb_", pred_int)
+  pi_ub_name <- paste0("pi_ub_", pred_int)
+  
+  res <- 
+    tibble(
+      rho = rho, 
+      studies = overall_res$n,
+      effects = overall_res$k,
+      avg_effect = as.numeric(overall_res$b),
+      se = overall_res$se,
+      LL = overall_res$ci.lb,
+      UL = overall_res$ci.ub,
+      !!pi_lb_name := pred$pi.lb,  
+      !!pi_ub_name := pred$pi.ub,  
+      pval = overall_res$pval,
+      df_satt = overall_res$dfs,
+      tau = sqrt(overall_res$sigma2[1]), 
+      omega = sqrt(overall_res$sigma2[2]), 
+      sd_total = sqrt(sum(overall_res$sigma2)),
+      QE = overall_res$QE,
+      I2 = I2_tot,
+      tau2 = overall_res$sigma2[1],
+      omega2 = overall_res$sigma2[2]
+    )
+  
+  if (!missing(study_out)) res <- res |> mutate(omitted_study = study_out)
+  
+  res
+  
+}
+
+# PECHE_RVE for meta-regression function
+.PECHE_meta_reg <- 
+  function(
+    formula, 
+    es, 
+    var, 
+    rand, 
+    rho, 
+    data, 
+    model, 
+    table, 
+    return_rma_obj = FALSE
+  ){
+    
+    if (!stringr::str_detect(model, "CHE")) stop("This function only fits CHE models")
+    
+    data$vi <- data[[var]]
+    data_name <- attr(data, "data_name")
+    
+    # Variance-Covariance Matrix
+    #V_mat <- metafor::vcalc(vi = vi, cluster = study, obs = esid, data = data, rho = rho)
+    
+    # Variance-Covariance Matrix
+    V_mat <- 
+      metafor::vcalc(
+        data = data,
+        vi = vi, 
+        cluster = study,
+        type = outcome_time,
+        grp1 = trt_name,
+        w1 = N_t,
+        grp2 = control,
+        w2 = N_c, 
+        rho = rho
+      )
+    
+    # Strategy for overcoming non-convergence 
+    optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+    raw_res <- "Non-converged"
+    i <- 1L
+    
+    # Fitting the main model
+    while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+      
+      raw_res <- tryCatch(
+        suppressWarnings(
+          metafor::rma.mv(
+            formula,
+            V = V_mat,
+            random = rand, 
+            data = data,
+            sparse = TRUE,
+            control = list(optimizer=optimizers[i])
+          )
+        ),
+        error = function(e) "Non-converged"
+      )
+      i <- i + 1L
+      
+    }
+    
+    paste0(rand, collapse = "") |> str2lang()
+    
+    #Re-constructiong the call
+    random_lang <- paste0(rand, collapse = "") |> str2lang()
+    
+    raw_res$call <- 
+      rlang::call2(
+        "rma.mv", 
+        yi = formula, 
+        V = as.name("V_mat"), 
+        data = as.name(data_name), 
+        random = random_lang, 
+        sparse = TRUE,
+        .ns = "metafor"
+      )
+    
+    raw_res$call$yi <- methods::as(raw_res$call$yi, Class = "call") 
+    
+    
+    # Getting robust results
+    robu_res <- 
+      raw_res |> 
+      metafor::robust(cluster = study, clubSandwich = TRUE, digits = 4L)
+    
+    # Returning main rma.mv object which can later be used with wald_test_cwb()
+    if (return_rma_obj) return(robu_res)
+    
+    # Making character variable with all covariates 
+    all_covariates <- all.vars(delete.response(terms(formula)))
+    
+    stars <- 
+      as.character(
+        stats::symnum(
+          robu_res$pval, corr = FALSE, na = FALSE,
+          cutpoints = c(0, .001, .01, .05, 1),
+          symbols   = c("***","**","*","")
+        )
+      )
+    
+    low_df <- dplyr::if_else(robu_res$dfs < 4, "L", "")
+    
+    column_names <- c(
+      "Age",
+      "% Male",
+      "Sessions",
+      "Duration",
+      "Follow-up timing",
+      NA_character_,
+      "Intercept",
+      "Study-level SD",
+      "Effect-level SD",
+      "Total SD",
+      "Number of effects",
+      "Number of studies"
+    )
+    
+    effects <- {
+      if (length(all_covariates) == 1L && stringr::str_detect(all_covariates, "age")) {
+        c(
+          paste0(round(robu_res$b[-1], 3L), " (", round(robu_res$se[-1], 3L), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 5L),
+          paste0(round(robu_res$b[1L], 3L), " (", round(robu_res$se[1], 3L), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1L]), 3L),
+          round(sqrt(robu_res$sigma2[2L]), 3L),
+          round(sqrt(sum(robu_res$sigma2)), 3L),
+          robu_res$s.nlevels[2L],
+          robu_res$s.nlevels[1L]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "male")) {
+        c(
+          NA_character_,
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 4),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "sessions")) {
+        c(
+          rep(NA_character_, 2),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 3),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "duration")) {
+        c(
+          rep(NA_character_, 3),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          rep(NA_character_, 2),
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) == 1 && stringr::str_detect(all_covariates, "fu_")) {
+        c(
+          rep(NA_character_, 4),
+          paste0(round(robu_res$b[-1], 3), " (", round(robu_res$se[-1], 3), ")", stars[-1], low_df[-1]),
+          NA_character_,
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } else if (length(all_covariates) > 1) {
+        c(
+          paste0(round(robu_res$b[2:6], 3), " (", round(robu_res$se[2:6], 3), ")", stars[2:6], low_df[2:6]),
+          NA_character_,
+          paste0(round(robu_res$b[1], 3), " (", round(robu_res$se[1], 3), ")", stars[1], low_df[1]),
+          round(sqrt(robu_res$sigma2[1]), 3),
+          round(sqrt(robu_res$sigma2[2]), 3),
+          round(sqrt(sum(robu_res$sigma2)), 3),
+          robu_res$s.nlevels[2],
+          robu_res$s.nlevels[1]
+        )
+      } 
+    }
+    
+    res <- tibble(
+      Moderators = column_names,
+      Coef = effects
+    )
+    
+    res
+    
+    
+  }
 

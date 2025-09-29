@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-26"
+date: "2025-09-29"
 format:
   html: 
     keep-md: true
@@ -518,7 +518,7 @@ time_vcalc <- c(
 
 gb_dat$time <- time_vcalc
 
-#saveRDS(gb_dat, file = "Data/gb_dat.rds")
+saveRDS(gb_dat, file = "Data/gb_dat.rds")
 ```
 :::
 
@@ -3776,10 +3776,10 @@ mental_overview_dat |>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:left;"> General mental health </td>
-   <td style="text-align:right;"> 0.696 </td>
-   <td style="text-align:right;"> 0.113 </td>
-   <td style="text-align:right;"> 0.096 </td>
-   <td style="text-align:right;"> 0.310 </td>
+   <td style="text-align:right;"> 0.716 </td>
+   <td style="text-align:right;"> 0.120 </td>
+   <td style="text-align:right;"> 0.101 </td>
+   <td style="text-align:right;"> 0.319 </td>
    <td style="text-align:right;"> 0.039 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
@@ -3802,10 +3802,10 @@ mental_overview_dat |>
    <td style="text-align:right;"> 7 </td>
    <td style="text-align:right;"> 9 </td>
    <td style="text-align:left;"> General mental health </td>
-   <td style="text-align:right;"> 0.772 </td>
-   <td style="text-align:right;"> 0.105 </td>
-   <td style="text-align:right;"> 0.083 </td>
-   <td style="text-align:right;"> 0.289 </td>
+   <td style="text-align:right;"> 0.846 </td>
+   <td style="text-align:right;"> 0.126 </td>
+   <td style="text-align:right;"> 0.100 </td>
+   <td style="text-align:right;"> 0.316 </td>
    <td style="text-align:right;"> 0.017 </td>
    <td style="text-align:right;"> 1 </td>
    <td style="text-align:left;"> High </td>
@@ -17486,9 +17486,9 @@ mental_health_dat |>
     #panel.grid.major = element_blank(),
     #panel.grid.minor = element_blank()
   ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2.2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.2, 0.012, 0.01)) + 
+  expand_limits(x = c(-1, 2.2), y = c(-0.2, 0.01)) +
   labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
 ```
 
@@ -17663,7 +17663,9 @@ es_dist_plot_mental <-
   theme(axis.title.y = element_blank()) +
   labs(x = "Effect size estimate")
 
+#png(filename = "Figures/margin_dist_plot_mental.png", width = 10, height = 3.1, units = "in", res = 600)
 es_dist_plot_mental
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -17775,7 +17777,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-26
+ date     2025-09-29
  pandoc   3.6.3 @ C:/RStudio-2025.09.0-387/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.0-3\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 

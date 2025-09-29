@@ -735,6 +735,7 @@ reintegration_dat |>
  
 ## Funnel plot across outcomes
 
+# Publication bias tests
 ```{r, tab-func-overall-pub-bias}
 
 .pubbias_overall_tab <- 
@@ -825,8 +826,8 @@ hyema_outcome_tab <-
       as.character(round(sqrt(hyema_obj$tau2), 3)),
       NA_character_,
       as.character(round(sqrt(hyema_obj$tau2), 3)),
-      as.character(n_distinct(reint_ma_dat$study)),
-      as.character(nrow(reint_ma_dat))
+      as.character(n_distinct(reint_ma_dat$study)-1),
+      as.character(nrow(reint_ma_dat)-3)
     ),
     
     method = "hyema"
@@ -924,6 +925,7 @@ wc_outcome_es <-
   worst_dat_reint |> 
   summarise(n_effects = n(), .by = outcome_type) |> 
   arrange(outcome_type) 
+
 
 ```
 
@@ -1052,10 +1054,24 @@ wc_prereg_tab <-
   )
 
 # Sensitivity analysis of prereg using the PESCE+ model. 
+V_mat_wc_prereg <- 
+  metafor::vcalc(
+    data = worst_dat_reint,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = prereg_chr,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
 wc_prereg_raw_sensi <- 
   rma.mv(
     gt_pop ~ prereg_chr - 1,
-    V = V_mat_wc, 
+    V = V_mat_wc_prereg, 
     random = list(~ prereg_chr | study, ~ prereg_chr | esid),
     struct = c("DIAG", "DIAG"),
     data = worst_dat_reint,
@@ -1124,6 +1140,19 @@ wc_outcome_tab <-
   )
 
 # Sensitivity analyses using the PESCE+ model
+V_mat_wc_outcome <- 
+  metafor::vcalc(
+    data = worst_dat_reint,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = outcome_type,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
 
 wc_outcome_raw_sensi <- 
   rma.mv(
@@ -1414,7 +1443,7 @@ che_pet_outcome <-
 #  )
 #plan(sequential)
 #toc()
-#
+
 #saveRDS(che_pet_outcome_cwb, "Bootstrap results/che_pet_outcome_cwb.rds")
 che_pet_outcome_cwb <- readRDS("Bootstrap results/che_pet_outcome_cwb.rds")
 
@@ -1450,12 +1479,14 @@ che_pet_outcome_tab <-
 
 ```{r, selmodel}
 
-set.seed(15092025)
+set.seed(29092025)
 
 library(future)
 
+cores <- parallel::detectCores() - 1
+
 # Overall reintegration
-#plan(multisession, workers = 7L)
+#plan(multisession, workers = cores)
 #
 #mod_3PSM_overall <- 
 #  metaselection::selection_model(
@@ -1477,8 +1508,8 @@ library(future)
 mod_3PSM_overall <- readRDS("Bootstrap results/mod_3PSM_overall.rds")
 
 #selection_plot(mod_3PSM_overall)
-
-#plan(multisession, workers = 7L)
+#
+#plan(multisession, workers = cores)
 #
 #mod_4PSM_overall <- 
 #  metaselection::selection_model(
@@ -1513,24 +1544,6 @@ mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 ## Only not preregistered outcome
 #plan(multisession, workers = 7L)
 #
-#mod_3PSM_not_prereg <- 
-#  metaselection::selection_model(
-#    data = reint_ma_dat, 
-#    yi = gt_pop,
-#    sei = Wse_pop,
-#    cluster = study,
-#    selection_type = "step",
-#    steps = 0.025,
-#    estimator = "CML",
-#    vcov_type = "robust",
-#    CI_type = "percentile",
-#    bootstrap = "two-stage",
-#    R = 1999,
-#    subset = conventional == 1
-#  )
-#plan(sequential)
-#
-#plan(multisession, workers = 7L)
 #
 #mod_3PSM_not_prereg <- 
 #  metaselection::selection_model(
@@ -1550,8 +1563,8 @@ mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 #plan(sequential)
 
 ## Prereg_chr as subgroup factor
-
-#plan(multisession, workers = 7L)
+  
+#plan(multisession, workers = cores)
 #
 #mod_3PSM_prereg <- 
 #  metaselection::selection_model(
@@ -1572,9 +1585,9 @@ mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 #
 #saveRDS(mod_3PSM_prereg, "Bootstrap results/mod_3PSM_prereg.rds")
 mod_3PSM_prereg <- readRDS("Bootstrap results/mod_3PSM_prereg.rds")
-
-
-#plan(multisession, workers = 7L)
+  
+  
+#plan(multisession, workers = cores)
 #
 #mod_4PSM_prereg <- 
 #  metaselection::selection_model(
@@ -1600,7 +1613,7 @@ mod_4PSM_prereg <- readRDS("Bootstrap results/mod_4PSM_prereg.rds")
 # Across outcomes
 ###################
 
-#plan(multisession, workers = 7L)
+#plan(multisession, workers = cores)
 #
 #mod_3PSM_outcome <- 
 #  metaselection::selection_model(
@@ -1624,7 +1637,7 @@ mod_3PSM_outcome <- readRDS("Bootstrap results/mod_3PSM_outcome.rds")
 
 #selection_plot(mod_3PSM_overall)
 
-#plan(multisession, workers = 7L)
+#plan(multisession, workers = cores)
 #
 #mod_4PSM_outcome <- 
 #  metaselection::selection_model(
@@ -1787,9 +1800,9 @@ PSM4_outcome_tab <-
         "]"
       ),
       NA_character_,
-      as.character(round(sqrt(mod_4PSM_mod_outcome$predictions$tausq), 3)),
+      as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
       NA_character_,
-      as.character(round(sqrt(mod_4PSM_mod_outcome$predictions$tausq), 3)),
+      as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
       as.character(n_distinct(reint_ma_dat$study)),
       as.character(nrow(reint_ma_dat))
     ),

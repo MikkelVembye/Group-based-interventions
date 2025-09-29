@@ -506,7 +506,7 @@ time_vcalc <- c(
 
 gb_dat$time <- time_vcalc
 
-#saveRDS(gb_dat, file = "Data/gb_dat.rds")
+saveRDS(gb_dat, file = "Data/gb_dat.rds")
 
 ```
 
@@ -6983,9 +6983,9 @@ mental_health_dat |>
     #panel.grid.major = element_blank(),
     #panel.grid.minor = element_blank()
   ) +
-  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2, 0.2)) + 
-  scale_y_continuous(expand=c(0,0), breaks = seq(-0.1, 0.1, 0.01)) + 
-  expand_limits(x = c(-0.71, 2), y = c(-0.091, 0.01)) +
+  scale_x_continuous(expand=c(0,0), breaks = seq(-1L, 2.2, 0.2)) + 
+  scale_y_continuous(expand=c(0,0), breaks = seq(-0.2, 0.012, 0.01)) + 
+  expand_limits(x = c(-1, 2.2), y = c(-0.2, 0.01)) +
   labs(y = "Modified SE - SE (used in main analysis)", x = "Effect size estimate")
 
 
@@ -7093,7 +7093,9 @@ es_dist_plot_mental <-
   theme(axis.title.y = element_blank()) +
   labs(x = "Effect size estimate")
 
+#png(filename = "Figures/margin_dist_plot_mental.png", width = 10, height = 3.1, units = "in", res = 600)
 es_dist_plot_mental
+#dev.off()
 
 ```
 :::
