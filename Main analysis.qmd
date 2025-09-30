@@ -592,6 +592,7 @@ methods_res_table <-
 
 ### PECHE-RVE for meta-regression
 
+
 ```{r che-rve-meta-regression}
 
 cor_val <- 0L:10L/10L
@@ -612,7 +613,8 @@ arg_tbl_contin <-
         
         paste0(
           "age_c;male_c;sessions_c;duration_c;fu_time_c;",
-          "outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c"
+          "alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c"
         )
       ),
       each = 5),
@@ -674,12 +676,9 @@ male_obj <-
   )
 
 
-
-
 arg_list_tbl_contin <- 
   pmap(.l = arg_tbl_contin, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() 
-
 
 
 continuous_res_reint <- 
@@ -759,7 +758,6 @@ reint_contin_res_table
 #reint_contin_res_table |> gtsave("Tables/reint_contin_res_table.docx")
 
 ```
-
 
 
 ## Mental health
@@ -943,7 +941,7 @@ cwb_test_mental <-
   try(
     Wald_test_cwb(
       full_model = outcome_obj_mental,
-      constraints = constrain_equal(1:7),
+      constraints = constrain_equal(1:4),
       R = 19, 
       seed = 26082025L
     )
@@ -1250,7 +1248,7 @@ methods_res_table_mental <-
 
 
 ### PECHE-RVE for meta-regression
-## Continue from HERE
+## 
 ```{r}
 
 cor_val <- 0L:10L/10L
@@ -1271,7 +1269,8 @@ arg_tbl_contin_mental <-
         
         paste0(
           "age_c;male_c;sessions_c;duration_c;fu_time_c;",
-          "outcome_type;schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c"
+          "anxiety;depression;gen_mental;symptoms;schizo_c;",
+          "cbt_c;prereg_c;clinical_c;tot_c;qes_c"
         )
       ),
       each = 5),
@@ -1286,9 +1285,9 @@ arg_tbl_contin_mental <-
 es_names <- list("gt", "g", "d", "gt_post")
 var_es_names <-  list("vgt", "vg", "vd", "vgt_post")
 
-arg_tbl_alt_es_contin <- 
+arg_tbl_alt_es_contin_mental <- 
   map2(es_names, var_es_names, ~ {
-    arg_tbl_contin |> 
+    arg_tbl_contin_mental |> 
       filter(r == 0.8) |> 
       mutate(
         yi = .x,
@@ -1297,8 +1296,8 @@ arg_tbl_alt_es_contin <-
   } ) |> 
   list_rbind()
 
-arg_tbl_all_contin <- 
-  rbind(arg_tbl_contin, arg_tbl_alt_es_contin)
+arg_tbl_all_contin_mental <- 
+  rbind(arg_tbl_contin_mental, arg_tbl_alt_es_contin_mental)
 
 
 
@@ -1306,9 +1305,9 @@ arg_tbl_all_contin <-
 
 rho <- 0.8
 
-V_mat <- 
+V_mat_mental <- 
   metafor::vcalc(
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     vi = vgt_pop, 
     cluster = study,
     type = outcome_time, 
@@ -1322,9 +1321,9 @@ V_mat <-
 male_obj <- 
   metafor::rma.mv(
     gt_pop ~ male_c, 
-    V = V_mat, 
+    V = V_mat_mental, 
     random = ~ 1 | study / esid,
-    data = reint_ma_dat,
+    data = mental_ma_dat,
     sparse = TRUE
   ) |> 
   robust(
@@ -1335,16 +1334,16 @@ male_obj <-
 
 
 
-arg_list_tbl_contin <- 
-  pmap(.l = arg_tbl_contin, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+arg_list_tbl_contin_mental <- 
+  pmap(.l = arg_tbl_contin_mental, .f = .rma_arg_tbl, data = mental_ma_dat) |> 
   list_rbind() 
 
 
 
-continuous_res_reint <- 
+continuous_res_mental <- 
   purrr::pmap(
     #subset to main specification
-    .l = arg_list_tbl_contin[arg_list_tbl_contin$rho == 0.8,], 
+    .l = arg_list_tbl_contin_mental[arg_list_tbl_contin_mental$rho == 0.8,], 
     .f = .PECHE_meta_reg, 
     return_rma_obj = FALSE
     
@@ -1358,7 +1357,7 @@ continuous_res_reint <-
     values_from = Coef
   )  
 
-continuous_res_reint
+continuous_res_mental
 
 #rho <- 0.8
 #
@@ -1393,8 +1392,8 @@ continuous_res_reint
 
 ```{r making-gt-tables-contin}
 
-reint_contin_res_table <- 
-  continuous_res_reint |> 
+mental_contin_res_table <- 
+  continuous_res_mental |> 
   gt() |> 
   sub_missing(
     columns = everything(),   
@@ -1413,9 +1412,9 @@ reint_contin_res_table <-
     )
   )
 
-reint_contin_res_table
+mental_contin_res_table
 
-#reint_contin_res_table |> gtsave("Tables/reint_contin_res_table.docx")
+#mental_contin_res_table |> gtsave("Tables/mental_contin_res_table.docx")
 
 ```
 
