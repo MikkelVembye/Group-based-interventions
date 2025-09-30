@@ -9,7 +9,7 @@ library(boot)      # for bootstrapping
 library(tictoc) 
 
 
-#-------------------------------------------------------------------------------
+# Reintegration ----------------------------------------------------
 # Make it work on the reintegration data
 reint_dat <- readRDS("reint_ma_dat.rds")
 
@@ -79,7 +79,7 @@ fit_hybrid_model2(reint_dat_nested)
 
 # Generate bootstrap
 set.seed(05052025)
-R <- 1999
+R <- 19
 ncpus <- parallel::detectCores() - 1
 
 tic()
@@ -127,39 +127,6 @@ saveRDS(boots_overall, "GitHub repos/Group-based-interventions/Boostrap results/
 saveRDS(hyema_overall, file = "GitHub repos/Group-based-interventions/Boostrap results/hyema_overall_reint.rds")
 
 # Make work with moderator
-
-# Test run function
-run_hybrid_model <- function(
-    g, vg, conventional, moderator
-) {
-  
-  optimizers <- c("Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "SANN", "Brent")
-  mod <- "Non-converged"
-  i <- 1L
-  
-  mod <- moderator
-  
-  while (!inherits(mod, "hybridoutput") & i <= 6L) {
-    
-    mod <- 
-      hybrid(
-        yi = g, 
-        vi = vg, 
-        conventional = conventional, 
-        side = "right",
-        mods = ~ mod -1,
-          control = list(optimizer = optimizers[i])
-      ) |> 
-      suppressWarnings()
-    
-    i <- i + 1L
-    
-  }
-  
-  c(betaone = mod$est[1], betatwo = mod$est[2], tau = sqrt(mod$tau2))
-  
-}
-
 
 fit_hybrid_reintegration <- 
   function(
@@ -266,13 +233,13 @@ fit_hybrid_reintegration(reint_dat_nested)
 toc()
 
 # Generate bootstrap
-set.seed(12092025)
+set.seed(30092025)
 
 ncpus <- parallel::detectCores() - 1
 
 tic()
 
-R <- 1999
+R <- 19
 
 # Make work in parallell
 boots_outcome <- 
@@ -354,5 +321,281 @@ F_boot_pval_outcome
 saveRDS(boots_outcome, file = "GitHub repos/Group-based-interventions/Boostrap results/boots_outcome_reint.rds")
 saveRDS(hyema_overcome, file = "GitHub repos/Group-based-interventions/Boostrap results/hyema_overcome.rds")
 saveRDS(F_boot_pval_outcome, "GitHub repos/Group-based-interventions/Boostrap results/F_boot_pval_outcome.rds")
+
+
+# Mental health -------------- 
+
+# Make it work on the reintegration data
+mental_dat <- readRDS("mental_ma_dat.rds")
+
+hybrid_mental <- 
+  hybrid(
+    yi = mental_dat$gt_pop, 
+    vi = mental_dat$Wgt_pop, 
+    conventional = mental_dat$conventional, 
+    side = "right",
+    control = list(optimizer = "Nelder-Mead")
+  )
+
+c(beta = hybrid_mental$est, tau = sqrt(hybrid_mental$tau2))
+
+mental_dat_nested <- nest_by(mental_dat, study, .key = "data")
+
+fit_hybrid_model2(mental_dat_nested)
+
+# Generate bootstrap
+set.seed(30092025)
+R <- 19
+ncpus <- parallel::detectCores() - 1
+
+tic()
+
+# Make work in parallell
+boots_overall_mental <- boot(
+  data = mental_dat_nested,    # nested dataset
+  statistic = fit_hybrid_model2,         # function for fitting selection model
+  R = R,                             # number of bootstraps
+  parallel = "multicore", ncpus = ncpus
+)
+
+time_seq <- toc()
+
+est_mental <- boots_overall_mental$t0
+
+boot_SE_mental <- apply(boots_overall_mental$t, 2, sd, na.rm = TRUE)  
+boot_pval_overall_mental <- 
+  sum(abs(boots_overall_mental$t[,1]-1) > abs(boots_overall_mental$t0[1]-1))/(1+boots_overall_mental$R)
+
+model_SE_mental <- with(hybrid_mental, c(se[1], se[2] / (2 * sqrt(tau2))))
+
+ci_est_mental <- boot.ci(boots_overall_mental, type = "perc", index = 1) # For overall average ES
+ci_est_mental$percent[4:5] 
+# Tau
+ci_tau_mental <- boot.ci(boots_overall_mental, type = "perc", index = 2) # For heterogeneity
+ci_tau_mental$percent[4:5]
+
+
+hyema_overall_mental <- 
+  tibble(
+    Parameter = names(est_mental),
+    Est = est_mental,
+    SE_bootstrap = boot_SE_mental,
+    CIL_bootstrap = c(ci_est_mental$percent[4], ci_tau_mental$percent[4]),
+    CIU_bootstrap = c(ci_est_mental$percent[5], ci_tau_mental$percent[5]),
+    p_val_bootstrap = boot_pval_overall_mental,
+    SE_model = model_SE_mental,
+    SE_bootstrap_vs_SE_model = boot_SE_mental / model_SE_mental,
+    R = R
+  )
+
+hyema_overall_mental
+
+#GitHub repos/Group-based-interventions/
+saveRDS(boots_overall_mental, "Bootstrap results/boots_overall_mental.rds")
+saveRDS(hyema_overall_mental, file = "Bootstrap results/hyema_overall_mental.rds")
+
+hybrid_mental_outcome <- 
+  puniform::hybrid(
+    yi = mental_dat$gt_pop, 
+    vi = mental_dat$Wgt_pop, 
+    conventional = mental_dat$conventional, 
+    mods = ~ mental_dat$outcome_type - 1,
+    side = "right",
+    control = list(optimizer = "Nelder-Mead")
+  )
+
+# Make work with moderator
+
+fit_hybrid_mental <- 
+  function(
+    dat, 
+    index = 1:nrow(dat) 
+  ) {
+    
+    # take subset of data
+    boot_dat_cluster <- dat[index, ]
+    
+    # expand to one row per effect size
+    boot_dat <- tidyr::unnest(boot_dat_cluster, data)
+    
+    run_hybrid_model <- function(
+    g, vg, conventional, moderator
+    ) {
+      
+      optimizers <- c("Nelder-Mead", "BFGS", "L-BFGS-B", "CG", "SANN", "Brent")
+      mod <- "Non-converged"
+      i <- 1L
+      
+      subgroup <- moderator
+      
+      while (!inherits(mod, "hybridoutput") & i <= 6L) {
+        
+        mod <- 
+          puniform::hybrid(
+            yi = g, 
+            vi = vg, 
+            conventional = conventional, 
+            side = "right",
+            mods = ~ subgroup -1,
+            control = list(optimizer = optimizers[i])
+          ) |> 
+          suppressWarnings()
+        
+        i <- i + 1L
+        
+      }
+      
+      X <- stats::model.matrix(~ -1 + subgroup)
+      n <- nrow(X)
+      p <- ncol(X)
+      
+      beta_hat <- mod$est
+      
+      # Obtain residuals
+      residuals <-  g - X %*% beta_hat
+      
+      # Calculate vcov
+      wi <- 1/(vg + mod$tau2)
+      W <- diag(wi, nrow = n, ncol = n)
+      
+      sigma_sq_hat <- sum(wi*residuals^2) / (n - p)
+      
+      vcov <- sigma_sq_hat * solve(t(X) %*% W %*% X)
+      
+      # Obtain q, Q, and the F value
+      q <- length(beta_hat)
+      
+      C_mat <- diag(1L, nrow = q)[1:2,,drop=FALSE]
+      
+      inverse_vcov <- chol2inv(chol(C_mat %*% vcov %*% t(C_mat)))
+      
+      C_beta <- (C_mat %*% beta_hat - matrix(c(0,0), ncol = 1L))
+      
+      Q <- as.numeric(t(C_beta) %*% inverse_vcov %*% C_beta)
+      
+      #Naive-F
+      F_naive <- Q/q
+      c(
+        F_val = F_naive, 
+        Anxiety = beta_hat[1], 
+        Depression = beta_hat[2], 
+        Gen_mental = beta_hat[3],
+        Symtoms = beta_hat[4],
+        tau = sqrt(mod$tau2)
+      )
+      
+      
+    }
+    
+    run_hybrid_model <- purrr::possibly(run_hybrid_model, otherwise = rep(NA_real_, 6))
+    
+    
+    # fit selection model, return vector
+    run_hybrid_model(
+      g = boot_dat$gt_pop, 
+      vg = boot_dat$Wgt_pop, 
+      conventional =  boot_dat$conventional,
+      moderator = boot_dat$outcome_type
+    )
+    
+}
+
+mental_dat_nested <- nest_by(mental_dat, study, .key = "data")
+
+tic()
+fit_hybrid_mental(mental_dat_nested)
+toc()
+
+# Generate bootstrap
+set.seed(30092025)
+
+ncpus <- parallel::detectCores() - 1
+
+tic()
+
+R <- 19
+
+# Make work in parallell
+boots_outcome_mental <- 
+  boot(
+    data = mental_dat_nested,               
+    statistic = fit_hybrid_mental, 
+    R = R,                                
+    parallel = "multicore", 
+    ncpus = ncpus
+  )
+
+
+time_seq <- toc()
+
+F_boot_pval_outcome_mental <- (1/R)*sum(boots_outcome_mental$t[,1] > boots_outcome_mental$t0[1], na.rm = TRUE)
+F_boot_pval_outcome_mental
+
+est_outcome_mental <- boots_outcome_mental$t0
+
+boot_SE_outcome_mental <- apply(boots_outcome_mental$t[,2:6], 2, sd, na.rm = TRUE)  
+
+boot_pval_outcome_mental <- 
+  map(
+    2:6, ~ {
+      sum(abs(boots_outcome_mental$t[,.x]-1) > abs(boots_outcome_mental$t0[.x]-1), na.rm = TRUE)/(1+boots_outcome_mental$R)  
+    }) |> 
+  list_c()
+
+#
+#model_SE <- with(hybrid_red, c(se[1], se[2] / (2 * sqrt(tau2))))
+#
+#res <- tibble(
+#  Parameter = names(est),
+#  Est = est,
+#  `SE(bootstrap)` = boot_SE,
+#  `SE(model)` = model_SE,
+#  `SE(bootstrap) / SE(model)` = boot_SE / model_SE
+#)
+#
+#res
+
+# Est
+cis_l_outcome_mental <- map(2:6, ~ {
+  obj <- boot.ci(boots_outcome_mental, type = "perc", index = .x) |> suppressWarnings()
+  obj$percent[4]
+}) |> list_c()
+
+cis_u_outcome_mental <- map(2:6, ~ {
+  obj <- boot.ci(boots_outcome_mental, type = "perc", index = .x) |> suppressWarnings()
+  obj$percent[5]
+}) |> list_c()
+
+#ci_alcohol <- boot.ci(boots, type = "perc", index = 2) 
+#ci_alcohol$percent[4:5] 
+## Tau
+#ci_hope <- boot.ci(boots, type = "perc", index = 3) 
+#ci_hope$percent[4:5]
+#
+#ci_social <- boot.ci(boots, type = "perc", index = 4) 
+#ci_social$percent[4:5] 
+## Tau
+#ci_well <- boot.ci(boots, type = "perc", index = 5) 
+#ci_well$percent[4:5]
+
+hyema_overcome_mental <- tibble(
+  Parameter = names(est_outcome_mental[2:6]),
+  Est = est_outcome_mental[2:6],
+  SE_bootstrap = boot_SE_outcome_mental,
+  CIL_bootstrap = cis_l_outcome_mental,
+  CIU_bootstrap = cis_u_outcome_mental, 
+  p_val_bootstrap = boot_pval_outcome_mental,
+  R = R
+)
+
+hyema_overcome_mental
+
+F_boot_pval_outcome_mental
+
+#GitHub repos/Group-based-interventions/
+saveRDS(boots_outcome_mental, file = "Bootstrap results/boots_outcome_mental.rds")
+saveRDS(hyema_overcome_mental, file = "Bootstrap results/hyema_overcome_mental.rds")
+saveRDS(F_boot_pval_outcome_mental, "Bootstrap results/F_boot_pval_outcome_mental.rds")
+
 
 

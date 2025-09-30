@@ -58,7 +58,9 @@ source("Helpers.R")
 source("pub-bias-test-helpers.R")
 ```
 
-# Data
+# **Reintegration**
+
+## Data
 ```{r load-data}
 #| code-fold: false
 
@@ -82,7 +84,7 @@ reint_ma_dat <-
 ```
 
 
-# Funnel plots
+## Funnel plots
 ```{r, main-res}
 #| eval: false
 rho <- 0.8
@@ -181,10 +183,7 @@ sub_res
 
 
 ```
-## Overall 
-
-::: {.panel-tabset}
-## Reintegration
+### Overall 
 
 ```{r reint-overall-fp}
 #| label: fig-reint-overall-fp
@@ -545,7 +544,7 @@ dev.off()
 
 ```
 
-## Investigating the impact of Cano-Vindel et al.
+### Investigating the impact of Cano-Vindel et al.
 
 ```{r reint-overall-fp}
 prereg_dat_cano <-  
@@ -662,80 +661,10 @@ cano_fp
 
 ```
 
-
-## Mental health
-```{r reint-overall-fp-mental}
-#| eval: false
-#| label: fig-reint-overall-fp-mental
-#| fig-cap: "Funnel plot across all mental health outcomes"
-#| fig.width: 9
-#| fig.height: 6
-#| fig.retina: 2
-#| message: false
-
-overall_mean_mental<- as.numeric(overall_res_mental$b)
-      
-y_lim_exp1 <- max(mental_health_dat$se_gt_pop) + 0.02 
-
-funnel_exp1 <-  tribble(
-  ~ x90, ~ x95, ~ x99, ~ y,
-  0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
-  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
-  0,     0,     0,     0
-) 
-
-# Egg CHE-ISCW-RVE ------------
-V_mat_ISCW <- metafor::vcalc(vi = Wgt_pop, cluster = study, obs = esid, data = reintegration_dat, rho = rho)
-
-W_ISCW <- solve(V_mat_ISCW)
-
-egg_ISCW <-
-  rma.mv(
-    yi = gt_pop,
-    V = V_mat_ISCW,
-    W = W_ISCW,
-    mods = ~ Wse_pop,
-    random = ~ 1 | study / esid,
-    data = reintegration_dat,
-    sparse = TRUE
-  ) |> 
-  robust(cluster = study, clubSandwich = TRUE)
-#----------------------------------
+### Funnel plot across outcomes
 
 
-reintegration_dat |> 
-  ggplot() + 
-  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
-  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
-  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
-  geom_abline(slope = qnorm(0.975), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
-  geom_hline(yintercept = overall_mean, linetype = mean_line, alpha = alpha_line) +  
-  geom_abline(slope = qnorm(0.025), intercept = overall_mean, linetype = mean_line, alpha = alpha_line) + 
-  geom_abline(slope = as.numeric(egg_ISCW$b[2]), intercept = as.numeric(egg_ISCW$b[1]), linetype = reg_line, color = reg_color) +
-  # Add prereg and rob to plot 
-  geom_point(aes(se_gt_pop, gt_pop), alpha = 1, size = 1.2) +
-  scale_color_brewer(type = "qual", palette = 2) + 
-  coord_flip() +
-  facet_grid2(~ outcome_construct) +
-  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
-  #scale_y_continuous(breaks = breaks_y) + 
-  theme_bw() + 
-  labs(x = "Standard error (adjusted)", 
-       y = "Standardized mean difference (Hedges' g)", 
-       color = "", shape = "") +
-  theme(legend.position = "bottom")
-
-
-
-```
-
-:::
- 
- 
-## Funnel plot across outcomes
-
-# Publication bias tests
+## Publication bias tests
 ```{r, tab-func-overall-pub-bias}
 
 .pubbias_overall_tab <- 
@@ -769,7 +698,7 @@ reintegration_dat |>
 ```
 
 
-# HYEMA
+### HYEMA
 
 ```{r}
 hyema_overall <- readRDS("Bootstrap results/hyema_overall_reint.rds")
@@ -838,7 +767,7 @@ hyema_outcome_tab <-
 
 ```
 
-# Puniform*
+### Puniform*
 
 ```{r puniform}
 # Not corrected for clustering as it has showed acceptable performance in
@@ -875,10 +804,8 @@ puniform_tab_res <-
 
 ```
 
-# Regression-based methods
 
-## Reintegration
-## Worst-case meta-analysis
+### Worst-case meta-analysis
 
 ```{r}
 
@@ -1173,7 +1100,7 @@ wc_outcome_sensi <-
 ```
 
 
-## CHE-ISCW 
+### CHE-ISCW 
 
 ```{r che-iscw}
 rho <- 0.8
@@ -1322,7 +1249,7 @@ che_iscw_outcome_tab <-
   )
 ```
 
-## PET/PEESE
+### PET/PEESE
 
 ```{r che-iscw}
 
@@ -1475,7 +1402,7 @@ che_pet_outcome_tab <-
 
 ```
 
-# Selection models
+### Selection models
 
 ```{r, selmodel}
 
@@ -1814,6 +1741,617 @@ PSM4_outcome_tab <-
 ```
 
 
+# **Mental health**
+## Data
+```{r load-data-mental}
+#| code-fold: false
+
+mental_ma_dat <- 
+  readRDS("mental_ma_dat.rds") |> 
+  mutate(
+    esid = 1:n(),
+    se_gt_pop = sqrt(vgt_pop), 
+    Wse_pop = sqrt(Wgt_pop),
+    t_i = gt_pop/sqrt(Wgt)
+  )
+
+```
+
+
+## Funnel plots
+```{r, main-res-mental}
+#| eval: false
+rho <- 0.8
+
+V_mat_mental <- 
+  metafor::vcalc(
+    data = mental_ma_dat,
+    vi = vgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+overall_res_mental <- 
+  metafor::rma.mv(
+    gt_pop,
+    V = V_mat_mental, 
+    random = ~ 1 | study / esid,
+    data = mental_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+overall_res_mental
+
+V_mat_outcome_mental <- 
+  metafor::vcalc(
+    data = mental_ma_dat,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = outcome_type,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+
+sub_res_mental <- 
+  rma.mv(
+    gt_pop ~ outcome_type - 1,
+    V = V_mat_outcome_mental, 
+    random = list(~ outcome_type | study, ~ outcome_type | esid),
+    struct = c("DIAG", "DIAG"),
+    data = mental_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+sub_res_mental
+
+# Mental health
+# MHV: Conduct these tests, when the main analyses has been made
+
+#V_mat_mental <- metafor::vcalc(
+#    data = mental_health_dat,
+#    vi = vgt_pop, 
+#    cluster = study,
+#    type = outcome_time, 
+#    grp1 = trt_name,
+#    w1 = N_t, 
+#    grp2 = control,
+#    w2 = N_c, 
+#    rho = rho
+#  )
+#
+#overall_res_mental <- 
+#  rma.mv(
+#    gt_pop ~ + 1,
+#    V = V_mat_mental, 
+#    random = ~ 1 | study / esid,
+#    data = mental_health_dat,
+#    sparse = TRUE
+#  ) |> 
+#  robust(cluster = study, clubSandwich = TRUE)
+#
+#overall_res_mental
+#
+#sub_res_mental <- 
+#  rma.mv(
+#    gt_pop ~ -1 + analysis_plan,
+#    V = V_mat_mental, 
+#    random = list(~ analysis_plan | study, ~ analysis_plan | esid),
+#    struct = c("DIAG", "DIAG"),
+#    data = mental_health_dat,
+#    sparse = TRUE
+#  )
+#
+#sub_res_mental
+
+
+```
+### Overall 
+
+```{r mental-overall-fp}
+#| label: fig-mental-overall-fp
+#| fig-cap: "Funnel plot across all mental health outcomes"
+#| fig.width: 9
+#| fig.height: 6
+#| fig.retina: 2
+#| message: false
+
+## Overall average effect
+
+rho <- 0.8
+
+# CHE-ISCW
+V_mat_mental <- 
+  metafor::vcalc(
+    data = mental_ma_dat,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+blsplit(V_mat_mental, mental_ma_dat$study) |> 
+  lapply(cov2cor) |> 
+  map(~ round(.x, 2))
+
+
+#W_mental <- chol2inv(chol(V_mat_mental))
+#W_mental <- Matrix::solve(V_mat_mod_mental)
+W_mental <- (V_mat_mental + t(V_mat_mental)) / 2
+
+# CHE
+che_mental <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mental,
+    random = ~ 1 | study / esid,
+    data = mental_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+# ISCW
+
+# CHE-ISCW-RVE
+che_iscw_mental <- 
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_mental,
+    W = W_mental,
+    random = ~ 1 | study / esid,
+    data = mental_ma_dat,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+## Preregistered vs. not preregistered 
+
+prereg_dat_mental <-  
+  mental_ma_dat |> 
+  filter(conventional == 0)
+
+V_mat_prereg_mental <- 
+  metafor::vcalc(
+    data = prereg_dat_mental,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+#W_prereg_mental <- chol2inv(chol(V_mat_prereg_mental))
+W_prereg_mental <- (V_mat_prereg_mental + t(V_mat_prereg_mental)) / 2
+
+egg_prereg_mental <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_prereg_mental,
+    W = W_prereg_mental,
+    mods = ~ Wse_pop,
+    random = ~ 1 | study / esid,
+    data = prereg_dat_mental,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+egg_prereg_res_mental <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_mental$b[1]),
+    egg_slope = as.numeric(egg_prereg_mental$b[2])
+  )
+
+notprereg_dat_mental <-  
+  mental_ma_dat |> 
+  filter(conventional == 1)
+
+
+V_mat_notprereg_mental <-  
+  metafor::vcalc(
+    data = notprereg_dat_mental,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+W_notprereg_mental <- solve(V_mat_notprereg_mental)
+
+egg_notprereg_mental <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_notprereg_mental,
+    W = W_notprereg_mental,
+    mods = ~ Wse_pop,
+    random = ~ 1 | study / esid,
+    data = notprereg_dat_mental,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+
+egg_notprereg_res_mental <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg_mental$b[1]),
+    egg_slope = as.numeric(egg_notprereg_mental$b[2])
+  )
+
+egg_res_subgrouped_mental <- bind_rows(egg_prereg_res_mental, egg_notprereg_res_mental)
+egg_res_subgrouped_mental
+
+
+# PESCE+ model
+
+prereg_arg_mental <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "prereg_chr",
+    model = "SCEp",
+    r = 0.8, 
+    data = mental_ma_dat,
+    type = "categorical"
+  ); prereg_arg_mental
+
+# PESCEp+ 
+subgroup_means_mental <- pmap(.l = prereg_arg_mental, .f = .PESCE_RVE) |> list_rbind()
+
+#subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
+
+subgroup_dat_mental <- 
+  mental_ma_dat |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means_mental[c(3,2), c(2, 14:18)], egg_res_subgrouped_mental) |> 
+  mutate(
+    slope_low = qnorm(0.025), 
+    slope_high = qnorm(0.975), 
+    level = "Effect size level"
+  ) 
+
+
+
+y_lim_exp1_mental <- max(mental_ma_dat$Wse_pop) + 0.02 
+
+funnel_exp1_mental <-  
+  tribble(
+    ~ x90, ~ x95, ~ x99, ~ y,
+    0,     0,     0,     0,
+    qnorm(0.05) * y_lim_exp1_mental, qnorm(0.025) * y_lim_exp1_mental, qnorm(0.005) * y_lim_exp1_mental, y_lim_exp1_mental,
+    qnorm(0.95) * y_lim_exp1_mental, qnorm(0.975) * y_lim_exp1_mental, qnorm(0.995) * y_lim_exp1_mental, y_lim_exp1_mental,
+    0,     0,     0,     0
+  ) 
+
+
+
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+es_level_fp_mental <- 
+  mental_ma_dat |> 
+  mutate(
+    level = "Effect size level",
+    report_bias = case_when(
+      rob_tool == "RoB2" & D5 == "Low" ~ "Low",
+      rob_tool == "RoB2" & str_detect(D5, "Some") ~ "Moderate",
+      rob_tool == "RoB2" & str_detect(D5, "High") ~ "Serious",
+      .default = D7
+    ),
+    
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious"))
+    
+  ) |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_mental, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_mental, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_mental, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_mental, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop, color = overall_rob), alpha = 1, size = 1.5) +
+  coord_flip() +
+  facet_grid(level~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp1_mental, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  scale_color_manual(
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow", "Serious/High" = "red")
+  ) + 
+  theme_bw() + 
+  labs(x = "Modified standard error", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "") +
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) +
+  labs(color = "Overall risk of bias") +
+  guides(col = guide_legend(nrow = 1))
+
+
+# Make aggregate plot
+
+mental_dat_agg <- 
+  mental_ma_dat |> 
+  escalc(measure = "SMD", yi = gt_pop, vi = Wgt_pop, data = _) |> 
+  aggregate.escalc(cluster = study, rho = 0.8) |> 
+  mutate(
+    Wse_pop = sqrt(vi)
+  )
+
+prereg_dat_agg_mental <-  
+  mental_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 0)
+
+egg_prereg_agg_mental <- 
+  rma(yi = yi, vi = vi, data = prereg_dat_agg_mental, control=list(stepadj=0.5, maxiter=1000)) |> 
+  regtest()
+
+egg_prereg_agg_res_mental <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_agg_mental$fit$b[1]),
+    egg_slope = as.numeric(egg_prereg_agg_mental$fit$b[2])
+  )
+
+notprereg_dat_agg_mental <-  
+  mental_dat_agg |> 
+  as_tibble() |> 
+  dplyr::filter(conventional == 1)
+
+egg_notprereg_agg_mental <- 
+  rma(yi = yi, vi = vi, data = notprereg_dat_agg_mental) |> 
+  regtest()
+
+egg_notprereg_agg_res_mental <- 
+  tibble(
+    subgroup = "Not preregistered",
+    egg_intercept = as.numeric(egg_notprereg_agg_mental$fit$b[1]),
+    egg_slope = as.numeric(egg_notprereg_agg_mental$fit$b[2])
+  )
+
+egg_res_agg_subgrouped_mental <- 
+  bind_rows(
+    egg_notprereg_agg_res_mental, 
+    egg_prereg_agg_res_mental
+  )
+
+
+means_agg_mental <- 
+  rma(yi, vi, mods = ~ prereg_chr - 1, data = mental_dat_agg) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+subgroup_means_agg_mental <- 
+  tibble(
+    Moderator = c("Not preregistered", "Preregistered"),
+    avg_effect = as.numeric(means_agg_mental$b), 
+    LL = as.numeric(means_agg_mental$ci.lb), 
+    UL = as.numeric(means_agg_mental$ci.ub)
+  )
+
+subgroup_dat_agg_mental <- 
+  mental_dat_agg |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  arrange(prereg_chr) |> 
+  bind_cols(subgroup_means_agg_mental, egg_res_agg_subgrouped_mental) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Study level") 
+
+
+#subgroup_dat <- 
+#  reintergation_dat |> 
+#  summarise(
+#    gt = mean(gt),
+#    Wse = mean(Wse),
+#    analysis_plan = analysis_plan[1],
+#    .by = prereg_chr
+#  ) |> 
+#  bind_cols(subgroup_means[2:3,], egg_res_subgrouped) |> 
+#  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Effect size level") 
+
+
+
+y_lim_exp2_mental <- max(mental_dat_agg$Wse_pop) + 0.02 
+y_lim_exp2_mental  
+
+funnel_exp2_mental <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp2_mental, qnorm(0.025) * y_lim_exp2_mental, qnorm(0.005) * y_lim_exp2_mental, y_lim_exp2_mental,
+  qnorm(0.95) * y_lim_exp2_mental, qnorm(0.975) * y_lim_exp2_mental, qnorm(0.995) * y_lim_exp2_mental, y_lim_exp2_mental,
+  0,     0,     0,     0
+) 
+
+study_level_fp_mental <- 
+  mental_dat_agg |> 
+  mutate(level = "Study level") |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp2_mental, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2_mental, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp2_mental, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_agg_mental, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_agg_mental, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_agg_mental, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_agg_mental, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop), alpha = 1, size = 1.5) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(level~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp2_mental, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() +
+  theme(
+    axis.title = element_blank()
+  )
+
+ylab_mental <- es_level_fp_mental$labels$x
+
+study_level_fp_mental$labels$x <- es_level_fp_mental$labels$x <- "" 
+
+png("plots/funnel plots (overall effect) across type of mental health.png", width = 6.5, height = 5, res = 300, unit = "in")
+study_level_fp_mental / es_level_fp_mental
+grid::grid.draw(grid::textGrob(ylab_mental, y = 0.6, x = 0.02, rot = 90))
+dev.off()
+
+```
+
+### Investigating the impact of Cano-Vindel et al.
+
+```{r reint-overall-fp}
+prereg_dat_cano <-  
+  reint_ma_dat |> 
+  filter(conventional == 0) |>
+  mutate(
+    cano_vindel = if_else(str_detect(study, "Cano"), 1, 0),
+    cano_vindel = factor(cano_vindel)
+  )
+
+V_mat_prereg_cano <- 
+  metafor::vcalc(
+    data = prereg_dat_cano,
+    vi = Wgt_pop, 
+    cluster = study,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+W_prereg_cano <- solve(V_mat_prereg_cano)
+
+egg_prereg_cano <-
+  rma.mv(
+    yi = gt_pop,
+    V = V_mat_prereg_cano,
+    W = W_prereg_cano,
+    mods = ~ Wse_pop + cano_vindel,
+    random = ~ 1 | study / esid,
+    data = prereg_dat_cano,
+    sparse = TRUE
+  ) |> 
+  robust(cluster = study, clubSandwich = TRUE)
+
+egg_prereg_res_cano <- 
+  tibble(
+    subgroup = "Preregistered",
+    egg_intercept = as.numeric(egg_prereg_cano $b[1]),
+    egg_slope = as.numeric(egg_prereg_cano$b[2])
+  )
+
+
+subgroup_dat_cano <- 
+  prereg_dat_cano |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means[3, c(2, 14:18)], egg_prereg_res_cano) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975)) 
+
+
+
+y_lim_exp_cano <- max(prereg_dat_cano$Wse_pop) + 0.02 
+y_lim_exp_cano  
+
+funnel_exp_cano <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp_cano, qnorm(0.025) * y_lim_exp_cano, qnorm(0.005) * y_lim_exp_cano, y_lim_exp_cano,
+  qnorm(0.95) * y_lim_exp_cano, qnorm(0.975) * y_lim_exp_cano, qnorm(0.995) * y_lim_exp_cano, y_lim_exp_cano,
+  0,     0,     0,     0
+) 
+
+
+
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+
+cano_fp <- 
+  prereg_dat_cano |> 
+  mutate(alpha_val = if_else(cano_vindel == 1, 0.9, 1)) |>
+  ggplot() + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_cano, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_cano, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_cano, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_point(aes(Wse_pop, gt_pop, col = cano_vindel, alpha = alpha_val), size = 1.5) +
+  scale_color_brewer(type = "qual", palette = 2) + 
+  coord_flip() +
+  facet_grid(~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp_cano, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  theme_bw() + 
+  labs(x = "Modified standard error", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "", shape = "") +
+  theme(
+    legend.position = "bottom"
+  ) +
+  labs(color = "Cano-vindel") +
+  guides(col = "none", alpha = "none")
+
+#png("plots/funnel plots (overall effect) without Cano-Vindel.png", width = 8, height = 5.5, res = 300, unit = "in")
+cano_fp
+#dev.off()
+
+
+
+
+```
+
 
 #Publication and small study bias tests for overall average effects
 ::: {.panel-tabset}
@@ -1854,7 +2392,6 @@ gt_tab_overall
 #gt_tab_overall |> gtsave("Tables/overall publication bias table.docx")
 ```
 
-:::
  
 # Publication and small study bias tests across type of registration
 ::: {.panel-tabset}
