@@ -403,7 +403,7 @@ es_level_fp <-
   scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
   scale_color_manual(
-    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow", "Serious/High" = "red")
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow2", "Serious/High" = "red")
   ) + 
   theme_bw() + 
   labs(x = "Modified standard error", 
@@ -1752,7 +1752,7 @@ mental_ma_dat <-
     esid = 1:n(),
     se_gt_pop = sqrt(vgt_pop), 
     Wse_pop = sqrt(Wgt_pop),
-    t_i = gt_pop/sqrt(Wgt)
+    t_i = gt_pop/sqrt(Wgt) # Following Chen and Pustejovsky (2025)
   )
 
 ```
@@ -1890,9 +1890,7 @@ blsplit(V_mat_mental, mental_ma_dat$study) |>
   map(~ round(.x, 2))
 
 
-#W_mental <- chol2inv(chol(V_mat_mental))
-#W_mental <- Matrix::solve(V_mat_mod_mental)
-W_mental <- (V_mat_mental + t(V_mat_mental)) / 2
+W_mental <- solve(V_mat_mental) |> round(3)
 
 # CHE
 che_mental <- 
@@ -1937,10 +1935,9 @@ V_mat_prereg_mental <-
     grp2 = control,
     w2 = N_c, 
     rho = rho
-  )
+  ) 
 
-#W_prereg_mental <- chol2inv(chol(V_mat_prereg_mental))
-W_prereg_mental <- (V_mat_prereg_mental + t(V_mat_prereg_mental)) / 2
+W_prereg_mental <- solve(V_mat_prereg_mental) |> round(3)
 
 egg_prereg_mental <-
   rma.mv(
@@ -1979,7 +1976,7 @@ V_mat_notprereg_mental <-
     rho = rho
   )
 
-W_notprereg_mental <- solve(V_mat_notprereg_mental)
+W_notprereg_mental <- solve(V_mat_notprereg_mental) |> round(3)
 
 egg_notprereg_mental <-
   rma.mv(
@@ -2073,7 +2070,9 @@ es_level_fp_mental <-
       .default = D7
     ),
     
-    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious"))
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious")),
+    
+    large_sample = if_else(N_total > 100, "Sample above 100", "Sample below 100")
     
   ) |> 
   ggplot() + 
@@ -2090,7 +2089,7 @@ es_level_fp_mental <-
   scale_x_reverse(limits = c(y_lim_exp1_mental, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
   scale_color_manual(
-    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow", "Serious/High" = "red")
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow2", "Serious/High" = "red")
   ) + 
   theme_bw() + 
   labs(x = "Modified standard error", 
@@ -2238,17 +2237,17 @@ dev.off()
 ### Investigating the impact of Cano-Vindel et al.
 
 ```{r reint-overall-fp}
-prereg_dat_cano <-  
-  reint_ma_dat |> 
+prereg_dat_cano_mental <-  
+  mental_ma_dat |> 
   filter(conventional == 0) |>
   mutate(
     cano_vindel = if_else(str_detect(study, "Cano"), 1, 0),
     cano_vindel = factor(cano_vindel)
   )
 
-V_mat_prereg_cano <- 
+V_mat_prereg_cano_mental <- 
   metafor::vcalc(
-    data = prereg_dat_cano,
+    data = prereg_dat_cano_mental,
     vi = Wgt_pop, 
     cluster = study,
     type = outcome_time, 
@@ -2259,49 +2258,49 @@ V_mat_prereg_cano <-
     rho = rho
   )
 
-W_prereg_cano <- solve(V_mat_prereg_cano)
+W_prereg_cano_mental <- solve(V_mat_prereg_cano_mental) |> round(3)
 
-egg_prereg_cano <-
+egg_prereg_cano_mental <-
   rma.mv(
     yi = gt_pop,
-    V = V_mat_prereg_cano,
-    W = W_prereg_cano,
+    V = V_mat_prereg_cano_mental,
+    W = W_prereg_cano_mental,
     mods = ~ Wse_pop + cano_vindel,
     random = ~ 1 | study / esid,
-    data = prereg_dat_cano,
+    data = prereg_dat_cano_mental,
     sparse = TRUE
   ) |> 
   robust(cluster = study, clubSandwich = TRUE)
 
-egg_prereg_res_cano <- 
+egg_prereg_res_cano_mental <- 
   tibble(
     subgroup = "Preregistered",
-    egg_intercept = as.numeric(egg_prereg_cano $b[1]),
-    egg_slope = as.numeric(egg_prereg_cano$b[2])
+    egg_intercept = as.numeric(egg_prereg_cano_mental$b[1]),
+    egg_slope = as.numeric(egg_prereg_cano_mental$b[2])
   )
 
 
-subgroup_dat_cano <- 
-  prereg_dat_cano |> 
+subgroup_dat_cano_mental <- 
+  prereg_dat_cano_mental |> 
   summarise(
     gt_pop = mean(gt_pop),
     Wse = mean(Wse_pop),
     outcome_type = outcome_type[1],
     .by = prereg_chr
   ) |> 
-  bind_cols(subgroup_means[3, c(2, 14:18)], egg_prereg_res_cano) |> 
+  bind_cols(subgroup_means_mental[3, c(2, 14:18)], egg_prereg_res_cano_mental) |> 
   mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975)) 
 
 
 
-y_lim_exp_cano <- max(prereg_dat_cano$Wse_pop) + 0.02 
-y_lim_exp_cano  
+y_lim_exp_cano_mental <- max(prereg_dat_cano_mental$Wse_pop) + 0.02 
+y_lim_exp_cano_mental  
 
-funnel_exp_cano <-  tribble(
+funnel_exp_cano_mental <-  tribble(
   ~ x90, ~ x95, ~ x99, ~ y,
   0,     0,     0,     0,
-  qnorm(0.05) * y_lim_exp_cano, qnorm(0.025) * y_lim_exp_cano, qnorm(0.005) * y_lim_exp_cano, y_lim_exp_cano,
-  qnorm(0.95) * y_lim_exp_cano, qnorm(0.975) * y_lim_exp_cano, qnorm(0.995) * y_lim_exp_cano, y_lim_exp_cano,
+  qnorm(0.05) * y_lim_exp_cano_mental, qnorm(0.025) * y_lim_exp_cano_mental, qnorm(0.005) * y_lim_exp_cano_mental, y_lim_exp_cano_mental,
+  qnorm(0.95) * y_lim_exp_cano_mental, qnorm(0.975) * y_lim_exp_cano_mental, qnorm(0.995) * y_lim_exp_cano_mental, y_lim_exp_cano_mental,
   0,     0,     0,     0
 ) 
 
@@ -2316,22 +2315,22 @@ reg_color <- "blue"
 breaks_y <- seq(-3, 3, 0.5)
 
 
-cano_fp <- 
-  prereg_dat_cano |> 
+cano_fp_mental <- 
+  prereg_dat_cano_mental |> 
   mutate(alpha_val = if_else(cano_vindel == 1, 0.9, 1)) |>
   ggplot() + 
-  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
-  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
-  geom_polygon(data = funnel_exp_cano, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
-  geom_abline(data = subgroup_dat_cano, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
-  geom_hline(data = subgroup_dat_cano, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
-  geom_abline(data = subgroup_dat_cano, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
-  geom_abline(data = subgroup_dat_cano, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_polygon(data = funnel_exp_cano_mental, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano_mental, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp_cano_mental, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_cano_mental, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_cano_mental, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_cano_mental, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_cano_mental, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
   geom_point(aes(Wse_pop, gt_pop, col = cano_vindel, alpha = alpha_val), size = 1.5) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
   facet_grid(~prereg_chr) +
-  scale_x_reverse(limits = c(y_lim_exp_cano, 0.0), expand = c(0,0)) + 
+  scale_x_reverse(limits = c(y_lim_exp_cano_mental, 0.0), expand = c(0,0)) + 
   scale_y_continuous(breaks = breaks_y) + 
   theme_bw() + 
   labs(x = "Modified standard error", 
@@ -2344,7 +2343,7 @@ cano_fp <-
   guides(col = "none", alpha = "none")
 
 #png("plots/funnel plots (overall effect) without Cano-Vindel.png", width = 8, height = 5.5, res = 300, unit = "in")
-cano_fp
+cano_fp_mental
 #dev.off()
 
 
