@@ -13,6 +13,8 @@ library(tictoc)
 # Make it work on the reintegration data
 reint_dat <- readRDS("reint_ma_dat.rds")
 
+R <- 1999
+
 hybrid_reint <- 
   hybrid(
     yi = reint_dat$gt_pop, 
@@ -79,7 +81,6 @@ fit_hybrid_model2(reint_dat_nested)
 
 # Generate bootstrap
 set.seed(05052025)
-R <- 19
 ncpus <- parallel::detectCores() - 1
 
 tic()
@@ -123,8 +124,9 @@ hyema_overall <-
 
 hyema_overall
 
-saveRDS(boots_overall, "GitHub repos/Group-based-interventions/Boostrap results/boots_overall_reint.rds")
-saveRDS(hyema_overall, file = "GitHub repos/Group-based-interventions/Boostrap results/hyema_overall_reint.rds")
+#GitHub repos/Group-based-interventions/
+saveRDS(boots_overall, "Bootstrap results/boots_overall_reint.rds")
+saveRDS(hyema_overall, file = "Bootstrap results/hyema_overall_reint.rds")
 
 # Make work with moderator
 
@@ -239,8 +241,6 @@ ncpus <- parallel::detectCores() - 1
 
 tic()
 
-R <- 19
-
 # Make work in parallell
 boots_outcome <- 
   boot(
@@ -318,9 +318,9 @@ hyema_overcome
 
 F_boot_pval_outcome
 
-saveRDS(boots_outcome, file = "GitHub repos/Group-based-interventions/Boostrap results/boots_outcome_reint.rds")
-saveRDS(hyema_overcome, file = "GitHub repos/Group-based-interventions/Boostrap results/hyema_overcome.rds")
-saveRDS(F_boot_pval_outcome, "GitHub repos/Group-based-interventions/Boostrap results/F_boot_pval_outcome.rds")
+saveRDS(boots_outcome, file = "Bootstrap results/boots_outcome_reint.rds")
+saveRDS(hyema_overcome, file = "Bootstrap results/hyema_overcome.rds")
+saveRDS(F_boot_pval_outcome, "Bootstrap results/F_boot_pval_outcome.rds")
 
 
 # Mental health -------------- 
@@ -345,7 +345,6 @@ fit_hybrid_model2(mental_dat_nested)
 
 # Generate bootstrap
 set.seed(30092025)
-R <- 19
 ncpus <- parallel::detectCores() - 1
 
 tic()
@@ -512,8 +511,6 @@ set.seed(30092025)
 ncpus <- parallel::detectCores() - 1
 
 tic()
-
-R <- 19
 
 # Make work in parallell
 boots_outcome_mental <- 

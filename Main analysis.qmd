@@ -103,6 +103,9 @@ reint_ma_dat <-
     # For vcalc
     outcome, outcome_time, N_t, N_c, N_total, trt_name, trt_id, control, ctr_id,
     
+    # For sensitivity analysis  
+    ESS_t, ESS_c, ESS_total,
+    
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
     
@@ -211,16 +214,166 @@ saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 
 
-.PECHE_RVE(data = reint_ma_dat)
-
+main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
+main_res_reint
 #study_names <- unique(reint_ma_dat$study) |> as.character()
 #
 #omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
 
 ```
 
+### Forest plot
 
-### Outcome
+```{r forest-plot-reint}
+
+rho <- 0.8
+
+studies <- n_distinct(reint_ma_dat$study)
+n_es <- nrow(reint_ma_dat)
+
+peche_res <- main_res_reint
+outcome_group <- "Overall average effect size (social reintegration)"
+tabel_label <- "Summary (PECHE-RVE)"
+
+tau2 <- peche_res$tau2
+omega2 <- peche_res$omega2
+beta <- round(peche_res$avg_effect, 2)
+cil <- round(peche_res$LL, 2)
+ciu <- round(peche_res$UL, 2)
+
+reframed_dat <-   
+  escalc(yi = gt_pop, vi = vgt_pop, data = reint_ma_dat) |> 
+  mutate(n = n(), .by = study) |> 
+  aggregate(cluster = study, rho = rho) |> 
+  reframe(
+    yi = rep(yi, n),
+    vi = rep(vi, n),
+    .by = study
+  ) |> 
+  select(-study)
+
+
+forest_dat <-
+  reint_ma_dat |> 
+  bind_cols(reframed_dat) |> 
+  mutate(
+    analysis_plan = "Overall average effect size (social reintegration)"
+  ) |> 
+  mutate(
+    Est = gt_pop,
+    SE = sqrt(vgt_pop),
+    
+    CI_L = Est - SE * qnorm(.975),
+    CI_U = Est + SE * qnorm(.975),
+    
+    #rma_mean = as.numeric(rma(gt, vgt, data = pick(dplyr::everything()))$b)
+    rma_mean = round(yi, 2),
+    rma_cil = round(yi - sqrt(vi) * qnorm(.975), 2),
+    rma_ciu = round(yi + sqrt(vi) * qnorm(.975), 2),
+    
+    kj = n(),
+    
+    sigma2j = mean(vgt_pop),
+    
+    es_weight = ((kj*tau2 + omega2 + ((kj-1)*rho)*sigma2j) + sigma2j )^-1,
+    
+    .by = study
+    
+  ) |> 
+  arrange(rma_mean, study) |> 
+  mutate(
+    study = factor(study, levels = rev(unique(study))),
+    weight_prop = round((es_weight/sum(es_weight)) * 100, 2),
+  )
+
+forest_dat2 <- 
+  forest_dat |> 
+  add_row(rma_mean = max(forest_dat$gt_pop) + 0.01) |> 
+  add_row(study = tabel_label) |> 
+  mutate(
+    study = replace_na(study, ""),
+    study = factor(study, levels = rev(unique(study))),
+    analysis_plan = if_else(is.na(analysis_plan), outcome_group, analysis_plan)
+  ) 
+
+    
+kj_label <- 
+  forest_dat2 |> 
+  summarise(
+    Est = Est[1],
+    CI_L = CI_L[1],
+    CI_U = CI_U[1],
+    
+    mean_label = paste0(rma_mean[1], " [", rma_cil[1], ", ", rma_ciu[1], "], " ),
+    
+    label = paste0(mean_label, "(", kj[1], ") ", weight_prop[1], "%"),
+    .by = c(analysis_plan, study)
+  ) |> 
+  mutate(
+    label = case_when(
+      study == "" ~ "",
+      study == tabel_label ~ paste0(beta, " [", cil, ", ", ciu, "], ", studies, " (", n_es, ")"),
+      .default = label
+    )
+  ) |> 
+  arrange(study)
+
+mean_label_dat <- 
+  forest_dat2 |> 
+  mutate(
+    mean_es = round(peche_res$avg_effect, 2)
+  )
+
+max_ciu <- forest_dat2$CI_U |> max(na.rm = TRUE)
+
+# Forest plot with all effect sizes
+r_diam_x <- r_diam_y_post <- forest_dat2 |> nrow() - 4
+sum.y <- c(1, 0.7, 1, 1.3, rep(NA, r_diam_y_post ))
+sum.x <- c(cil, beta, ciu, beta, rep(NA, r_diam_x))
+
+plot <- 
+  forest_dat2 |>
+  ggplot(
+    aes(x = Est, y = study, xmin = CI_L, xmax = CI_U,
+        color = outcome_type, alpha = 0.5)
+  ) + 
+  geom_pointrange(position = position_dodge2(width = 0.5, padding = 0.5)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +
+  facet_grid(~analysis_plan) +
+  geom_text(data = kj_label, aes(x = max_ciu + 0.6, label = label), size=3.3, color = "black") +
+  geom_vline(data = mean_label_dat, aes(xintercept = mean_es), color = "black", linetype = 4) +
+  geom_blank(aes(max_ciu + 0.6 + 0.4)) +
+  geom_polygon(aes(x=sum.x, y=sum.y), color = "black", alpha = 1) +
+  theme_light() + 
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(color = "black"),
+    axis.title.y=element_blank(),
+    plot.caption = element_text(hjust = 0)
+  ) + 
+  scale_x_continuous(breaks = seq(-3, 3, 0.5)) +
+  labs(
+    x = "Hedges' g (95% CI)",
+    color = "Type of outcome"
+  ) +
+  guides(
+    alpha = "none",
+    color = guide_legend(nrow = 3, byrow = TRUE)
+    ) +
+  scale_color_discrete(na.translate = FALSE)
+
+
+#png(filename = "Figures/forest plot reint.png", height = 11, width = 10, res = 600, units = "in")
+suppressWarnings(plot)
+#dev.off()
+
+
+  
+  
+
+```
+
+
 ```{r outcome-test}
 rho <- 0.8
 
@@ -879,7 +1032,7 @@ saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ```{r}
 
-.PECHE_RVE(data = mental_ma_dat)
+main_res_mental <- .PECHE_RVE(data = mental_ma_dat)
 
 #study_names <- unique(reint_ma_dat$study) |> as.character()
 #
@@ -887,8 +1040,158 @@ saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ```
 
+### Forest plot
 
-### Outcome
+```{r forest-plot-reint}
+
+rho <- 0.8
+
+studies_mental <- n_distinct(mental_ma_dat$study)
+n_es_mental <- nrow(mental_ma_dat)
+
+peche_res_mental <- main_res_mental
+outcome_group_mental <- "Overall average effect size (mental health)"
+tabel_label_mental <- "Summary (PECHE-RVE)"
+
+tau2_mental <- peche_res_mental$tau2
+omega2_mental <- peche_res_mental$omega2
+beta_mental <- round(peche_res_mental$avg_effect, 2)
+cil_mental <- round(peche_res_mental$LL, 2)
+ciu_mental <- round(peche_res_mental$UL, 2)
+
+reframed_dat_mental <-   
+  escalc(yi = gt_pop, vi = vgt_pop, data = mental_ma_dat) |> 
+  mutate(n = n(), .by = study) |> 
+  aggregate(cluster = study, rho = rho) |> 
+  reframe(
+    yi = rep(yi, n),
+    vi = rep(vi, n),
+    .by = study
+  ) |> 
+  select(-study)
+
+
+forest_dat_mental <-
+  mental_ma_dat |> 
+  bind_cols(reframed_dat_mental) |> 
+  mutate(
+    analysis_plan = "Overall average effect size (mental health)"
+  ) |> 
+  mutate(
+    Est = gt_pop,
+    SE = sqrt(vgt_pop),
+    
+    CI_L = Est - SE * qnorm(.975),
+    CI_U = Est + SE * qnorm(.975),
+    
+    #rma_mean = as.numeric(rma(gt, vgt, data = pick(dplyr::everything()))$b)
+    rma_mean = round(yi, 2),
+    rma_cil = round(yi - sqrt(vi) * qnorm(.975), 2),
+    rma_ciu = round(yi + sqrt(vi) * qnorm(.975), 2),
+    
+    kj = n(),
+    
+    sigma2j = mean(vgt_pop),
+    
+    es_weight = ((kj*tau2 + omega2 + ((kj-1)*rho)*sigma2j) + sigma2j )^-1,
+    
+    .by = study
+    
+  ) |> 
+  arrange(rma_mean, study) |> 
+  mutate(
+    study = factor(study, levels = rev(unique(study))),
+    weight_prop = round((es_weight/sum(es_weight)) * 100, 2),
+  )
+
+forest_dat2_mental <- 
+  forest_dat_mental |> 
+  add_row(rma_mean = max(forest_dat_mental$gt_pop) + 0.01) |> 
+  add_row(study = tabel_label) |> 
+  mutate(
+    study = replace_na(study, ""),
+    study = factor(study, levels = rev(unique(study))),
+    analysis_plan = if_else(is.na(analysis_plan), outcome_group_mental, analysis_plan)
+  ) 
+
+    
+kj_label_mental <- 
+  forest_dat2_mental |> 
+  summarise(
+    Est = Est[1],
+    CI_L = CI_L[1],
+    CI_U = CI_U[1],
+    
+    mean_label = paste0(rma_mean[1], " [", rma_cil[1], ", ", rma_ciu[1], "], " ),
+    
+    label = paste0(mean_label, "(", kj[1], ") ", weight_prop[1], "%"),
+    .by = c(analysis_plan, study)
+  ) |> 
+  mutate(
+    label = case_when(
+      study == "" ~ "",
+      study == tabel_label ~ paste0(beta, " [", cil_mental, ", ", ciu_mental, "], ", studies_mental, " (", n_es_mental, ")"),
+      .default = label
+    )
+  ) |> 
+  arrange(study)
+
+mean_label_dat_mental <- 
+  forest_dat2_mental |> 
+  mutate(
+    mean_es = round(peche_res_mental$avg_effect, 2)
+  )
+
+max_ciu_mental <- forest_dat2_mental$CI_U |> max(na.rm = TRUE)
+
+# Forest plot with all effect sizes
+r_diam_x_mental <- r_diam_y_post_mental <- forest_dat2_mental |> nrow() - 4
+sum.y_mental <- c(1, 0.7, 1, 1.3, rep(NA, r_diam_y_post_mental ))
+sum.x_mental <- c(cil_mental, beta_mental, ciu_mental, beta_mental, rep(NA, r_diam_x_mental))
+
+plot_mental <- 
+  forest_dat2_mental |>
+  ggplot(
+    aes(x = Est, y = study, xmin = CI_L, xmax = CI_U,
+        color = outcome_type, alpha = 0.5)
+  ) + 
+  geom_pointrange(position = position_dodge2(width = 0.5, padding = 0.5)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +
+  facet_grid(~analysis_plan) +
+  geom_text(data = kj_label_mental, aes(x = max_ciu_mental + 0.6, label = label), size=3.3, color = "black") +
+  geom_vline(data = mean_label_dat_mental, aes(xintercept = mean_es), color = "black", linetype = 4) +
+  geom_blank(aes(max_ciu + 0.6 + 0.4)) +
+  geom_polygon(aes(x=sum.x_mental, y=sum.y_mental), color = "black", alpha = 1) +
+  theme_light() + 
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(color = "black"),
+    axis.title.y=element_blank(),
+    plot.caption = element_text(hjust = 0)
+  ) + 
+  scale_x_continuous(breaks = seq(-3, 5, 0.5), limits = c(-1.5, 4.15)) +
+  labs(
+    x = "Hedges' g (95% CI)",
+    color = "Type of outcome"
+  ) +
+  guides(
+    alpha = "none",
+    color = guide_legend(nrow = 2, byrow = TRUE)
+    ) +
+  scale_color_discrete(na.translate = FALSE)
+
+
+#png(filename = "Figures/forest plot mental.png", height = 11, width = 10, res = 600, units = "in")
+suppressWarnings(plot_mental)
+#dev.off()
+
+
+  
+  
+
+```
+
+
 ```{r outcome-test-mental}
 rho <- 0.8
 
