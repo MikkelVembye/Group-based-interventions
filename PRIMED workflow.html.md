@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-09-29"
+date: "2025-10-08"
 format:
   html: 
     keep-md: true
@@ -17777,9 +17777,9 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-09-29
- pandoc   3.6.3 @ C:/RStudio-2025.09.0-387/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
- quarto   NA @ C:\\RSTUDI~1.0-3\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ date     2025-10-08
+ pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source

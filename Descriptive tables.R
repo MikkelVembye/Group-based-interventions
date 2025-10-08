@@ -13,8 +13,9 @@ library(gt)
 reintegration_dat <- 
   readRDS("reintegration_dat.rds") |> 
   mutate(
-    schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other"))
-  )
+    schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other")),
+    short_term_es =  if_else(time_after_end_intervention_weeks <= 52, "Short-term measure (< 52 weeks)", "Follow-up measure (> 52 weeks)")
+  ) 
 
 .study_avg <- function(category, data = reintegration_dat) {
   
@@ -47,6 +48,7 @@ reintegration_dat <-
 
 
 
+
 x <- dplyr::vars(
   cnt,
   analysis_plan,
@@ -59,6 +61,7 @@ x <- dplyr::vars(
   analysis_strategy,
   control,
   overall_rob,
+  short_term_es,
   posttest_only,
   handle_multilevel
   ) 
@@ -80,8 +83,9 @@ pct_table_reint_dat <-
       n %in% 37:38 ~ "Analysis strategy",
       n %in% 39:42 ~ "Control group",
       n %in% 43:45 ~ "Overall risk of bias",
-      n %in% 46:47 ~ "Effect size metric",
-      n %in% 48:49 ~ "Handles multilevel structure",
+      n %in% 46 ~ "Timing of measurement",
+      n %in% 47:48 ~ "Effect size metric",
+      n %in% 49:50 ~ "Handles multilevel structure",
       .default = NA_character_
     )
   ) |> 
@@ -112,7 +116,7 @@ pct_table_reint <-
     table.font.size = 12
   )
 
-#pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
+pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
 
   
 .mean_table <- 
@@ -332,7 +336,8 @@ mean_table_reint <-
 mental_health_dat <- 
   readRDS("mental_health_dat.rds") |> 
   mutate(
-    schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other"))
+    schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other")),
+    short_term_es =  if_else(time_after_end_intervention_weeks <= 52, "Short-term measure (< 52 weeks)", "Follow-up measure (> 52 weeks)")
   )
 
 
@@ -348,6 +353,7 @@ x <- dplyr::vars(
   analysis_strategy,
   control,
   overall_rob,
+  short_term_es,
   posttest_only,
   handle_multilevel
 ) 
@@ -370,8 +376,9 @@ pct_table_mental_dat <-
       n %in% 31:32 ~ "Analysis strategy",
       n %in% 33:36 ~ "Control group",
       n %in% 37:39 ~ "Overall risk of bias",
-      n %in% 40 ~ "Effect size metric",
-      n %in% 41:42 ~ "Handles multilevel structure",
+      n %in% 40 ~ "Timing of measurement",
+      n %in% 41 ~ "Effect size metric",
+      n %in% 42:43 ~ "Handles multilevel structure",
       .default = NA_character_
     )
   ) |> 

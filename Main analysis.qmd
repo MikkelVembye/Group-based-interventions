@@ -106,6 +106,9 @@ reint_ma_dat <-
     # For sensitivity analysis  
     ESS_t, ESS_c, ESS_total,
     
+    # For interpretation
+    m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c, ppcor,
+    
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
     
@@ -208,11 +211,51 @@ saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 ```
 
+### For interpretation: average change between pre- and posttest for control group
+
+```{r pre-post-es}
+
+prepost_smd_dat <- 
+  reint_ma_dat |> 
+  filter(!if_any(c(sd_post_c, sd_pre_c), is.na)) |>
+  filter(str_detect(control_modified, "TAU")) |> 
+  mutate(
+    
+    ppcor = if_else(is.na(ppcor), 0.5, ppcor),
+    
+    # Eq. 11.24 (Valentine & Aloe, 2019)
+    sd_within = sqrt((sd_pre_c^2 + sd_post_c^2)/2),
+    d_c = m_diff_c/sd_within,
+    vd_c = (1/N_c + d_c^2/(2*N_c)) * (2 *(1-ppcor))
+    
+  )
+
+V_mat_c <- 
+  metafor::vcalc(
+    data = prepost_smd_dat,
+    vi = vd_c, 
+    cluster = study,
+    obs = esid, 
+    rho = 0.8
+  )
+
+res_c <- 
+  metafor::rma.mv(
+    yi = d_c, 
+    V = V_mat_c,
+    random = ~ 1 | study / esid, 
+    data = prepost_smd_dat
+  ) |> 
+  metafor::robust(cluster = study, clubSandwich = TRUE)
+
+res_c
+```
+
+
+
 ### Overall effect
 
 ```{r}
-
-
 
 main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
 main_res_reint
@@ -943,6 +986,12 @@ mental_ma_dat <-
     # For vcalc
     outcome, outcome_time, N_t, N_c, N_total, trt_name, trt_id, control, ctr_id,
     
+    # For sensitivity analysis  
+    ESS_t, ESS_c, ESS_total,
+    
+    # For interpretation
+    m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c,
+    
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
     
@@ -1027,6 +1076,47 @@ attr(mental_ma_dat, "data_name") <- "mental_ma_dat"
 saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ```
+
+### For interpretation: average change between pre- and posttest for control group
+
+```{r pre-post-es}
+
+prepost_smd_dat_mental <- 
+  mental_ma_dat |> 
+  filter(!if_any(c(sd_post_c, sd_pre_c), is.na)) |>
+  filter(str_detect(control_modified, "TAU")) |> 
+  mutate(
+    
+    ppcor = if_else(is.na(ppcor), 0.5, ppcor),
+    
+    # Eq. 11.24 (Valentine & Aloe, 2019)
+    sd_within = sqrt((sd_pre_c^2 + sd_post_c^2)/2),
+    d_c = m_diff_c/sd_within,
+    vd_c = (1/N_c + d_c^2/(2*N_c)) * (2 *(1-ppcor))
+    
+  )
+
+V_mat_c_mental <- 
+  metafor::vcalc(
+    data = prepost_smd_dat_mental,
+    vi = vd_c, 
+    cluster = study,
+    obs = esid, 
+    rho = 0.8
+  )
+
+res_c_mental <- 
+  metafor::rma.mv(
+    yi = d_c, 
+    V = V_mat_c,
+    random = ~ 1 | study / esid, 
+    data = prepost_smd_dat_mental
+  ) |> 
+  metafor::robust(cluster = study, clubSandwich = TRUE)
+
+res_c_mental
+```
+
 
 ### Overall effect
 
