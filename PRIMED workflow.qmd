@@ -4205,6 +4205,7 @@ label_coords[, 2] <- c(
 
 node_sizes <- diag(as.matrix(res_dat[, -1]))
 
+#png(filename = "Figures/outcome_network.png", height = 6, width = 6, res = 600, units = "in")
 plot(
   g,
   layout = layout,
@@ -4224,6 +4225,7 @@ text(
   col = "black",
   xpd = NA
 )
+#dev.off()
 
 
 ```
