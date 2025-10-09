@@ -5590,6 +5590,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 #| fig.topcaption: TRUE
 #| message: false
 
+#png(filename = "Figures/duration_length_plot.png", height = 11, width = 10, res = 600, units = "in")
 reintegration_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
@@ -5617,7 +5618,7 @@ reintegration_dat |>
   #scale_size(breaks = c(0.5, 1, 1.5, 2, 10.5), limits = c(0, 10.5)) +
   labs(
     x = "Lenght of intervention in weeks", 
-    y = "", 
+    y = "",
     caption = paste0(
       "The light gray facet grids indicate the average number of sessions per week.\n", 
       "The dashed lines indicate 3 months, 6 months, 1 year, and 1.5 years, respectively.\n",
@@ -5633,6 +5634,7 @@ reintegration_dat |>
     strip.text.y.left = element_text(angle = 0),
     plot.caption = element_text(hjust = 0)
   ) 
+#dev.off()
 ```
 :::
 
