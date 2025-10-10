@@ -822,7 +822,7 @@ forest_plot_de <-
   I2_tot <- round(100 * sum(overall_res$sigma2)/(sum(overall_res$sigma2) + 
                                                    (overall_res$k - overall_res$p)/sum(diag(P))), 2)
   
-  pred <- predict(overall_res, level = pred_int)
+  pred <- metafor::predict.rma(overall_res, level = pred_int)
   
   pi_lb_name <- paste0("pi_lb_", pred_int)
   pi_ub_name <- paste0("pi_ub_", pred_int)

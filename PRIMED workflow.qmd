@@ -2896,10 +2896,13 @@ mental_health_dat|>
 
 es_plot_per_study <- 
   gb_dat |>
+  mutate(
+    outcome_label = if_else(str_detect(outcome_construct, "Reint"), "Reintegration", "Mental health")
+  ) |> 
   arrange(desc(study)) |>
   mutate(study = factor(study, unique(study))) |> 
   ggplot(aes(x = study)) +
-  geom_bar(aes(fill = outcome_construct)) +
+  geom_bar(aes(fill = outcome_label)) +
   scale_y_continuous(breaks = seq(5, 40, by = 5)) + 
   theme_minimal() +
   theme(
@@ -2908,12 +2911,14 @@ es_plot_per_study <-
   coord_flip() +
   labs(
     x = paste0("Study (", n_distinct(gb_dat$study), " studies in total)"), 
-    y = "Number of Effect Size Estimates",
-    fill = "Outcome construct"
+    y = "Number of effect size estimates",
+    fill = "Outcome measure"
   ) +
   guides(fill = guide_legend(reverse=TRUE))
 
+#png(filename = "Figures/Number_es_by_type_of_outcome.png", height = 10, width = 9, res = 600, units = "in")
 es_plot_per_study
+#dev.off()
 ```
 
 

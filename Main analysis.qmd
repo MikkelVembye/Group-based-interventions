@@ -249,6 +249,9 @@ res_c <-
   metafor::robust(cluster = study, clubSandwich = TRUE)
 
 res_c
+
+pred_res_test <- metafor::predict.rma(res_c, level = 80)
+
 ```
 
 
@@ -259,6 +262,72 @@ res_c
 
 main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
 main_res_reint
+
+# Predivtive distribution 
+
+mu <- main_res_reint$avg_effect 
+tau2<- main_res_reint$tau2
+omega2 <- main_res_reint$omega2
+var_g <- main_res_reint$se^2
+
+pred_sd <- sqrt(tau2 + omega2 + var_g)
+
+m <- n_distinct(reint_ma_dat$study)                 
+df <- m - 1
+
+# -----------------------------
+# Generate predictive distribution 
+# -----------------------------
+x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+
+dens_df <- data.frame(
+  x = x_vals,
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+)
+
+# 95% t-based prediction interval
+#alpha <- 0.05
+#tcrit <- qt(1 - alpha/2, df)
+pi80_lb <- main_res_reint$pi_lb_80
+pi80_ub <- main_res_reint$pi_ub_80
+
+# Heights of the curve at those bounds
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+
+prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+
+# -----------------------------
+# Plot
+# -----------------------------
+dens_df |> 
+  mutate(outcome = "Reintegration") |> 
+ggplot(aes(x, y)) +
+  # Shade area above 0
+  geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
+  geom_line(linewidth = 1) +
+ annotate("segment",
+           x = pi80_lb, xend = pi80_lb,
+           y = 0, yend = y_pi[1],
+           linetype = "dashed", linewidth = 0.6) +
+  annotate("segment",
+           x = pi80_ub, xend = pi80_ub,
+           y = 0, yend = y_pi[2],
+           linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = 0) +
+  facet_grid(~outcome) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    caption = sprintf("df = %d,  P(θ > 0) ≈ %.2f", df, prop_above0),
+    x = "Effect size estimate", y = ""
+  ) +
+  coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
+  theme_bw() 
+  
+
+
 #study_names <- unique(reint_ma_dat$study) |> as.character()
 #
 #omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
@@ -1123,10 +1192,73 @@ res_c_mental
 ```{r}
 
 main_res_mental <- .PECHE_RVE(data = mental_ma_dat)
-
+main_res_mental
 #study_names <- unique(reint_ma_dat$study) |> as.character()
 #
 #omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
+
+# Predivtive distribution 
+
+mu <- main_res_mental$avg_effect 
+tau2<- main_res_mental$tau2
+omega2 <- main_res_mental$omega2
+var_g <- main_res_mental$se^2
+
+pred_sd <- sqrt(tau2 + omega2 + var_g)
+
+m <- n_distinct(mental_ma_dat$study)                 
+df <- m - 1
+
+# -----------------------------
+# Generate predictive distribution 
+# -----------------------------
+x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+
+dens_df <- data.frame(
+  x = x_vals,
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+)
+
+# 95% t-based prediction interval
+#alpha <- 0.05
+#tcrit <- qt(1 - alpha/2, df)
+pi80_lb <- main_res_mental$pi_lb_80
+pi80_ub <- main_res_mental$pi_ub_80
+
+# Heights of the curve at those bounds
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+
+prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+
+# -----------------------------
+# Plot
+# -----------------------------
+dens_df |> 
+  mutate(outcome = "Mental health") |> 
+ggplot(aes(x, y)) +
+  # Shade area above 0
+  geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
+  geom_line(linewidth = 1) +
+ annotate("segment",
+           x = pi80_lb, xend = pi80_lb,
+           y = 0, yend = y_pi[1],
+           linetype = "dashed", linewidth = 0.6) +
+  annotate("segment",
+           x = pi80_ub, xend = pi80_ub,
+           y = 0, yend = y_pi[2],
+           linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = 0) +
+  facet_grid(~outcome) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    caption = sprintf("df = %d,  P(θ > 0) ≈ %.2f", df, prop_above0),
+    x = "Effect size estimate", y = ""
+  ) +
+  coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
+  theme_bw() 
 
 ```
 
@@ -1220,7 +1352,7 @@ kj_label_mental <-
   mutate(
     label = case_when(
       study == "" ~ "",
-      study == tabel_label ~ paste0(beta, " [", cil_mental, ", ", ciu_mental, "], ", studies_mental, " (", n_es_mental, ")"),
+      study == tabel_label ~ paste0(beta_mental, " [", cil_mental, ", ", ciu_mental, "], ", studies_mental, " (", n_es_mental, ")"),
       .default = label
     )
   ) |> 
@@ -1271,9 +1403,9 @@ plot_mental <-
   scale_color_discrete(na.translate = FALSE)
 
 
-#png(filename = "Figures/forest plot mental.png", height = 11, width = 10, res = 600, units = "in")
+png(filename = "Figures/forest plot mental.png", height = 11, width = 10, res = 600, units = "in")
 suppressWarnings(plot_mental)
-#dev.off()
+dev.off()
 
 
   
