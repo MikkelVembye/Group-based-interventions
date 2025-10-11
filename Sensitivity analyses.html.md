@@ -2,7 +2,7 @@
 title: "Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-07"
+date: "2025-10-11"
 format:
   html: 
     keep-md: true
@@ -48,6 +48,7 @@ library(patchwork)
 source("Helpers.R")
 
 reint_ma_dat <- readRDS("reint_ma_dat.rds")
+mental_ma_dat <- readRDS("mental_ma_dat.rds")
 ```
 :::
 
@@ -146,6 +147,130 @@ grid::grid.draw(grid::textGrob(xlab, y = 0.05, x = 0.5, rot = 0))
 ![](Sensitivity-analyses_files/figure-html/fig-rho-impact-reint-1.png){#fig-rho-impact-reint fig-pos='H' width=864}
 :::
 :::
+
+
+## Prediction distribution based on t-distribution and Satterthwaite degrees of freedom
+
+
+::: {.cell}
+
+```{.r .cell-code}
+main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
+main_res_reint
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 1 × 18
+    rho studies effects avg_effect     se    LL    UL pi_lb_80 pi_ub_80    pval df_satt    tau omega
+  <dbl>   <int>   <int>      <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl>   <dbl>   <dbl>  <dbl> <dbl>
+1   0.8      46     205      0.195 0.0353 0.122 0.268  -0.0789    0.468 1.02e-5    24.9 0.0674 0.193
+# ℹ 5 more variables: sd_total <dbl>, QE <dbl>, I2 <dbl>, tau2 <dbl>, omega2 <dbl>
+```
+
+
+:::
+
+```{.r .cell-code}
+# Predivtive distribution 
+
+mu <- main_res_reint$avg_effect 
+tau2<- main_res_reint$tau2
+omega2 <- main_res_reint$omega2
+var_g <- main_res_reint$se^2
+
+pred_sd <- sqrt(tau2 + omega2 + var_g)
+
+m <- n_distinct(reint_ma_dat$study)                 
+df <- main_res_reint$df_satt
+
+# -----------------------------
+# Generate predictive distribution 
+# -----------------------------
+x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+
+dens_df <- data.frame(
+  x = x_vals,
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+)
+
+# 95% t-based prediction interval
+alpha <- 0.05
+tcrit <- qt(1 - alpha/2, df)
+pi_lb_man <- mu - tcrit * pred_sd
+pi_ub_man <- mu + tcrit * pred_sd
+
+c(pi_lb_man, pi_ub_man)
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] -0.2333695  0.6227890
+```
+
+
+:::
+
+```{.r .cell-code}
+pi80_lb <- main_res_reint$pi_lb_80
+pi80_ub <- main_res_reint$pi_ub_80
+
+c(pi80_lb, pi80_ub)
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+[1] -0.07887099  0.46829053
+```
+
+
+:::
+
+```{.r .cell-code}
+# Heights of the curve at those bounds
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+
+prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+
+# -----------------------------
+# Plot
+# -----------------------------
+dens_df |> 
+  mutate(outcome = "Reintegration") |> 
+ggplot(aes(x, y)) +
+  # Shade area above 0
+  geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
+  geom_line() +
+ annotate("segment",
+           x = pi80_lb, xend = pi80_lb,
+           y = 0, yend = y_pi[1],
+           linetype = "dashed", linewidth = 0.6) +
+  annotate("segment",
+           x = pi80_ub, xend = pi80_ub,
+           y = 0, yend = y_pi[2],
+           linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = 0) +
+  facet_grid(~outcome) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    caption = paste0("Effects above null ", round(prop_above0, 2), "%. df = ", round(df, 2)),
+    x = "Effect size estimate", y = ""
+  ) +
+  #coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
+  theme_bw() 
+```
+
+::: {.cell-output-display}
+![](Sensitivity-analyses_files/figure-html/unnamed-chunk-2-1.png){fig-pos='H' width=672}
+:::
+:::
+
 
 
 ## Leave one study out
@@ -281,6 +406,105 @@ ess_facet_plot
 :::
 
 
+# Mental health
+
+## Prediction distribution based on t-distribution and Satterthwaite degrees of freedom
+
+::: {.cell}
+
+```{.r .cell-code}
+main_res_mental <- .PECHE_RVE(data = mental_ma_dat)
+main_res_mental
+```
+
+::: {.cell-output .cell-output-stdout}
+
+```
+# A tibble: 1 × 18
+    rho studies effects avg_effect     se     LL    UL pi_lb_80 pi_ub_80    pval df_satt   tau omega
+  <dbl>   <int>   <int>      <dbl>  <dbl>  <dbl> <dbl>    <dbl>    <dbl>   <dbl>   <dbl> <dbl> <dbl>
+1   0.8      42     144      0.215 0.0617 0.0897 0.340   -0.228    0.657 0.00129    37.5 0.298 0.150
+# ℹ 5 more variables: sd_total <dbl>, QE <dbl>, I2 <dbl>, tau2 <dbl>, omega2 <dbl>
+```
+
+
+:::
+
+```{.r .cell-code}
+#study_names <- unique(reint_ma_dat$study) |> as.character()
+#
+#omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
+
+# Predivtive distribution 
+
+mu <- main_res_mental$avg_effect 
+tau2<- main_res_mental$tau2
+omega2 <- main_res_mental$omega2
+var_g <- main_res_mental$se^2
+
+pred_sd <- sqrt(tau2 + omega2 + var_g)
+
+m <- n_distinct(mental_ma_dat$study)                 
+df <- main_res_mental$df_satt
+
+# -----------------------------
+# Generate predictive distribution 
+# -----------------------------
+x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+
+dens_df <- data.frame(
+  x = x_vals,
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+)
+
+# 95% t-based prediction interval
+#alpha <- 0.05
+#tcrit <- qt(1 - alpha/2, df)
+pi80_lb <- main_res_mental$pi_lb_80
+pi80_ub <- main_res_mental$pi_ub_80
+
+# Heights of the curve at those bounds
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+
+prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+
+# -----------------------------
+# Plot
+# -----------------------------
+dens_df |> 
+  mutate(outcome = "Mental health") |> 
+ggplot(aes(x, y)) +
+  # Shade area above 0
+  geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
+  geom_line() +
+ annotate("segment",
+           x = pi80_lb, xend = pi80_lb,
+           y = 0, yend = y_pi[1],
+           linetype = "dashed", linewidth = 0.6) +
+  annotate("segment",
+           x = pi80_ub, xend = pi80_ub,
+           y = 0, yend = y_pi[2],
+           linetype = "dashed", linewidth = 0.6) +
+  geom_vline(xintercept = 0) +
+  facet_grid(~outcome) + 
+  theme(
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank()
+  ) +
+  labs(
+    caption = paste0("Effects above null ", round(prop_above0, 2), "%. df = ", round(df, 2)),
+    x = "Effect size estimate", y = ""
+  ) +
+  coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
+  theme_bw() 
+```
+
+::: {.cell-output-display}
+![](Sensitivity-analyses_files/figure-html/unnamed-chunk-3-1.png){fig-pos='H' width=672}
+:::
+:::
+
+
 
 # Colophon
 
@@ -302,7 +526,7 @@ ess_facet_plot
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-07
+ date     2025-10-11
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 

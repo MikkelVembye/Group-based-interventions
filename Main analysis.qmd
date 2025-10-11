@@ -263,6 +263,17 @@ pred_res_test <- metafor::predict.rma(res_c, level = 80)
 main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
 main_res_reint
 
+main_res_reint$avg_effect
+c(main_res_reint$LL, main_res_reint$UL)
+
+paste0("Q(", nrow(reint_ma_dat)-1, ") = ", round(main_res_reint$QE, 1))
+main_res_reint$tau
+main_res_reint$omega
+main_res_reint$sd_total
+
+#PI
+c(main_res_reint$pi_lb_80, main_res_reint$pi_ub_80)
+
 # Predivtive distribution 
 
 mu <- main_res_reint$avg_effect 
@@ -273,28 +284,25 @@ var_g <- main_res_reint$se^2
 pred_sd <- sqrt(tau2 + omega2 + var_g)
 
 m <- n_distinct(reint_ma_dat$study)                 
-df <- m - 1
+df <- main_res_reint$df_satt
 
 # -----------------------------
 # Generate predictive distribution 
 # -----------------------------
-x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+x_vals <- rnorm(10000, mean = mu, sd = pred_sd)
 
 dens_df <- data.frame(
   x = x_vals,
-  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+  y = dnorm((x_vals - mu) / pred_sd) / pred_sd
 )
 
-# 95% t-based prediction interval
-#alpha <- 0.05
-#tcrit <- qt(1 - alpha/2, df)
 pi80_lb <- main_res_reint$pi_lb_80
 pi80_ub <- main_res_reint$pi_ub_80
 
 # Heights of the curve at those bounds
 y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
 
-prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+prop_above0 <- 1 - pnorm(0, mean = mu, sd = pred_sd) 
 
 # -----------------------------
 # Plot
@@ -304,7 +312,7 @@ dens_df |>
 ggplot(aes(x, y)) +
   # Shade area above 0
   geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
-  geom_line(linewidth = 1) +
+  geom_line() +
  annotate("segment",
            x = pi80_lb, xend = pi80_lb,
            y = 0, yend = y_pi[1],
@@ -320,8 +328,8 @@ ggplot(aes(x, y)) +
     axis.text.y = element_blank()
   ) +
   labs(
-    caption = sprintf("df = %d,  P(θ > 0) ≈ %.2f", df, prop_above0),
-    x = "Effect size estimate", y = ""
+    caption = paste0("Effects above null ", round(prop_above0, 2), "%."),
+    x = "Predicted effect size estimate", y = ""
   ) +
   coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
@@ -1059,7 +1067,7 @@ mental_ma_dat <-
     ESS_t, ESS_c, ESS_total,
     
     # For interpretation
-    m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c,
+    m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c, ppcor,
     
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
@@ -1177,7 +1185,7 @@ V_mat_c_mental <-
 res_c_mental <- 
   metafor::rma.mv(
     yi = d_c, 
-    V = V_mat_c,
+    V = V_mat_c_mental,
     random = ~ 1 | study / esid, 
     data = prepost_smd_dat_mental
   ) |> 
@@ -1193,9 +1201,17 @@ res_c_mental
 
 main_res_mental <- .PECHE_RVE(data = mental_ma_dat)
 main_res_mental
-#study_names <- unique(reint_ma_dat$study) |> as.character()
-#
-#omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
+
+main_res_mental$avg_effect
+c(main_res_mental$LL, main_res_mental$UL)
+
+paste0("Q(", nrow(mental_ma_dat)-1, ") = ", round(main_res_mental$QE, 1))
+main_res_mental$tau
+main_res_mental$omega
+main_res_mental$sd_total
+
+#PI
+c(main_res_mental$pi_lb_80, main_res_mental$pi_ub_80)
 
 # Predivtive distribution 
 
@@ -1207,16 +1223,16 @@ var_g <- main_res_mental$se^2
 pred_sd <- sqrt(tau2 + omega2 + var_g)
 
 m <- n_distinct(mental_ma_dat$study)                 
-df <- m - 1
+#df <- main_res_mental$df_satt
 
 # -----------------------------
 # Generate predictive distribution 
 # -----------------------------
-x_vals <- seq(mu - 4*pred_sd, mu + 4*pred_sd, length.out = 10000)
+x_vals <- rnorm(10000, mean = mu, sd = pred_sd)
 
 dens_df <- data.frame(
   x = x_vals,
-  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
+  y = dnorm((x_vals - mu) / pred_sd) / pred_sd
 )
 
 # 95% t-based prediction interval
@@ -1228,7 +1244,7 @@ pi80_ub <- main_res_mental$pi_ub_80
 # Heights of the curve at those bounds
 y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
 
-prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
+prop_above0 <- 1 - pnorm(0, mean = mu, sd = pred_sd) 
 
 # -----------------------------
 # Plot
@@ -1238,7 +1254,7 @@ dens_df |>
 ggplot(aes(x, y)) +
   # Shade area above 0
   geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
-  geom_line(linewidth = 1) +
+  geom_line() +
  annotate("segment",
            x = pi80_lb, xend = pi80_lb,
            y = 0, yend = y_pi[1],
@@ -1254,8 +1270,8 @@ ggplot(aes(x, y)) +
     axis.text.y = element_blank()
   ) +
   labs(
-    caption = sprintf("df = %d,  P(θ > 0) ≈ %.2f", df, prop_above0),
-    x = "Effect size estimate", y = ""
+    caption = paste0("Effects above null ", round(prop_above0, 2), "%. df = ", round(df, 2)),
+    x = "Predicted effect size estimate", y = ""
   ) +
   coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
