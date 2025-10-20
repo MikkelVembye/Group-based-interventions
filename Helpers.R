@@ -837,7 +837,8 @@ forest_plot_de <-
       LL = overall_res$ci.lb,
       UL = overall_res$ci.ub,
       !!pi_lb_name := pred$pi.lb,  
-      !!pi_ub_name := pred$pi.ub,  
+      !!pi_ub_name := pred$pi.ub,
+      tval = overall_res$zval,
       pval = overall_res$pval,
       df_satt = overall_res$dfs,
       tau = sqrt(overall_res$sigma2[1]), 
@@ -1055,4 +1056,60 @@ forest_plot_de <-
     
     
   }
+
+
+### Valentine and Aloe - Chapter 19 from Handbook 
+#——————————————————————————
+# Transforming Across Effect-Size Metrics
+# Valentine, Aloe, Wilson
+#--------------------------
+# Starting with the standardized mean
+difference (d)
+# and its standard error
+#--------------------------
+# Read both functions first
+es.trans <- function(d, se){
+  # Point-biserial correlation coefficient
+  A <- 4 # assumes equal sample sizes across groups
+  # if groups are not equal in size, comment off the line above,
+  # uncomment the next lines of code (beginning nt, nc, and A) and
+  # enter sample sizes for treatment (nt) and control (nc) groups
+  # nt <- enter treatment group sample size here
+  # nc <- enter control group sample size here
+  # A <- ((nt + nc)^2)/ (nt*nc)
+  r <- d/sqrt(d^2 + A)
+  # Proportion of variance explained
+  r2 <- r^2
+  # Cohen’s u3
+  u3 = pnorm(d)*100
+  # Cohen’s u2
+  u2 = pnorm(d/2)*100
+  # Cohen’s u1
+  u1 = (2*(pnorm(abs(d)/2)) - 1) /
+    (pnorm(abs(d)/2))* 100
+  
+  cles <- pnorm(d/sqrt(2))
+  res.es <- c(d = d, r = r, r2 = r2, u1 = u1, u2 = u2, u3 = u3, cles = cles)
+  # BESD
+  a <- (.5 + r/2) * 100 # percent treatment above median
+  b <- (1 - a/100) * 100 # percent treatment below median
+  c <- (.5 - r/2) * 100 # percent control above median
+  d <- (1 - c/100) * 100 # percent control below median
+  # 2 by 2 table for BESD
+  mytab <- matrix(c(a,b,c,d), ncol = 2,
+                  byrow = TRUE)
+  colnames(mytab) <- c("% Above the Median", "% %Below the Median")
+  rownames(mytab) <- c("Treatment",
+                        "Control")
+  res_mytab <- as.data.frame(round
+                             (mytab, 2))
+  res_mytab <- as.data.frame(round
+                             (mytab, 2))
+  res.all <- list(res.es, res_mytab)
+  return(res.all)
+}
+
+#es.trans(d = 0.195, se = 0.0353)
+
+# ADD other function as well
 

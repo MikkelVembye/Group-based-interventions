@@ -61,6 +61,7 @@ library(fastDummies)
 library(rlang)
 library(wildmeta)
 library(tictoc)
+library(patchwork)
 
 source("Helpers.R")
 
@@ -260,19 +261,25 @@ pred_res_test <- metafor::predict.rma(res_c, level = 80)
 
 ```{r}
 
-main_res_reint <- .PECHE_RVE(data = reint_ma_dat)
+main_res_reint <- .PECHE_RVE(data = reint_ma_dat, pred_int = 95)
 main_res_reint
 
 main_res_reint$avg_effect
 c(main_res_reint$LL, main_res_reint$UL)
 
+paste0(
+  "t(", round(main_res_reint$df_satt, 1), ") = ", 
+  round(main_res_reint$tval, 2), ", p < .001"
+)
+
 paste0("Q(", nrow(reint_ma_dat)-1, ") = ", round(main_res_reint$QE, 1))
 main_res_reint$tau
 main_res_reint$omega
 main_res_reint$sd_total
+main_res_reint$I2
 
 #PI
-c(main_res_reint$pi_lb_80, main_res_reint$pi_ub_80)
+c(main_res_reint$pi_lb_95, main_res_reint$pi_ub_95)
 
 # Predivtive distribution 
 
@@ -289,36 +296,52 @@ df <- main_res_reint$df_satt
 # -----------------------------
 # Generate predictive distribution 
 # -----------------------------
-x_vals <- rnorm(10000, mean = mu, sd = pred_sd)
+# -----------------------------
+# Generate predictive distribution 
+# -----------------------------
+set.seed(111025)
+x_vals <- mu + pred_sd * rt(100000, df)
+quantile(x_vals, probs = c(.1, .5, .9))
 
 dens_df <- data.frame(
   x = x_vals,
-  y = dnorm((x_vals - mu) / pred_sd) / pred_sd
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
 )
 
-pi80_lb <- main_res_reint$pi_lb_80
-pi80_ub <- main_res_reint$pi_ub_80
+# 95% t-based prediction interval
+alpha <- 0.2
+tcrit <- qt(1 - alpha/2, df)
+pi_lb_man <- mu - tcrit * pred_sd
+pi_ub_man <- mu + tcrit * pred_sd
+
+c(pi_lb_man, pi_ub_man)
+
+pi95_lb <- main_res_reint$pi_lb_95
+pi95_ub <- main_res_reint$pi_ub_95
+
+c(pi95_lb, pi95_ub)
 
 # Heights of the curve at those bounds
-y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi95_lb, pi95_ub))$y
 
-prop_above0 <- 1 - pnorm(0, mean = mu, sd = pred_sd) 
+prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
 
 # -----------------------------
 # Plot
 # -----------------------------
-dens_df |> 
+pi_plot_reint <- 
+  dens_df |> 
   mutate(outcome = "Reintegration") |> 
-ggplot(aes(x, y)) +
+  ggplot(aes(x, y)) +
   # Shade area above 0
   geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
   geom_line() +
- annotate("segment",
-           x = pi80_lb, xend = pi80_lb,
+  annotate("segment",
+           x = pi95_lb, xend = pi95_lb,
            y = 0, yend = y_pi[1],
            linetype = "dashed", linewidth = 0.6) +
   annotate("segment",
-           x = pi80_ub, xend = pi80_ub,
+           x = pi95_ub, xend = pi95_ub,
            y = 0, yend = y_pi[2],
            linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = 0) +
@@ -328,17 +351,14 @@ ggplot(aes(x, y)) +
     axis.text.y = element_blank()
   ) +
   labs(
-    caption = paste0("Effects above null ", round(prop_above0, 2), "%."),
-    x = "Predicted effect size estimate", y = ""
+    x = "Predictive effect size estimates", y = ""
   ) +
-  coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
+  #coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
-  
 
-
-#study_names <- unique(reint_ma_dat$study) |> as.character()
-#
-#omit_test <- map(.x = study_names[1:2], .f = .PECHE_RVE, data = reint_ma_dat) 
+png("plots/predictive distribution reint.png", width = 8, height = 4, res = 300, unit = "in")
+pi_plot_reint +  labs(caption = paste0(round(prop_above0, 2) * 100, " % effects above null."))
+dev.off()
 
 ```
 
@@ -1199,7 +1219,7 @@ res_c_mental
 
 ```{r}
 
-main_res_mental <- .PECHE_RVE(data = mental_ma_dat)
+main_res_mental <- .PECHE_RVE(data = mental_ma_dat, pred_int = 95)
 main_res_mental
 
 main_res_mental$avg_effect
@@ -1211,7 +1231,7 @@ main_res_mental$omega
 main_res_mental$sd_total
 
 #PI
-c(main_res_mental$pi_lb_80, main_res_mental$pi_ub_80)
+c(main_res_mental$pi_lb_95, main_res_mental$pi_ub_95)
 
 # Predivtive distribution 
 
@@ -1223,44 +1243,56 @@ var_g <- main_res_mental$se^2
 pred_sd <- sqrt(tau2 + omega2 + var_g)
 
 m <- n_distinct(mental_ma_dat$study)                 
-#df <- main_res_mental$df_satt
+df <- main_res_mental$df_satt
 
 # -----------------------------
 # Generate predictive distribution 
 # -----------------------------
-x_vals <- rnorm(10000, mean = mu, sd = pred_sd)
+set.seed(111025)
+x_vals <- mu + pred_sd * rt(100000, df)
+quantile(x_vals, probs = c(.1, .5, .9))
 
 dens_df <- data.frame(
   x = x_vals,
-  y = dnorm((x_vals - mu) / pred_sd) / pred_sd
+  y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
 )
 
 # 95% t-based prediction interval
+alpha <- 0.2
+tcrit <- qt(1 - alpha/2, df)
+pi_lb_man <- mu - tcrit * pred_sd
+pi_ub_man <- mu + tcrit * pred_sd
+
+c(pi_lb_man, pi_ub_man)
+# 95% t-based prediction interval
 #alpha <- 0.05
 #tcrit <- qt(1 - alpha/2, df)
-pi80_lb <- main_res_mental$pi_lb_80
-pi80_ub <- main_res_mental$pi_ub_80
+pi95_lb <- main_res_mental$pi_lb_95
+pi95_ub <- main_res_mental$pi_ub_95
+
+c(pi95_lb, pi95_ub)
 
 # Heights of the curve at those bounds
-y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi80_lb, pi80_ub))$y
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi95_lb, pi95_ub))$y
 
 prop_above0 <- 1 - pnorm(0, mean = mu, sd = pred_sd) 
 
 # -----------------------------
 # Plot
 # -----------------------------
-dens_df |> 
+pi_plot_mental <- 
+  dens_df |> 
   mutate(outcome = "Mental health") |> 
-ggplot(aes(x, y)) +
+  ggplot(aes(x, y)) +
   # Shade area above 0
-  geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
+  geom_area(data = subset(dens_df, x > 0), fill = "lightpink", alpha = 0.5) +
   geom_line() +
- annotate("segment",
-           x = pi80_lb, xend = pi80_lb,
+  annotate("segment",
+           x = pi95_lb, xend = pi95_lb,
            y = 0, yend = y_pi[1],
            linetype = "dashed", linewidth = 0.6) +
   annotate("segment",
-           x = pi80_ub, xend = pi80_ub,
+           x = pi95_ub, xend = pi95_ub,
            y = 0, yend = y_pi[2],
            linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = 0) +
@@ -1270,12 +1302,14 @@ ggplot(aes(x, y)) +
     axis.text.y = element_blank()
   ) +
   labs(
-    caption = paste0("Effects above null ", round(prop_above0, 2), "%. df = ", round(df, 2)),
     x = "Predicted effect size estimate", y = ""
   ) +
   coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
 
+png("plots/predictive distribution mental.png", width = 8, height = 4, res = 300, unit = "in")
+pi_plot_mental + labs(caption = paste0(round(prop_above0, 2) * 100, " % effects above null."))
+dev.off()
 ```
 
 ### Forest plot
@@ -1789,7 +1823,7 @@ methods_res_table_mental <-
 
 
 ### PECHE-RVE for meta-regression
-## 
+
 ```{r}
 
 cor_val <- 0L:10L/10L
@@ -1960,6 +1994,25 @@ mental_contin_res_table
 ```
 
 
+# Miscancellous
+
+```{r}
+# Predictive distribution plot
+#
+#xlab <- "Predictive effect size estimates"
+#
+#pi_plot_reint$labels$x <- pi_plot_mental$labels$x <- "" 
+#
+#png("plots/predictive distributions.png", width = 8, height = 4, res = 300, unit = "in")
+#pi_plot_reint + pi_plot_mental
+#grid::grid.draw(grid::textGrob(xlab, y = 0.025, x = 0.52, rot = 0))
+#dev.off()
+#
+#
+#
+#
+
+```
 
 
 
