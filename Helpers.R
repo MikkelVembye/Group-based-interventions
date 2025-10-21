@@ -1063,8 +1063,7 @@ forest_plot_de <-
 # Transforming Across Effect-Size Metrics
 # Valentine, Aloe, Wilson
 #--------------------------
-# Starting with the standardized mean
-difference (d)
+# Starting with the standardized mean difference(d)
 # and its standard error
 #--------------------------
 # Read both functions first
@@ -1096,20 +1095,41 @@ es.trans <- function(d, se){
   c <- (.5 - r/2) * 100 # percent control above median
   d <- (1 - c/100) * 100 # percent control below median
   # 2 by 2 table for BESD
-  mytab <- matrix(c(a,b,c,d), ncol = 2,
-                  byrow = TRUE)
+  mytab <- matrix(c(a,b,c,d), ncol = 2, byrow = TRUE)
   colnames(mytab) <- c("% Above the Median", "% %Below the Median")
-  rownames(mytab) <- c("Treatment",
-                        "Control")
-  res_mytab <- as.data.frame(round
-                             (mytab, 2))
-  res_mytab <- as.data.frame(round
-                             (mytab, 2))
+  rownames(mytab) <- c("Treatment", "Control")
+  res_mytab <- as.data.frame(round(mytab, 2))
+  res_mytab <- as.data.frame(round(mytab, 2))
   res.all <- list(res.es, res_mytab)
   return(res.all)
 }
 
 #es.trans(d = 0.195, se = 0.0353)
 
-# ADD other function as well
+es.com <- 
+  function(d, se, df, conf_level = .95, dist_ci = 'qt', ...){
+  args <- list(p = (1 - conf_level)/2, lower.tail = FALSE, df = df, ...)
+  value <- do.call(eval(parse(text = dist_ci)), args)
+  
+  d.ci <- d + c(-1, 1) * value*se
+ 
+  Estimate <- round(es.trans(d = d, se = se)[[1]],2)
+  Lower <- round(es.trans(d = d.ci[1], se = se)[[1]],2)
+  Lower['u1'] <- ifelse(Lower['u1'] < 0, 0, Lower['u1'])
+  Upper <- round(es.trans(d = d.ci[2], se = se)[[1]],2)
+  Upper['u1'] <- ifelse(Upper['u1'] > 100, 100, Upper['u1'])
+  Names.es <- c("d", "r", "r^2", "U1","U2", "U3", "CLES")
+  res <- data.frame(cbind(Names.es,Estimate, Lower, Upper))
+  l <- paste0(conf_level*100,"%")
+  lower <- paste(l, "CI", "Lower")
+  upper <- paste(l, "CI", "Upper")
+  names(res) <- c("Effect Size", "Estimate", lower, upper)
+  rownames(res) <- NULL
+  return(list(res, es.trans(d = d, se = se)[[2]]))
+}
+
+d <- 0.195
+se <- 0.0353
+
+es.com(d = d, se = se, df = 25)
 

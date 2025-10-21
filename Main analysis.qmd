@@ -224,7 +224,7 @@ prepost_smd_dat <-
     
     ppcor = if_else(is.na(ppcor), 0.5, ppcor),
     
-    # Eq. 11.24 (Valentine & Aloe, 2019)
+    # Eq. 11.24 (recommended by Valentine & Aloe, 2019)
     sd_within = sqrt((sd_pre_c^2 + sd_post_c^2)/2),
     d_c = m_diff_c/sd_within,
     vd_c = (1/N_c + d_c^2/(2*N_c)) * (2 *(1-ppcor))
@@ -251,7 +251,7 @@ res_c <-
 
 res_c
 
-pred_res_test <- metafor::predict.rma(res_c, level = 80)
+#pred_res_test <- metafor::predict.rma(res_c, level = 80)
 
 ```
 
@@ -280,6 +280,16 @@ main_res_reint$I2
 
 #PI
 c(main_res_reint$pi_lb_95, main_res_reint$pi_ub_95)
+
+# For interpretation
+es.com(
+  d = main_res_reint$avg_effect, 
+  se = main_res_reint$se, 
+  df = main_res_reint$df_satt
+)
+
+# treatment effect vs. improvement in tau
+main_res_reint$avg_effect/as.numeric(res_c$b[1,])
 
 # Predivtive distribution 
 
