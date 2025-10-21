@@ -1235,13 +1235,31 @@ main_res_mental
 main_res_mental$avg_effect
 c(main_res_mental$LL, main_res_mental$UL)
 
+paste0(
+  "t(", round(main_res_mental$df_satt, 1), ") = ", 
+  round(main_res_mental$tval, 2), ", p = .001"
+)
+
 paste0("Q(", nrow(mental_ma_dat)-1, ") = ", round(main_res_mental$QE, 1))
 main_res_mental$tau
 main_res_mental$omega
 main_res_mental$sd_total
+main_res_mental$I2
+
+# For interpretation
+es.com(
+  d = main_res_mental$avg_effect, 
+  se = main_res_mental$se, 
+  df = main_res_mental$df_satt
+)
 
 #PI
 c(main_res_mental$pi_lb_67, main_res_mental$pi_ub_67)
+
+
+# treatment effect vs. improvement in tau
+main_res_mental$avg_effect/as.numeric(res_c_mental$b[1,])
+
 
 # Predivtive distribution 
 
