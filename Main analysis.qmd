@@ -261,7 +261,7 @@ res_c
 
 ```{r}
 
-main_res_reint <- .PECHE_RVE(data = reint_ma_dat, pred_int = 95)
+main_res_reint <- .PECHE_RVE(data = reint_ma_dat, pred_int = 67)
 main_res_reint
 
 main_res_reint$avg_effect
@@ -279,7 +279,7 @@ main_res_reint$sd_total
 main_res_reint$I2
 
 #PI
-c(main_res_reint$pi_lb_95, main_res_reint$pi_ub_95)
+c(main_res_reint$pi_lb_67, main_res_reint$pi_ub_67)
 
 # For interpretation
 es.com(
@@ -318,7 +318,7 @@ dens_df <- data.frame(
   y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
 )
 
-# 95% t-based prediction interval
+# 67% t-based prediction interval
 alpha <- 0.2
 tcrit <- qt(1 - alpha/2, df)
 pi_lb_man <- mu - tcrit * pred_sd
@@ -326,13 +326,13 @@ pi_ub_man <- mu + tcrit * pred_sd
 
 c(pi_lb_man, pi_ub_man)
 
-pi95_lb <- main_res_reint$pi_lb_95
-pi95_ub <- main_res_reint$pi_ub_95
+pi67_lb <- main_res_reint$pi_lb_67
+pi67_ub <- main_res_reint$pi_ub_67
 
-c(pi95_lb, pi95_ub)
+c(pi67_lb, pi67_ub)
 
 # Heights of the curve at those bounds
-y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi95_lb, pi95_ub))$y
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi67_lb, pi67_ub))$y
 
 prop_above0 <- 1 - pt((0 - mu) / pred_sd, df = df)
 
@@ -347,11 +347,11 @@ pi_plot_reint <-
   geom_area(data = subset(dens_df, x > 0), fill = "steelblue", alpha = 0.5) +
   geom_line() +
   annotate("segment",
-           x = pi95_lb, xend = pi95_lb,
+           x = pi67_lb, xend = pi67_lb,
            y = 0, yend = y_pi[1],
            linetype = "dashed", linewidth = 0.6) +
   annotate("segment",
-           x = pi95_ub, xend = pi95_ub,
+           x = pi67_ub, xend = pi67_ub,
            y = 0, yend = y_pi[2],
            linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = 0) +
@@ -366,9 +366,9 @@ pi_plot_reint <-
   #coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
 
-png("plots/predictive distribution reint.png", width = 8, height = 4, res = 300, unit = "in")
-pi_plot_reint +  labs(caption = paste0(round(prop_above0, 2) * 100, " % effects above null."))
-dev.off()
+#png("Figures/predictive distribution reint.png", width = 8, height = 4, res = 300, unit = "in")
+pi_plot_reint +  labs(caption = paste0(round(prop_above0, 2) * 100, "% effects above null."))
+#dev.off()
 
 ```
 
@@ -387,9 +387,9 @@ tabel_label <- "Summary (PECHE-RVE)"
 
 tau2 <- peche_res$tau2
 omega2 <- peche_res$omega2
-beta <- round(peche_res$avg_effect, 2)
-cil <- round(peche_res$LL, 2)
-ciu <- round(peche_res$UL, 2)
+beta <- round(peche_res$avg_effect, 3)
+cil <- round(peche_res$LL, 3)
+ciu <- round(peche_res$UL, 3)
 
 reframed_dat <-   
   escalc(yi = gt_pop, vi = vgt_pop, data = reint_ma_dat) |> 
@@ -471,7 +471,7 @@ kj_label <-
 mean_label_dat <- 
   forest_dat2 |> 
   mutate(
-    mean_es = round(peche_res$avg_effect, 2)
+    mean_es = round(peche_res$avg_effect, 3)
   )
 
 max_ciu <- forest_dat2$CI_U |> max(na.rm = TRUE)
@@ -1229,7 +1229,7 @@ res_c_mental
 
 ```{r}
 
-main_res_mental <- .PECHE_RVE(data = mental_ma_dat, pred_int = 95)
+main_res_mental <- .PECHE_RVE(data = mental_ma_dat, pred_int = 67)
 main_res_mental
 
 main_res_mental$avg_effect
@@ -1241,7 +1241,7 @@ main_res_mental$omega
 main_res_mental$sd_total
 
 #PI
-c(main_res_mental$pi_lb_95, main_res_mental$pi_ub_95)
+c(main_res_mental$pi_lb_67, main_res_mental$pi_ub_67)
 
 # Predivtive distribution 
 
@@ -1267,23 +1267,23 @@ dens_df <- data.frame(
   y = dt((x_vals - mu) / pred_sd, df = df) / pred_sd
 )
 
-# 95% t-based prediction interval
+# 67% t-based prediction interval
 alpha <- 0.2
 tcrit <- qt(1 - alpha/2, df)
 pi_lb_man <- mu - tcrit * pred_sd
 pi_ub_man <- mu + tcrit * pred_sd
 
 c(pi_lb_man, pi_ub_man)
-# 95% t-based prediction interval
+# 67% t-based prediction interval
 #alpha <- 0.05
 #tcrit <- qt(1 - alpha/2, df)
-pi95_lb <- main_res_mental$pi_lb_95
-pi95_ub <- main_res_mental$pi_ub_95
+pi67_lb <- main_res_mental$pi_lb_67
+pi67_ub <- main_res_mental$pi_ub_67
 
-c(pi95_lb, pi95_ub)
+c(pi67_lb, pi67_ub)
 
 # Heights of the curve at those bounds
-y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi95_lb, pi95_ub))$y
+y_pi <- approx(dens_df$x, dens_df$y, xout = c(pi67_lb, pi67_ub))$y
 
 prop_above0 <- 1 - pnorm(0, mean = mu, sd = pred_sd) 
 
@@ -1298,11 +1298,11 @@ pi_plot_mental <-
   geom_area(data = subset(dens_df, x > 0), fill = "lightpink", alpha = 0.5) +
   geom_line() +
   annotate("segment",
-           x = pi95_lb, xend = pi95_lb,
+           x = pi67_lb, xend = pi67_lb,
            y = 0, yend = y_pi[1],
            linetype = "dashed", linewidth = 0.6) +
   annotate("segment",
-           x = pi95_ub, xend = pi95_ub,
+           x = pi67_ub, xend = pi67_ub,
            y = 0, yend = y_pi[2],
            linetype = "dashed", linewidth = 0.6) +
   geom_vline(xintercept = 0) +
@@ -1317,9 +1317,9 @@ pi_plot_mental <-
   coord_cartesian(ylim = c(0, max(dens_df$y) * 1.05)) +
   theme_bw() 
 
-png("plots/predictive distribution mental.png", width = 8, height = 4, res = 300, unit = "in")
-pi_plot_mental + labs(caption = paste0(round(prop_above0, 2) * 100, " % effects above null."))
-dev.off()
+#png("Figures/predictive distribution mental.png", width = 8, height = 4, res = 300, unit = "in")
+pi_plot_mental + labs(caption = paste0(round(prop_above0, 2) * 100, "% effects above null."))
+#dev.off()
 ```
 
 ### Forest plot
@@ -1337,9 +1337,9 @@ tabel_label_mental <- "Summary (PECHE-RVE)"
 
 tau2_mental <- peche_res_mental$tau2
 omega2_mental <- peche_res_mental$omega2
-beta_mental <- round(peche_res_mental$avg_effect, 2)
-cil_mental <- round(peche_res_mental$LL, 2)
-ciu_mental <- round(peche_res_mental$UL, 2)
+beta_mental <- round(peche_res_mental$avg_effect, 3)
+cil_mental <- round(peche_res_mental$LL, 3)
+ciu_mental <- round(peche_res_mental$UL, 3)
 
 reframed_dat_mental <-   
   escalc(yi = gt_pop, vi = vgt_pop, data = mental_ma_dat) |> 
@@ -1451,7 +1451,7 @@ plot_mental <-
     axis.title.y=element_blank(),
     plot.caption = element_text(hjust = 0)
   ) + 
-  scale_x_continuous(breaks = seq(-3, 5, 0.5), limits = c(-1.5, 4.15)) +
+  scale_x_continuous(breaks = seq(-3, 5, 0.5), limits = c(-1.5, 4.2)) +
   labs(
     x = "Hedges' g (95% CI)",
     color = "Type of outcome"
@@ -1463,9 +1463,9 @@ plot_mental <-
   scale_color_discrete(na.translate = FALSE)
 
 
-png(filename = "Figures/forest plot mental.png", height = 11, width = 10, res = 600, units = "in")
+#png(filename = "Figures/forest plot mental.png", height = 11, width = 10, res = 600, units = "in")
 suppressWarnings(plot_mental)
-dev.off()
+#dev.off()
 
 
   
