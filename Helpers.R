@@ -852,6 +852,8 @@ forest_plot_de <-
   
   if (!missing(study_out)) res <- res |> mutate(omitted_study = study_out)
   
+  attr(res, "rma.res") <- overall_res
+  
   res
   
 }

@@ -3949,8 +3949,39 @@ cat_dat_cross <- function(variable, study_id, data) {
 
 ### Outcome measure
 
+```{r outcome-dependency-table-all}
+#| tbl-cap: "Dependency table across primary and secondary outcomes"
+#| tbl-cap-location: top
+#| label: tbl-outcome-all
+
+outcome_dat_all <- 
+  cat_dat_cross(
+    data = gb_dat,
+    variable = outcome_construct,
+    study_id = study
+  )
+
+outcome_dat_all |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_dat_all)[-1]
+    )
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+
+```
+
+
 ```{r outcome-dependency-table-reint}
-#| tbl-cap: "Dependency table for preregistration status (reintegration)"
+#| tbl-cap: "Dependency table for reintegrational outcomes"
 #| tbl-cap-location: top
 #| label: tbl-outcome
 

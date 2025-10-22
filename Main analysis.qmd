@@ -67,6 +67,8 @@ source("Helpers.R")
 
 reintegration_dat <- readRDS("reintegration_dat.rds")
 mental_health_dat <- readRDS("mental_health_dat.rds")
+gb_dat <- readRDS("Data/gb_dat.rds")
+
 
 
 ```
@@ -272,11 +274,17 @@ paste0(
   round(main_res_reint$tval, 2), ", p < .001"
 )
 
+#Heterogeneity measures
 paste0("Q(", nrow(reint_ma_dat)-1, ") = ", round(main_res_reint$QE, 1))
 main_res_reint$tau
 main_res_reint$omega
 main_res_reint$sd_total
 main_res_reint$I2
+
+# Confidence intervals of tau and omega plus likelihood profiles. 
+metafor::confint.rma.mv(attr(main_res_reint, "rma.res"))
+profile(attr(main_res_reint, "rma.res"), sigma2 = 1)   
+profile(attr(main_res_reint, "rma.res"), sigma2 = 2)
 
 #PI
 c(main_res_reint$pi_lb_67, main_res_reint$pi_ub_67)
@@ -1240,11 +1248,18 @@ paste0(
   round(main_res_mental$tval, 2), ", p = .001"
 )
 
+#Heterogeneity measures
 paste0("Q(", nrow(mental_ma_dat)-1, ") = ", round(main_res_mental$QE, 1))
 main_res_mental$tau
 main_res_mental$omega
 main_res_mental$sd_total
 main_res_mental$I2
+
+# Confidence intervals of tau and omega plus likelihood profiles. 
+metafor::confint.rma.mv(attr(main_res_mental, "rma.res"))
+profile(attr(main_res_mental, "rma.res"), sigma2 = 1)   
+profile(attr(main_res_mental, "rma.res"), sigma2 = 2)
+
 
 # For interpretation
 es.com(
@@ -2023,6 +2038,65 @@ mental_contin_res_table
 
 
 # Miscancellous
+
+## PECMVE 
+
+```{r cmve-modeling}
+
+dat_all <- 
+  gb_dat |>
+  arrange(study) |> 
+  mutate(
+    outcome_time = paste(outcome, time, sep = "_"),
+    studyid = as.integer(factor(study))
+  )
+
+rho <- 0.8
+
+V_mat_cmve <- 
+  metafor::vcalc(
+    data = dat_all,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = outcome_construct,
+    type = outcome_time, 
+    grp1 = trt_name,
+    w1 = N_t, 
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+#blsplit(V_mat_cmve, gb_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
+
+
+pecmve_res <- 
+  rma.mv(
+    gt_pop ~ 0 + outcome_construct,
+    V = V_mat_cmve, 
+    random = list(~ outcome_construct | study, ~ outcome_construct | esid),
+    struct = c("UN", "DIAG"),
+    data = dat_all
+  ) 
+
+clubSandwich::coef_test(pecmve_res, vcov = "CR2")
+clubSandwich::conf_int(pecmve_res, vcov = "CR2")
+# Could be bootstrapped but as these estimates a closely similar, we did not conduct this test
+clubSandwich::Wald_test(
+  pecmve_res,
+  constraints = clubSandwich::constrain_equal(1:2),
+  vcov = "CR2"
+)
+
+pecmve_res
+
+# Covariance between reintegrational and mental health outcomes
+pecmve_res$G
+
+```
+
 
 ```{r}
 # Predictive distribution plot

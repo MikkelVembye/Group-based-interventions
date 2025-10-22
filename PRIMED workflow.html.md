@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-08"
+date: "2025-10-22"
 format:
   html: 
     keep-md: true
@@ -7577,10 +7577,13 @@ mental_health_dat|>
 ```{.r .cell-code}
 es_plot_per_study <- 
   gb_dat |>
+  mutate(
+    outcome_label = if_else(str_detect(outcome_construct, "Reint"), "Reintegration", "Mental health")
+  ) |> 
   arrange(desc(study)) |>
   mutate(study = factor(study, unique(study))) |> 
   ggplot(aes(x = study)) +
-  geom_bar(aes(fill = outcome_construct)) +
+  geom_bar(aes(fill = outcome_label)) +
   scale_y_continuous(breaks = seq(5, 40, by = 5)) + 
   theme_minimal() +
   theme(
@@ -7589,12 +7592,14 @@ es_plot_per_study <-
   coord_flip() +
   labs(
     x = paste0("Study (", n_distinct(gb_dat$study), " studies in total)"), 
-    y = "Number of Effect Size Estimates",
-    fill = "Outcome construct"
+    y = "Number of effect size estimates",
+    fill = "Outcome measure"
   ) +
   guides(fill = guide_legend(reverse=TRUE))
 
+#png(filename = "Figures/Number_es_by_type_of_outcome.png", height = 10, width = 9, res = 600, units = "in")
 es_plot_per_study
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -8980,7 +8985,67 @@ cat_dat_cross <- function(variable, study_id, data) {
 ### Outcome measure
 
 
-::: {#tbl-outcome .cell .tbl-cap-location-top tbl-cap='Dependency table for preregistration status (reintegration)'}
+::: {#tbl-outcome-all .cell .tbl-cap-location-top tbl-cap='Dependency table across primary and secondary outcomes'}
+
+```{.r .cell-code}
+outcome_dat_all <- 
+  cat_dat_cross(
+    data = gb_dat,
+    variable = outcome_construct,
+    study_id = study
+  )
+
+outcome_dat_all |>
+  knitr::kable(
+    "html",
+    col.names = c(
+      "Outcome",
+      colnames(outcome_dat_all)[-1]
+    )
+  ) |>
+  kableExtra::column_spec(1, bold = TRUE) |>
+  kableExtra::footnote(
+    general = "Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.",
+    general_title = "Note: ",
+    footnote_as_chunk = T
+  ) |>
+  kableExtra::kable_styling(bootstrap_options = c("striped", "condensed"), full_width = T)
+```
+
+::: {.cell-output-display}
+`````{=html}
+<table style="NAborder-bottom: 0; margin-left: auto; margin-right: auto;" class="table table-striped table-condensed">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Outcome </th>
+   <th style="text-align:left;"> Mental health outcome </th>
+   <th style="text-align:left;"> Reintegrational outcome </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Mental health outcome </td>
+   <td style="text-align:left;"> 42 (144) </td>
+   <td style="text-align:left;"> 39 (140) </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-weight: bold;"> Reintegrational outcome </td>
+   <td style="text-align:left;"> 39 (175) </td>
+   <td style="text-align:left;"> 46 (205) </td>
+  </tr>
+</tbody>
+<tfoot><tr><td style="padding: 0; " colspan="100%">
+<span style="font-style: italic;">Note: </span> <sup></sup> Values outside the parentheses are number of studies, with the number of samples and effect size estimates shown in the parentheses.</td></tr></tfoot>
+</table>
+
+`````
+:::
+:::
+
+
+
+
+::: {#tbl-outcome .cell .tbl-cap-location-top tbl-cap='Dependency table for reintegrational outcomes'}
 
 ```{.r .cell-code}
 outcome_dat_cross <- cat_dat_cross(
@@ -9483,6 +9548,7 @@ label_coords[, 2] <- c(
 
 node_sizes <- diag(as.matrix(res_dat[, -1]))
 
+#png(filename = "Figures/outcome_network.png", height = 6, width = 6, res = 600, units = "in")
 plot(
   g,
   layout = layout,
@@ -9502,6 +9568,7 @@ text(
   col = "black",
   xpd = NA
 )
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -11672,6 +11739,7 @@ sessions_hist_mental + labs(title = "Mental Health") + theme(plot.title = elemen
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
+#png(filename = "Figures/duration_length_plot.png", height = 11, width = 10, res = 600, units = "in")
 reintegration_dat |>
   select(study, duration_in_weeks, sessions_per_week, N_total) |> 
   filter(!is.na(sessions_per_week)) |>  
@@ -11699,7 +11767,7 @@ reintegration_dat |>
   #scale_size(breaks = c(0.5, 1, 1.5, 2, 10.5), limits = c(0, 10.5)) +
   labs(
     x = "Lenght of intervention in weeks", 
-    y = "", 
+    y = "",
     caption = paste0(
       "The light gray facet grids indicate the average number of sessions per week.\n", 
       "The dashed lines indicate 3 months, 6 months, 1 year, and 1.5 years, respectively.\n",
@@ -11715,6 +11783,7 @@ reintegration_dat |>
     strip.text.y.left = element_text(angle = 0),
     plot.caption = element_text(hjust = 0)
   ) 
+#dev.off()
 ```
 
 ::: {.cell-output-display}
@@ -17777,7 +17846,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-08
+ date     2025-10-22
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
