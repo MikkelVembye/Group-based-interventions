@@ -186,7 +186,7 @@ sub_res
 ### Overall 
 
 ```{r reint-overall-fp}
-#| label: fig-reint-overall-fp
+
 #| fig-cap: "Funnel plot across all reintegrational outcomes"
 #| fig.width: 9
 #| fig.height: 6
@@ -546,7 +546,7 @@ grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
 
 ### Investigating the impact of Cano-Vindel et al.
 
-```{r reint-overall-fp}
+```{r reint-overall-fp-cano}
 prereg_dat_cano <-  
   reint_ma_dat |> 
   filter(conventional == 0) |>
@@ -672,7 +672,8 @@ cano_fp
     rma_obj, 
     test,
     studies = n_distinct(reint_ma_dat$study), 
-    effects = nrow(reint_ma_dat)
+    effects = nrow(reint_ma_dat),
+    lambda = NA_real_
   ){
     
     tibble(
@@ -690,7 +691,9 @@ cano_fp
     pval = rma_obj$pval[1],
     tau = round(sqrt(rma_obj$sigma2[1]), 3),
     omega = round(sqrt(rma_obj$sigma2[2]), 3),
-    total_SD = round(sqrt(sum(rma_obj$sigma2)), 3)
+    total_SD = round(sqrt(sum(rma_obj$sigma2)), 3),
+    lambda1 = lambda,
+    lambda2 = lambda
   )
 
 }
@@ -720,7 +723,9 @@ hyema_tab_res <-
     pval = NA_real_,
     tau = round(hyema_overall$Est[2], 3),
     omega = NA_real_,
-    total_SD = hyema_overall$Est[2]
+    total_SD = hyema_overall$Est[2],
+    lambda1 = NA_real_,
+    lambda2 = NA_real_
   )
 
 # HYEMA across outcome
@@ -741,7 +746,8 @@ hyema_obj <-
 hyema_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"),
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"),
     est_ci = c(
       paste0(
         round(as.numeric(hyema_outcome$Est), 3), 
@@ -752,6 +758,8 @@ hyema_outcome_tab <-
         "]"
       ),
       as.character(round(hyema_outcome_f_stat, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(hyema_obj$tau2), 3)),
       NA_character_,
       as.character(round(sqrt(hyema_obj$tau2), 3)),
@@ -796,8 +804,9 @@ puniform_tab_res <-
     pval = puniform_star_res$pval.0,
     tau = round(sqrt(puniform_star_res$tau2), 3),
     omega = NA_real_,
-    total_SD = tau
-    
+    total_SD = tau,
+    lambda1 = NA_real_,
+    lambda2 = NA_real_
   )
 
 
@@ -957,7 +966,7 @@ wc_prereg_tab <-
    tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -969,6 +978,8 @@ wc_prereg_tab <-
         "]"
       ),
       as.character(round(wc_prereg_cwb$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(wc_prereg$sigma2[1]), 3)),
       as.character(round(sqrt(wc_prereg$sigma2[2]), 3)),
       as.character(round(sqrt(sum(wc_prereg$sigma2)), 3)),
@@ -1043,7 +1054,8 @@ wc_outcome_cwb <- readRDS("Bootstrap results/wc_outcome_cwb.rds")
 wc_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1055,6 +1067,8 @@ wc_outcome_tab <-
         "]"
       ),
       as.character(round(wc_outcome_cwb$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(wc_outcome$sigma2[1]), 3)),
       as.character(round(sqrt(wc_outcome$sigma2[2]), 3)),
       as.character(round(sqrt(sum(wc_outcome$sigma2)), 3)),
@@ -1168,7 +1182,7 @@ che_iscw_prereg_tab <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1180,6 +1194,8 @@ che_iscw_prereg_tab <-
         "]"
       ),
       as.character(round(che_iscw_prereg_cwb$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_iscw_prereg$sigma2[1]), 3)),
       as.character(round(sqrt(che_iscw_prereg$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_iscw_prereg$sigma2)), 3)),
@@ -1222,11 +1238,12 @@ che_iscw_outcome <-
 #saveRDS(che_iscw_outcome_cwb, "Bootstrap results/che_iscw_outcome_cwb.rds")
 che_iscw_outcome_cwb <- readRDS("Bootstrap results/che_iscw_outcome_cwb.rds")
 
-#MHV CHECK THIS
+
 che_iscw_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1238,6 +1255,8 @@ che_iscw_outcome_tab <-
         "]"
       ),
       as.character(round(che_iscw_outcome_cwb$p_val, 3)), 
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_iscw_outcome$sigma2[1]), 3)),
       as.character(round(sqrt(che_iscw_outcome$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_iscw_outcome$sigma2)), 3)),
@@ -1252,7 +1271,7 @@ che_iscw_outcome_tab <-
 
 ### PET/PEESE
 
-```{r che-iscw}
+```{r petpesse}
 
 ## PET/PEESE overall
 che_pet <- 
@@ -1319,7 +1338,7 @@ che_pet_prereg_tab <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered",
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1331,6 +1350,8 @@ che_pet_prereg_tab <-
         "]"
       ),
       as.character(round(che_pet_prereg_cwb$p_val,3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_pet_prereg$sigma2[1]), 3)),
       as.character(round(sqrt(che_pet_prereg$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_pet_prereg$sigma2)), 3)),
@@ -1378,7 +1399,8 @@ che_pet_outcome_cwb <- readRDS("Bootstrap results/che_pet_outcome_cwb.rds")
 che_pet_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1390,6 +1412,8 @@ che_pet_outcome_tab <-
         "]"
       ),
       as.character(round(che_pet_outcome_cwb$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_pet_outcome$sigma2[1]), 3)),
       as.character(round(sqrt(che_pet_outcome$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_pet_outcome$sigma2)), 3)),
@@ -1407,11 +1431,11 @@ che_pet_outcome_tab <-
 
 ```{r, selmodel}
 
-set.seed(29092025)
-
-library(future)
-
-cores <- parallel::detectCores() - 1
+#set.seed(29092025)
+#
+#library(future)
+#
+#cores <- parallel::detectCores() - 1
 
 # Overall reintegration
 #plan(multisession, workers = cores)
@@ -1606,6 +1630,8 @@ PSM3_tab_res <-
       "]"
     ),
     pval = NA_real_,
+    lambda1 = round(unique(mod_3PSM_overall$predictions$lambda_full[,2]), 3),
+    lambda2 = NA_real_,
     tau = sqrt(mod_3PSM_overall$predictions$tausq),
     omega = NA_real_,
     total_SD = tau
@@ -1625,6 +1651,8 @@ PSM4_tab_res <-
       "]"
     ),
     pval = NA_real_,
+    lambda1 = round(unique(mod_4PSM_overall$predictions$lambda_full[,2]), 3),
+    lambda2 = round(unique(mod_4PSM_overall$predictions$lambda_full[,3]), 3),
     tau = sqrt(mod_4PSM_overall$predictions$tausq),
     omega = NA_real_,
     total_SD = tau
@@ -1635,7 +1663,7 @@ PSM3_prereg_tab <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1646,6 +1674,8 @@ PSM3_prereg_tab <-
         round(mod_3PSM_prereg$est$percentile_upper[1:2], 3),
         "]"
       ),
+      NA_character_,
+      as.character(round(unique(mod_3PSM_prereg$predictions$lambda_full[,2]), 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_prereg$predictions$tausq), 3)),
       NA_character_,
@@ -1662,7 +1692,7 @@ PSM4_prereg_tab <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1674,6 +1704,8 @@ PSM4_prereg_tab <-
         "]"
       ),
       NA_character_,
+      as.character(round(unique(mod_4PSM_prereg$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_4PSM_prereg$predictions$lambda_full[,3]), 3)),
       as.character(round(sqrt(mod_4PSM_prereg$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_prereg$predictions$tausq), 3)),
@@ -1690,7 +1722,8 @@ PSM4_prereg_tab <-
 PSM3_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1701,6 +1734,8 @@ PSM3_outcome_tab <-
         round(mod_3PSM_outcome$est$percentile_upper[1:7], 3),
         "]"
       ),
+      NA_character_,
+      as.character(round(unique(mod_3PSM_outcome$predictions$lambda_full[,2]), 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_outcome$predictions$tausq), 3)),
       NA_character_,
@@ -1716,7 +1751,8 @@ PSM3_outcome_tab <-
 PSM4_outcome_tab <- 
   tibble(
     coefficient = c(
-      hyema_outcome$Parameter, "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome$Parameter, 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -1728,6 +1764,8 @@ PSM4_outcome_tab <-
         "]"
       ),
       NA_character_,
+      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,3]), 3)),
       as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
@@ -2237,7 +2275,7 @@ grid::grid.draw(grid::textGrob(ylab_mental, y = 0.6, x = 0.02, rot = 90))
 
 ### Investigating the impact of Cano-Vindel et al.
 
-```{r reint-overall-fp}
+```{r reint-overall-fp-cano-mental}
 prereg_dat_cano_mental <-  
   mental_ma_dat |> 
   filter(conventional == 0) |>
@@ -2376,7 +2414,9 @@ hyema_tab_res_mental <-
     pval = NA_real_,
     tau = round(hyema_overall_mental$Est[2], 3),
     omega = NA_real_,
-    total_SD = hyema_overall_mental$Est[2]
+    total_SD = hyema_overall_mental$Est[2],
+    lambda1 = NA_real_,
+    lambda2 = NA_real_
   )
 
 # HYEMA across outcome
@@ -2397,7 +2437,8 @@ hyema_outcome_f_stat_mental <- readRDS("Bootstrap results/F_boot_pval_outcome_me
 hyema_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"),
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"),
     est_ci = c(
       paste0(
         round(as.numeric(hyema_outcome_mental$Est[-5]), 3), 
@@ -2408,6 +2449,8 @@ hyema_outcome_tab_mental <-
         "]"
       ),
       as.character(round(hyema_outcome_f_stat_mental, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(hyema_outcome_mental$Est[5], 3)),
       NA_character_,
       as.character(round( hyema_outcome_mental$Est[5], 3)),
@@ -2452,10 +2495,10 @@ puniform_tab_res_mental <-
     pval = puniform_star_res_mental$pval.0,
     tau = round(sqrt(puniform_star_res_mental$tau2), 3),
     omega = NA_real_,
-    total_SD = tau
-    
+    total_SD = tau,
+    lambda1 = NA_real_,
+    lambda2 = NA_real_
   )
-
 
 
 ```
@@ -2614,7 +2657,7 @@ wc_prereg_tab_mental <-
    tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -2626,6 +2669,8 @@ wc_prereg_tab_mental <-
         "]"
       ),
       as.character(round(wc_prereg_cwb_mental$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(wc_prereg_mental$sigma2[1]), 3)),
       as.character(round(sqrt(wc_prereg_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(wc_prereg_mental$sigma2)), 3)),
@@ -2700,7 +2745,8 @@ wc_outcome_cwb_mental <- readRDS("Bootstrap results/wc_outcome_cwb_mental.rds")
 wc_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -2712,6 +2758,8 @@ wc_outcome_tab_mental <-
         "]"
       ),
       as.character(round(wc_outcome_cwb_mental$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(wc_outcome_mental$sigma2[1]), 3)),
       as.character(round(sqrt(wc_outcome_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(wc_outcome_mental$sigma2)), 3)),
@@ -2834,7 +2882,7 @@ che_iscw_prereg_tab_mental <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -2846,6 +2894,8 @@ che_iscw_prereg_tab_mental <-
         "]"
       ),
       as.character(round(che_iscw_prereg_cwb_mental$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_iscw_prereg_mental$sigma2[1]), 3)),
       as.character(round(sqrt(che_iscw_prereg_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_iscw_prereg_mental$sigma2)), 3)),
@@ -2891,7 +2941,8 @@ che_iscw_outcome_cwb_mental <- readRDS("Bootstrap results/che_iscw_outcome_cwb_m
 che_iscw_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -2903,6 +2954,8 @@ che_iscw_outcome_tab_mental <-
         "]"
       ),
       as.character(round(che_iscw_outcome_cwb_mental$p_val, 3)), 
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_iscw_outcome_mental$sigma2[1]), 3)),
       as.character(round(sqrt(che_iscw_outcome_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_iscw_outcome_mental$sigma2)), 3)),
@@ -2917,7 +2970,7 @@ che_iscw_outcome_tab_mental <-
 
 ### PET/PEESE
 
-```{r che-iscw-mental}
+```{r petpeese-mental}
 
 ## PET/PEESE overall
 che_pet_mental <- 
@@ -2991,7 +3044,7 @@ che_pet_prereg_tab_mental <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered",
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3003,6 +3056,8 @@ che_pet_prereg_tab_mental <-
         "]"
       ),
       as.character(round(che_pet_prereg_cwb_mental$p_val,3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_pet_prereg_mental$sigma2[1]), 3)),
       as.character(round(sqrt(che_pet_prereg_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_pet_prereg_mental$sigma2)), 3)),
@@ -3050,7 +3105,8 @@ che_pet_outcome_cwb_mental <- readRDS("Bootstrap results/che_pet_outcome_cwb_men
 che_pet_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3062,6 +3118,8 @@ che_pet_outcome_tab_mental <-
         "]"
       ),
       as.character(round(che_pet_outcome_cwb_mental$p_val, 3)),
+      NA_character_,
+      NA_character_,
       as.character(round(sqrt(che_pet_outcome_mental$sigma2[1]), 3)),
       as.character(round(sqrt(che_pet_outcome_mental$sigma2[2]), 3)),
       as.character(round(sqrt(sum(che_pet_outcome_mental$sigma2)), 3)),
@@ -3079,11 +3137,11 @@ che_pet_outcome_tab_mental <-
 
 ```{r, selmodel-mental}
 
-set.seed(29092025)
-
-library(future)
-
-cores <- parallel::detectCores() - 1
+#set.seed(29092025)
+#
+#library(future)
+#
+#cores <- parallel::detectCores() - 1
 
 # Overall reintegration
 #plan(multisession, workers = cores)
@@ -3280,7 +3338,9 @@ PSM3_tab_res_mental <-
     pval = NA_real_,
     tau = sqrt(mod_3PSM_overall_mental$predictions$tausq),
     omega = NA_real_,
-    total_SD = tau
+    total_SD = tau,
+    lambda1 = round(unique(mod_3PSM_overall_mental$predictions$lambda_full[,2]), 3),
+    lambda2 = NA_real_
   )
 
 PSM4_tab_res_mental <- 
@@ -3299,7 +3359,9 @@ PSM4_tab_res_mental <-
     pval = NA_real_,
     tau = sqrt(mod_4PSM_overall_mental$predictions$tausq),
     omega = NA_real_,
-    total_SD = tau
+    total_SD = tau,
+    lambda1 = round(unique(mod_4PSM_overall_mental$predictions$lambda_full[,2]), 3),
+    lambda2 = round(unique(mod_4PSM_overall_mental$predictions$lambda_full[,3]), 3)
   )
 
 # Prereg
@@ -3307,7 +3369,7 @@ PSM3_prereg_tab_mental <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3318,6 +3380,8 @@ PSM3_prereg_tab_mental <-
         round(mod_3PSM_prereg_mental$est$percentile_upper[1:2], 3),
         "]"
       ),
+      NA_character_,
+      as.character(round(unique(mod_3PSM_prereg_mental$predictions$lambda_full[,2]), 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_prereg_mental$predictions$tausq), 3)),
       NA_character_,
@@ -3334,7 +3398,7 @@ PSM4_prereg_tab_mental <-
   tibble(
     coefficient = c(
       "Not preregistered", "Preregistered", 
-      "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3346,6 +3410,8 @@ PSM4_prereg_tab_mental <-
         "]"
       ),
       NA_character_,
+      as.character(round(unique(mod_4PSM_prereg_mental$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_4PSM_prereg_mental$predictions$lambda_full[,3]), 3)),
       as.character(round(sqrt(mod_4PSM_prereg_mental$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_prereg_mental$predictions$tausq), 3)),
@@ -3362,7 +3428,8 @@ PSM4_prereg_tab_mental <-
 PSM3_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3373,6 +3440,8 @@ PSM3_outcome_tab_mental <-
         round(mod_3PSM_outcome_mental$est$percentile_upper[1:4], 3),
         "]"
       ),
+      NA_character_,
+      as.character(round(unique(mod_3PSM_outcome_mental$predictions$lambda_full[,2]), 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_outcome_mental$predictions$tausq), 3)),
       NA_character_,
@@ -3388,7 +3457,8 @@ PSM3_outcome_tab_mental <-
 PSM4_outcome_tab_mental <- 
   tibble(
     coefficient = c(
-      hyema_outcome_mental$Parameter[-5], "Wald test p value", "tau", "omega", "Total SD", "Studies", "Effects"
+      hyema_outcome_mental$Parameter[-5], 
+      "Wald test p value", "lambda1", "lambda2", "tau", "omega", "Total SD", "Studies", "Effects"
       ),
     est_ci = c(
       paste0(
@@ -3400,6 +3470,8 @@ PSM4_outcome_tab_mental <-
         "]"
       ),
       NA_character_,
+      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,3]), 3)),
       as.character(round(sqrt(mod_4PSM_outcome_mental$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_outcome_mental$predictions$tausq), 3)),
@@ -3523,7 +3595,8 @@ prereg_tab_pub_bias_gt <-
   )
 
 prereg_tab_pub_bias_gt
-#prereg_tab_pub_bias_gt |> gtsave(file = "Tables/Publication bias table across preregistration status.docx")
+#prereg_tab_pub_bias_gt |> 
+#gtsave(file = "Tables/Publication bias table across preregistration status.docx")
 ```
 
 ## Mental health
@@ -3555,8 +3628,8 @@ prereg_tab_pub_bias_gt_mental <-
   )
 
 prereg_tab_pub_bias_gt_mental
-prereg_tab_pub_bias_gt_mental |> 
-gtsave(file = "Tables/Publication bias table across preregistration status mental.docx")
+#prereg_tab_pub_bias_gt_mental |> 
+#gtsave(file = "Tables/Publication bias table across preregistration status mental.docx")
 ```
 
 # Publication and small study bias tests across types of outcomes
@@ -3591,7 +3664,7 @@ outcome_tab_pub_bias_gt <-
   )
   
 outcome_tab_pub_bias_gt
-outcome_tab_pub_bias_gt |> gtsave(file = "Tables/Publication bias table across outcomes.docx")
+#outcome_tab_pub_bias_gt |> gtsave(file = "Tables/Publication bias table across outcomes.docx")
 
 ```
 
