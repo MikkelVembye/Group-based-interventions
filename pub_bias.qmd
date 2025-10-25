@@ -511,6 +511,19 @@ funnel_exp2 <-  tribble(
   0,     0,     0,     0
 ) 
 
+df_text <- 
+  reint_dat_agg |> 
+  summarise(
+    Wse_pop = mean(Wse_pop),
+    gt_pop = mean(gt_pop),
+    level = "Study level",
+    .by = prereg_chr
+  ) |> 
+  mutate(
+  label = paste0("(",LETTERS[c(2,1)],")")
+)
+
+
 study_level_fp <- 
   reint_dat_agg |> 
   mutate(level = "Study level") |> 
@@ -522,6 +535,12 @@ study_level_fp <-
   geom_hline(data = subgroup_dat_agg, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
   geom_abline(data = subgroup_dat_agg, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat_agg, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_text(
+    data = df_text, 
+    aes(x = 0.025, y = -1.4, label = label, shape = NULL, color = NULL), 
+    size = 3, 
+    color = "black"
+  ) +
   geom_point(aes(Wse_pop, gt_pop), alpha = 1, size = 1.5) +
   scale_color_brewer(type = "qual", palette = 2) + 
   coord_flip() +
