@@ -2,7 +2,7 @@
 title: "Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-22"
+date: "2025-10-27"
 format:
   html: 
     keep-md: true
@@ -395,7 +395,7 @@ ess_facet_plot
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-22
+ date     2025-10-27
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
