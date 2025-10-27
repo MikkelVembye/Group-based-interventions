@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-22"
+date: "2025-10-27"
 format:
   html: 
     keep-md: true
@@ -17823,7 +17823,89 @@ mental_health_outcomes_plot <-
 
 :::
 
+# Forest across all outcomes 
 
+
+::: {.cell fig.topcaption='true'}
+
+```{.r .cell-code}
+rho <- 0.8
+
+reint_mental_studies <- 
+  gb_dat |> 
+  mutate(
+    n_outcomes = n_distinct(outcome_construct),
+    .by = study
+  ) |> 
+  filter(n_outcomes > 1)
+
+reframed_dat <-   
+  escalc(yi = gt_pop, vi = vgt_pop, data = reint_mental_studies) |> 
+  mutate(n = n(), .by = study) |> 
+  aggregate(cluster = study, rho = rho) |> 
+  reframe(
+    yi = rep(yi, n),
+    vi = rep(vi, n),
+    .by = study
+  ) |> 
+  select(-study)
+
+
+forest_dat <-
+  reint_mental_studies |> 
+  bind_cols(reframed_dat) |> 
+  mutate(
+    Est = gt_pop,
+    SE = sqrt(vgt_pop),
+    
+    CI_L = Est - SE * qnorm(.975),
+    CI_U = Est + SE * qnorm(.975),
+    
+    #rma_mean = as.numeric(rma(gt, vgt, data = pick(dplyr::everything()))$b)
+    rma_mean = round(yi, 2)
+    
+  ) |> 
+  arrange(rma_mean, study) |> 
+  mutate(
+    study = factor(study, levels = rev(unique(study)))
+  )
+
+
+total_forest <- 
+  forest_dat |>
+  ggplot(
+    aes(x = Est, y = study, xmin = CI_L, xmax = CI_U,
+        color = outcome_construct, alpha = 0.5)
+  ) + 
+  geom_pointrange(position = position_dodge2(width = 0.5, padding = 0.5)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +
+  theme_light() + 
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(color = "black"),
+    axis.title.y=element_blank(),
+    plot.caption = element_text(hjust = 0)
+  ) + 
+  scale_x_continuous(breaks = seq(-3, 3, 0.5)) +
+  labs(
+    x = "Hedges' g (95% CI)",
+    color = "Type of outcome"
+  ) +
+  guides(
+    alpha = "none",
+    color = guide_legend(nrow = 1, byrow = TRUE)
+    ) 
+
+
+#png(filename = "Figures/forest plot reint.png", height = 11, width = 10, res = 600, units = "in")
+total_forest
+#dev.off()
+```
+
+::: {.cell-output-display}
+![Forest plot including primary and secondary outcomes, respectively](PRIMED-workflow_files/figure-html/fig-forest-all-outcome-1.png){#fig-forest-all-outcome fig-pos='H' width=652.8}
+:::
+:::
 
 
 # Colophon
@@ -17846,7 +17928,7 @@ mental_health_outcomes_plot <-
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-22
+ date     2025-10-27
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
