@@ -252,15 +252,12 @@ l1out_facet_plot <-
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 l1out_facet_plot 
+#dev.off()  
 ```
 
 ::: {.cell-output-display}
-![](Sensitivity-analyses_files/figure-html/unnamed-chunk-2-1.png){fig-pos='H' width=672}
+![](Sensitivity-analyses_files/figure-html/fig-leaveoneout-reint-1.png){#fig-leaveoneout-reint fig-pos='H' width=864}
 :::
-
-```{.r .cell-code}
-#dev.off()  
-```
 :::
 
 
@@ -746,7 +743,7 @@ sensi_res <-
       "Not small-sample or cluster adjusted (d)",
       "RCTs only",
       "Low RoB only",
-      "Low and Moderate RoB only",
+      "Low and moderate RoB only",
       "Excluding the 5 largest studies",
       "Preregistered studies only"
     ),
@@ -805,7 +802,7 @@ facet_beta_sensi <-
   bind_rows(replicate(2, facet_beta_sensi1, simplify = FALSE)) |> 
   mutate(
     parameter = "avg_effect",
-    y_label = c(sensi_res$y_label[1], sensi_res$y_label[10]),
+    y_label = c(sensi_res$y_label[1], sensi_res$y_label[9]),
     facet_label = factor("Average effect size"),
     sensi_type_overall = c("Changed effect size calc", "Changed inclusion criteria")
   )
@@ -824,11 +821,19 @@ facet_sd_pi <-
 
 facet_errorbar_sensi <- 
   sensi_plot_dat |> 
-  filter(sensi_type_overall != "Reported mean", facet_label == "Average effect size") 
+  filter(sensi_type != "Reported mean", facet_label == "Average effect size")
+```
+:::
 
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
 sensi_facet_plot <- 
   sensi_plot_dat |> 
-  filter(sensi_type_overall != "Reported mean") |> 
+  filter(sensi_type != "Reported mean") |> 
   ggplot(aes(x = est, y = y_label, color = y_label)) +
   geom_vline(xintercept = 0) + 
   geom_vline(data = facet_beta_sensi, aes(xintercept = est), linetype = "dashed") + 
@@ -840,15 +845,19 @@ sensi_facet_plot <-
   geom_errorbarh(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
   facet_grid(sensi_type_overall~facet_label, scale = "free") + 
   theme_light() +
-  theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Sensitivity analysis", color = "") 
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+    ) + 
+  labs(x = "Estimate", y = "Sensitivity analysis (reintegration)", color = "") 
 
-
+#png(filename = "Figures/sensi plot reint.png", width = 9, height = 6, res = 600, units = "in")
 sensi_facet_plot
+#dev.off()
 ```
 
 ::: {.cell-output-display}
-![](Sensitivity-analyses_files/figure-html/unnamed-chunk-4-1.png){fig-pos='H' width=672}
+![](Sensitivity-analyses_files/figure-html/fig-sensitivity-analyses-reint-1.png){#fig-sensitivity-analyses-reint fig-pos='H' width=864}
 :::
 :::
 
@@ -1052,15 +1061,12 @@ l1out_facet_plot_mental <-
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 l1out_facet_plot_mental
+#dev.off()  
 ```
 
 ::: {.cell-output-display}
-![](Sensitivity-analyses_files/figure-html/unnamed-chunk-5-1.png){fig-pos='H' width=672}
+![](Sensitivity-analyses_files/figure-html/fig-leaveoneout-mental-1.png){#fig-leaveoneout-mental fig-pos='H' width=864}
 :::
-
-```{.r .cell-code}
-#dev.off()  
-```
 :::
 
 
@@ -1268,7 +1274,7 @@ argument_list <-
       )
   )
 
-sensi_res_mental <- 
+sensi_res <- 
   pmap(.l = argument_list, .f = .PECHE_RVE) |> 
   list_rbind() |> 
   mutate(
@@ -1294,7 +1300,7 @@ sensi_res_mental <-
       "Not small-sample or cluster adjusted (d)",
       "RCTs only",
       "Low RoB only",
-      "Low and Moderate RoB only",
+      "Low and moderate RoB only",
       "Excluding the 5 largest studies",
       "Preregistered studies only"
     ),
@@ -1353,7 +1359,7 @@ facet_beta_sensi <-
   bind_rows(replicate(2, facet_beta_sensi1, simplify = FALSE)) |> 
   mutate(
     parameter = "avg_effect",
-    y_label = c(sensi_res$y_label[1], sensi_res$y_label[10]),
+    y_label = c(sensi_res$y_label[1], sensi_res$y_label[9]),
     facet_label = factor("Average effect size"),
     sensi_type_overall = c("Changed effect size calc", "Changed inclusion criteria")
   )
@@ -1372,11 +1378,19 @@ facet_sd_pi <-
 
 facet_errorbar_sensi <- 
   sensi_plot_dat |> 
-  filter(sensi_type_overall != "Reported mean", facet_label == "Average effect size") 
+  filter(sensi_type != "Reported mean", facet_label == "Average effect size")
+```
+:::
 
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
 sensi_facet_plot_mental <- 
   sensi_plot_dat |> 
-  filter(sensi_type_overall != "Reported mean") |> 
+  filter(sensi_type != "Reported mean") |> 
   ggplot(aes(x = est, y = y_label, color = y_label)) +
   geom_vline(xintercept = 0) + 
   geom_vline(data = facet_beta_sensi, aes(xintercept = est), linetype = "dashed") + 
@@ -1388,15 +1402,19 @@ sensi_facet_plot_mental <-
   geom_errorbarh(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
   facet_grid(sensi_type_overall~facet_label, scale = "free") + 
   theme_light() +
-  theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Sensitivity analysis", color = "") 
+  theme(
+    legend.position = "none", 
+    strip.text = element_text(color = "black")
+    ) + 
+  labs(x = "Estimate", y = "Sensitivity analysis (mental health)", color = "") 
 
-
+#png(filename = "Figures/sensi plot mental.png", width = 9, height = 6, res = 600, units = "in")
 sensi_facet_plot_mental
+#dev.off()
 ```
 
 ::: {.cell-output-display}
-![](Sensitivity-analyses_files/figure-html/unnamed-chunk-6-1.png){fig-pos='H' width=672}
+![](Sensitivity-analyses_files/figure-html/fig-sensitivity-analyses-mental-1.png){#fig-sensitivity-analyses-mental fig-pos='H' width=864}
 :::
 :::
 
