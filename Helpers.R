@@ -755,7 +755,7 @@ forest_plot_de <-
     var = "vgt_pop", 
     studyid = "study", 
     rho = 0.8,  
-    pred_int = 80
+    pred_int = 67
 ){
   
   
