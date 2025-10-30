@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-27"
+date: "2025-10-30"
 format:
   html: 
     keep-md: true
@@ -38,7 +38,7 @@ bibliography: bibliography.bib
 
 # Introduction 
 
-This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in [@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. To find the mental helath presentation, press on the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
+This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in Dalgaard et al. [-@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
 
 
 ## R packages
@@ -9421,17 +9421,26 @@ cat_ridge <- function(data, es, v, variable) {
 
 ::: {.column width="95%"}
 
-::: {.panel-tabset}
-###### Subgroup analyzed
 
 ::: {.cell}
 
 ```{.r .cell-code}
 analyzed_outcomes <- 
   reintegration_dat |> 
-  filter(str_detect(analysis_plan, "Alco|Hope|Social|Well"))
+  mutate(
+    # Outcome variables
+    outcome_type = case_match(
+      analysis_plan, 
+      c("Employment", "Physical health", "Psychiatric hospitalization") ~ "Other",
+      .default = analysis_plan
+    ),
+    
+    outcome_type = fct_relevel(outcome_type, sort),
+    outcome_type = fct_relevel(outcome_type, "Other", after = Inf),
+  )
+  
 
-cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
+cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = outcome_type, v = vgt_pop)
 ```
 
 ::: {.cell-output-display}
@@ -9439,25 +9448,6 @@ cat_ridge(data = analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = v
 :::
 :::
 
-
-###### Not subgroup analyzed
-
-::: {.cell}
-
-```{.r .cell-code}
-not_analyzed_outcomes <- 
-  reintegration_dat |> 
-  filter(!str_detect(analysis_plan, "Alco|Hope|Social|Well"))
-
-cat_ridge(data = not_analyzed_outcomes, es = gt_pop, variable = analysis_plan, v = vgt_pop)
-```
-
-::: {.cell-output-display}
-![Distribution of effect size estimates, by reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-type-ridge-reint-not-analyzed-1.png){#fig-type-ridge-reint-not-analyzed fig-pos='H' width=576}
-:::
-:::
-
-:::
 
 :::
 
@@ -17908,6 +17898,61 @@ total_forest
 :::
 
 
+# Scatterplot for studies both reporting on reintegration and mental health
+
+
+::: {.cell fig.topcaption='true'}
+
+```{.r .cell-code}
+scatter_dat <- 
+  gb_dat |> 
+  mutate(
+    outcome_number = n_distinct(outcome_construct),
+    .by = study
+  ) |> 
+  filter(outcome_number > 1) |> 
+  mutate(
+    cluster = paste(study, outcome_construct, sep = "_")
+  ) |> 
+  metafor::escalc(data = _, yi = gt_pop, vi = vgt_pop) |> 
+  aggregate(cluster = cluster, rho = 0.8) |> 
+  select(
+    study, gt_pop = yi, outcome_construct
+  ) |> 
+  mutate(
+    outcome = if_else(
+      str_detect(outcome_construct, "Reint"), 
+      "Reintegrational outcome", 
+      "Mental health outcome"
+    )
+  ) |> 
+  select(-outcome_construct) |> 
+  pivot_wider(
+    names_from = outcome,
+    values_from = gt_pop
+  )
+  
+
+#png(filename = "Figures/scatter plot reint and mental.png", height = 7, width = 7.5, res = 600, units = "in")
+ggplot(scatter_dat) + 
+  aes(x=`Reintegrational outcome`,y=`Mental health outcome`) + 
+  geom_hline(yintercept = 0) + 
+  geom_vline(xintercept = 0) + 
+  geom_smooth(method='lm', se = FALSE, color = "black", linetype = "dashed", linewidth= 0.5) +
+  geom_point(color = "purple", size = 3) + 
+  geom_text(aes(label=study), size = 2.5, color = "grey", hjust = 0, nudge_x = 0.015) + 
+  scale_x_continuous(breaks = seq(-0.5, 1.5, 0.5), limits = c(-0.3, 1)) + 
+  theme_minimal()
+#dev.off()
+```
+
+::: {.cell-output-display}
+![Scatter plot reintegration vs. mental](PRIMED-workflow_files/figure-html/fig-outcome-scatter-reint-mental-1.png){#fig-outcome-scatter-reint-mental fig-pos='H' width=672}
+:::
+:::
+
+
+
 # Colophon
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=false #session-info}
@@ -17928,7 +17973,7 @@ total_forest
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-27
+ date     2025-10-30
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 

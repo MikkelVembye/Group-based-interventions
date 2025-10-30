@@ -2,7 +2,7 @@
 title: "Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-28"
+date: "2025-10-29"
 format:
   html: 
     keep-md: true
@@ -749,8 +749,8 @@ sensi_res <-
     ),
     
     study_es_label = paste0(
-      studies, " (", effects, "), g = ", round(avg_effect, 2), 
-      " [", round(LL, 2), ", ", round(UL, 2), "]"
+      studies, " (", effects, "), g = ", round(avg_effect, 3), 
+      " [", round(LL, 3), ", ", round(UL, 3), "]"
       
     ),
     
@@ -767,23 +767,26 @@ sensi_plot_dat <-
   sensi_res |> 
   relocate(sd_total, .after = avg_effect) |> 
   pivot_longer(
-    cols = c(avg_effect:sd_total, pi_lb_67:pi_ub_67),
+    cols = c(avg_effect, tau, omega, sd_total),
     names_to = "parameter",
     values_to = "est"
   ) |> 
   mutate(
+    
     facet_label = case_match(
       parameter,
       "avg_effect" ~ "Average effect size",
-      "sd_total" ~ "Total SD",
-      "pi_lb_67" ~ "67% PI lower",
-      "pi_ub_67" ~ "67% PI upper"
+      "tau" ~ "Between-study SD",
+      "omega" ~ "Within-study SD",
+      "sd_total" ~ "Total SD"
     ),
     
     facet_label = factor(
       facet_label,
-      levels = c("Average effect size", "Total SD", "67% PI lower", "67% PI upper")
-      )
+      levels = c("Average effect size", "Between-study SD", "Within-study SD", "Total SD")
+    ),
+    
+    max = 0.3
     
   )
 
@@ -839,10 +842,21 @@ sensi_facet_plot <-
   geom_vline(data = facet_beta_sensi, aes(xintercept = est), linetype = "dashed") + 
   geom_rect(data = facet_beta_sensi, aes(xmin = LL, xmax = UL, ymin = -Inf, ymax = Inf),
             fill = "gray90", alpha = 0.5, color = "gray90") +
+  geom_vline(data = facet_beta_sensi, aes(xintercept = pi_lb_67), linetype = "dotted") +
+  geom_vline(data = facet_beta_sensi, aes(xintercept = pi_ub_67), linetype = "dotted") +
   geom_vline(data = facet_sd_pi, aes(xintercept = est), linetype = "dashed") + 
-  #geom_blank(aes(x = max)) + 
+  geom_blank(aes(x = max)) + 
+  geom_errorbar(
+    data = facet_errorbar_sensi,
+    aes(xmin = pi_lb_67, xmax = pi_ub_67),
+    color = "lightblue",
+    #size = 1,
+    linewidth = 2,
+    alpha = 0.7,
+    width=0
+  ) +
   geom_point(size = 3) +
-  geom_errorbarh(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
+  geom_errorbar(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
   facet_grid(sensi_type_overall~facet_label, scale = "free") + 
   theme_light() +
   theme(
@@ -1306,8 +1320,8 @@ sensi_res <-
     ),
     
     study_es_label = paste0(
-      studies, " (", effects, "), g = ", round(avg_effect, 2), 
-      " [", round(LL, 2), ", ", round(UL, 2), "]"
+      studies, " (", effects, "), g = ", round(avg_effect, 3), 
+      " [", round(LL, 3), ", ", round(UL, 3), "]"
       
     ),
     
@@ -1324,23 +1338,26 @@ sensi_plot_dat <-
   sensi_res |> 
   relocate(sd_total, .after = avg_effect) |> 
   pivot_longer(
-    cols = c(avg_effect:sd_total, pi_lb_67:pi_ub_67),
+    cols = c(avg_effect, tau, omega, sd_total),
     names_to = "parameter",
     values_to = "est"
   ) |> 
   mutate(
+    
     facet_label = case_match(
       parameter,
       "avg_effect" ~ "Average effect size",
-      "sd_total" ~ "Total SD",
-      "pi_lb_67" ~ "67% PI lower",
-      "pi_ub_67" ~ "67% PI upper"
+      "tau" ~ "Between-study SD",
+      "omega" ~ "Within-study SD",
+      "sd_total" ~ "Total SD"
     ),
     
     facet_label = factor(
       facet_label,
-      levels = c("Average effect size", "Total SD", "67% PI lower", "67% PI upper")
-      )
+      levels = c("Average effect size", "Between-study SD", "Within-study SD", "Total SD")
+    ),
+    
+    max = 0.3
     
   )
 
@@ -1396,10 +1413,21 @@ sensi_facet_plot_mental <-
   geom_vline(data = facet_beta_sensi, aes(xintercept = est), linetype = "dashed") + 
   geom_rect(data = facet_beta_sensi, aes(xmin = LL, xmax = UL, ymin = -Inf, ymax = Inf),
             fill = "gray90", alpha = 0.5, color = "gray90") +
+  geom_vline(data = facet_beta_sensi, aes(xintercept = pi_lb_67), linetype = "dotted") +
+  geom_vline(data = facet_beta_sensi, aes(xintercept = pi_ub_67), linetype = "dotted") +
   geom_vline(data = facet_sd_pi, aes(xintercept = est), linetype = "dashed") + 
-  #geom_blank(aes(x = max)) + 
+  geom_blank(aes(x = max)) + 
+  geom_errorbar(
+    data = facet_errorbar_sensi,
+    aes(xmin = pi_lb_67, xmax = pi_ub_67),
+    color = "lightblue",
+    #size = 1,
+    linewidth = 2,
+    alpha = 0.7,
+    width=0
+  ) +
   geom_point(size = 3) +
-  geom_errorbarh(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
+  geom_errorbar(data = facet_errorbar_sensi, aes(xmin = LL, xmax = UL), width=0) + 
   facet_grid(sensi_type_overall~facet_label, scale = "free") + 
   theme_light() +
   theme(
@@ -1440,7 +1468,7 @@ sensi_facet_plot_mental
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-28
+ date     2025-10-29
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
