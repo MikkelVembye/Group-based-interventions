@@ -645,6 +645,10 @@ dat_ess_less_140_reint <-
   filter(mean_ess < 140)
 
 dat_prereg_reint <- reint_ma_dat |> filter(prereg_chr == "Preregistered")
+dat_prereg_rob_reint <- 
+  reint_ma_dat |> 
+  filter(prereg_chr == "Preregistered" & !str_detect(overall_rob, "Seri")) 
+
 
 argument_list <- 
   tibble(
@@ -667,18 +671,19 @@ argument_list <-
       dat_rob_low_reint,
       dat_rob_low_moderate_reint, 
       dat_ess_less_140_reint,
-      dat_prereg_reint
+      dat_prereg_reint,
+      dat_prereg_rob_reint 
     ),
     
     es = c(
       rep("gt_pop", 4), 
       "gt", "gt_post", "g", "d",
-      rep("gt_pop", 5)
+      rep("gt_pop", 6)
       ),
     var = c(
       rep("vgt_pop", 4), 
       "vgt", "vgt_post", "vg", "vd",
-      rep("vgt_pop", 5)
+      rep("vgt_pop", 6)
       )
   )
 
@@ -689,7 +694,7 @@ sensi_res <-
     sensi_type_overall = 
       rep(
         c("Changed effect size calc", "Changed inclusion criteria"), 
-        c(8,5)
+        c(8,6)
       ),
     
     sensi_type_overall = factor(
@@ -710,7 +715,8 @@ sensi_res <-
       "Low RoB only",
       "Low and moderate RoB only",
       "Excluding the 5 largest studies",
-      "Preregistered studies only"
+      "Preregistered studies only",
+      "Preregistered studies and not high RoB"
     ),
     
     study_es_label = paste0(
@@ -1181,6 +1187,10 @@ dat_ess_less_135_mental <-
   filter(mean_ess < 135)
 
 dat_prereg_mental<- mental_ma_dat |> filter(prereg_chr == "Preregistered")
+dat_prereg_rob_mental <- 
+  mental_ma_dat |> 
+  filter(prereg_chr == "Preregistered" & !str_detect(overall_rob, "Seri")) 
+
 
 argument_list <- 
   tibble(
@@ -1203,18 +1213,19 @@ argument_list <-
       dat_rob_low_mental,
       dat_rob_low_moderate_mental, 
       dat_ess_less_135_mental,
-      dat_prereg_mental
+      dat_prereg_mental,
+      dat_prereg_rob_mental
     ),
     
     es = c(
       rep("gt_pop", 4), 
       "gt", "gt_post", "g", "d",
-      rep("gt_pop", 5)
+      rep("gt_pop", 6)
       ),
     var = c(
       rep("vgt_pop", 4), 
       "vgt", "vgt_post", "vg", "vd",
-      rep("vgt_pop", 5)
+      rep("vgt_pop", 6)
       )
   )
 
@@ -1225,7 +1236,7 @@ sensi_res <-
     sensi_type_overall = 
       rep(
         c("Changed effect size calc", "Changed inclusion criteria"), 
-        c(8,5)
+        c(8,6)
       ),
     
     sensi_type_overall = factor(
@@ -1246,7 +1257,8 @@ sensi_res <-
       "Low RoB only",
       "Low and moderate RoB only",
       "Excluding the 5 largest studies",
-      "Preregistered studies only"
+      "Preregistered studies only",
+      "Preregistered studies and not high RoB"
     ),
     
     study_es_label = paste0(

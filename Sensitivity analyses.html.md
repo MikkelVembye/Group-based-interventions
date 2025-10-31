@@ -2,7 +2,7 @@
 title: "Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-29"
+date: "2025-10-31"
 format:
   html: 
     keep-md: true
@@ -680,6 +680,10 @@ dat_ess_less_140_reint <-
   filter(mean_ess < 140)
 
 dat_prereg_reint <- reint_ma_dat |> filter(prereg_chr == "Preregistered")
+dat_prereg_rob_reint <- 
+  reint_ma_dat |> 
+  filter(prereg_chr == "Preregistered" & !str_detect(overall_rob, "Seri")) 
+
 
 argument_list <- 
   tibble(
@@ -702,18 +706,19 @@ argument_list <-
       dat_rob_low_reint,
       dat_rob_low_moderate_reint, 
       dat_ess_less_140_reint,
-      dat_prereg_reint
+      dat_prereg_reint,
+      dat_prereg_rob_reint 
     ),
     
     es = c(
       rep("gt_pop", 4), 
       "gt", "gt_post", "g", "d",
-      rep("gt_pop", 5)
+      rep("gt_pop", 6)
       ),
     var = c(
       rep("vgt_pop", 4), 
       "vgt", "vgt_post", "vg", "vd",
-      rep("vgt_pop", 5)
+      rep("vgt_pop", 6)
       )
   )
 
@@ -724,7 +729,7 @@ sensi_res <-
     sensi_type_overall = 
       rep(
         c("Changed effect size calc", "Changed inclusion criteria"), 
-        c(8,5)
+        c(8,6)
       ),
     
     sensi_type_overall = factor(
@@ -745,7 +750,8 @@ sensi_res <-
       "Low RoB only",
       "Low and moderate RoB only",
       "Excluding the 5 largest studies",
-      "Preregistered studies only"
+      "Preregistered studies only",
+      "Preregistered studies and not high RoB"
     ),
     
     study_es_label = paste0(
@@ -1251,6 +1257,10 @@ dat_ess_less_135_mental <-
   filter(mean_ess < 135)
 
 dat_prereg_mental<- mental_ma_dat |> filter(prereg_chr == "Preregistered")
+dat_prereg_rob_mental <- 
+  mental_ma_dat |> 
+  filter(prereg_chr == "Preregistered" & !str_detect(overall_rob, "Seri")) 
+
 
 argument_list <- 
   tibble(
@@ -1273,18 +1283,19 @@ argument_list <-
       dat_rob_low_mental,
       dat_rob_low_moderate_mental, 
       dat_ess_less_135_mental,
-      dat_prereg_mental
+      dat_prereg_mental,
+      dat_prereg_rob_mental
     ),
     
     es = c(
       rep("gt_pop", 4), 
       "gt", "gt_post", "g", "d",
-      rep("gt_pop", 5)
+      rep("gt_pop", 6)
       ),
     var = c(
       rep("vgt_pop", 4), 
       "vgt", "vgt_post", "vg", "vd",
-      rep("vgt_pop", 5)
+      rep("vgt_pop", 6)
       )
   )
 
@@ -1295,7 +1306,7 @@ sensi_res <-
     sensi_type_overall = 
       rep(
         c("Changed effect size calc", "Changed inclusion criteria"), 
-        c(8,5)
+        c(8,6)
       ),
     
     sensi_type_overall = factor(
@@ -1316,7 +1327,8 @@ sensi_res <-
       "Low RoB only",
       "Low and moderate RoB only",
       "Excluding the 5 largest studies",
-      "Preregistered studies only"
+      "Preregistered studies only",
+      "Preregistered studies and not high RoB"
     ),
     
     study_es_label = paste0(
@@ -1468,7 +1480,7 @@ sensi_facet_plot_mental
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-29
+ date     2025-10-31
  pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
