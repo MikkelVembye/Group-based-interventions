@@ -112,6 +112,9 @@ reint_ma_dat <-
     # For interpretation
     m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c, ppcor,
     
+    # For exploration
+    cnt, 
+    
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
     
@@ -174,6 +177,20 @@ reint_ma_dat <-
     sessions_c = sessions_per_week - 1,
     duration_c = duration_in_weeks - 12,
     fu_time_c = time_after_end_intervention_weeks - 1,
+    
+    country = case_match(
+      cnt, 
+      c(
+        "Turkey", "Norway", "Spain", "Netherlands", 
+        "Finland", "Germany", "Austria", "Italy", "Ireland"
+        ) ~ "Europe",
+      
+      "US" ~ "US",
+      
+      c("Canada", "Australia", "UK") ~ "Commonwealth",
+      
+      c( "Japan", "Corea" ) ~ "Asia"
+    ),
     
     study = stringi::stri_trans_general(study, "Latin-ASCII"),
     study = fct_relevel(study, sort)
@@ -586,21 +603,21 @@ club_wald_test <- Wald_test(outcome_obj, constraints = constrain_equal(1:3), vco
 club_wald_test
 
 
-tic()
-plan(multisession, workers = parallel::detectCores()-1)
-
-cwb_test <- 
-  try(
-    Wald_test_cwb(
-      full_model = outcome_obj,
-      constraints = constrain_equal(1:7),
-      R = 19, 
-      seed = 26082025L
-    )
-  ); cwb_test
-
-plan(sequential)
-toc()
+#tic()
+#plan(multisession, workers = parallel::detectCores()-1)
+#
+#cwb_test <- 
+#  try(
+#    Wald_test_cwb(
+#      full_model = outcome_obj,
+#      constraints = constrain_equal(1:7),
+#      R = 19, 
+#      seed = 26082025L
+#    )
+#  ); cwb_test
+#
+#plan(sequential)
+#toc()
 
 # Continuous model
 
@@ -758,7 +775,7 @@ tic()
 plan(multisession)
 x_test <- 
   pmap(
-    .l = arg_list_tbl_rho08, 
+    .l = arg_list_tbl_rho08[17:18,], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = FALSE
@@ -821,6 +838,35 @@ toc()
 #)
 #future::plan(future::sequential)
 #future::plan()
+
+## Country effects
+
+arg_cnt <- 
+  tibble(
+    yi = "gt_pop",
+    vi = "vgt_pop",
+    covars = "country",
+    model = "SCEp",
+    r = 0.8, 
+    type = "theory"
+  ) 
+
+arg_cnt_rma <- 
+  pmap(.l = arg_cnt, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
+  list_rbind() |> 
+  mutate(
+    R = 19L,
+    seed = 26082025L
+  )
+
+cnt_res_reint <- 
+  pmap(
+    .l = arg_cnt_rma, 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = FALSE
+  )
+cnt_res_reint[[1]]
 
 ```
 
@@ -1107,6 +1153,9 @@ mental_ma_dat <-
     # For interpretation
     m_diff_c, sd_pre_c, sd_post_c, b_emm_pre_c, b_emm_post_c, ppcor,
     
+    # For exploration
+    cnt, 
+    
     # Miscellaneous 
     vary_id, varifier, time, rob_tool
     
@@ -1162,6 +1211,20 @@ mental_ma_dat <-
     sessions_c = sessions_per_week - 1,
     duration_c = duration_in_weeks - 12,
     fu_time_c = time_after_end_intervention_weeks - 1,
+    
+    country = case_match(
+      cnt, 
+      c(
+        "Turkey", "Norway", "Spain", "Netherlands", 
+        "Finland", "Germany", "Austria", "Italy", "Ireland"
+      ) ~ "Europe",
+      
+      "US" ~ "US",
+      
+      c("Canada", "Australia", "UK") ~ "Commonwealth",
+      
+      c( "Japan", "Corea" ) ~ "Asia"
+    ),
     
     study = stringi::stri_trans_general(study, "Latin-ASCII"),
     study = fct_relevel(study, sort)
@@ -1784,6 +1847,24 @@ toc()
 #)
 #future::plan(future::sequential)
 #future::plan()
+
+
+arg_cnt_rma_mental <- 
+  pmap(.l = arg_cnt, .f = .rma_arg_tbl, data = mental_ma_dat) |> 
+  list_rbind() |> 
+  mutate(
+    R = 19L,
+    seed = 26082025L
+  )
+
+cnt_res_mental <- 
+  pmap(
+    .l = arg_cnt_rma_mental, 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = FALSE
+  )
+cnt_res_mental[[1]]
 
 ```
 

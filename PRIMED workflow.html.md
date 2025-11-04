@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-30"
+date: "2025-11-03"
 format:
   html: 
     keep-md: true
@@ -8575,6 +8575,205 @@ study_sizes_plot_mental
 :::
 
 :::
+
+### Total EFFECTIVE sample sizes
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+::: {#tbl-sample-size-effective .cell .tbl-cap-location-top tbl-cap='Distribution of primary study effective sample sizes at post test for reintegrational outcomes'}
+
+```{.r .cell-code}
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid_ESS <- 
+  reintegration_dat |> 
+  reframe(N_treat_ESS = max(ESS_t), .by = c(study, trt_id)) 
+
+N_t_total_ESS <- 
+  N_t_stud_trtid_ESS |> 
+  summarise(N_t_total_ESS = sum(N_treat_ESS), .by = study)
+
+N_c_total_ESS <- 
+  reintegration_dat |> 
+  summarise(N_c_total_ESS = max(ESS_c), .by = study)
+
+N_total_ESS_dat <- 
+  left_join(N_t_total_ESS, N_c_total_ESS, by = join_by(study)) |> 
+  mutate(N_total_ESS = N_t_total_ESS + N_c_total_ESS)
+
+
+primary_ESS_sample_size_descriptive <- 
+  N_total_ESS_dat$N_total_ESS |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_ESS_sample_size_descriptive |>
+  knitr::kable(
+    digits = 2,
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+```
+
+::: {.cell-output-display}
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> sd </th>
+   <th style="text-align:right;"> p0 </th>
+   <th style="text-align:right;"> p25 </th>
+   <th style="text-align:right;"> p50 </th>
+   <th style="text-align:right;"> p75 </th>
+   <th style="text-align:right;"> p100 </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 69.52 </td>
+   <td style="text-align:right;"> 73.29 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 23.25 </td>
+   <td style="text-align:right;"> 37.5 </td>
+   <td style="text-align:right;"> 84.5 </td>
+   <td style="text-align:right;"> 351 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+:::
+:::
+
+:::
+
+::: {.column-margin} 
+
+::: {#tbl-sample-size-mental-effective .cell .tbl-cap-location-top tbl-cap='Distribution of primary study effective sample sizes at post test for mental health outcomes'}
+
+```{.r .cell-code}
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid_mental_ESS <- 
+  mental_health_dat |> 
+  reframe(N_treat_ESS = max(ESS_t), .by = c(study, trt_id)) 
+
+N_t_total_mental_ESS <- 
+  N_t_stud_trtid_mental_ESS |> 
+  summarise(N_t_total_ESS = sum(N_treat_ESS), .by = study)
+
+N_c_total_mental_ESS <- 
+  mental_health_dat |> 
+  summarise(N_c_total_ESS = max(ESS_c), .by = study)
+
+N_total_ESS_dat_mental <- 
+  left_join(N_t_total_mental_ESS, N_c_total_mental_ESS, by = join_by(study)) |> 
+  mutate(N_total_ESS = N_t_total_ESS + N_c_total_ESS)
+
+
+primary_ESS_sample_size_descriptive_mental <- 
+  N_total_ESS_dat_mental$N_total_ESS |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_ESS_sample_size_descriptive_mental |>
+  knitr::kable(
+    digits = 2,
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+```
+
+::: {.cell-output-display}
+`````{=html}
+<table class="table table-striped table-condensed" style="width: auto !important; margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:right;"> mean </th>
+   <th style="text-align:right;"> sd </th>
+   <th style="text-align:right;"> p0 </th>
+   <th style="text-align:right;"> p25 </th>
+   <th style="text-align:right;"> p50 </th>
+   <th style="text-align:right;"> p75 </th>
+   <th style="text-align:right;"> p100 </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 66.9 </td>
+   <td style="text-align:right;"> 71.46 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 23 </td>
+   <td style="text-align:right;"> 38 </td>
+   <td style="text-align:right;"> 80 </td>
+   <td style="text-align:right;"> 351 </td>
+  </tr>
+</tbody>
+</table>
+
+`````
+:::
+:::
+
+:::
+
+:::
+
+The following plot displays the distribution of the effective study sample sizes at post-test.
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+::: {.cell}
+
+```{.r .cell-code}
+study_sizes_plot_reint_ESS <- 
+  ggplot(N_total_ESS_dat, aes(N_total_ESS)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Effective Sample Size", y = "")
+study_sizes_plot_reint_ESS
+```
+
+::: {.cell-output-display}
+![Distribution of primary effective study sample sizes at post test for reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-sample-size-reint-effective-1.png){#fig-sample-size-reint-effective fig-pos='H' width=768}
+:::
+:::
+
+:::
+
+::: {.column-margin}
+
+::: {.cell}
+
+```{.r .cell-code}
+study_sizes_plot_mental_ESS <- 
+  ggplot(N_total_ESS_dat_mental, aes(N_total_ESS)) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Effective Sample Size", y = "")
+study_sizes_plot_mental_ESS
+```
+
+::: {.cell-output-display}
+![Distribution of primary effective study sample sizes at post test for mental health outcomes.](PRIMED-workflow_files/figure-html/fig-sample-size-mental-effective-1.png){#fig-sample-size-mental-effective fig-pos='H' width=672}
+:::
+:::
+
+:::
+
+:::
+
 
 ### Treatment group
 
@@ -17973,9 +18172,9 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-30
- pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
- quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ date     2025-11-03
+ pandoc   3.6.3 @ C:/RStudio-2025.09.2-418/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
+ quarto   NA @ C:\\RSTUDI~1.2-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source

@@ -3675,6 +3675,140 @@ study_sizes_plot_mental
 
 :::
 
+### Total EFFECTIVE sample sizes
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r effective-sample-size-overall-reint}
+#| tbl-cap: "Distribution of primary study effective sample sizes at post test for reintegrational outcomes"
+#| tbl-cap-location: top
+#| label: tbl-sample-size-effective
+
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid_ESS <- 
+  reintegration_dat |> 
+  reframe(N_treat_ESS = max(ESS_t), .by = c(study, trt_id)) 
+
+N_t_total_ESS <- 
+  N_t_stud_trtid_ESS |> 
+  summarise(N_t_total_ESS = sum(N_treat_ESS), .by = study)
+
+N_c_total_ESS <- 
+  reintegration_dat |> 
+  summarise(N_c_total_ESS = max(ESS_c), .by = study)
+
+N_total_ESS_dat <- 
+  left_join(N_t_total_ESS, N_c_total_ESS, by = join_by(study)) |> 
+  mutate(N_total_ESS = N_t_total_ESS + N_c_total_ESS)
+
+
+primary_ESS_sample_size_descriptive <- 
+  N_total_ESS_dat$N_total_ESS |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_ESS_sample_size_descriptive |>
+  knitr::kable(
+    digits = 2,
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+::: {.column-margin} 
+```{r effective-sample-size-overall-mental}
+#| tbl-cap: "Distribution of primary study effective sample sizes at post test for mental health outcomes"
+#| tbl-cap-location: top
+#| label: tbl-sample-size-mental-effective
+
+
+# Used when describing the treatment group sample sizes
+N_t_stud_trtid_mental_ESS <- 
+  mental_health_dat |> 
+  reframe(N_treat_ESS = max(ESS_t), .by = c(study, trt_id)) 
+
+N_t_total_mental_ESS <- 
+  N_t_stud_trtid_mental_ESS |> 
+  summarise(N_t_total_ESS = sum(N_treat_ESS), .by = study)
+
+N_c_total_mental_ESS <- 
+  mental_health_dat |> 
+  summarise(N_c_total_ESS = max(ESS_c), .by = study)
+
+N_total_ESS_dat_mental <- 
+  left_join(N_t_total_mental_ESS, N_c_total_mental_ESS, by = join_by(study)) |> 
+  mutate(N_total_ESS = N_t_total_ESS + N_c_total_ESS)
+
+
+primary_ESS_sample_size_descriptive_mental <- 
+  N_total_ESS_dat_mental$N_total_ESS |> 
+  skim() |>
+  select(-skim_type, -skim_variable, -n_missing, -complete_rate, -numeric.hist) |>
+  rename_at(vars(starts_with("numeric.")), ~ str_remove(., "numeric\\.")) 
+
+primary_ESS_sample_size_descriptive_mental |>
+  knitr::kable(
+    digits = 2,
+    booktabs = TRUE
+  ) |>
+  kable_styling(bootstrap_options = c("striped","condensed"), full_width = FALSE)
+
+```
+:::
+
+:::
+
+The following plot displays the distribution of the effective study sample sizes at post-test.
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r sample-size-plot-reint-effective }
+#| label: fig-sample-size-reint-effective
+#| fig-cap: "Distribution of primary effective study sample sizes at post test for reintegrational outcomes."
+#| fig.height: 2.5
+#| fig.width: 8
+#| fig.retina: 2
+#| message: false
+study_sizes_plot_reint_ESS <- 
+  ggplot(N_total_ESS_dat, aes(N_total_ESS)) + 
+  geom_density(fill = "cornflowerblue", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Effective Sample Size", y = "")
+study_sizes_plot_reint_ESS
+```
+:::
+
+::: {.column-margin}
+```{r sample-size-plot-mental-effective}
+#| label: fig-sample-size-mental-effective
+#| fig-cap: "Distribution of primary effective study sample sizes at post test for mental health outcomes."
+#| fig.height: 4
+#| fig.retina: 2
+#| message: false
+study_sizes_plot_mental_ESS <- 
+  ggplot(N_total_ESS_dat_mental, aes(N_total_ESS)) + 
+  geom_density(fill = "gray", alpha = 0.8) + 
+  geom_blank(aes(x = 0, y = 0)) + 
+  geom_rug(alpha = 0.8) +
+  scale_y_continuous(NULL, breaks = NULL) + 
+  theme_minimal() + 
+  labs(x = "Total Effective Sample Size", y = "")
+study_sizes_plot_mental_ESS
+
+```
+:::
+
+:::
+
+
 ### Treatment group
 
 ::: {.columns}

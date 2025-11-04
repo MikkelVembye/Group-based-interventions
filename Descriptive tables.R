@@ -148,6 +148,7 @@ pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
         Characteristic = char_name,
         N_studies = n(),
         N_ES = sum(n_es),
+        Median_J = round(median(x_mean_stud, rm.na = rm_mis), digits),
         Mean_J = round(mean(x_mean_stud, rm.na = rm_mis), digits),
         SD_J = round(sd(x_mean_stud), 1),
         Range = paste0(round(min(x_mean_stud)), "-", round(max(x_mean_stud)))
@@ -167,6 +168,7 @@ pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
           N_studies = n(),
           N_ES = sum(kj),
           
+          Median_J = round(median(kj, rm.na = rm_mis), digits),
           Mean_J = round(mean(kj, na.rm = rm_mis), 1),
           SD_J = round(sd(kj, na.rm = rm_mis), 1),
           Range = paste0(min(kj, na.rm = rm_mis), "-", max(kj, na.rm = rm_mis)) 
@@ -251,6 +253,7 @@ N_total_reint <-
     Characteristic = "Total sample size",
     N_studies = n(),
     N_ES = sum(N_es),
+    Median_J = round(median(N_total)),
     Mean_J = round(mean(N_total)),
     SD_J = round(sd(N_total),1),
     Range = paste0(round(min(N_total)), "-", round(max(N_total))),
@@ -263,6 +266,7 @@ N_ESS_reint <-
     Characteristic = "Total effective sample size",
     N_studies = n(),
     N_ES = sum(N_es),
+    Median_J = round(median(ESS_total)),
     Mean_J = round(mean(ESS_total)),
     SD_J = round(sd(ESS_total),1),
     Range = paste0(round(min(ESS_total)), "-", round(max(ESS_total))),
@@ -293,6 +297,7 @@ ppcor_dat_reint <-
     Characteristic = "Pre-posttest correlation (emp. calc)",
     N_studies = n_distinct(study),
     N_ES = n(),
+    Median_J = median(ppcor),
     Mean_J = mean(ppcor),
     SD_J = sd(ppcor),
     Range = paste0(round(min(ppcor), 3), "-", round(max(ppcor), 3))
@@ -315,6 +320,7 @@ mean_table_reint <-
   cols_label(
     N_studies = "J",
     N_ES = "K",
+    Median_J = "Median",
     Mean_J = "Average",
     SD_J = "SD"
   ) |> 
@@ -323,9 +329,9 @@ mean_table_reint <-
     indent = 3
   ) |> 
   tab_stubhead("Characteristics") |> 
-  fmt_number(columns = 4:5, decimals = 2) 
+  fmt_number(columns = 4:6, decimals = 2) 
 
-#mean_table_reint |> gtsave("Tables/mean_table_reint.docx")
+mean_table_reint |> gtsave("Tables/mean_table_reint.docx")
 
 ################################################################################
 #
@@ -453,6 +459,7 @@ N_total_mental <-
     Characteristic = "Total sample size",
     N_studies = n(),
     N_ES = sum(N_es),
+    Median_J = round(median(N_total)),
     Mean_J = round(mean(N_total)),
     SD_J = round(sd(N_total),1),
     Range = paste0(round(min(N_total)), "-", round(max(N_total))),
@@ -465,6 +472,7 @@ N_ESS_mental <-
     Characteristic = "Total effective sample size",
     N_studies = n(),
     N_ES = sum(N_es),
+    Median_J = round(median(ESS_total)),
     Mean_J = round(mean(ESS_total)),
     SD_J = round(sd(ESS_total),1),
     Range = paste0(round(min(ESS_total)), "-", round(max(ESS_total))),
@@ -495,6 +503,7 @@ ppcor_dat_mental <-
     Characteristic = "Pre-posttest correlation (emp. calc)",
     N_studies = n_distinct(study),
     N_ES = n(),
+    Median_J = median(ppcor),
     Mean_J = mean(ppcor),
     SD_J = sd(ppcor),
     Range = paste0(round(min(ppcor), 3), "-", round(max(ppcor), 3))
@@ -517,6 +526,7 @@ mean_table_mental <-
   cols_label(
     N_studies = "J",
     N_ES = "K",
+    Median_J = "Median",
     Mean_J = "Average",
     SD_J = "SD"
   ) |> 
@@ -525,7 +535,7 @@ mean_table_mental <-
     indent = 3
   ) |> 
   tab_stubhead("Characteristics") |> 
-  fmt_number(columns = 4:5, decimals = 2) 
+  fmt_number(columns = 4:6, decimals = 2) 
 
 #mean_table_mental |> gtsave("Tables/mean_table_mental.docx")
 
