@@ -4366,6 +4366,7 @@ label_coords[, 2] <- c(
 )
 
 node_sizes <- diag(as.matrix(res_dat[, -1]))
+#node_sizes <- c(8, 9, 20, 1, 29, 12, 4, 2, 5, 17, 7, 25, 1)
 
 #png(filename = "Figures/outcome_network.png", height = 6, width = 6, res = 600, units = "in")
 plot(
@@ -4382,7 +4383,7 @@ plot(
 text(
   x = label_coords[, 1],
   y = label_coords[, 2],
-  labels = paste0(str_wrap(names(res_dat[c(2:9, 11:14, 10)]), width = 15), "\n(J = ", node_sizes, ")"),
+  labels = paste0(str_wrap(names(res_dat[c(2:9, 11:14, 10)]), width = 15), "\n(J = ", node_sizes[c(1:8, 10:13, 9)], ")"),
   cex = 0.6,
   col = "black",
   xpd = NA

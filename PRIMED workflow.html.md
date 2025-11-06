@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-11-03"
+date: "2025-11-05"
 format:
   html: 
     keep-md: true
@@ -9736,6 +9736,7 @@ label_coords[, 2] <- c(
 )
 
 node_sizes <- diag(as.matrix(res_dat[, -1]))
+#node_sizes <- c(8, 9, 20, 1, 29, 12, 4, 2, 5, 17, 7, 25, 1)
 
 #png(filename = "Figures/outcome_network.png", height = 6, width = 6, res = 600, units = "in")
 plot(
@@ -9752,7 +9753,7 @@ plot(
 text(
   x = label_coords[, 1],
   y = label_coords[, 2],
-  labels = paste0(str_wrap(names(res_dat[c(2:9, 11:14, 10)]), width = 15), "\n(J = ", node_sizes, ")"),
+  labels = paste0(str_wrap(names(res_dat[c(2:9, 11:14, 10)]), width = 15), "\n(J = ", node_sizes[c(1:8, 10:13, 9)], ")"),
   cex = 0.6,
   col = "black",
   xpd = NA
@@ -18172,7 +18173,7 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-11-03
+ date     2025-11-05
  pandoc   3.6.3 @ C:/RStudio-2025.09.2-418/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
  quarto   NA @ C:\\RSTUDI~1.2-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
 
