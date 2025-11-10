@@ -1382,6 +1382,27 @@ sensi_facet_plot_mental
 #dev.off()
 ```
 
+# Direction of findings from studies without effect sizes
+
+```{r}
+
+png(filename = "Figures/direction of results (no effect size studies).png", res = 600, height = 5, width = 6, units = "in")
+tibble(
+  n = c(5,4,3,2,0,0),
+  direc = rep(c("Favor", "Null", "Negative"), each = 2),
+  Direction = factor(direc, levels = c("Favor", "Null", "Negative")),
+  Outcome = factor(rep(c("Reintegration", "Mental health"), 3), levels = c("Reintegration", "Mental health"))
+) |> 
+  ggplot(aes(x = Direction, y = n, fill = Outcome)) + 
+  scale_fill_manual(
+    values = c("Mental health" = met.brewer("Navajo")[2], "Reintegration" = met.brewer("Navajo")[4])
+  )+
+  geom_col(position = "dodge") +
+  theme_minimal() + 
+  labs(x = "Direction of overall conclusion", y = "Number of studies")
+dev.off()
+```
+ 
 
 # Colophon
 

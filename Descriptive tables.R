@@ -14,7 +14,17 @@ reintegration_dat <-
   readRDS("reintegration_dat.rds") |> 
   mutate(
     schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other")),
-    short_term_es =  if_else(time_after_end_intervention_weeks <= 52, "Short-term measure (< 52 weeks)", "Follow-up measure (> 52 weeks)")
+    short_term_es =  
+      if_else(
+        time_after_end_intervention_weeks <= 52, 
+        "Short-term measure (< 52 weeks)", 
+        "Follow-up measure (> 52 weeks)"
+      ),
+    group_size = case_when(
+      !str_detect(avg_cl_type, regex("Imp", ignore_case = TRUE)) ~ avg_cl_size,
+      .default = NA_real_
+    )
+    
   ) 
 
 .study_avg <- function(category, data = reintegration_dat) {
@@ -116,7 +126,7 @@ pct_table_reint <-
     table.font.size = 12
   )
 
-pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
+#pct_table_reint |> gtsave("Tables/pct_table_reint.docx")
 
   
 .mean_table <- 
@@ -186,6 +196,7 @@ mean_vars <- dplyr::vars(
   ESS_t, ESS_c,
   age_mean,
   male_pct,
+  group_size,
   total_number_of_sessions,
   sessions_per_week,
   duration_in_weeks,
@@ -200,6 +211,7 @@ mean_var_names <- c(
   "Effective sample size of control group",
   "Age",
   "% Males",
+  "Average group size",
   "Total number of sessions",
   "Sessions per week",
   "Duration (in weeks)",
@@ -210,14 +222,14 @@ mean_var_names <- c(
 list_x <- tibble(
   var = mean_vars,
   char_name = mean_var_names,
-  digits = rep(c(0,1), c(4,7)),
+  digits = rep(c(0,1), c(4,8)),
 )
 
 mean_table_reint_dat <- 
   pmap(.l = list_x, .f = .mean_table) |> 
   list_rbind() |> 
   mutate(
-    n = c(1:2, 4:5, 7:13)
+    n = c(1:2, 4:5, 7:14)
   )
 
 
@@ -310,7 +322,7 @@ mean_table_reint_dat <-
   mutate(
     group = rep(
       c("Sample characteristics", "Intervention characteristics", "Measurement timing", "Methodological features"), 
-      c(8,3,2,1)
+      c(8,4,2,1)
       )
   )
 
@@ -343,7 +355,16 @@ mental_health_dat <-
   readRDS("mental_health_dat.rds") |> 
   mutate(
     schizophrenia = factor(schizophrenia, levels = c("Schizophrenia", "Other")),
-    short_term_es =  if_else(time_after_end_intervention_weeks <= 52, "Short-term measure (< 52 weeks)", "Follow-up measure (> 52 weeks)")
+    short_term_es =  
+      if_else(
+        time_after_end_intervention_weeks <= 52, 
+        "Short-term measure (< 52 weeks)", 
+        "Follow-up measure (> 52 weeks)"
+      ),
+    group_size = case_when(
+      !str_detect(avg_cl_type, regex("Imp", ignore_case = TRUE)) ~ avg_cl_size,
+      .default = NA_real_
+    )
   )
 
 
@@ -423,7 +444,7 @@ mean_table_mental_dat <-
   pmap(.l = list_x, .f = .mean_table, data = mental_health_dat) |> 
   list_rbind() |> 
   mutate(
-    n = c(1:2, 4:5, 7:13)
+    n = c(1:2, 4:5, 7:14)
   )
 
 
@@ -516,7 +537,7 @@ mean_table_mental_dat <-
   mutate(
     group = rep(
       c("Sample characteristics", "Intervention characteristics", "Measurement timing", "Methodological features"), 
-      c(8,3,2,1)
+      c(8,4,2,1)
     )
   )
 
