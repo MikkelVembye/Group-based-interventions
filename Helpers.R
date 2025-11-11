@@ -563,7 +563,9 @@ forest_plot_de <-
     R, 
     seed, 
     return_rma_obj = FALSE, 
-    CWB = FALSE){
+    CWB = FALSE,
+    ...
+    ){
     
     if (!stringr::str_detect(model, "SCE")) stop("This function only fits SCE models")
     
@@ -605,7 +607,7 @@ forest_plot_de <-
             struct = structure,
             data = data,
             sparse = TRUE,
-            control = list(optimizer=optimizers[i])
+            control = list(optimizer=optimizers[i], ...)
           )
         ),
         error = function(e) "Non-converged"

@@ -67,6 +67,7 @@ library(igraph)
 library(fastDummies)
 library(patchwork)
 library(ggh4x)
+library(writexl)
 ```
 
 # Data manipulation - prepare data sets
@@ -507,6 +508,7 @@ time_vcalc <- c(
 gb_dat$time <- time_vcalc
 
 saveRDS(gb_dat, file = "Data/gb_dat.rds")
+write_xlsx(gb_dat, "gb_dat.xlsx")
 
 ```
 

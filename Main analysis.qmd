@@ -764,7 +764,7 @@ arg_list_tbl <-
   pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 19L,
+    R = 10,
     seed = 26082025L
   )
 
@@ -773,20 +773,80 @@ arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
 tic()
 plan(multisession)
-x_test <- 
+reint_cwb_res <- 
   pmap(
-    .l = arg_list_tbl_rho08[17:18,], 
+    .l = arg_list_tbl_rho08[6,], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
-    CWB = FALSE
-  ); x_test
+    CWB = TRUE,
+    control=list(iter.max=10000)
+  ); reint_cwb_res
 plan(sequential)
 toc()
 
-#blsplit(x_test[[1]], reint_ma_dat$study) |> 
-#  lapply(cov2cor) |> 
-#  map(~ round(.x, 2))
+# Working around convergence issue with CBT_intervention with controls
 
+#rho <- 0.8
+#V_mat_cbt <- 
+#  metafor::vcalc(
+#    data = reint_ma_dat,
+#    vi = vgt_pop, 
+#    cluster = study,
+#    subgroup = CBT_intervention,
+#    type = outcome_time,
+#    grp1 = trt_name,
+#    w1 = N_t,
+#    grp2 = control,
+#    w2 = N_c, 
+#    rho = rho
+#  )
+#
+# Strategy for overcoming non-convergence 
+#optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+#raw_res <- "Non-converged"
+#i <- 1L
+#
+## Fitting the main model
+#while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+#  
+#  raw_res <- tryCatch(
+#    suppressWarnings(
+#      metafor::rma.mv(
+#        gt_pop ~ CBT_intervention + alcohol + hope + lonely + self_est + 
+#          social_fun + wellbeing + other + schizo_c + prereg_c + clinical_c + 
+#          tot_c + qes_c + crt_grp_c + rob_c + age_c + sessions_c + 
+#          duration_c + fu_time_c - 1,
+#        V = V_mat_cbt,
+#        random = list(~CBT_intervention | study, ~CBT_intervention | esid), 
+#        struct = c("DIAG", "DIAG"),
+#        data = reint_ma_dat,
+#        sparse = TRUE,
+#        control = list(optimizer= optimizers[i])
+#      )
+#    ),
+#    error = function(e) "Non-converged"
+#  )
+#  i <- i + 1L
+#  
+#}
+
+#noncon_res <- .Wald_test_cwb_fun(
+#  rma_fun_obj = raw_res,
+#  seq_c = 1:2, 
+#  reps = 12,
+#  seed_num = 10112025
+#)
+#
+#wildmeta::Wald_test_cwb(
+#  full_model = raw_res,
+#  constraints = wildmeta::constrain_equal(1:2),
+#  R = 10,
+#  auxiliary_dist = "Rademacher",
+#  seed = 10112025,
+#  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
+#)
+
+#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
 
 #opts <- furrr::furrr_options(
 #  stdout = FALSE,        # don't forward cat/print output
@@ -873,7 +933,7 @@ cnt_res_reint[[1]]
 ```{r tables-reint}
 #| eval: false 
 wider_dat_theory_factors <- 
-  x_test |> 
+  reint_cwb_res |> 
   list_rbind() |> 
   filter(table == "theory") |> 
   select(Characteric:SD_total, controls) |> 
@@ -942,7 +1002,7 @@ methods_res_table <-
     missing_text = ""         
   ); methods_res_table
 
-#methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
+methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
 
 ```
 
