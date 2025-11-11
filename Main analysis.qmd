@@ -775,14 +775,17 @@ tic()
 plan(multisession)
 reint_cwb_res <- 
   pmap(
-    .l = arg_list_tbl_rho08[6,], 
+    .l = arg_list_tbl_rho08, 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = TRUE,
-    control=list(iter.max=10000)
   ); reint_cwb_res
 plan(sequential)
 toc()
+
+#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
+
+reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res.rds")
 
 # Working around convergence issue with CBT_intervention with controls
 
@@ -845,8 +848,6 @@ toc()
 #  seed = 10112025,
 #  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
 #)
-
-#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
 
 #opts <- furrr::furrr_options(
 #  stdout = FALSE,        # don't forward cat/print output
@@ -969,7 +970,7 @@ main_res_table <-
 #main_res_table |> gtsave("Tables/main_res_table_reint.docx")
 
 wider_dat_methods_factors <- 
-  x_test |> 
+  reint_cwb_res |> 
   list_rbind() |> 
   filter(table == "methods") |> 
   select(Characteric:SD_total, controls) |> 
