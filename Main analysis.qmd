@@ -771,21 +771,29 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-tic()
-plan(multisession)
-reint_cwb_res <- 
-  pmap(
-    .l = arg_list_tbl_rho08, 
-    .f = .PESCE_RVE, 
-    return_rma_obj = FALSE,
-    CWB = TRUE,
-  ); reint_cwb_res
-plan(sequential)
-toc()
-
+#tic()
+#plan(multisession)
+#reint_cwb_res <- 
+#  pmap(
+#    .l = arg_list_tbl_rho08, 
+#    .f = .PESCE_RVE, 
+#    return_rma_obj = FALSE,
+#    CWB = TRUE,
+#  ); reint_cwb_res
+#plan(sequential)
+#toc()
+#
 #saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
 
 reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res.rds")
+
+# Obtaining HTZ value for CBT intervention res
+pmap(
+    .l = arg_list_tbl_rho08[6,], 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = FALSE
+  )
 
 # Working around convergence issue with CBT_intervention with controls
 
@@ -1837,24 +1845,36 @@ arg_list_tbl_mental <-
   pmap(.l = arg_tbl_all_mental, .f = .rma_arg_tbl, data = mental_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 19L,
-    seed = 26082025L
+    R = 1999L,
+    seed = 11112025L
   )
 
 
 arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "vgt_pop")
 
-tic()
-plan(multisession)
-res_mental <- 
-  pmap(
-    .l = arg_list_tbl_rho08_mental, 
+#tic()
+#plan(multisession)
+#mental_cwb_res <- 
+#  pmap(
+#    .l = arg_list_tbl_rho08_mental, 
+#    .f = .PESCE_RVE, 
+#    return_rma_obj = FALSE,
+#    CWB = TRUE
+#  ); mental_cwb_res
+#plan(sequential)
+#toc()
+#
+#saveRDS(mental_cwb_res, file = "Bootstrap results/mental_cwb_res.rds")
+
+res_mental <- readRDS("Bootstrap results/mental_cwb_res.rds")
+
+# Obtaining HTZ value for schizophrenia indicator
+pmap(
+    .l = arg_list_tbl_rho08_mental[4,], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = FALSE
-  ); res_mental
-plan(sequential)
-toc()
+  )
 
 
 #opts <- furrr::furrr_options(
