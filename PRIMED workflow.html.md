@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-11-05"
+date: "2025-11-26"
 format:
   html: 
     keep-md: true
@@ -67,6 +67,7 @@ library(igraph)
 library(fastDummies)
 library(patchwork)
 library(ggh4x)
+library(writexl)
 ```
 :::
 
@@ -519,6 +520,7 @@ time_vcalc <- c(
 gb_dat$time <- time_vcalc
 
 saveRDS(gb_dat, file = "Data/gb_dat.rds")
+write_xlsx(gb_dat, "gb_dat.xlsx")
 ```
 :::
 
@@ -18138,10 +18140,11 @@ ggplot(scatter_dat) +
   aes(x=`Reintegrational outcome`,y=`Mental health outcome`) + 
   geom_hline(yintercept = 0) + 
   geom_vline(xintercept = 0) + 
-  geom_smooth(method='lm', se = FALSE, color = "black", linetype = "dashed", linewidth= 0.5) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
+  #geom_smooth(method='lm', se = FALSE, color = "black", linetype = "dashed", linewidth= 0.5) +
   geom_point(color = "purple", size = 3) + 
   geom_text(aes(label=study), size = 2.5, color = "grey", hjust = 0, nudge_x = 0.015) + 
-  scale_x_continuous(breaks = seq(-0.5, 1.5, 0.5), limits = c(-0.3, 1)) + 
+  scale_x_continuous(breaks = seq(-0.5, 1.5, 0.5), limits = c(-0.5, 1.5)) + 
   theme_minimal()
 #dev.off()
 ```
@@ -18173,9 +18176,9 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-11-05
- pandoc   3.6.3 @ C:/RStudio-2025.09.2-418/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
- quarto   NA @ C:\\RSTUDI~1.2-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ date     2025-11-26
+ pandoc   3.6.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
+ quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
@@ -18194,7 +18197,7 @@ ggplot(scatter_dat) +
  GGally       * 2.4.0      2025-08-23 [1] CRAN (R 4.5.1)
  ggExtra      * 0.11.0     2025-09-01 [1] CRAN (R 4.5.1)
  ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.5.1)
- ggplot2      * 4.0.0      2025-09-11 [1] CRAN (R 4.5.1)
+ ggplot2      * 4.0.1      2025-11-14 [1] CRAN (R 4.5.2)
  ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.1)
  ggridges     * 0.5.7      2025-08-27 [1] CRAN (R 4.5.1)
  ggstats        0.11.0     2025-09-15 [1] CRAN (R 4.5.1)
@@ -18215,7 +18218,7 @@ ggplot(scatter_dat) +
  lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.1)
  lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.1)
  magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.1)
- mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.1)
+ mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.2)
  Matrix       * 1.7-3      2025-03-11 [1] CRAN (R 4.5.1)
  metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.1)
  metafor      * 4.9-18     2025-09-22 [1] Github (wviechtb/metafor@6cc5a0a)
@@ -18246,7 +18249,7 @@ ggplot(scatter_dat) +
  skimr        * 2.2.1      2025-07-26 [1] CRAN (R 4.5.1)
  snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.5.1)
  stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.0)
- stringr      * 1.5.2      2025-09-08 [1] CRAN (R 4.5.1)
+ stringr      * 1.6.0      2025-11-04 [1] CRAN (R 4.5.2)
  svglite        2.2.1      2025-05-12 [1] CRAN (R 4.5.1)
  systemfonts    1.2.3      2025-04-30 [1] CRAN (R 4.5.1)
  textshaping    1.0.3      2025-09-02 [1] CRAN (R 4.5.1)
@@ -18260,6 +18263,7 @@ ggplot(scatter_dat) +
  vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.1)
  viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.5.1)
  withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.1)
+ writexl      * 1.5.4      2025-04-15 [1] CRAN (R 4.5.1)
  xfun           0.53       2025-08-19 [1] CRAN (R 4.5.1)
  xml2           1.4.0      2025-08-20 [1] CRAN (R 4.5.1)
  xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.1)
