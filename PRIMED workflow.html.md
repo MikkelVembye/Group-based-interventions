@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-11-26"
+date: "2025-12-02"
 format:
   html: 
     keep-md: true
@@ -12118,7 +12118,7 @@ reintegration_dat |>
   scale_x_continuous(breaks = seq(0, 55, 5)) +
   theme_minimal() + 
   theme(legend.position = "none") + 
-  labs(x = "Follow-up duration (months)", y = "Hedges' g")
+  labs(x = "Follow-up duration (weeks)", y = "Hedges' g")
 ```
 
 ::: {.cell-output-display}
@@ -12144,7 +12144,7 @@ mental_health_dat |>
   scale_x_continuous(breaks = seq(0, 55, 5)) +
   theme_minimal() + 
   theme(legend.position = "none") + 
-  labs(x = "Follow-up duration (months)", y = "Hedges' g")
+  labs(x = "Follow-up duration (weeks)", y = "Hedges' g")
 ```
 
 ::: {.cell-output-display}
@@ -18176,7 +18176,7 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-11-26
+ date     2025-12-02
  pandoc   3.6.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
  quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
 
