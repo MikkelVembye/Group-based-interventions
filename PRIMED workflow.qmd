@@ -6215,7 +6215,7 @@ multivariate_pairs_mental_method_theo
 
 :::
 
-### Covariance matrices
+### Correlation matrices
 ::: {.columns}
 
 ::: {.column width="160%"}
