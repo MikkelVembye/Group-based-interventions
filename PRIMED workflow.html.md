@@ -2,7 +2,7 @@
 title: "PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-01-23"
+date: "2026-03-09"
 format:
   html: 
     keep-md: true
@@ -18176,18 +18176,18 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2026-01-23
+ date     2026-03-09
  pandoc   3.6.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
  quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
- base64enc      0.1-3      2015-07-28 [1] CRAN (R 4.5.2)
+ base64enc      0.1-6      2026-02-02 [1] CRAN (R 4.5.2)
  cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.2)
- clubSandwich * 0.6.1      2025-07-30 [1] CRAN (R 4.5.2)
- data.table     1.17.8     2025-07-10 [1] CRAN (R 4.5.2)
+ clubSandwich * 0.6.2      2026-02-02 [1] CRAN (R 4.5.2)
+ data.table     1.18.2.1   2026-01-27 [1] CRAN (R 4.5.2)
  digest         0.6.39     2025-11-19 [1] CRAN (R 4.5.2)
- dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.5.2)
+ dplyr        * 1.2.0      2026-02-03 [1] CRAN (R 4.5.2)
  evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.5.2)
  farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.2)
  fastDummies  * 1.7.5      2025-01-20 [1] CRAN (R 4.5.2)
@@ -18197,7 +18197,7 @@ ggplot(scatter_dat) +
  GGally       * 2.4.0      2025-08-23 [1] CRAN (R 4.5.2)
  ggExtra      * 0.11.0     2025-09-01 [1] CRAN (R 4.5.2)
  ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.5.2)
- ggplot2      * 4.0.1      2025-11-14 [1] CRAN (R 4.5.2)
+ ggplot2      * 4.0.2      2026-02-03 [1] CRAN (R 4.5.2)
  ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.2)
  ggridges     * 0.5.7      2025-08-27 [1] CRAN (R 4.5.2)
  ggstats        0.11.0     2025-09-15 [1] CRAN (R 4.5.2)
@@ -18211,12 +18211,12 @@ ggplot(scatter_dat) +
  janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.5.2)
  jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.2)
  kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.5.2)
- knitr        * 1.50       2025-03-16 [1] CRAN (R 4.5.2)
+ knitr        * 1.51       2025-12-20 [1] CRAN (R 4.5.2)
  labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.2)
  later          1.4.4      2025-08-27 [1] CRAN (R 4.5.2)
  lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.2)
- lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.2)
- lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.2)
+ lifecycle      1.0.5      2026-01-08 [1] CRAN (R 4.5.2)
+ lubridate    * 1.9.5      2026-02-04 [1] CRAN (R 4.5.2)
  magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.2)
  mathjaxr       2.0-0      2025-12-01 [1] CRAN (R 4.5.2)
  Matrix       * 1.7-4      2025-08-28 [1] CRAN (R 4.5.2)
@@ -18236,12 +18236,12 @@ ggplot(scatter_dat) +
  purrr        * 1.2.0      2025-11-04 [1] CRAN (R 4.5.2)
  R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.2)
  RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.2)
- Rcpp           1.1.0      2025-07-02 [1] CRAN (R 4.5.2)
+ Rcpp           1.1.1      2026-01-10 [1] CRAN (R 4.5.2)
  readr        * 2.1.6      2025-11-14 [1] CRAN (R 4.5.2)
  repr           1.1.7      2024-03-22 [1] CRAN (R 4.5.2)
- rlang        * 1.1.6      2025-04-11 [1] CRAN (R 4.5.2)
+ rlang        * 1.1.7      2026-01-09 [1] CRAN (R 4.5.2)
  rmarkdown      2.30       2025-09-28 [1] CRAN (R 4.5.2)
- rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.5.2)
+ rstudioapi     0.18.0     2026-01-16 [1] CRAN (R 4.5.2)
  S7             0.2.1      2025-11-14 [1] CRAN (R 4.5.2)
  sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.2)
  scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.2)
@@ -18254,22 +18254,22 @@ ggplot(scatter_dat) +
  svglite        2.2.2      2025-10-21 [1] CRAN (R 4.5.2)
  systemfonts    1.3.1      2025-10-01 [1] CRAN (R 4.5.2)
  textshaping    1.0.4      2025-10-10 [1] CRAN (R 4.5.2)
- tibble       * 3.3.0      2025-06-08 [1] CRAN (R 4.5.2)
- tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.5.2)
+ tibble       * 3.3.1      2026-01-11 [1] CRAN (R 4.5.2)
+ tidyr        * 1.3.2      2025-12-19 [1] CRAN (R 4.5.2)
  tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.2)
  tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.2)
- timechange     0.3.0      2024-01-18 [1] CRAN (R 4.5.2)
+ timechange     0.4.0      2026-01-29 [1] CRAN (R 4.5.2)
  tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.2)
  utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.2)
- vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.2)
- viridisLite    0.4.2      2023-05-02 [1] CRAN (R 4.5.2)
+ vctrs          0.7.1      2026-01-23 [1] CRAN (R 4.5.2)
+ viridisLite    0.4.3      2026-02-04 [1] CRAN (R 4.5.2)
  withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.2)
  writexl      * 1.5.4      2025-04-15 [1] CRAN (R 4.5.2)
- xfun           0.54       2025-10-30 [1] CRAN (R 4.5.2)
- xml2           1.5.1      2025-12-01 [1] CRAN (R 4.5.2)
+ xfun           0.56       2026-01-18 [1] CRAN (R 4.5.2)
+ xml2           1.5.2      2026-01-17 [1] CRAN (R 4.5.2)
  xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.2)
  yaml           2.3.12     2025-12-10 [1] CRAN (R 4.5.2)
- zoo            1.8-14     2025-04-10 [1] CRAN (R 4.5.2)
+ zoo            1.8-15     2025-12-15 [1] CRAN (R 4.5.2)
 
  [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.2/library
  * ── Packages attached to the search path.
