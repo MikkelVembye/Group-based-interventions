@@ -512,6 +512,46 @@ write_xlsx(gb_dat, "gb_dat.xlsx")
 
 ```
 
+```{r}
+#| echo: false
+#| eval: false
+#| include: false
+
+# For NHB paper Table 2 only
+
+table2_func <- 
+  function(filter_var) {
+    gb_dat |> 
+    dplyr::filter(.data[[filter_var]] == 1) |> 
+    summarise(
+    variable = filter_var,
+    n_studies = n_distinct(study),
+    n_effects = n()
+  )
+}
+
+names_mh_dis <- 
+  gb_dat |> 
+  select(schizophrenia_or_primary_psychotic_disorder:dissociative_identity_disorder) |> 
+  names()
+
+mental_health_dis <- 
+  map(.x = names_mh_dis, .f = table2_func) |> 
+  list_rbind() 
+
+names_sm <- 
+  gb_dat |> 
+  select(other_social_problem:not_specified_social_problem) |> 
+  names()
+
+social_mar <- 
+  map(.x = names_sm, .f = table2_func) |> 
+  list_rbind()
+
+
+
+```
+
 
 ## Creating primary and secondary data
 
