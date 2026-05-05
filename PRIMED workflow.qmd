@@ -2817,6 +2817,199 @@ robin_pct_effects_unweight_mental <-
 
 :::
 
+```{r}
+#| eval: false
+#| include: false
+#| echo: false
+
+# For NHB paper Fig. 2
+
+rob_pct_effects_nhb <- 
+  rob_sum |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Social reintegration"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "none",
+    strip.text = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) + 
+  facetted_pos_scales(
+    x = list(
+      prereg == "Preregistered" ~ scale_x_continuous(breaks = seq(0, 150, 25)
+      )
+    )
+  )
+
+rob_pct_effects_mental_nhb <- 
+  rob_sum_mental |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Mental health"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(level ~ prereg, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Some concerns" = "lightgoldenrodyellow", "High" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of the outcome",
+      "Bias due to missing outcome data",
+      "Bias due to deviations from intended interventions",
+      "Bias arising from the randomization process"
+    )
+  ) +
+  labs(
+    x = "Number of effects",
+    y = "",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank(),
+    strip.text.y = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) 
+
+# Save combined NHB Fig. 2 plot
+png(filename = "Figures/rob2_nhb_fig2.png", width = 12, height = 8, units = "in", res = 300)
+rob_pct_effects_nhb / rob_pct_effects_mental_nhb
+dev.off()
+
+## ROBINS-I plot for NHB paper
+
+robin_effects_nhb <- 
+  robinsi_sum  |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Social reintegration"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(~ level, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Moderate" = "lightgoldenrodyellow", "Serious" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of outcomes",
+      "Bias due to missing data",
+      "Bias due to deviations from intended interventions",
+      "Bias in classification of interventions",
+      "Bias due to selection of participants",
+      "Bias due to confounding"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Raw number",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) 
+
+robin_effects_mental_nhb <- 
+  robinsi_sum_mental  |> 
+  mutate(
+    Rating = fct_rev(Rating),
+    level = "Mental health"
+    ) |> 
+  ggplot(aes(x = effects, y = Category, fill = Rating)) + 
+  geom_col(alpha = 0.9) +
+  facet_grid(~ level, scales = "free_x") + 
+  scale_fill_manual(
+    values = c("Low" = "mediumaquamarine", "Moderate" = "lightgoldenrodyellow", "Serious" = "lightcoral")
+  ) +
+  scale_y_discrete(
+    limits = rev,
+    labels = c( 
+      expression(bold("Overall risk of bias")),
+      "Bias in selection of the reported result",
+      "Bias in measurement of outcomes",
+      "Bias due to missing data",
+      "Bias due to deviations from intended interventions",
+      "Bias in classification of interventions",
+      "Bias due to selection of participants",
+      "Bias due to confounding"
+    )
+  ) +
+  labs(
+    y = "",
+    x = "Raw number",
+    fill = "Risk of Bias"
+  ) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  theme_bw() + 
+  theme(
+    legend.position = "bottom",
+    axis.ticks.y = element_blank(),
+    axis.text.y = element_blank(),
+    strip.text.x = element_text(size = 14),
+    axis.title = element_text(size = 14),
+    axis.text = element_text(size = 14),
+    legend.text = element_text(size = 14),
+    legend.title = element_text(size = 14)
+  ) 
+
+#png(filename = "Figures/robinsi_reint_mental_nhb.png", width = 12, height = 5, units = "in", res = 600)
+(robin_effects_nhb + robin_effects_mental_nhb ) +
+  plot_layout(guides = "collect", axis_titles = "collect") & theme(legend.position = 'bottom') 
+#dev.off()
+
+
+
+```
+
+
 # Descriptives and Dependence Structures
 
 ## Timeline
@@ -7468,6 +7661,93 @@ total_forest
 
 
 ```
+
+
+```{r all-outcomes-forest}
+#| eval: false
+#| include: false
+#| echo: false
+
+# For NHB paper Figure
+
+rho <- 0.8
+
+reint_mental_studies <- 
+  gb_dat 
+
+reframed_dat <-   
+  escalc(yi = gt_pop, vi = vgt_pop, data = reint_mental_studies) |> 
+  mutate(n = n(), .by = study) |> 
+  aggregate(cluster = study, rho = rho) |> 
+  reframe(
+    yi = rep(yi, n),
+    vi = rep(vi, n),
+    .by = study
+  ) |> 
+  select(-study)
+
+
+forest_dat <-
+  reint_mental_studies |> 
+  bind_cols(reframed_dat) |> 
+  mutate(
+    Est = gt_pop,
+    SE = sqrt(vgt_pop),
+    
+    CI_L = Est - SE * qnorm(.975),
+    CI_U = Est + SE * qnorm(.975),
+    
+    #rma_mean = as.numeric(rma(gt, vgt, data = pick(dplyr::everything()))$b)
+    rma_mean = round(yi, 2)
+    
+  ) |> 
+  arrange(rma_mean, study) |> 
+  mutate(
+    study = factor(study, levels = rev(unique(study)))
+  )
+
+
+total_forest_nhb <- 
+  forest_dat |>
+  mutate(
+    outcome_construct = case_when(
+      str_detect(outcome_construct, "Reint") ~ "Socioal reintegration",
+      str_detect(outcome_construct, "Men") ~ "Mental health ",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  ggplot(
+    aes(x = Est, y = study, xmin = CI_L, xmax = CI_U,
+        color = outcome_construct, alpha = 0.5)
+  ) + 
+  geom_pointrange(position = position_dodge2(width = 0.5, padding = 0.5)) +
+  geom_vline(xintercept = 0, linetype = "solid", color = "black", alpha = 0.5) +
+  theme_light() + 
+  theme(
+    legend.position = "bottom",
+    strip.text = element_text(color = "black"),
+    axis.title.y=element_blank(),
+    plot.caption = element_text(hjust = 0)
+  ) + 
+  scale_x_continuous(breaks = seq(-3, 3, 0.5)) +
+  labs(
+    x = "Hedges' g (95% CI)",
+    color = "Type of outcome"
+  ) +
+  guides(
+    alpha = "none",
+    color = guide_legend(nrow = 1, byrow = TRUE)
+    ) 
+
+
+#png(filename = "Figures/forest plot nhb.png", height = 11, width = 10, res = 600, units = "in")
+total_forest_nhb
+#dev.off()
+
+
+```
+
+
 
 # Scatterplot for studies both reporting on reintegration and mental health
 
