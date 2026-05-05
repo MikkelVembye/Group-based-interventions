@@ -1,5 +1,5 @@
 ---
-title: "Sensitivity analyses for Group-Based Review"
+title: "Appendix D: Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
 date: "`r Sys.Date()`"
@@ -41,6 +41,7 @@ library(metafor)
 library(clubSandwich)
 library(tidyverse)
 library(patchwork)
+library(MetBrewer)
 
 source("Helpers.R")
 
@@ -1386,7 +1387,7 @@ sensi_facet_plot_mental
 
 ```{r}
 
-png(filename = "Figures/direction of results (no effect size studies).png", res = 600, height = 5, width = 6, units = "in")
+#png(filename = "Figures/direction of results (no effect size studies).png", res = 600, height = 5, width = 6, units = "in")
 tibble(
   n = c(5,4,3,2,0,0),
   direc = rep(c("Favor", "Null", "Negative"), each = 2),
@@ -1400,7 +1401,7 @@ tibble(
   geom_col(position = "dodge") +
   theme_minimal() + 
   labs(x = "Direction of overall conclusion", y = "Number of studies")
-dev.off()
+#dev.off()
 ```
  
 

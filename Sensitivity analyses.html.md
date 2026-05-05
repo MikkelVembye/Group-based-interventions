@@ -1,8 +1,8 @@
 ---
-title: "Sensitivity analyses for Group-Based Review"
+title: "Appendix D: Sensitivity analyses for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2025-10-31"
+date: "2026-05-05"
 format:
   html: 
     keep-md: true
@@ -44,6 +44,7 @@ library(metafor)
 library(clubSandwich)
 library(tidyverse)
 library(patchwork)
+library(MetBrewer)
 
 source("Helpers.R")
 
@@ -1459,6 +1460,38 @@ sensi_facet_plot_mental
 :::
 
 
+# Direction of findings from studies without effect sizes
+
+
+::: {.cell}
+
+```{.r .cell-code}
+#png(filename = "Figures/direction of results (no effect size studies).png", res = 600, height = 5, width = 6, units = "in")
+tibble(
+  n = c(5,4,3,2,0,0),
+  direc = rep(c("Favor", "Null", "Negative"), each = 2),
+  Direction = factor(direc, levels = c("Favor", "Null", "Negative")),
+  Outcome = factor(rep(c("Reintegration", "Mental health"), 3), levels = c("Reintegration", "Mental health"))
+) |> 
+  ggplot(aes(x = Direction, y = n, fill = Outcome)) + 
+  scale_fill_manual(
+    values = c("Mental health" = met.brewer("Navajo")[2], "Reintegration" = met.brewer("Navajo")[4])
+  )+
+  geom_col(position = "dodge") +
+  theme_minimal() + 
+  labs(x = "Direction of overall conclusion", y = "Number of studies")
+```
+
+::: {.cell-output-display}
+![](Sensitivity-analyses_files/figure-html/unnamed-chunk-5-1.png){fig-pos='H' width=672}
+:::
+
+```{.r .cell-code}
+#dev.off()
+```
+:::
+
+ 
 
 # Colophon
 
@@ -1472,78 +1505,79 @@ sensi_facet_plot_mental
 ```
 ─ Session info ───────────────────────────────────────────────────────────────────────────────────
  setting  value
- version  R version 4.5.1 (2025-06-13 ucrt)
- os       Windows 11 x64 (build 22631)
+ version  R version 4.5.2 (2025-10-31 ucrt)
+ os       Windows 11 x64 (build 26200)
  system   x86_64, mingw32
  ui       RTerm
  language (EN)
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2025-10-31
- pandoc   3.6.3 @ C:/RStudio-2025.09.1-401/resources/app/bin/quarto/bin/tools/ (via rmarkdown)
- quarto   NA @ C:\\RSTUDI~1.1-4\\RESOUR~1\\app\\bin\\quarto\\bin\\quarto.exe
+ date     2026-05-05
+ pandoc   3.8.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
+ quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
- cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.1)
- clubSandwich * 0.6.1      2025-07-30 [1] CRAN (R 4.5.1)
- digest         0.6.37     2024-08-19 [1] CRAN (R 4.5.1)
- dplyr        * 1.1.4      2023-11-17 [1] CRAN (R 4.5.1)
- evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.5.1)
- farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.1)
- fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.1)
- forcats      * 1.0.0      2023-01-29 [1] CRAN (R 4.5.1)
- generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.1)
- ggplot2      * 4.0.0      2025-09-11 [1] CRAN (R 4.5.1)
- glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.1)
- gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.1)
- hms            1.1.3      2023-03-21 [1] CRAN (R 4.5.1)
- htmltools      0.5.8.1    2024-04-04 [1] CRAN (R 4.5.1)
- htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.1)
- jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.1)
- knitr          1.50       2025-03-16 [1] CRAN (R 4.5.1)
- labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.0)
- lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.1)
- lifecycle      1.0.4      2023-11-07 [1] CRAN (R 4.5.1)
- lubridate    * 1.9.4      2024-12-08 [1] CRAN (R 4.5.1)
- magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.1)
- mathjaxr       1.8-0      2025-04-30 [1] CRAN (R 4.5.1)
- Matrix       * 1.7-3      2025-03-11 [1] CRAN (R 4.5.1)
- metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.1)
- metafor      * 4.9-18     2025-09-22 [1] Github (wviechtb/metafor@6cc5a0a)
- nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.1)
- numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.0)
- patchwork    * 1.3.2      2025-08-25 [1] CRAN (R 4.5.1)
- pillar         1.11.1     2025-09-17 [1] CRAN (R 4.5.1)
- pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.1)
- purrr        * 1.1.0      2025-07-10 [1] CRAN (R 4.5.1)
- R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.1)
- RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.0)
- readr        * 2.1.5      2024-01-10 [1] CRAN (R 4.5.1)
- rlang          1.1.6      2025-04-11 [1] CRAN (R 4.5.1)
- rmarkdown      2.29       2024-11-04 [1] CRAN (R 4.5.1)
- rstudioapi     0.17.1     2024-10-22 [1] CRAN (R 4.5.1)
- S7             0.2.0      2024-11-07 [1] CRAN (R 4.5.1)
- sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.1)
- scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.1)
- sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.1)
- stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.0)
- stringr      * 1.5.2      2025-09-08 [1] CRAN (R 4.5.1)
- tibble       * 3.3.0      2025-06-08 [1] CRAN (R 4.5.1)
- tidyr        * 1.3.1      2024-01-24 [1] CRAN (R 4.5.1)
- tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.1)
- tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.1)
- timechange     0.3.0      2024-01-18 [1] CRAN (R 4.5.1)
- tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.1)
- utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.1)
- vctrs          0.6.5      2023-12-01 [1] CRAN (R 4.5.1)
- withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.1)
- xfun           0.53       2025-08-19 [1] CRAN (R 4.5.1)
- yaml           2.3.10     2024-07-26 [1] CRAN (R 4.5.0)
- zoo            1.8-14     2025-04-10 [1] CRAN (R 4.5.1)
+ cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.2)
+ clubSandwich * 0.6.2      2026-02-02 [1] CRAN (R 4.5.2)
+ digest         0.6.39     2025-11-19 [1] CRAN (R 4.5.2)
+ dplyr        * 1.2.0      2026-02-03 [1] CRAN (R 4.5.2)
+ evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.5.2)
+ farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.2)
+ fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.2)
+ forcats      * 1.0.1      2025-09-25 [1] CRAN (R 4.5.2)
+ generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.2)
+ ggplot2      * 4.0.2      2026-02-03 [1] CRAN (R 4.5.2)
+ glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.2)
+ gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.2)
+ hms            1.1.4      2025-10-17 [1] CRAN (R 4.5.2)
+ htmltools      0.5.9      2025-12-04 [1] CRAN (R 4.5.2)
+ htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.2)
+ jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.2)
+ knitr          1.51       2025-12-20 [1] CRAN (R 4.5.2)
+ labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.2)
+ lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.2)
+ lifecycle      1.0.5      2026-01-08 [1] CRAN (R 4.5.2)
+ lubridate    * 1.9.5      2026-02-04 [1] CRAN (R 4.5.2)
+ magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.2)
+ mathjaxr       2.0-0      2025-12-01 [1] CRAN (R 4.5.2)
+ Matrix       * 1.7-4      2025-08-28 [1] CRAN (R 4.5.2)
+ metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.2)
+ metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.5.2)
+ MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.5.2)
+ nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.2)
+ numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.2)
+ otel           0.2.0      2025-08-29 [1] CRAN (R 4.5.2)
+ patchwork    * 1.3.2      2025-08-25 [1] CRAN (R 4.5.2)
+ pillar         1.11.1     2025-09-17 [1] CRAN (R 4.5.2)
+ pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.2)
+ purrr        * 1.2.0      2025-11-04 [1] CRAN (R 4.5.2)
+ R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.2)
+ RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.2)
+ readr        * 2.1.6      2025-11-14 [1] CRAN (R 4.5.2)
+ rlang          1.1.7      2026-01-09 [1] CRAN (R 4.5.2)
+ rmarkdown      2.30       2025-09-28 [1] CRAN (R 4.5.2)
+ S7             0.2.1      2025-11-14 [1] CRAN (R 4.5.2)
+ sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.2)
+ scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.2)
+ sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.2)
+ stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.2)
+ stringr      * 1.6.0      2025-11-04 [1] CRAN (R 4.5.2)
+ tibble       * 3.3.1      2026-01-11 [1] CRAN (R 4.5.2)
+ tidyr        * 1.3.2      2025-12-19 [1] CRAN (R 4.5.2)
+ tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.2)
+ tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.2)
+ timechange     0.4.0      2026-01-29 [1] CRAN (R 4.5.2)
+ tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.2)
+ utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.2)
+ vctrs          0.7.1      2026-01-23 [1] CRAN (R 4.5.2)
+ withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.2)
+ xfun           0.56       2026-01-18 [1] CRAN (R 4.5.2)
+ yaml           2.3.12     2025-12-10 [1] CRAN (R 4.5.2)
+ zoo            1.8-15     2025-12-15 [1] CRAN (R 4.5.2)
 
- [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.1/library
+ [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.2/library
  * ── Packages attached to the search path.
 
 ──────────────────────────────────────────────────────────────────────────────────────────────────

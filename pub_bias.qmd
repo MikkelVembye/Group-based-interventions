@@ -1,5 +1,5 @@
 ---
-title: "Publication bias testing in Dalgaard et al. (2025)"
+title: "Publication bias testing in Dalgaard et al. (2026)"
 date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
 format:
   html:
@@ -183,10 +183,11 @@ sub_res
 
 
 ```
+
 ### Overall 
 
 ```{r reint-overall-fp}
-
+#| label: fig-reint-overall-fp
 #| fig-cap: "Funnel plot across all reintegrational outcomes"
 #| fig.width: 9
 #| fig.height: 6
@@ -1936,6 +1937,7 @@ sub_res_mental
 
 
 ```
+
 ### Overall 
 
 ```{r mental-overall-fp}
@@ -1964,9 +1966,9 @@ V_mat_mental <-
     rho = rho
   )
 
-blsplit(V_mat_mental, mental_ma_dat$study) |> 
-  lapply(cov2cor) |> 
-  map(~ round(.x, 2))
+#blsplit(V_mat_mental, mental_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 
 W_mental <- solve(V_mat_mental) |> round(3)
@@ -3565,7 +3567,7 @@ PSM4_outcome_tab_mental <-
 ```
 
 
-#Publication and small study bias tests for overall average effects
+# **Publication and small study bias tests for overall average effects**
 
 ## Reintegration
 ```{r pub-bias-tab-overall-eff-reint}
@@ -3643,7 +3645,7 @@ gt_tab_overall_mental
 ```
 
  
-# Publication and small study bias tests across type of registration
+# **Publication and small study bias tests across type of registration**
 
 ## Reintegration
 ```{r pub-bias-tab-prereg-reint}
@@ -3711,7 +3713,7 @@ prereg_tab_pub_bias_gt_mental
 #gtsave(file = "Tables/Publication bias table across preregistration status mental.docx")
 ```
 
-# Publication and small study bias tests across types of outcomes
+# **Publication and small study bias tests across types of outcomes**
 
 ## Reintegration
 ```{r pub-bias-tab-outcome-reint}
@@ -3781,8 +3783,245 @@ outcome_tab_pub_bias_gt_mental
 
 ```
 
+```{r}
+#| eval: false
+#| include: false
+#| echo: false
+
+# For NHB paper Fig. 7
+
+prereg_arg <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "prereg_chr",
+    model = "SCEp",
+    r = 0.8, 
+    data = reint_ma_dat,
+    type = "categorical"
+  ); prereg_arg
+
+# PESCEp+ 
+subgroup_means <- pmap(.l = prereg_arg, .f = .PESCE_RVE) |> list_rbind()
+
+#subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
+
+subgroup_dat <- 
+  reint_ma_dat |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means[c(3,2), c(2, 14:18)], egg_res_subgrouped) |> 
+  mutate(slope_low = qnorm(0.025), slope_high = qnorm(0.975), level = "Social reintegration") 
+
+
+
+y_lim_exp1 <- max(reint_ma_dat$Wse_pop) + 0.02 
+
+funnel_exp1 <-  tribble(
+  ~ x90, ~ x95, ~ x99, ~ y,
+  0,     0,     0,     0,
+  qnorm(0.05) * y_lim_exp1, qnorm(0.025) * y_lim_exp1, qnorm(0.005) * y_lim_exp1, y_lim_exp1,
+  qnorm(0.95) * y_lim_exp1, qnorm(0.975) * y_lim_exp1, qnorm(0.995) * y_lim_exp1, y_lim_exp1,
+  0,     0,     0,     0
+) 
+
+df_text_es_nhb <- 
+  reint_ma_dat |> 
+  summarise(
+    Wse_pop = mean(Wse_pop),
+    gt_pop = mean(gt_pop),
+    level = "Social reintegration",
+    .by = prereg_chr
+  ) |> 
+  mutate(
+  label = paste0("(",LETTERS[c(2,1)],")"),
+  report_bias = "Low"
+)
+
+es_level_fp_nhb <- 
+  reint_ma_dat |> 
+  mutate(
+    level = "Social reintegration",
+    report_bias = case_when(
+      rob_tool == "RoB2" & D5 == "Low" ~ "Low",
+      rob_tool == "RoB2" & str_detect(D5, "Some") ~ "Moderate",
+      rob_tool == "RoB2" & str_detect(D5, "High") ~ "Serious",
+      .default = D7
+    ),
+    
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious"))
+    
+  ) |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_text(
+    data = df_text_es_nhb, 
+    aes(x = 0.05, y = -1.65, label = label, shape = NULL, color = NULL), 
+    size = 3, 
+    color = "black"
+  ) +
+  geom_point(aes(Wse_pop, gt_pop, color = overall_rob), alpha = 1, size = 1.5) +
+  coord_flip() +
+  facet_grid(level~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp1, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  scale_color_manual(
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow2", "Serious/High" = "red")
+  ) + 
+  theme_bw() + 
+  labs(x = "Modified standard error", 
+       y = "", 
+       color = "", shape = "") +
+  theme(
+    legend.position = "none",
+    axis.title = element_blank()
+  ) +
+  labs(color = "Overall risk of bias") +
+  guides(col = guide_legend(nrow = 1))
+
+
+# Mental health plot
+
+prereg_arg_mental <- 
+  .rma_arg_tbl(
+    yi = "gt_pop", 
+    vi = "vgt_pop", 
+    covars = "prereg_chr",
+    model = "SCEp",
+    r = 0.8, 
+    data = mental_ma_dat,
+    type = "categorical"
+  ); prereg_arg_mental
+
+# PESCEp+ 
+subgroup_means_mental <- pmap(.l = prereg_arg_mental, .f = .PESCE_RVE) |> list_rbind()
+
+#subgroup_means <- .SCEp(mod = prereg_chr, data = reint_ma_dat)
+
+subgroup_dat_mental <- 
+  mental_ma_dat |> 
+  summarise(
+    gt_pop = mean(gt_pop),
+    Wse_pop = mean(Wse_pop),
+    outcome_type = outcome_type[1],
+    .by = prereg_chr
+  ) |> 
+  bind_cols(subgroup_means_mental[c(3,2), c(2, 14:18)], egg_res_subgrouped_mental) |> 
+  mutate(
+    slope_low = qnorm(0.025), 
+    slope_high = qnorm(0.975), 
+    level = "Mental health"
+  ) 
+
+
+
+y_lim_exp1_mental <- max(mental_ma_dat$Wse_pop) + 0.02 
+
+funnel_exp1_mental <-  
+  tribble(
+    ~ x90, ~ x95, ~ x99, ~ y,
+    0,     0,     0,     0,
+    qnorm(0.05) * y_lim_exp1_mental, qnorm(0.025) * y_lim_exp1_mental, qnorm(0.005) * y_lim_exp1_mental, y_lim_exp1_mental,
+    qnorm(0.95) * y_lim_exp1_mental, qnorm(0.975) * y_lim_exp1_mental, qnorm(0.995) * y_lim_exp1_mental, y_lim_exp1_mental,
+    0,     0,     0,     0
+  ) 
+
+
+
+alpha_line <- 0.5
+polygon_fill <- c("grey", "grey10", "lightcyan")
+mean_line <- "dashed"
+reg_test <- TRUE
+reg_line <- "longdash"
+reg_color <- "blue"
+breaks_y <- seq(-3, 3, 0.5)
+
+df_text_es_mental <- 
+  mental_ma_dat |> 
+  summarise(
+    Wse_pop = mean(Wse_pop),
+    gt_pop = mean(gt_pop),
+    level = "Mental health",
+    .by = prereg_chr
+  ) |> 
+  mutate(
+  label = paste0("(",LETTERS[c(4,3)],")"),
+  report_bias = "Low"
+)
+
+
+es_level_fp_mental_nhb <- 
+  mental_ma_dat |> 
+  mutate(
+    level = "Mental health",
+    report_bias = case_when(
+      rob_tool == "RoB2" & D5 == "Low" ~ "Low",
+      rob_tool == "RoB2" & str_detect(D5, "Some") ~ "Moderate",
+      rob_tool == "RoB2" & str_detect(D5, "High") ~ "Serious",
+      .default = D7
+    ),
+    
+    report_bias = factor(report_bias, levels =  c("Low", "Moderate", "Serious")),
+    
+    large_sample = if_else(N_total > 100, "Sample above 100", "Sample below 100")
+    
+  ) |> 
+  ggplot() + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x99), fill = polygon_fill[1], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x95), fill = polygon_fill[2], alpha = 0.5) + 
+  geom_polygon(data = funnel_exp1_mental, aes(x = y, y = x90), fill = polygon_fill[3], alpha = 0.7) + 
+  geom_abline(data = subgroup_dat_mental, aes(slope = slope_high, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_hline(data = subgroup_dat_mental, aes(yintercept = avg_effect), linetype = mean_line, alpha = alpha_line) +  
+  geom_abline(data = subgroup_dat_mental, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
+  geom_abline(data = subgroup_dat_mental, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
+  geom_text(
+    data = df_text_es_mental, 
+    aes(x = 0.05, y = -1.65, label = label, shape = NULL, color = NULL), 
+    size = 3, 
+    color = "black"
+  ) +
+  geom_point(aes(Wse_pop, gt_pop, color = overall_rob), alpha = 1, size = 1.5) +
+  coord_flip() +
+  facet_grid(level~prereg_chr) +
+  scale_x_reverse(limits = c(y_lim_exp1_mental, 0.0), expand = c(0,0)) + 
+  scale_y_continuous(breaks = breaks_y) + 
+  scale_color_manual(
+    values = c("Low" = "green3", "Some concerns/Moderate" = "yellow2", "Serious/High" = "red")
+  ) + 
+  theme_bw() + 
+  labs(x = "Modified standard error", 
+       y = "Standardized mean difference (Hedges' g)", 
+       color = "") +
+  theme(
+    legend.position = "bottom",
+    strip.text.x = element_blank()
+  ) +
+  labs(color = "Overall risk of bias") +
+  guides(col = guide_legend(nrow = 1))
+
+ylab <- es_level_fp_mental_nhb$labels$x
+
+es_level_fp_nhb$labels$x <- es_level_fp_mental_nhb$labels$x <- "" 
+
+#png("Figures/funnel plots (overall effect) across type of registration NHB.png", width = 6.5, height = 5, res = 300, unit = "in")
+es_level_fp_nhb  / es_level_fp_mental_nhb
+grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
+#dev.off()
+
+```
+
  
-# References
+# **References**
 Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
