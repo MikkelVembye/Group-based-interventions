@@ -1,5 +1,5 @@
 ---
-title: "PRIMED workflow for Group-Based Review"
+title: "Appendix B - PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
 date: "`r Sys.Date()`"
@@ -7663,7 +7663,7 @@ total_forest
 ```
 
 
-```{r all-outcomes-forest}
+```{r all-outcomes-forest-nhb-only}
 #| eval: false
 #| include: false
 #| echo: false
@@ -7687,6 +7687,58 @@ reframed_dat <-
   select(-study)
 
 
+study_ref_map <- c(
+  "Acarturk et al. 2022" = "Acarturk et al.46",
+  "Barbic et al. 2009" = "Barbic et al.47",
+  "Bond et al. 2015" = "Bond et al.83",
+  "Baekkelund et al. 2022" = "Bækkelund et al.75",
+  "Cano-Vindel et al. 2021" = "Cano-Vindel et al.35",
+  "Craigie & Nathan 2009" = "Craigie & Nathan36",
+  "Crawford et al. 2012" = "Crawford et al.63",
+  "Druss et al. 2010" = "Druss et al.55",
+  "Druss et al. 2018" = "Druss et al.56",
+  "Dyck et al. 2000" = "Dyck et al.57",
+  "Gestel-Timmermans et al. 2012" = "van Gestel-Timmermans et al.78",
+  "Gatz et al. 2007" = "Gatz et al.90",
+  "Gonzalez & Prihoda 2007" = "Gonzalez & Prihoda49",
+  "Gordon et al. 2018" = "Gordon et al.64",
+  "Gutman et al. 2019" = "Gutman et al.50",
+  "Hagen et al. 2005" = "Hagen et al.37",
+  "Halperin et al. 2000" = "Halperin et al.38",
+  "Haslam et al. 2019" = "Haslam et al.51",
+  "Hilden et al. 2021" = "Hilden et al.65",
+  "Himle et al. 2014" = "Himle et al.39",
+  "Jacob et al. 2010" = "Jacob et al.72",
+  "James et al. 2004" = "James et al.86",
+  "Kanie et al. 2019" = "Kanie et al.66",
+  "Lim et al. 2020" = "Lim et al.67",
+  "Lloyd-Evans et al. 2020" = "Lloyd-Evans et al.91",
+  "Madigan et al. 2013" = "Madigan et al.40",
+  "McCay et al. 2006" = "McCay et al.58",
+  "McCay et al. 2007" = "McCay et al.59",
+  "Michalak et al. 2015" = "Michalak et al.41",
+  "Morley et al. 2014" = "Morley et al.80",
+  "Morton et al. 2012" = "Morton et al.77",
+  "Patterson et al. 2003" = "Patterson et al.73",
+  "Popolo et al. 2019" = "Popolo et al.53",
+  "Rabenstein et al. 2016" = "Rabenstein et al.42",
+  "Rosenblum et al. 2014" = "Rosenblum et al.81",
+  "Russinova et al. 2018" = "Russinova et al.85",
+  "Rusch et al. 2019" = "Rüsch et al.60",
+  "Sacks et al. 2011" = "Sacks et al.89",
+  "Sajatovic et al. 2009" = "Sajatovic et al.61",
+  "Saloheimo et al. 2016" = "Saloheimo et al.62",
+  "Schrank et al. 2016" = "Schrank et al.93",
+  "Schafer et al. 2019" = "Schäfer et al.87",
+  "Somers et al. 2017" = "Somers et al.88",
+  "Tjaden et al. 2021" = "Tjaden et al.92",
+  "Valiente et al. 2022" = "Valiente et al.94",
+  "Volpe et al. 2015" = "Volpe et al.95",
+  "Wojtalik et al. 2022" = "Wojtalik et al.68",
+  "Wuthrich & Rapee 2013" = "Wuthrich & Rapee44",
+  "Smith et al. 2021" = "Smith et al.43"
+)
+
 forest_dat <-
   reint_mental_studies |> 
   bind_cols(reframed_dat) |> 
@@ -7698,8 +7750,8 @@ forest_dat <-
     CI_U = Est + SE * qnorm(.975),
     
     #rma_mean = as.numeric(rma(gt, vgt, data = pick(dplyr::everything()))$b)
-    rma_mean = round(yi, 2)
-    
+    rma_mean = round(yi, 2),
+    study = recode(study, !!!study_ref_map)
   ) |> 
   arrange(rma_mean, study) |> 
   mutate(
@@ -7744,6 +7796,9 @@ total_forest_nhb <-
 total_forest_nhb
 #dev.off()
 
+##
+## Effects clearly different from zero (i.e., CIs not including zero) are:
+#forest_dat |> filter(Est < 0 & CI_U < 0) |> summarise(n = n(), .by = c(study, outcome_construct))
 
 ```
 
@@ -7757,6 +7812,48 @@ total_forest_nhb
 #| fig.retina: 2
 #| fig.topcaption: TRUE
 #| message: false
+
+scatter_study_ref_map <- c(
+  "Acarturk et al. 2022" = "Acarturk et al.46",
+  "Baekkelund et al. 2022" = "Bækkelund et al.75",
+  "Cano-Vindel et al. 2021" = "Cano-Vindel et al.35",
+  "Craigie & Nathan 2009" = "Craigie & Nathan36",
+  "Crawford et al. 2012" = "Crawford et al.63",
+  "Gestel-Timmermans et al. 2012" = "van Gestel-Timmermans et al.78",
+  "Gatz et al. 2007" = "Gatz et al.90",
+  "Gonzalez & Prihoda 2007" = "Gonzalez & Prihoda49",
+  "Gordon et al. 2018" = "Gordon et al.64",
+  "Gutman et al. 2019" = "Gutman et al.50",
+  "Hagen et al. 2005" = "Hagen et al.37",
+  "Halperin et al. 2000" = "Halperin et al.38",
+  "Haslam et al. 2019" = "Haslam et al.51",
+  "Hilden et al. 2021" = "Hilden et al.65",
+  "Himle et al. 2014" = "Himle et al.39",
+  "Jacob et al. 2010" = "Jacob et al.72",
+  "James et al. 2004" = "James et al.86",
+  "Kanie et al. 2019" = "Kanie et al.66",
+  "Lim et al. 2020" = "Lim et al.67",
+  "Lloyd-Evans et al. 2020" = "Lloyd-Evans et al.91",
+  "Madigan et al. 2013" = "Madigan et al.40",
+  "McCay et al. 2006" = "McCay et al.58",
+  "Michalak et al. 2015" = "Michalak et al.41",
+  "Morley et al. 2014" = "Morley et al.80",
+  "Morton et al. 2012" = "Morton et al.77",
+  "Patterson et al. 2003" = "Patterson et al.73",
+  "Rabenstein et al. 2016" = "Rabenstein et al.42",
+  "Rusch et al. 2019" = "Rüsch et al.60",
+  "Sacks et al. 2011" = "Sacks et al.89",
+  "Sajatovic et al. 2009" = "Sajatovic et al.61",
+  "Schrank et al. 2016" = "Schrank et al.93",
+  "Schafer et al. 2019" = "Schäfer et al.87",
+  "Somers et al. 2017" = "Somers et al.88",
+  "Tjaden et al. 2021" = "Tjaden et al.92",
+  "Valiente et al. 2022" = "Valiente et al.94",
+  "Volpe et al. 2015" = "Volpe et al.95",
+  "Wojtalik et al. 2022" = "Wojtalik et al.68",
+  "Wuthrich & Rapee 2013" = "Wuthrich & Rapee44",
+  "Smith et al. 2021" = "Smith et al.43"
+)
 
 
 scatter_dat <- 
@@ -7777,9 +7874,12 @@ scatter_dat <-
   mutate(
     outcome = if_else(
       str_detect(outcome_construct, "Reint"), 
-      "Reintegrational outcome", 
+      "Social reintegration outcome", 
       "Mental health outcome"
-    )
+    ),
+
+    study = recode(study, !!!scatter_study_ref_map)
+
   ) |> 
   select(-outcome_construct) |> 
   pivot_wider(
@@ -7790,7 +7890,7 @@ scatter_dat <-
 
 #png(filename = "Figures/scatter plot reint and mental.png", height = 7, width = 7.5, res = 600, units = "in")
 ggplot(scatter_dat) + 
-  aes(x=`Reintegrational outcome`,y=`Mental health outcome`) + 
+  aes(x=`Social reintegration outcome`,y=`Mental health outcome`) + 
   geom_hline(yintercept = 0) + 
   geom_vline(xintercept = 0) + 
   geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 

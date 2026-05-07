@@ -1,8 +1,8 @@
 ---
-title: "PRIMED workflow for Group-Based Review"
+title: "Appendix B - PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-03-09"
+date: "2026-05-07"
 format:
   html: 
     keep-md: true
@@ -523,6 +523,8 @@ saveRDS(gb_dat, file = "Data/gb_dat.rds")
 write_xlsx(gb_dat, "gb_dat.xlsx")
 ```
 :::
+
+
 
 
 
@@ -7412,6 +7414,9 @@ robin_pct_effects_unweight_mental <-
 :::
 
 :::
+
+
+
 
 # Descriptives and Dependence Structures
 
@@ -18100,6 +18105,11 @@ total_forest
 :::
 
 
+
+
+
+
+
 # Scatterplot for studies both reporting on reintegration and mental health
 
 
@@ -18124,7 +18134,7 @@ scatter_dat <-
   mutate(
     outcome = if_else(
       str_detect(outcome_construct, "Reint"), 
-      "Reintegrational outcome", 
+      "Social reintegration outcome", 
       "Mental health outcome"
     )
   ) |> 
@@ -18137,7 +18147,7 @@ scatter_dat <-
 
 #png(filename = "Figures/scatter plot reint and mental.png", height = 7, width = 7.5, res = 600, units = "in")
 ggplot(scatter_dat) + 
-  aes(x=`Reintegrational outcome`,y=`Mental health outcome`) + 
+  aes(x=`Social reintegration outcome`,y=`Mental health outcome`) + 
   geom_hline(yintercept = 0) + 
   geom_vline(xintercept = 0) + 
   geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
@@ -18176,9 +18186,9 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2026-03-09
- pandoc   3.6.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
- quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
+ date     2026-05-07
+ pandoc   3.8.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
+ quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
