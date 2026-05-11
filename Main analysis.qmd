@@ -1,5 +1,5 @@
 ---
-title: "Main analysis (group-based)"
+title: "Appendix C - Main analyses"
 author: "Mikkel H. Vembye"
 subtitle: ""
 date: "`r Sys.Date()`"
@@ -79,7 +79,7 @@ gb_dat <- readRDS("Data/gb_dat.rds")
 ## Reintegration
 In this section, we manipulate all variables used in meta-regression analyses. 
 
-```{r, manipulate-data}
+```{r manipulate-data}
 # List all relevant moderator variables here: 
 ## Type of outcome: analysis_plan
 ## 
@@ -1189,7 +1189,7 @@ reint_contin_res_table
 ## Mental health
 In this section, we manipulate all variables used in meta-regression analyses based on mental health outcomes 
 
-```{r, manipulate-data}
+```{r manipulate-data-mental}
 # List all relevant moderator variables here: 
 ## Type of outcome: analysis_plan
 ## 
@@ -1326,7 +1326,7 @@ saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ### For interpretation: average change between pre- and posttest for control group
 
-```{r pre-post-es}
+```{r pre-post-es-mental}
 
 prepost_smd_dat_mental <- 
   mental_ma_dat |> 
@@ -1489,7 +1489,7 @@ pi_plot_mental + labs(caption = paste0(round(prop_above0, 2) * 100, "% effects a
 
 ### Forest plot
 
-```{r forest-plot-reint}
+```{r forest-plot-mental}
 
 rho <- 0.8
 
@@ -1741,7 +1741,7 @@ prereg_obj_mental
 
 ```
 ### Theory and methods tables
-```{r reint-table-data}
+```{r mental-table-data}
 
 arg_tbl_mental <- 
   tibble::tibble(
@@ -1852,6 +1852,7 @@ arg_list_tbl_mental <-
 
 arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "vgt_pop")
 
+# MAIN MODERATOR RESULTS MADE HERE
 #tic()
 #plan(multisession)
 #mental_cwb_res <- 
@@ -1949,7 +1950,7 @@ cnt_res_mental[[1]]
 
 ```
 
-```{r tables-reint}
+```{r tables-mental}
 #| eval: false
 
 wider_dat_theory_factors_mental <- 
@@ -2170,7 +2171,7 @@ continuous_res_mental
 
 ```
 
-```{r making-gt-tables-contin}
+```{r making-gt-tables-contin-mental}
 
 mental_contin_res_table <- 
   continuous_res_mental |> 
@@ -2259,6 +2260,20 @@ pecmve_res$G
 
 ```
 
+## Mutilplicity test as described in Polanin (2013)
+
+```{r}
+# Multiplicity test for reintegration outcomes
+x <- map(1:18, ~ reint_cwb_res[[.x]]$pval |> last())  |> list_c() |> sort(decreasing = TRUE)
+
+map2(
+  1:length(x),
+  sort(1:length(x), decreasing = TRUE),
+  ~ .y / length(x) * 0.05 < x[.x]
+)
+
+# ALL TRUE = No rejection of null hypotheses after multiplicity adjustment
+```
 
 ```{r}
 # Predictive distribution plot
