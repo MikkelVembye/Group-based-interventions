@@ -3095,6 +3095,7 @@ reintegration_dat |>
   pull(ppcor) |> 
   mean()
 ```
+
 :::
 
 ::: {.column-margin}
@@ -3113,6 +3114,7 @@ mental_health_dat|>
   pull(ppcor) |> 
   mean()
 ```
+
 :::
 
 :::
@@ -3352,6 +3354,96 @@ gb_dat |>
 
 ```
 
+### Number of effect size estimates per study vs. effect sizes
+
+
+```{r es-per-study-vs-es-overall}
+#| label: fig-n-es-vs-es-overall
+#| fig-cap: "Distribution of number of effects per study vs. effect sizes for overall outcomes."
+#| message: false
+
+gb_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 35, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Overall)")
+
+```
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+```{r es-per-study-vs-es-reint}
+#| label: fig-n-es-vs-es-reint
+#| fig-cap: "Distribution of number of effects per study vs. effect sizes for reintegrational outcomes."
+#| fig-width: 9
+#| fig-height: 6
+#| message: false
+
+reintegration_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 35, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Reintegration)")
+
+```
+
+:::
+
+::: {.column-margin}
+
+```{r es-per-study-vs-es-mental}
+#| label: fig-n-es-vs-es-mental
+#| fig-cap: "Distribution of number of effects per study vs. effect sizes for mental health outcomes."
+#| fig-height: 8
+#| message: false
+
+mental_health_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 25, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Mental Health)")
+
+```
+
+:::
+
+:::
+
 ### Across outcome subgroups 
 
 ::: {.columns}
@@ -3572,7 +3664,7 @@ kable(
 ::: {.column width="95%"}
 ```{r sum-es-plot-reint}
 #| label: fig-es-hist-reint
-#| fig-cap: "Distribution of number of effects per study for mental for reintegrational outcomes."
+#| fig-cap: "Distribution of number of effects per study for reintegrational outcomes."
 #| fig-width: 9
 #| fig-height: 6
 #| message: false
@@ -6091,6 +6183,84 @@ mental_health_dat |>
   )  
 ```
 ::: 
+
+:::
+
+### Correlation between effect size estimates and duration
+
+```{r session-effect-size-plot-overall}
+#| label: fig-session-effect-size-plot-overall
+#| fig-cap: "Distribution of effect size across length of intervention and weight by the number of sessions per week for overall outcomes."
+#| message: false
+gb_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Overall)", size = "Sessions per Week")
+```
+
+::: {.columns}
+
+::: {.column width="95%"}
+```{r session-effect-size-plot-reint}
+#| label: fig-session-effect-size-plot-reint
+#| fig-cap: "Distribution of effect size across length of intervention and weight by the number of sessions per week for reintegrational outcomes."
+#| fig-width: 9
+#| fig-height: 6
+#| message: false
+
+reintegration_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Reintegration)", size = "Sessions per Week")
+```
+
+:::
+
+::: {.column-margin}
+
+```{r session-effect-size-plot-mental}
+#| label: fig-session-effect-size-plot-mental
+#| fig-cap: "Distribution of effect size across length of intervention and weight by the number of sessions per week for mental health outcomes."
+#| fig-height: 8
+#| message: false
+
+mental_health_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Mental Health)", size = "Sessions per Week")
+```
+
+:::
 
 :::
 

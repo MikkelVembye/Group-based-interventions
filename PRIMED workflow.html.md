@@ -2,7 +2,7 @@
 title: "Appendix B - PRIMED workflow for Group-Based Review"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-05-07"
+date: "2026-06-22"
 format:
   html: 
     keep-md: true
@@ -7537,6 +7537,7 @@ reintegration_dat |>
 :::
 :::
 
+
 :::
 
 ::: {.column-margin}
@@ -7568,6 +7569,7 @@ mental_health_dat|>
 
 :::
 :::
+
 
 :::
 
@@ -7861,6 +7863,105 @@ gb_dat |>
 :::
 :::
 
+
+### Number of effect size estimates per study vs. effect sizes
+
+
+
+::: {.cell}
+
+```{.r .cell-code}
+gb_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 35, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Overall)")
+```
+
+::: {.cell-output-display}
+![Distribution of number of effects per study vs. effect sizes for overall outcomes.](PRIMED-workflow_files/figure-html/fig-n-es-vs-es-overall-1.png){#fig-n-es-vs-es-overall fig-pos='H' width=672}
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+reintegration_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 35, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Reintegration)")
+```
+
+::: {.cell-output-display}
+![Distribution of number of effects per study vs. effect sizes for reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-n-es-vs-es-reint-1.png){#fig-n-es-vs-es-reint fig-pos='H' width=864}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+mental_health_dat |> 
+  mutate(
+    kj = n(),
+    .by = study
+  ) |> 
+  select(study, gt_pop, vgt_pop, kj) |> 
+  ggplot() +
+  aes(x = kj, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = 1/vgt_pop), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 25, 5)) +
+  theme_minimal() + 
+  theme(legend.position = "none") + 
+  labs(x = "Number of Effect Size Estimates per Study", y = "Hedges' g (Mental Health)")
+```
+
+::: {.cell-output-display}
+![Distribution of number of effects per study vs. effect sizes for mental health outcomes.](PRIMED-workflow_files/figure-html/fig-n-es-vs-es-mental-1.png){#fig-n-es-vs-es-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
+
+:::
 
 ### Across outcome subgroups 
 
@@ -8185,7 +8286,7 @@ reintegration_dat |>
 ```
 
 ::: {.cell-output-display}
-![Distribution of number of effects per study for mental for reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=864}
+![Distribution of number of effects per study for reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-es-hist-reint-1.png){#fig-es-hist-reint fig-pos='H' width=864}
 :::
 :::
 
@@ -12045,6 +12146,97 @@ mental_health_dat |>
 :::
 
 ::: 
+
+:::
+
+### Correlation between effect size estimates and duration
+
+
+::: {.cell}
+
+```{.r .cell-code}
+gb_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Overall)", size = "Sessions per Week")
+```
+
+::: {.cell-output-display}
+![Distribution of effect size across length of intervention and weight by the number of sessions per week for overall outcomes.](PRIMED-workflow_files/figure-html/fig-session-effect-size-plot-overall-1.png){#fig-session-effect-size-plot-overall fig-pos='H' width=672}
+:::
+:::
+
+
+::: {.columns}
+
+::: {.column width="95%"}
+
+::: {.cell}
+
+```{.r .cell-code}
+reintegration_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Reintegration)", size = "Sessions per Week")
+```
+
+::: {.cell-output-display}
+![Distribution of effect size across length of intervention and weight by the number of sessions per week for reintegrational outcomes.](PRIMED-workflow_files/figure-html/fig-session-effect-size-plot-reint-1.png){#fig-session-effect-size-plot-reint fig-pos='H' width=864}
+:::
+:::
+
+
+:::
+
+::: {.column-margin}
+
+
+::: {.cell}
+
+```{.r .cell-code}
+mental_health_dat |> 
+  filter(!is.na(sessions_per_week)) |>  
+  select(study, gt_pop, vgt_pop, sessions_per_week, duration_in_weeks) |> 
+  ggplot() +
+  aes(x = duration_in_weeks, y = gt_pop, color = study) +
+  geom_vline(xintercept = 0) + 
+  geom_hline(yintercept = 0) + 
+  geom_point(aes(size = sessions_per_week), alpha = 0.30) + 
+  geom_smooth(method = "lm", formula = y ~ x, color = "yellow") + 
+  scale_x_continuous(breaks = seq(0, 100, 10)) +
+  guides(color = "none") +
+  theme_minimal() + 
+  theme(legend.position = "bottom") + 
+  labs(x = "Duration in Weeks", y = "Hedges' g (Mental Health)", size = "Sessions per Week")
+```
+
+::: {.cell-output-display}
+![Distribution of effect size across length of intervention and weight by the number of sessions per week for mental health outcomes.](PRIMED-workflow_files/figure-html/fig-session-effect-size-plot-mental-1.png){#fig-session-effect-size-plot-mental fig-pos='H' width=672}
+:::
+:::
+
+
+:::
 
 :::
 
@@ -18116,6 +18308,49 @@ total_forest
 ::: {.cell fig.topcaption='true'}
 
 ```{.r .cell-code}
+scatter_study_ref_map <- c(
+  "Acarturk et al. 2022" = "Acarturk et al.46",
+  "Baekkelund et al. 2022" = "Bækkelund et al.75",
+  "Cano-Vindel et al. 2021" = "Cano-Vindel et al.35",
+  "Craigie & Nathan 2009" = "Craigie & Nathan36",
+  "Crawford et al. 2012" = "Crawford et al.63",
+  "Gestel-Timmermans et al. 2012" = "van Gestel-Timmermans et al.78",
+  "Gatz et al. 2007" = "Gatz et al.90",
+  "Gonzalez & Prihoda 2007" = "Gonzalez & Prihoda49",
+  "Gordon et al. 2018" = "Gordon et al.64",
+  "Gutman et al. 2019" = "Gutman et al.50",
+  "Hagen et al. 2005" = "Hagen et al.37",
+  "Halperin et al. 2000" = "Halperin et al.38",
+  "Haslam et al. 2019" = "Haslam et al.51",
+  "Hilden et al. 2021" = "Hilden et al.65",
+  "Himle et al. 2014" = "Himle et al.39",
+  "Jacob et al. 2010" = "Jacob et al.72",
+  "James et al. 2004" = "James et al.86",
+  "Kanie et al. 2019" = "Kanie et al.66",
+  "Lim et al. 2020" = "Lim et al.67",
+  "Lloyd-Evans et al. 2020" = "Lloyd-Evans et al.91",
+  "Madigan et al. 2013" = "Madigan et al.40",
+  "McCay et al. 2006" = "McCay et al.58",
+  "Michalak et al. 2015" = "Michalak et al.41",
+  "Morley et al. 2014" = "Morley et al.80",
+  "Morton et al. 2012" = "Morton et al.77",
+  "Patterson et al. 2003" = "Patterson et al.73",
+  "Rabenstein et al. 2016" = "Rabenstein et al.42",
+  "Rusch et al. 2019" = "Rüsch et al.60",
+  "Sacks et al. 2011" = "Sacks et al.89",
+  "Sajatovic et al. 2009" = "Sajatovic et al.61",
+  "Schrank et al. 2016" = "Schrank et al.93",
+  "Schafer et al. 2019" = "Schäfer et al.87",
+  "Somers et al. 2017" = "Somers et al.88",
+  "Tjaden et al. 2021" = "Tjaden et al.92",
+  "Valiente et al. 2022" = "Valiente et al.94",
+  "Volpe et al. 2015" = "Volpe et al.95",
+  "Wojtalik et al. 2022" = "Wojtalik et al.68",
+  "Wuthrich & Rapee 2013" = "Wuthrich & Rapee44",
+  "Smith et al. 2021" = "Smith et al.43"
+)
+
+
 scatter_dat <- 
   gb_dat |> 
   mutate(
@@ -18136,7 +18371,10 @@ scatter_dat <-
       str_detect(outcome_construct, "Reint"), 
       "Social reintegration outcome", 
       "Mental health outcome"
-    )
+    ),
+
+    study = recode(study, !!!scatter_study_ref_map)
+
   ) |> 
   select(-outcome_construct) |> 
   pivot_wider(
@@ -18178,7 +18416,7 @@ ggplot(scatter_dat) +
 ```
 ─ Session info ───────────────────────────────────────────────────────────────────────────────────
  setting  value
- version  R version 4.5.2 (2025-10-31 ucrt)
+ version  R version 4.6.0 (2026-04-24 ucrt)
  os       Windows 11 x64 (build 26200)
  system   x86_64, mingw32
  ui       RTerm
@@ -18186,102 +18424,102 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2026-05-07
+ date     2026-06-22
  pandoc   3.8.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
- quarto   NA @ C:\\Users\\B199526\\AppData\\Local\\Programs\\Quarto\\bin\\quarto.exe
+ quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
 
 ─ Packages ───────────────────────────────────────────────────────────────────────────────────────
  package      * version    date (UTC) lib source
- base64enc      0.1-6      2026-02-02 [1] CRAN (R 4.5.2)
- cli            3.6.5      2025-04-23 [1] CRAN (R 4.5.2)
- clubSandwich * 0.6.2      2026-02-02 [1] CRAN (R 4.5.2)
- data.table     1.18.2.1   2026-01-27 [1] CRAN (R 4.5.2)
- digest         0.6.39     2025-11-19 [1] CRAN (R 4.5.2)
- dplyr        * 1.2.0      2026-02-03 [1] CRAN (R 4.5.2)
- evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.5.2)
- farver         2.1.2      2024-05-13 [1] CRAN (R 4.5.2)
- fastDummies  * 1.7.5      2025-01-20 [1] CRAN (R 4.5.2)
- fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.5.2)
- forcats      * 1.0.1      2025-09-25 [1] CRAN (R 4.5.2)
- generics       0.1.4      2025-05-09 [1] CRAN (R 4.5.2)
- GGally       * 2.4.0      2025-08-23 [1] CRAN (R 4.5.2)
- ggExtra      * 0.11.0     2025-09-01 [1] CRAN (R 4.5.2)
- ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.5.2)
- ggplot2      * 4.0.2      2026-02-03 [1] CRAN (R 4.5.2)
- ggrepel      * 0.9.6      2024-09-07 [1] CRAN (R 4.5.2)
- ggridges     * 0.5.7      2025-08-27 [1] CRAN (R 4.5.2)
- ggstats        0.11.0     2025-09-15 [1] CRAN (R 4.5.2)
- glue           1.8.0      2024-09-30 [1] CRAN (R 4.5.2)
- gtable         0.3.6      2024-10-25 [1] CRAN (R 4.5.2)
- hms            1.1.4      2025-10-17 [1] CRAN (R 4.5.2)
- htmltools      0.5.9      2025-12-04 [1] CRAN (R 4.5.2)
- htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.5.2)
- httpuv         1.6.16     2025-04-16 [1] CRAN (R 4.5.2)
- igraph       * 2.2.1      2025-10-27 [1] CRAN (R 4.5.2)
- janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.5.2)
- jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.5.2)
- kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.5.2)
- knitr        * 1.51       2025-12-20 [1] CRAN (R 4.5.2)
- labeling       0.4.3      2023-08-29 [1] CRAN (R 4.5.2)
- later          1.4.4      2025-08-27 [1] CRAN (R 4.5.2)
- lattice        0.22-7     2025-04-02 [1] CRAN (R 4.5.2)
- lifecycle      1.0.5      2026-01-08 [1] CRAN (R 4.5.2)
- lubridate    * 1.9.5      2026-02-04 [1] CRAN (R 4.5.2)
- magrittr       2.0.4      2025-09-12 [1] CRAN (R 4.5.2)
- mathjaxr       2.0-0      2025-12-01 [1] CRAN (R 4.5.2)
- Matrix       * 1.7-4      2025-08-28 [1] CRAN (R 4.5.2)
- metadat      * 1.4-0      2025-02-04 [1] CRAN (R 4.5.2)
- metafor      * 4.8-0      2025-01-28 [1] CRAN (R 4.5.2)
- MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.5.2)
- mgcv           1.9-3      2025-04-04 [1] CRAN (R 4.5.2)
- mime           0.13       2025-03-17 [1] CRAN (R 4.5.2)
- miniUI         0.1.2      2025-04-17 [1] CRAN (R 4.5.2)
- nlme           3.1-168    2025-03-31 [1] CRAN (R 4.5.2)
- numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.5.2)
- otel           0.2.0      2025-08-29 [1] CRAN (R 4.5.2)
- patchwork    * 1.3.2      2025-08-25 [1] CRAN (R 4.5.2)
- pillar         1.11.1     2025-09-17 [1] CRAN (R 4.5.2)
- pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.5.2)
- promises       1.5.0      2025-11-01 [1] CRAN (R 4.5.2)
- purrr        * 1.2.0      2025-11-04 [1] CRAN (R 4.5.2)
- R6             2.6.1      2025-02-15 [1] CRAN (R 4.5.2)
- RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.5.2)
- Rcpp           1.1.1      2026-01-10 [1] CRAN (R 4.5.2)
- readr        * 2.1.6      2025-11-14 [1] CRAN (R 4.5.2)
- repr           1.1.7      2024-03-22 [1] CRAN (R 4.5.2)
- rlang        * 1.1.7      2026-01-09 [1] CRAN (R 4.5.2)
- rmarkdown      2.30       2025-09-28 [1] CRAN (R 4.5.2)
- rstudioapi     0.18.0     2026-01-16 [1] CRAN (R 4.5.2)
- S7             0.2.1      2025-11-14 [1] CRAN (R 4.5.2)
- sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.5.2)
- scales         1.4.0      2025-04-24 [1] CRAN (R 4.5.2)
- sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.5.2)
- shiny          1.12.1     2025-12-09 [1] CRAN (R 4.5.2)
- skimr        * 2.2.1      2025-07-26 [1] CRAN (R 4.5.2)
- snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.5.2)
- stringi        1.8.7      2025-03-27 [1] CRAN (R 4.5.2)
- stringr      * 1.6.0      2025-11-04 [1] CRAN (R 4.5.2)
- svglite        2.2.2      2025-10-21 [1] CRAN (R 4.5.2)
- systemfonts    1.3.1      2025-10-01 [1] CRAN (R 4.5.2)
- textshaping    1.0.4      2025-10-10 [1] CRAN (R 4.5.2)
- tibble       * 3.3.1      2026-01-11 [1] CRAN (R 4.5.2)
- tidyr        * 1.3.2      2025-12-19 [1] CRAN (R 4.5.2)
- tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.5.2)
- tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.5.2)
- timechange     0.4.0      2026-01-29 [1] CRAN (R 4.5.2)
- tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.5.2)
- utf8           1.2.6      2025-06-08 [1] CRAN (R 4.5.2)
- vctrs          0.7.1      2026-01-23 [1] CRAN (R 4.5.2)
- viridisLite    0.4.3      2026-02-04 [1] CRAN (R 4.5.2)
- withr          3.0.2      2024-10-28 [1] CRAN (R 4.5.2)
- writexl      * 1.5.4      2025-04-15 [1] CRAN (R 4.5.2)
- xfun           0.56       2026-01-18 [1] CRAN (R 4.5.2)
- xml2           1.5.2      2026-01-17 [1] CRAN (R 4.5.2)
- xtable         1.8-4      2019-04-21 [1] CRAN (R 4.5.2)
- yaml           2.3.12     2025-12-10 [1] CRAN (R 4.5.2)
- zoo            1.8-15     2025-12-15 [1] CRAN (R 4.5.2)
+ base64enc      0.1-6      2026-02-02 [1] CRAN (R 4.6.0)
+ cli            3.6.6      2026-04-09 [1] CRAN (R 4.6.0)
+ clubSandwich * 0.7.0      2026-05-04 [1] CRAN (R 4.6.0)
+ data.table     1.18.4     2026-05-06 [1] CRAN (R 4.6.0)
+ digest         0.6.39     2025-11-19 [1] CRAN (R 4.6.0)
+ dplyr        * 1.2.1      2026-04-03 [1] CRAN (R 4.6.0)
+ evaluate       1.0.5      2025-08-27 [1] CRAN (R 4.6.0)
+ farver         2.1.2      2024-05-13 [1] CRAN (R 4.6.0)
+ fastDummies  * 1.7.6      2026-04-22 [1] CRAN (R 4.6.0)
+ fastmap        1.2.0      2024-05-15 [1] CRAN (R 4.6.0)
+ forcats      * 1.0.1      2025-09-25 [1] CRAN (R 4.6.0)
+ generics       0.1.4      2025-05-09 [1] CRAN (R 4.6.0)
+ GGally       * 2.4.0      2025-08-23 [1] CRAN (R 4.6.0)
+ ggExtra      * 0.11.0     2025-09-01 [1] CRAN (R 4.6.0)
+ ggh4x        * 0.3.1      2025-05-30 [1] CRAN (R 4.6.0)
+ ggplot2      * 4.0.3      2026-04-22 [1] CRAN (R 4.6.0)
+ ggrepel      * 0.9.8      2026-03-17 [1] CRAN (R 4.6.0)
+ ggridges     * 0.5.7      2025-08-27 [1] CRAN (R 4.6.0)
+ ggstats        0.13.0     2026-03-06 [1] CRAN (R 4.6.0)
+ glue           1.8.1      2026-04-17 [1] CRAN (R 4.6.0)
+ gtable         0.3.6      2024-10-25 [1] CRAN (R 4.6.0)
+ hms            1.1.4      2025-10-17 [1] CRAN (R 4.6.0)
+ htmltools      0.5.9      2025-12-04 [1] CRAN (R 4.6.0)
+ htmlwidgets    1.6.4      2023-12-06 [1] CRAN (R 4.6.0)
+ httpuv         1.6.17     2026-03-18 [1] CRAN (R 4.6.0)
+ igraph       * 2.3.1      2026-05-04 [1] CRAN (R 4.6.0)
+ janitor      * 2.2.1      2024-12-22 [1] CRAN (R 4.6.0)
+ jsonlite       2.0.0      2025-03-27 [1] CRAN (R 4.6.0)
+ kableExtra   * 1.4.0      2024-01-24 [1] CRAN (R 4.6.0)
+ knitr        * 1.51       2025-12-20 [1] CRAN (R 4.6.0)
+ labeling       0.4.3      2023-08-29 [1] CRAN (R 4.6.0)
+ later          1.4.8      2026-03-05 [1] CRAN (R 4.6.0)
+ lattice        0.22-9     2026-02-09 [1] CRAN (R 4.6.0)
+ lifecycle      1.0.5      2026-01-08 [1] CRAN (R 4.6.0)
+ lubridate    * 1.9.5      2026-02-04 [1] CRAN (R 4.6.0)
+ magrittr       2.0.5      2026-04-04 [1] CRAN (R 4.6.0)
+ mathjaxr       2.0-0      2025-12-01 [1] CRAN (R 4.6.0)
+ Matrix       * 1.7-5      2026-03-21 [1] CRAN (R 4.6.0)
+ metadat      * 1.6-0      2026-04-29 [1] CRAN (R 4.6.0)
+ metafor      * 5.1-6      2026-06-16 [1] Github (wviechtb/metafor@c6b8072)
+ MetBrewer    * 0.2.0      2022-03-21 [1] CRAN (R 4.6.0)
+ mgcv           1.9-4      2025-11-07 [1] CRAN (R 4.6.0)
+ mime           0.13       2025-03-17 [1] CRAN (R 4.6.0)
+ miniUI         0.1.2      2025-04-17 [1] CRAN (R 4.6.0)
+ nlme           3.1-169    2026-03-27 [1] CRAN (R 4.6.0)
+ numDeriv     * 2016.8-1.1 2019-06-06 [1] CRAN (R 4.6.0)
+ otel           0.2.0      2025-08-29 [1] CRAN (R 4.6.0)
+ patchwork    * 1.3.2      2025-08-25 [1] CRAN (R 4.6.0)
+ pillar         1.11.1     2025-09-17 [1] CRAN (R 4.6.0)
+ pkgconfig      2.0.3      2019-09-22 [1] CRAN (R 4.6.0)
+ promises       1.5.0      2025-11-01 [1] CRAN (R 4.6.0)
+ purrr        * 1.2.2      2026-04-10 [1] CRAN (R 4.6.0)
+ R6             2.6.1      2025-02-15 [1] CRAN (R 4.6.0)
+ RColorBrewer   1.1-3      2022-04-03 [1] CRAN (R 4.6.0)
+ Rcpp           1.1.1-1.1  2026-04-24 [1] CRAN (R 4.6.0)
+ readr        * 2.2.0      2026-02-19 [1] CRAN (R 4.6.0)
+ repr           1.1.7      2024-03-22 [1] CRAN (R 4.6.0)
+ rlang        * 1.2.0      2026-04-06 [1] CRAN (R 4.6.0)
+ rmarkdown      2.31       2026-03-26 [1] CRAN (R 4.6.0)
+ rstudioapi     0.18.0     2026-01-16 [1] CRAN (R 4.6.0)
+ S7             0.2.2      2026-04-22 [1] CRAN (R 4.6.0)
+ sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.6.0)
+ scales         1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
+ sessioninfo    1.2.3      2025-02-05 [1] CRAN (R 4.6.0)
+ shiny          1.13.0     2026-02-20 [1] CRAN (R 4.6.0)
+ skimr        * 2.2.2      2026-01-10 [1] CRAN (R 4.6.0)
+ snakecase      0.11.1     2023-08-27 [1] CRAN (R 4.6.0)
+ stringi        1.8.7      2025-03-27 [1] CRAN (R 4.6.0)
+ stringr      * 1.6.0      2025-11-04 [1] CRAN (R 4.6.0)
+ svglite        2.2.2      2025-10-21 [1] CRAN (R 4.6.0)
+ systemfonts    1.3.2      2026-03-05 [1] CRAN (R 4.6.0)
+ textshaping    1.0.5      2026-03-06 [1] CRAN (R 4.6.0)
+ tibble       * 3.3.1      2026-01-11 [1] CRAN (R 4.6.0)
+ tidyr        * 1.3.2      2025-12-19 [1] CRAN (R 4.6.0)
+ tidyselect     1.2.1      2024-03-11 [1] CRAN (R 4.6.0)
+ tidyverse    * 2.0.0      2023-02-22 [1] CRAN (R 4.6.0)
+ timechange     0.4.0      2026-01-29 [1] CRAN (R 4.6.0)
+ tzdb           0.5.0      2025-03-15 [1] CRAN (R 4.6.0)
+ utf8           1.2.6      2025-06-08 [1] CRAN (R 4.6.0)
+ vctrs          0.7.3      2026-04-11 [1] CRAN (R 4.6.0)
+ viridisLite    0.4.3      2026-02-04 [1] CRAN (R 4.6.0)
+ withr          3.0.2      2024-10-28 [1] CRAN (R 4.6.0)
+ writexl      * 1.5.4      2025-04-15 [1] CRAN (R 4.6.0)
+ xfun           0.57       2026-03-20 [1] CRAN (R 4.6.0)
+ xml2           1.5.2      2026-01-17 [1] CRAN (R 4.6.0)
+ xtable         1.8-8      2026-02-22 [1] CRAN (R 4.6.0)
+ yaml           2.3.12     2025-12-10 [1] CRAN (R 4.6.0)
+ zoo            1.8-15     2025-12-15 [1] CRAN (R 4.6.0)
 
- [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.5.2/library
+ [1] C:/Users/B199526/AppData/Local/Programs/R/R-4.6.0/library
  * ── Packages attached to the search path.
 
 ──────────────────────────────────────────────────────────────────────────────────────────────────
