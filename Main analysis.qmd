@@ -782,13 +782,15 @@ tic()
 plan(multisession)
 reint_cwb_res_update <- 
   pmap(
-    .l = arg_list_tbl_rho08[3:4,], 
+    .l = arg_list_tbl_rho08[1:2,], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
-    CWB = TRUE,
-  ); reint_cwb_res_update
+    CWB = TRUE
+  )
 plan(sequential)
 toc()
+
+reint_cwb_res_update
 #
 #saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res_update.rds")
 
