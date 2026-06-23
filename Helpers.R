@@ -616,6 +616,53 @@ forest_plot_de <-
       
     }
     
+    if (is.list(raw_res) && length(raw_res) == 1 && inherits(raw_res[[1]], "rma.mv")) {
+      raw_res <- raw_res[[1]]
+    }
+    
+    if (!inherits(raw_res, "rma.mv")) {
+      all_covariates <- all.vars(delete.response(terms(formula)))
+      mod_string <- all_covariates[1]
+      mod_string_table <- stringr::str_replace_all(mod_string, pattern = "_", replacement = " ")
+      mod_string_table <- sub("^(\\w)(\\w*)", "\\U\\1\\L\\2", mod_string_table, perl = TRUE)
+      
+      if (length(all_covariates) > 1) {
+        controlled <- "Yes"
+        control_vars <- paste0(all_covariates[-1], collapse = ";")
+      } else {
+        controlled <- "No"
+        control_vars <- "None"
+      }
+      
+      warning("Model did not converge to an rma.mv object")
+      
+      return(
+        tibble(
+          Characteric = mod_string,
+          Moderator = mod_string_table,
+          studies = NA_real_,
+          effects = NA_real_,
+          avg_effect_ci = "Non-converged",
+          pval = NA_real_,
+          df_satt = NA_real_,
+          SD_total = NA_real_,
+          rho = rho,
+          wald_compared = NA_character_,
+          controls = controlled,
+          control_vars = control_vars,
+          optimizer = "Non-converged",
+          avg_effect = NA_real_,
+          LL = NA_real_,
+          UL = NA_real_,
+          tau2 = NA_real_,
+          omega2 = NA_real_,
+          t_val = NA_real_,
+          table = table,
+          effect_size = es
+        )
+      )
+    }
+    
     struct_lang <- if(model == "SCEp") str2lang('c("DIAG", "DIAG")') else str2lang('"DIAG"')
     random_lang <- paste0("list(", paste0(rand, collapse = ", "), ")") |> str2lang()
     

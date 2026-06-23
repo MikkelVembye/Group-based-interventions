@@ -178,7 +178,7 @@ reint_ma_dat <-
     duration_c = duration_in_weeks - 12,
     fu_time_c = time_after_end_intervention_weeks - 1,
     
-    country = case_match(
+    country = recode_values(
       cnt, 
       c(
         "Turkey", "Norway", "Spain", "Netherlands", 
@@ -214,7 +214,14 @@ reint_ma_dat <-
   ) |> 
   mutate(
     across(where(is.double), as.double),
-    across(where(is.integer), as.integer)
+    across(where(is.integer), as.integer),
+    alcohol_c = alcohol - mean(alcohol),
+    hope_c = hope - mean(hope),
+    lonely_c = lonely - mean(lonely),
+    self_est_c = self_est - mean(self_est),
+    social_fun_c = social_fun - mean(social_fun),
+    wellbeing_c = wellbeing - mean(wellbeing),
+    other_c = other - mean(other)
   )
 
 #reint_ma_dat <- 
@@ -677,56 +684,56 @@ arg_tbl <-
         
         "schizophrenia_in_sample",
         paste0(
-          "schizophrenia_in_sample;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizophrenia_in_sample;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "CBT_intervention",
         paste0(
-          "CBT_intervention;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "CBT_intervention;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c",
           "schizo_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "prereg_chr", 
         paste0(
-          "prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "prereg_chr;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "test_type",
-        paste0(
-          "test_type;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+      paste0(
+          "test_type;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;tot_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "analysis_strategy",
         paste0(
-          "analysis_strategy;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "analysis_strategy;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "QES_design",
         paste0(
-          "QES_design;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "QES_design;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "control_modified",
         paste0(
-          "control_modified;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "control_modified;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "risk_of_bias", 
         paste0(
-          "risk_of_bias;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "risk_of_bias;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         )
@@ -771,19 +778,19 @@ arg_list_tbl <-
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
-#tic()
-#plan(multisession)
-#reint_cwb_res <- 
-#  pmap(
-#    .l = arg_list_tbl_rho08, 
-#    .f = .PESCE_RVE, 
-#    return_rma_obj = FALSE,
-#    CWB = TRUE,
-#  ); reint_cwb_res
-#plan(sequential)
-#toc()
+tic()
+plan(multisession)
+reint_cwb_res_update <- 
+  pmap(
+    .l = arg_list_tbl_rho08[3:4,], 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = TRUE,
+  ); reint_cwb_res_update
+plan(sequential)
+toc()
 #
-#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
+#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res_update.rds")
 
 reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res.rds")
 
@@ -823,8 +830,8 @@ pmap(
 #  raw_res <- tryCatch(
 #    suppressWarnings(
 #      metafor::rma.mv(
-#        gt_pop ~ CBT_intervention + alcohol + hope + lonely + self_est + 
-#          social_fun + wellbeing + other + schizo_c + prereg_c + clinical_c + 
+#        gt_pop ~ CBT_intervention + alcohol_c + hope_c + lonely_c + self_est_c + 
+#          social_fun_c + wellbeing_c + other_c + schizo_c + prereg_c + clinical_c + 
 #          tot_c + qes_c + crt_grp_c + rob_c + age_c + sessions_c + 
 #          duration_c + fu_time_c - 1,
 #        V = V_mat_cbt,
