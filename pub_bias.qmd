@@ -70,8 +70,11 @@ reint_ma_dat <-
     esid = 1:n(),
     se_gt_pop = sqrt(vgt_pop), 
     Wse_pop = sqrt(Wgt_pop),
-    t_i = gt_pop/sqrt(Wgt)
+    t_i = gt_pop/sqrt(Wgt),
   )
+
+reint_ma_dat$notprereg_I <- as.integer(reint_ma_dat$prereg_chr == "Not preregistered")
+
 
 #Secondary analysis
 #mental_health_dat <- 
@@ -226,18 +229,18 @@ che <-
 
 # ISCW
 
-# CHE-ISCW-RVE
-che_iscw <- 
-  rma.mv(
-    yi = gt_pop,
-    V = V_mat_mod,
-    W = W,
-    mods = ~ prereg_chr + Wse_pop - 1,
-    random = ~ 1 | study / esid,
-    data = reint_ma_dat,
-    sparse = TRUE
-  ) |> 
-  robust(cluster = study, clubSandwich = TRUE)
+# CHE-ISCW-RVE - Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
+#che_iscw <- 
+#  rma.mv(
+#    yi = gt_pop,
+#    V = V_mat_mod,
+#    W = W, 
+#    mods = ~ prereg_chr + Wse_pop - 1,
+#    random = ~ 1 | study / esid,
+#    data = reint_ma_dat,
+#    sparse = TRUE
+#  ) |> 
+#  robust(cluster = study, clubSandwich = TRUE)
 
 
 ## Preregistered vs. not preregistered 
@@ -259,13 +262,13 @@ V_mat_prereg <-
     rho = rho
   )
 
-W_prereg <- solve(V_mat_prereg)
+#W_prereg <- solve(V_mat_prereg)
 
 egg_prereg <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_prereg,
-    W = W_prereg,
+    #W = W_prereg, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
     data = prereg_dat,
@@ -298,13 +301,13 @@ V_mat_notprereg <-
     rho = rho
   )
 
-W_notprereg <- solve(V_mat_notprereg)
+#W_notprereg <- solve(V_mat_notprereg)
 
 egg_notprereg <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_notprereg,
-    W = W_notprereg,
+    #W = W_notprereg, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
     data = notprereg_dat,
@@ -607,13 +610,13 @@ V_mat_prereg_cano <-
     rho = rho
   )
 
-W_prereg_cano <- solve(V_mat_prereg_cano)
+#W_prereg_cano <- solve(V_mat_prereg_cano)
 
 egg_prereg_cano <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_prereg_cano,
-    W = W_prereg_cano,
+    #W = W_prereg_cano, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     mods = ~ Wse_pop + cano_vindel,
     random = ~ 1 | study / esid,
     data = prereg_dat_cano,
@@ -953,7 +956,7 @@ V_mat_wc <-
 # Overall res
 #############
 
-wc_overall<- 
+wc_overall <- 
   rma.mv(
     gt_pop,
     V = V_mat_wc, 
@@ -1158,6 +1161,8 @@ wc_outcome_sensi <-
 ### CHE-ISCW 
 
 ```{r che-iscw}
+#| eval: false
+
 rho <- 0.8
 
 V_mat_mod <- metafor::vcalc(
@@ -1172,7 +1177,7 @@ V_mat_mod <- metafor::vcalc(
   rho = rho
 )
 
-W <- solve(V_mat_mod)
+#W <- solve(V_mat_mod)
 
 # CHE-ISCW
 ## Overall
@@ -1314,12 +1319,26 @@ che_iscw_outcome_tab <-
 
 ```{r petpesse}
 
+rho <- 0.8
+
+V_mat_mod <- metafor::vcalc(
+  data = reint_ma_dat,
+  vi = Wgt_pop, 
+  cluster = study,
+  type = outcome_time, 
+  grp1 = trt_name,
+  w1 = N_t, 
+  grp2 = control,
+  w2 = N_c, 
+  rho = rho
+)
+
 ## PET/PEESE overall
 che_pet <- 
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod,
-    W = W,
+    #W = W, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     mods = ~ Wse_pop + prereg_c,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
@@ -1331,7 +1350,7 @@ che_peese <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod,
-    W = W,
+    # W = W,
     mods = ~ Wgt_pop + prereg_c,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
@@ -1348,7 +1367,7 @@ che_pet_prereg_raw <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod,
-    W = W,
+    # W = W,
     mods = ~ prereg_chr + Wse_pop - 1,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
@@ -1358,8 +1377,6 @@ che_pet_prereg_raw <-
 che_pet_prereg <- 
   che_pet_prereg_raw |> 
   robust(cluster = study, clubSandwich = TRUE)
-
-
 
 #tic()
 #plan(multisession, workers = 7L)
@@ -1410,7 +1427,7 @@ che_pet_outcome_raw <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod,
-    W = W,
+    # W = W,
     mods = ~ outcome_type + Wse_pop + prereg_c - 1,
     random = ~ 1 | study / esid,
     data = reint_ma_dat,
@@ -1471,14 +1488,16 @@ che_pet_outcome_tab <-
 ### Selection models
 
 ```{r, selmodel}
+# set up progress bar
+#progressr::handlers(global = TRUE)
 
 #set.seed(29092025)
 #
 #library(future)
 #
 #cores <- parallel::detectCores() - 1
-
-# Overall reintegration
+#
+## Overall reintegration - taking selective reporting into account acroos all types of studies.
 #plan(multisession, workers = cores)
 #
 #mod_3PSM_overall <- 
@@ -1491,7 +1510,7 @@ che_pet_outcome_tab <-
 #    steps = 0.025,
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    R = 1999
 #  )
@@ -1500,8 +1519,37 @@ che_pet_outcome_tab <-
 #saveRDS(mod_3PSM_overall, "Bootstrap results/mod_3PSM_overall.rds")
 mod_3PSM_overall <- readRDS("Bootstrap results/mod_3PSM_overall.rds")
 
-#selection_plot(mod_3PSM_overall)
+#set.seed(29092025)
 #
+#library(future)
+#
+#cores <- parallel::detectCores() - 1
+#
+## Overall reintegration taking selective reporting into account only for non-preregistered study outcomes. 
+#plan(multisession, workers = cores)
+#
+#mod_3PSM_overall_nonreg_only <- 
+#  metaselection::selection_model(
+#    data = reint_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    sel_mods = ~ 0 + notprereg_I,
+#    priors = NULL, 
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = c("large-sample", "percentile"),
+#    bootstrap = "two-stage",
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_3PSM_overall_nonreg_only, "Bootstrap results/mod_3PSM_overall_nonreg_only.rds")
+mod_3PSM_overall_nonreg_only <- readRDS("Bootstrap results/mod_3PSM_overall_nonreg_only.rds")
+
+
 #plan(multisession, workers = cores)
 #
 #mod_4PSM_overall <- 
@@ -1514,7 +1562,7 @@ mod_3PSM_overall <- readRDS("Bootstrap results/mod_3PSM_overall.rds")
 #    steps = c(0.025, 0.500),
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    R = 1999
 #  )
@@ -1523,37 +1571,41 @@ mod_3PSM_overall <- readRDS("Bootstrap results/mod_3PSM_overall.rds")
 #saveRDS(mod_4PSM_overall, "Bootstrap results/mod_4PSM_overall.rds")
 mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 
-
-#save(
-#  mod_3PSM_overall,
-#  mod_4PSM_overall,
-#  file = "selmodel_res.RData"
-#)
-
-##############################
-# Across type of registration
-##############################
-
-## Only not preregistered outcome
-#plan(multisession, workers = 7L)
+#plan(multisession, workers = cores)
 #
-#
-#mod_3PSM_not_prereg <- 
+#mod_4PSM_overall_nonreg_only <- 
 #  metaselection::selection_model(
 #    data = reint_ma_dat, 
 #    yi = gt_pop,
 #    sei = Wse_pop,
 #    cluster = study,
 #    selection_type = "step",
-#    steps = 0.025,
+#    steps = c(0.025, 0.500),
+#    sel_mods = ~ 0 + notprereg_I,
+#    priors = NULL, 
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
-#    R = 1999,
-#    subset = conventional == 0
+#    R = 1999
 #  )
 #plan(sequential)
+#
+#saveRDS(mod_4PSM_overall_nonreg_only, "Bootstrap results/mod_4PSM_overall_nonreg_only.rds")
+mod_4PSM_overall_nonreg_only <- readRDS("Bootstrap results/mod_4PSM_overall_nonreg_only.rds")
+
+
+#save(
+#  mod_3PSM_overall,
+#  mod_3PSM_overall_nonreg_only
+#  mod_4PSM_overall,
+#  mod_4PSM_overall_nonreg_only
+#  file = "selmodel_res_reint.RData"
+#)
+
+##############################
+# Across type of registration
+##############################
 
 ## Prereg_chr as subgroup factor
   
@@ -1569,7 +1621,7 @@ mod_4PSM_overall <- readRDS("Bootstrap results/mod_4PSM_overall.rds")
 #    steps = 0.025,
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    mean_mods = ~ prereg_chr - 1,
 #    R = 1999
@@ -1592,7 +1644,7 @@ mod_3PSM_prereg <- readRDS("Bootstrap results/mod_3PSM_prereg.rds")
 #    steps = c(0.025, 0.500),
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    mean_mods = ~ prereg_chr - 1,
 #    R = 1999
@@ -1609,19 +1661,21 @@ mod_4PSM_prereg <- readRDS("Bootstrap results/mod_4PSM_prereg.rds")
 #plan(multisession, workers = cores)
 #
 #mod_3PSM_outcome <- 
-#  metaselection::selection_model(
-#    data = reint_ma_dat, 
-#    yi = gt_pop,
-#    sei = Wse_pop,
-#    cluster = study,
-#    selection_type = "step",
-#    steps = 0.025,
-#    estimator = "CML",
-#    vcov_type = "robust",
-#    CI_type = "percentile",
-#    bootstrap = "two-stage",
-#    mean_mods = ~ outcome_type + prereg_c - 1,
-#    R = 1999
+#    metaselection::selection_model(
+#      data = reint_ma_dat, 
+#      yi = gt_pop,
+#      sei = Wse_pop,
+#      cluster = study,
+#      selection_type = "step",
+#      steps = 0.025,
+#      priors = NULL, 
+#      estimator = "CML",
+#      vcov_type = "robust",
+#      CI_type = c("large-sample", "percentile"),
+#      bootstrap = "two-stage",
+#      mean_mods = ~ outcome_type + prereg_c - 1,
+#      sel_mods = ~ 0 + notprereg_I, 
+#      R = 1999
 #  )
 #plan(sequential)
 #
@@ -1632,21 +1686,24 @@ mod_3PSM_outcome <- readRDS("Bootstrap results/mod_3PSM_outcome.rds")
 
 #plan(multisession, workers = cores)
 #
-#mod_4PSM_outcome <- 
-#  metaselection::selection_model(
-#    data = reint_ma_dat, 
-#    yi = gt_pop,
-#    sei = Wse_pop,
-#    cluster = study,
-#    selection_type = "step",
-#    steps = c(0.025, 0.500),
-#    estimator = "CML",
-#    vcov_type = "robust",
-#    CI_type = "percentile",
-#    bootstrap = "two-stage",
-#    mean_mods = ~ outcome_type + prereg_c - 1,
-#    R = 1999
+#mod_4PSM_outcome <-
+#    metaselection::selection_model(
+#      data = reint_ma_dat, 
+#      yi = gt_pop,
+#      sei = Wse_pop,
+#      cluster = study,
+#      selection_type = "step",
+#      steps = c(0.025, 0.500),
+#      priors = NULL, 
+#      estimator = "CML",
+#      vcov_type = "robust",
+#      CI_type = c("large-sample", "percentile"),
+#      bootstrap = "two-stage",
+#      mean_mods = ~ outcome_type + prereg_c - 1,
+#      sel_mods = ~ 0 + notprereg_I, 
+#      R = 1999
 #  )
+#
 #plan(sequential)
 #
 #saveRDS(mod_4PSM_outcome, "Bootstrap results/mod_4PSM_outcome.rds")
@@ -1659,7 +1716,7 @@ mod_4PSM_outcome <- readRDS("Bootstrap results/mod_4PSM_outcome.rds")
 
 PSM3_tab_res <- 
   tibble(
-    test = "Cluster selmodel (3PSM)",
+    test = "Cluster selmodel (3PSM - all)",
     J = n_distinct(reint_ma_dat$study),
     K = nrow(reint_ma_dat),
     est_ci = paste0(
@@ -1670,7 +1727,7 @@ PSM3_tab_res <-
       round(mod_3PSM_overall$est$percentile_upper[1], 3),
       "]"
     ),
-    pval = NA_real_,
+    pval = round(mod_3PSM_overall$est$p_value[1], 4),
     lambda1 = round(unique(mod_3PSM_overall$predictions$lambda_full[,2]), 3),
     lambda2 = NA_real_,
     tau = sqrt(mod_3PSM_overall$predictions$tausq),
@@ -1678,9 +1735,32 @@ PSM3_tab_res <-
     total_SD = tau
   )
 
+
+PSM3_nonreg_only_tab_res <- 
+  tibble(
+    test = "Cluster selmodel (3PSM - non-preregistered only)",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_3PSM_overall_nonreg_only$est$Est[1]), 3), 
+      " [", 
+      round(mod_3PSM_overall_nonreg_only$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_3PSM_overall_nonreg_only$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = round(mod_3PSM_overall_nonreg_only$est$p_value[1], 4),
+    lambda1 = round(unique(mod_3PSM_overall_nonreg_only$predictions$lambda_full[,2])[2], 3),
+    lambda2 = NA_real_,
+    tau = sqrt(mod_3PSM_overall_nonreg_only$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau
+  )
+
+
 PSM4_tab_res <- 
   tibble(
-    test = "Cluster selmodel (4PSM)",
+    test = "Cluster selmodel (4PSM- all)",
     J = n_distinct(reint_ma_dat$study),
     K = nrow(reint_ma_dat),
     est_ci = paste0(
@@ -1691,10 +1771,31 @@ PSM4_tab_res <-
       round(mod_4PSM_overall$est$percentile_upper[1], 3),
       "]"
     ),
-    pval = NA_real_,
+    pval = round(mod_4PSM_overall$est$p_value[1], 4),
     lambda1 = round(unique(mod_4PSM_overall$predictions$lambda_full[,2]), 3),
     lambda2 = round(unique(mod_4PSM_overall$predictions$lambda_full[,3]), 3),
     tau = sqrt(mod_4PSM_overall$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau
+  )
+
+PSM4_nonreg_only_tab_res <- 
+  tibble(
+    test = "Cluster selmodel (4PSM - non-preregistered only)",
+    J = n_distinct(reint_ma_dat$study),
+    K = nrow(reint_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_4PSM_overall_nonreg_only$est$Est[1]), 3), 
+      " [", 
+      round(mod_4PSM_overall_nonreg_only$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_4PSM_overall_nonreg_only$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = round(mod_4PSM_overall_nonreg_only$est$p_value[1], 4),
+    lambda1 = round(unique(mod_4PSM_overall_nonreg_only$predictions$lambda_full[,2])[2], 3),
+    lambda2 = round(unique(mod_4PSM_overall_nonreg_only$predictions$lambda_full[,3])[2], 3),
+    tau = sqrt(mod_4PSM_overall_nonreg_only$predictions$tausq),
     omega = NA_real_,
     total_SD = tau
   )
@@ -1776,7 +1877,7 @@ PSM3_outcome_tab <-
         "]"
       ),
       NA_character_,
-      as.character(round(unique(mod_3PSM_outcome$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_3PSM_outcome$predictions$lambda_full[,2])[2], 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_outcome$predictions$tausq), 3)),
       NA_character_,
@@ -1805,8 +1906,8 @@ PSM4_outcome_tab <-
         "]"
       ),
       NA_character_,
-      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,2]), 3)),
-      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,3]), 3)),
+      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,2])[2], 3)),
+      as.character(round(unique(mod_4PSM_outcome$predictions$lambda_full[,3])[2], 3)),
       as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_outcome$predictions$tausq), 3)),
@@ -1834,6 +1935,8 @@ mental_ma_dat <-
     Wse_pop = sqrt(Wgt_pop),
     t_i = gt_pop/sqrt(Wgt) # Following Chen and Pustejovsky (2025)
   )
+
+mental_ma_dat$notprereg_I <- as.integer(mental_ma_dat$prereg_chr == "Not preregistered")
 
 ```
 
@@ -1971,7 +2074,7 @@ V_mat_mental <-
 #  map(~ round(.x, 2))
 
 
-W_mental <- solve(V_mat_mental) |> round(3)
+#W_mental <- solve(V_mat_mental) |> round(3)
 
 # CHE
 che_mental <- 
@@ -1991,7 +2094,7 @@ che_iscw_mental <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mental,
-    W = W_mental,
+    #W = W_mental, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     random = ~ 1 | study / esid,
     data = mental_ma_dat,
     sparse = TRUE
@@ -2018,7 +2121,7 @@ V_mat_prereg_mental <-
     rho = rho
   ) 
 
-W_prereg_mental <- solve(V_mat_prereg_mental) |> round(3)
+#W_prereg_mental <- solve(V_mat_prereg_mental) |> round(3)
 
 egg_prereg_mental <-
   rma.mv(
@@ -2057,13 +2160,13 @@ V_mat_notprereg_mental <-
     rho = rho
   )
 
-W_notprereg_mental <- solve(V_mat_notprereg_mental) |> round(3)
+#W_notprereg_mental <- solve(V_mat_notprereg_mental) |> round(3)
 
 egg_notprereg_mental <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_notprereg_mental,
-    W = W_notprereg_mental,
+    #W = W_notprereg_mental, Not used as we have few large studies (c.f., Chen & Pustejovsky, 2026)
     mods = ~ Wse_pop,
     random = ~ 1 | study / esid,
     data = notprereg_dat_mental,
@@ -2893,6 +2996,10 @@ clubSandwich::Wald_test(
 ### CHE-ISCW 
 
 ```{r che-iscw-mental}
+#| eval: false
+
+# Not used as we have few large size studies that can distort the weighting in the ISCW model, 
+# see PRIMED Figure 37-40
 rho <- 0.8
 
 V_mat_mod_mental <- metafor::vcalc(
@@ -3053,12 +3160,26 @@ che_iscw_outcome_tab_mental <-
 
 ```{r petpeese-mental}
 
+rho <- 0.8
+
+V_mat_mod_mental <- metafor::vcalc(
+  data = mental_ma_dat,
+  vi = Wgt_pop, 
+  cluster = study,
+  type = outcome_time, 
+  grp1 = trt_name,
+  w1 = N_t, 
+  grp2 = control,
+  w2 = N_c, 
+  rho = rho
+)
+
 ## PET/PEESE overall
 che_pet_mental <- 
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod_mental,
-    W = W_mental,
+    #W = W_mental,
     mods = ~ Wse_pop + prereg_c,
     random = ~ 1 | study / esid,
     data = mental_ma_dat,
@@ -3070,7 +3191,7 @@ che_peese_mental <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod_mental,
-    W = W_mental,
+    #W = W_mental,
     mods = ~ Wgt_pop + prereg_c,
     random = ~ 1 | study / esid,
     data = mental_ma_dat,
@@ -3094,7 +3215,7 @@ che_pet_prereg_raw_mental <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod_mental,
-    W = W_mental,
+    #W = W_mental,
     mods = ~ prereg_chr + Wse_pop - 1,
     random = ~ 1 | study / esid,
     data = mental_ma_dat,
@@ -3156,7 +3277,7 @@ che_pet_outcome_raw_mental <-
   rma.mv(
     yi = gt_pop,
     V = V_mat_mod_mental,
-    W = W_mental,
+    #W = W_mental,
     mods = ~ outcome_type + Wse_pop + prereg_c - 1,
     random = ~ 1 | study / esid,
     data = mental_ma_dat,
@@ -3170,7 +3291,7 @@ che_pet_outcome_mental <-
 
 
 #tic()
-#plan(multisession, workers = 13L)
+#plan(multisession)
 #che_pet_outcome_cwb_mental <- 
 #  wildmeta::Wald_test_cwb(
 #    full_model = che_pet_outcome_raw_mental,
@@ -3218,13 +3339,16 @@ che_pet_outcome_tab_mental <-
 
 ```{r, selmodel-mental}
 
+# set up progress bar
+#progressr::handlers(global = TRUE)
+
 #set.seed(29092025)
 #
 #library(future)
 #
 #cores <- parallel::detectCores() - 1
 
-# Overall reintegration
+# Overall mental health - taking selection into account across all studies, regardless of preregistration status
 #plan(multisession, workers = cores)
 #
 #mod_3PSM_overall_mental <- 
@@ -3235,9 +3359,10 @@ che_pet_outcome_tab_mental <-
 #    cluster = study,
 #    selection_type = "step",
 #    steps = 0.025,
+#    priors = NULL,  
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    R = 1999
 #  )
@@ -3246,8 +3371,32 @@ che_pet_outcome_tab_mental <-
 #saveRDS(mod_3PSM_overall_mental, "Bootstrap results/mod_3PSM_overall_mental.rds")
 mod_3PSM_overall_mental <- readRDS("Bootstrap results/mod_3PSM_overall_mental.rds")
 
-#selection_plot(mod_3PSM_overall)
+# Overall mental health - only taking selection into account for non-preregistered studies
+#plan(multisession, workers = cores)
 #
+#mod_3PSM_overall_nonreg_only_mental <- 
+#  metaselection::selection_model(
+#    data = mental_ma_dat, 
+#    yi = gt_pop,
+#    sei = Wse_pop,
+#    cluster = study,
+#    selection_type = "step",
+#    steps = 0.025,
+#    sel_mods = ~ 0 + notprereg_I,
+#    priors = NULL,  
+#    estimator = "CML",
+#    vcov_type = "robust",
+#    CI_type = c("large-sample", "percentile"),
+#    bootstrap = "two-stage",
+#    R = 1999
+#  )
+#plan(sequential)
+#
+#saveRDS(mod_3PSM_overall_nonreg_only_mental, "Bootstrap results/mod_3PSM_overall_nonreg_only_mental.rds")
+mod_3PSM_overall_nonreg_only_mental <- readRDS("Bootstrap results/mod_3PSM_overall_nonreg_only_mental.rds")
+
+
+# Overall mental health (4PSM) - taking selection into account across all studies, regardless of preregistration status
 #plan(multisession, workers = cores)
 #
 #mod_4PSM_overall_mental <- 
@@ -3258,9 +3407,10 @@ mod_3PSM_overall_mental <- readRDS("Bootstrap results/mod_3PSM_overall_mental.rd
 #    cluster = study,
 #    selection_type = "step",
 #    steps = c(0.025, 0.500),
+#    priors = NULL,  
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
 #    R = 1999
 #  )
@@ -3269,37 +3419,33 @@ mod_3PSM_overall_mental <- readRDS("Bootstrap results/mod_3PSM_overall_mental.rd
 #saveRDS(mod_4PSM_overall_mental, "Bootstrap results/mod_4PSM_overall_mental.rds")
 mod_4PSM_overall_mental <- readRDS("Bootstrap results/mod_4PSM_overall_mental.rds")
 
-
-#save(
-#  mod_3PSM_overall,
-#  mod_4PSM_overall,
-#  file = "selmodel_res.RData"
-#)
-
-##############################
-# Across type of registration
-##############################
-
-## Only not preregistered outcome
+# Overall mental health (4PSM) - only taking selection into account for non-preregistered studies
 #plan(multisession, workers = cores)
 #
-#
-#mod_3PSM_not_prereg_mental <- 
+#mod_4PSM_overall_nonreg_only_mental <- 
 #  metaselection::selection_model(
 #    data = mental_ma_dat, 
 #    yi = gt_pop,
 #    sei = Wse_pop,
 #    cluster = study,
 #    selection_type = "step",
-#    steps = 0.025,
+#    steps = c(0.025, 0.500),
+#    sel_mods = ~ 0 + notprereg_I,
+#    priors = NULL,  
 #    estimator = "CML",
 #    vcov_type = "robust",
-#    CI_type = "percentile",
+#    CI_type = c("large-sample", "percentile"),
 #    bootstrap = "two-stage",
-#    R = 1999,
-#    subset = conventional == 0
+#    R = 1999
 #  )
 #plan(sequential)
+#
+#saveRDS(mod_4PSM_overall_nonreg_only_mental, "Bootstrap results/mod_4PSM_overall_nonreg_only_mental.rds")
+mod_4PSM_overall_nonreg_only_mental <- readRDS("Bootstrap results/mod_4PSM_overall_nonreg_only_mental.rds")
+
+##############################
+# Across type of registration
+##############################
 
 ## Prereg_chr as subgroup factor
   
@@ -3355,19 +3501,21 @@ mod_4PSM_prereg_mental <- readRDS("Bootstrap results/mod_4PSM_prereg_mental.rds"
 #plan(multisession, workers = cores)
 #
 #mod_3PSM_outcome_mental <- 
-#  metaselection::selection_model(
-#    data = mental_ma_dat, 
-#    yi = gt_pop,
-#    sei = Wse_pop,
-#    cluster = study,
-#    selection_type = "step",
-#    steps = 0.025,
-#    estimator = "CML",
-#    vcov_type = "robust",
-#    CI_type = "percentile",
-#    bootstrap = "two-stage",
-#    mean_mods = ~ outcome_type + prereg_c - 1,
-#    R = 1999
+#    metaselection::selection_model(
+#      data = mental_ma_dat, 
+#      yi = gt_pop,
+#      sei = Wse_pop,
+#      cluster = study,
+#      selection_type = "step",
+#      steps = 0.025,
+#      priors = NULL, 
+#      estimator = "CML",
+#      vcov_type = "robust",
+#      CI_type = c("large-sample", "percentile"),
+#      bootstrap = "two-stage",
+#      mean_mods = ~ outcome_type + prereg_c - 1,
+#      sel_mods = ~ 0 + notprereg_I, 
+#      R = 1999
 #  )
 #plan(sequential)
 #
@@ -3378,21 +3526,24 @@ mod_3PSM_outcome_mental <- readRDS("Bootstrap results/mod_3PSM_outcome_mental.rd
 
 #plan(multisession, workers = cores)
 #
-#mod_4PSM_outcome_mental <- 
-#  metaselection::selection_model(
-#    data = mental_ma_dat, 
-#    yi = gt_pop,
-#    sei = Wse_pop,
-#    cluster = study,
-#    selection_type = "step",
-#    steps = c(0.025, 0.500),
-#    estimator = "CML",
-#    vcov_type = "robust",
-#    CI_type = "percentile",
-#    bootstrap = "two-stage",
-#    mean_mods = ~ outcome_type + prereg_c - 1,
-#    R = 1999
+#mod_4PSM_outcome_mental <-
+#    metaselection::selection_model(
+#      data = mental_ma_dat, 
+#      yi = gt_pop,
+#      sei = Wse_pop,
+#      cluster = study,
+#      selection_type = "step",
+#      steps = c(0.025, 0.500),
+#      priors = NULL, 
+#      estimator = "CML",
+#      vcov_type = "robust",
+#      CI_type = c("large-sample", "percentile"),
+#      bootstrap = "two-stage",
+#      mean_mods = ~ outcome_type + prereg_c - 1,
+#      sel_mods = ~ 0 + notprereg_I, 
+#      R = 1999
 #  )
+#
 #plan(sequential)
 #
 #saveRDS(mod_4PSM_outcome_mental, "Bootstrap results/mod_4PSM_outcome_mental.rds")
@@ -3405,7 +3556,7 @@ mod_4PSM_outcome_mental <- readRDS("Bootstrap results/mod_4PSM_outcome_mental.rd
 
 PSM3_tab_res_mental <- 
   tibble(
-    test = "Cluster selmodel (3PSM)",
+    test = "Cluster selmodel (3PSM - all studies)",
     J = n_distinct(mental_ma_dat$study),
     K = nrow(mental_ma_dat),
     est_ci = paste0(
@@ -3416,7 +3567,7 @@ PSM3_tab_res_mental <-
       round(mod_3PSM_overall_mental$est$percentile_upper[1], 3),
       "]"
     ),
-    pval = NA_real_,
+    pval = round(mod_3PSM_overall_mental$est$p_value[1], 3),
     tau = sqrt(mod_3PSM_overall_mental$predictions$tausq),
     omega = NA_real_,
     total_SD = tau,
@@ -3424,9 +3575,30 @@ PSM3_tab_res_mental <-
     lambda2 = NA_real_
   )
 
+PSM3_nonreg_only_tab_res_mental <- 
+  tibble(
+    test = "Cluster selmodel (3PSM - non-preregistered only)",
+    J = n_distinct(mental_ma_dat$study),
+    K = nrow(mental_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_3PSM_overall_nonreg_only_mental$est$Est[1]), 3), 
+      " [", 
+      round(mod_3PSM_overall_nonreg_only_mental$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_3PSM_overall_nonreg_only_mental$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = round(mod_3PSM_overall_nonreg_only_mental$est$p_value[1], 3),
+    tau = sqrt(mod_3PSM_overall_nonreg_only_mental$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau,
+    lambda1 = round(unique(mod_3PSM_overall_nonreg_only_mental$predictions$lambda_full[,2])[2], 3),
+    lambda2 = NA_real_
+  )
+
 PSM4_tab_res_mental <- 
   tibble(
-    test = "Cluster selmodel (4PSM)",
+    test = "Cluster selmodel (4PSM - all studies)",
     J = n_distinct(mental_ma_dat$study),
     K = nrow(mental_ma_dat),
     est_ci = paste0(
@@ -3437,12 +3609,33 @@ PSM4_tab_res_mental <-
       round(mod_4PSM_overall_mental$est$percentile_upper[1], 3),
       "]"
     ),
-    pval = NA_real_,
+    pval = round(mod_4PSM_overall_mental$est$p_value[1], 3),
     tau = sqrt(mod_4PSM_overall_mental$predictions$tausq),
     omega = NA_real_,
     total_SD = tau,
     lambda1 = round(unique(mod_4PSM_overall_mental$predictions$lambda_full[,2]), 3),
     lambda2 = round(unique(mod_4PSM_overall_mental$predictions$lambda_full[,3]), 3)
+  )
+
+PSM4_nonreg_only_tab_res_mental <- 
+  tibble(
+    test = "Cluster selmodel (4PSM - non-preregistered only)",
+    J = n_distinct(mental_ma_dat$study),
+    K = nrow(mental_ma_dat),
+    est_ci = paste0(
+      round(as.numeric(mod_4PSM_overall_nonreg_only_mental$est$Est[1]), 3), 
+      " [", 
+      round(mod_4PSM_overall_nonreg_only_mental$est$percentile_lower[1], 3),
+      ", ",
+      round(mod_4PSM_overall_nonreg_only_mental$est$percentile_upper[1], 3),
+      "]"
+    ),
+    pval = round(mod_4PSM_overall_nonreg_only_mental$est$p_value[1], 3),
+    tau = sqrt(mod_4PSM_overall_nonreg_only_mental$predictions$tausq),
+    omega = NA_real_,
+    total_SD = tau,
+    lambda1 = round(unique(mod_4PSM_overall_nonreg_only_mental$predictions$lambda_full[,2])[2], 3),
+    lambda2 = round(unique(mod_4PSM_overall_nonreg_only_mental$predictions$lambda_full[,3])[2], 3)
   )
 
 # Prereg
@@ -3522,7 +3715,7 @@ PSM3_outcome_tab_mental <-
         "]"
       ),
       NA_character_,
-      as.character(round(unique(mod_3PSM_outcome_mental$predictions$lambda_full[,2]), 3)),
+      as.character(round(unique(mod_3PSM_outcome_mental$predictions$lambda_full[,2])[2], 3)),
       NA_character_,
       as.character(round(sqrt(mod_3PSM_outcome_mental$predictions$tausq), 3)),
       NA_character_,
@@ -3551,8 +3744,8 @@ PSM4_outcome_tab_mental <-
         "]"
       ),
       NA_character_,
-      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,2]), 3)),
-      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,3]), 3)),
+      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,2])[2], 3)),
+      as.character(round(unique(mod_4PSM_outcome_mental$predictions$lambda_full[,3])[2], 3)),
       as.character(round(sqrt(mod_4PSM_outcome_mental$predictions$tausq), 3)),
       NA_character_,
       as.character(round(sqrt(mod_4PSM_outcome_mental$predictions$tausq), 3)),
@@ -3583,10 +3776,12 @@ overall_pub_bias_tab <-
     hyema_tab_res,
     puniform_tab_res,
     wc_tab_res,
-    iscw_tab_res,
+    #iscw_tab_res,
     pet_peese_tab_res,
     PSM3_tab_res,
-    PSM4_tab_res
+    PSM3_nonreg_only_tab_res,
+    PSM4_tab_res,
+    PSM4_nonreg_only_tab_res
   ) |> 
   list_rbind() |> 
   mutate(
@@ -3621,10 +3816,12 @@ overall_pub_bias_tab_mental <-
     hyema_tab_res_mental,
     puniform_tab_res_mental,
     wc_tab_res_mental,
-    iscw_tab_res_mental,
+    #iscw_tab_res_mental,
     pet_peese_tab_res_mental,
     PSM3_tab_res_mental,
-    PSM4_tab_res_mental
+    PSM3_nonreg_only_tab_res_mental,
+    PSM4_tab_res_mental,
+    PSM4_nonreg_only_tab_res_mental
   ) |> 
   list_rbind() |> 
   mutate(
@@ -3659,7 +3856,7 @@ gt_tab_overall_mental
 prereg_tab_pub_bias <- 
   list(
   wc_prereg_tab,
-  che_iscw_prereg_tab,
+  #che_iscw_prereg_tab,
   che_pet_prereg_tab,
   PSM3_prereg_tab,
   PSM4_prereg_tab
@@ -3692,7 +3889,7 @@ prereg_tab_pub_bias_gt
 prereg_tab_pub_bias_mental <- 
   list(
   wc_prereg_tab_mental,
-  che_iscw_prereg_tab_mental,
+  #che_iscw_prereg_tab_mental,
   che_pet_prereg_tab_mental,
   PSM3_prereg_tab_mental,
   PSM4_prereg_tab_mental
@@ -3728,7 +3925,7 @@ outcome_tab_pub_bias <-
   list(
   hyema_outcome_tab,
   wc_outcome_tab,
-  che_iscw_outcome_tab,
+  #che_iscw_outcome_tab,
   che_pet_outcome_tab,
   PSM3_outcome_tab,
   PSM4_outcome_tab
@@ -3762,7 +3959,7 @@ outcome_tab_pub_bias_mental <-
   list(
   hyema_outcome_tab_mental,
   wc_outcome_tab_mental,
-  che_iscw_outcome_tab_mental,
+  #che_iscw_outcome_tab_mental,
   che_pet_outcome_tab_mental,
   PSM3_outcome_tab_mental,
   PSM4_outcome_tab_mental
@@ -3783,12 +3980,8 @@ outcome_tab_pub_bias_gt_mental
 
 ```
 
-```{r}
-#| eval: false
-#| include: false
-#| echo: false
-
-# For NHB paper Fig. 7
+```{r pub-bias-plot-prereg-reint-mental}
+# For PNAS paper Figure 6
 
 prereg_arg <- 
   .rma_arg_tbl(
@@ -3829,7 +4022,7 @@ funnel_exp1 <-  tribble(
   0,     0,     0,     0
 ) 
 
-df_text_es_nhb <- 
+df_text_es_pnas <- 
   reint_ma_dat |> 
   summarise(
     Wse_pop = mean(Wse_pop),
@@ -3842,7 +4035,7 @@ df_text_es_nhb <-
   report_bias = "Low"
 )
 
-es_level_fp_nhb <- 
+es_level_fp_pnas <- 
   reint_ma_dat |> 
   mutate(
     level = "Social reintegration",
@@ -3865,7 +4058,7 @@ es_level_fp_nhb <-
   geom_abline(data = subgroup_dat, aes(slope = slope_low, intercept = avg_effect), linetype = mean_line, alpha = alpha_line) + 
   geom_abline(data = subgroup_dat, aes(slope = -egg_slope, intercept = egg_intercept), linetype = reg_line, color = reg_color) +
   geom_text(
-    data = df_text_es_nhb, 
+    data = df_text_es_pnas, 
     aes(x = 0.05, y = -1.65, label = label, shape = NULL, color = NULL), 
     size = 3, 
     color = "black"
@@ -3960,7 +4153,7 @@ df_text_es_mental <-
 )
 
 
-es_level_fp_mental_nhb <- 
+es_level_fp_mental_pnas <- 
   mental_ma_dat |> 
   mutate(
     level = "Mental health",
@@ -4009,12 +4202,12 @@ es_level_fp_mental_nhb <-
   labs(color = "Overall risk of bias") +
   guides(col = guide_legend(nrow = 1))
 
-ylab <- es_level_fp_mental_nhb$labels$x
+ylab <- es_level_fp_mental_pnas$labels$x
 
-es_level_fp_nhb$labels$x <- es_level_fp_mental_nhb$labels$x <- "" 
+es_level_fp_pnas$labels$x <- es_level_fp_mental_pnas$labels$x <- "" 
 
-#png("Figures/funnel plots (overall effect) across type of registration NHB.png", width = 6.5, height = 5, res = 300, unit = "in")
-es_level_fp_nhb  / es_level_fp_mental_nhb
+#png("Figures/funnel plots (overall effect) across type of registration pnas.png", width = 6.5, height = 5, res = 300, unit = "in")
+es_level_fp_pnas  / es_level_fp_mental_pnas
 grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
 #dev.off()
 
@@ -4022,7 +4215,7 @@ grid::grid.draw(grid::textGrob(ylab, y = 0.6, x = 0.02, rot = 90))
 
  
 # **References**
-Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., & Vembye, M. H. (2025) Group‐based community interventions to support the social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysus. *Campbell Systematic Reviews*, 18(3), e1254. https://doi.org/10.1002/cl2.1254
+Dalgaard, N. T., Flensborg Jensen, M. C., Bengtsen, E., Krassel, K. F., Vembye, M. H., & Tipton, E. (2026) Group‐based community interventions can improve social reintegration of marginalised adults with mental illness. A Systematic Review and meta-analysis. *Open Science Framework* https://doi.org/10.31234/osf.io/kpvam_v1 
 
 ::: {.callout-note icon=false appearance="simple" title="Session Information" collapse=true}
 

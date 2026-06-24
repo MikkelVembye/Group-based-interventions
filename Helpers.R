@@ -634,7 +634,7 @@ forest_plot_de <-
         control_vars <- "None"
       }
       
-      warning("Model did not converge to an rma.mv object")
+      #warning("Model did not converge to an rma.mv object")
       
       return(
         tibble(

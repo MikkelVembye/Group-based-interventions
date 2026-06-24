@@ -666,6 +666,7 @@ prereg_obj
 
 
 ```
+
 ### Theory and methods tables
 ```{r reint-table-data}
 
@@ -771,18 +772,19 @@ arg_list_tbl <-
   pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 10,
+    R = 1999L,
     seed = 26082025L
   )
 
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
+# MAIN RESULTS ARE MADE HERE
 tic()
 plan(multisession)
 reint_cwb_res_update <- 
   pmap(
-    .l = arg_list_tbl_rho08[1:2,], 
+    .l = arg_list_tbl_rho08, 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = TRUE
@@ -792,13 +794,13 @@ toc()
 
 reint_cwb_res_update
 #
-#saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res_update.rds")
+saveRDS(reint_cwb_res_update, file = "Bootstrap results/reint_cwb_res_update.rds")
 
-reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res.rds")
+reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res_update.rds")
 
 # Obtaining HTZ value for CBT intervention res
 pmap(
-    .l = arg_list_tbl_rho08[6,], 
+    .l = arg_list_tbl_rho08[c(6, 12, 14),], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = FALSE
@@ -806,49 +808,51 @@ pmap(
 
 # Working around convergence issue with CBT_intervention with controls
 
-#rho <- 0.8
-#V_mat_cbt <- 
-#  metafor::vcalc(
-#    data = reint_ma_dat,
-#    vi = vgt_pop, 
-#    cluster = study,
-#    subgroup = CBT_intervention,
-#    type = outcome_time,
-#    grp1 = trt_name,
-#    w1 = N_t,
-#    grp2 = control,
-#    w2 = N_c, 
-#    rho = rho
-#  )
-#
-# Strategy for overcoming non-convergence 
-#optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
-#raw_res <- "Non-converged"
-#i <- 1L
-#
-## Fitting the main model
-#while (!inherits(raw_res, "rma.mv") & i <= 4L) {
-#  
-#  raw_res <- tryCatch(
-#    suppressWarnings(
-#      metafor::rma.mv(
-#        gt_pop ~ CBT_intervention + alcohol_c + hope_c + lonely_c + self_est_c + 
-#          social_fun_c + wellbeing_c + other_c + schizo_c + prereg_c + clinical_c + 
-#          tot_c + qes_c + crt_grp_c + rob_c + age_c + sessions_c + 
-#          duration_c + fu_time_c - 1,
-#        V = V_mat_cbt,
-#        random = list(~CBT_intervention | study, ~CBT_intervention | esid), 
-#        struct = c("DIAG", "DIAG"),
-#        data = reint_ma_dat,
-#        sparse = TRUE,
-#        control = list(optimizer= optimizers[i])
-#      )
-#    ),
-#    error = function(e) "Non-converged"
-#  )
-#  i <- i + 1L
-#  
-#}
+rho <- 0.8
+V_mat_cbt <- 
+  metafor::vcalc(
+    data = reint_ma_dat,
+    vi = vgt_pop, 
+    cluster = study,
+    subgroup = CBT_intervention,
+    type = outcome_time,
+    grp1 = trt_name,
+    w1 = N_t,
+    grp2 = control,
+    w2 = N_c, 
+    rho = rho
+  )
+
+#Strategy for overcoming non-convergence 
+optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
+raw_res <- "Non-converged"
+i <- 1L
+
+# Fitting the main model
+while (!inherits(raw_res, "rma.mv") & i <= 4L) {
+  
+  raw_res <- tryCatch(
+    suppressWarnings(
+      metafor::rma.mv(
+        gt_pop ~ CBT_intervention + alcohol_c + hope_c + lonely_c + self_est_c + 
+          social_fun_c + wellbeing_c + other_c + schizo_c + prereg_c + clinical_c + 
+          tot_c + qes_c + crt_grp_c + rob_c + age_c + sessions_c + 
+          duration_c + fu_time_c - 1,
+        V = V_mat_cbt,
+        random = list(~CBT_intervention | study, ~CBT_intervention | esid), 
+        struct = c("DIAG", "DIAG"),
+        data = reint_ma_dat,
+        sparse = TRUE,
+        control = list(optimizer= optimizers[i])
+      )
+    ),
+    error = function(e) "Non-converged"
+  )
+  i <- i + 1L
+  
+}
+
+raw_res |> clubSandwich::Wald_test(constraints = clubSandwich::constrain_equal(1:2), vcov = "CR2")
 
 #noncon_res <- .Wald_test_cwb_fun(
 #  rma_fun_obj = raw_res,
@@ -1323,7 +1327,13 @@ mental_ma_dat <-
   ) |> 
   mutate(
     across(where(is.double), as.double),
-    across(where(is.integer), as.integer)
+    across(where(is.integer), as.integer),
+
+    # Centering
+    anxiety_c = anxiety - mean(anxiety),
+    depression_c = depression - mean(depression),
+    gen_mental_c = gen_mental - mean(gen_mental),
+    symptoms_c = symptoms - mean(symptoms)
   )
 
 
@@ -1616,7 +1626,7 @@ plot_mental <-
   facet_grid(~analysis_plan) +
   geom_text(data = kj_label_mental, aes(x = max_ciu_mental + 0.6, label = label), size=3.3, color = "black") +
   geom_vline(data = mean_label_dat_mental, aes(xintercept = mean_es), color = "black", linetype = 4) +
-  geom_blank(aes(max_ciu + 0.6 + 0.4)) +
+  geom_blank(aes(max_ciu_mental + 0.6 + 0.4)) +
   geom_polygon(aes(x=sum.x_mental, y=sum.y_mental), color = "black", alpha = 1) +
   theme_light() + 
   theme(
@@ -1767,56 +1777,56 @@ arg_tbl_mental <-
         
         "schizophrenia_in_sample",
         paste0(
-          "schizophrenia_in_sample;anxiety;depression;gen_mental;symptoms;",
+          "schizophrenia_in_sample;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "cbt_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "CBT_intervention",
         paste0(
-          "CBT_intervention;anxiety;depression;gen_mental;symptoms;",
+          "CBT_intervention;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "prereg_chr", 
         paste0(
-          "prereg_chr;anxiety;depression;gen_mental;symptoms;",
+          "prereg_chr;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "test_type",
         paste0(
-          "test_type;anxiety;depression;gen_mental;symptoms;",
+          "test_type;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "analysis_strategy",
         paste0(
-          "analysis_strategy;anxiety;depression;gen_mental;symptoms;",
+          "analysis_strategy;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "QES_design",
         paste0(
-          "QES_design;anxiety;depression;gen_mental;symptoms;",
+          "QES_design;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "control_modified",
         paste0(
-          "control_modified;anxiety;depression;gen_mental;symptoms;",
+          "control_modified;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "risk_of_bias", 
         paste0(
-          "risk_of_bias;anxiety;depression;gen_mental;symptoms;",
+          "risk_of_bias;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         )
@@ -1862,19 +1872,19 @@ arg_list_tbl_mental <-
 arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "vgt_pop")
 
 # MAIN MODERATOR RESULTS MADE HERE
-#tic()
-#plan(multisession)
-#mental_cwb_res <- 
-#  pmap(
-#    .l = arg_list_tbl_rho08_mental, 
-#    .f = .PESCE_RVE, 
-#    return_rma_obj = FALSE,
-#    CWB = TRUE
-#  ); mental_cwb_res
-#plan(sequential)
-#toc()
-#
-#saveRDS(mental_cwb_res, file = "Bootstrap results/mental_cwb_res.rds")
+tic()
+plan(multisession)
+mental_cwb_res <- 
+  pmap(
+    .l = arg_list_tbl_rho08_mental, 
+    .f = .PESCE_RVE, 
+    return_rma_obj = FALSE,
+    CWB = TRUE
+  ); mental_cwb_res
+plan(sequential)
+toc()
+
+saveRDS(mental_cwb_res, file = "Bootstrap results/mental_cwb_res.rds")
 
 res_mental <- readRDS("Bootstrap results/mental_cwb_res.rds")
 
