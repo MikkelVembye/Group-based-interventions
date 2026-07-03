@@ -234,7 +234,7 @@ reint_ma_dat <-
 
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 
-saveRDS(reint_ma_dat, "reint_ma_dat.rds")
+#saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 
 ```
 
@@ -286,9 +286,11 @@ res_c
 ### Overall effect
 
 ```{r}
-
 main_res_reint <- .PECHE_RVE(data = reint_ma_dat, pred_int = 67)
 main_res_reint
+
+main_res_reint_95PI <- .PECHE_RVE(data = reint_ma_dat, pred_int = 95)
+c(`95% PI lower (reint)` = main_res_reint_95PI$pi_lb_95, `95% PI upper (reint)` = main_res_reint_95PI$pi_ub_95)
 
 main_res_reint$avg_effect
 c(main_res_reint$LL, main_res_reint$UL)
@@ -584,9 +586,9 @@ V_mat <-
 
 
 # Checking correct v_mat
-blsplit(V_mat, reint_ma_dat$study) |> 
-  lapply(cov2cor) |> 
-  map(~ round(.x, 2))
+#blsplit(V_mat, reint_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 outcome_obj <- 
   metafor::rma.mv(
@@ -1224,7 +1226,7 @@ mental_ma_dat <-
 
 attr(mental_ma_dat, "data_name") <- "mental_ma_dat"
 
-saveRDS(mental_ma_dat, "mental_ma_dat.rds")
+#saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 
 ```
 
@@ -1275,6 +1277,9 @@ res_c_mental
 
 main_res_mental <- .PECHE_RVE(data = mental_ma_dat, pred_int = 67)
 main_res_mental
+
+main_res_mental_95PI <- .PECHE_RVE(data = mental_ma_dat, pred_int = 95)
+c(`95% PI lower (mental)` = main_res_mental_95PI$pi_lb_95, `95% PI upper (mental)` = main_res_mental_95PI$pi_ub_95)
 
 main_res_mental$avg_effect
 c(main_res_mental$LL, main_res_mental$UL)
@@ -1562,9 +1567,9 @@ V_mat_mental <-
 
 
 # Checking correct v_mat
-blsplit(V_mat_mental, mental_ma_dat$study) |> 
-  lapply(cov2cor) |> 
-  map(~ round(.x, 2))
+#blsplit(V_mat_mental, mental_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 outcome_obj_mental <- 
   metafor::rma.mv(
@@ -1588,21 +1593,21 @@ club_wald_test <- Wald_test(outcome_obj_mental, constraints = constrain_equal(1:
 club_wald_test
 
 
-tic()
-plan(multisession, workers = parallel::detectCores()-1)
-
-cwb_test_mental <- 
-  try(
-    Wald_test_cwb(
-      full_model = outcome_obj_mental,
-      constraints = constrain_equal(1:4),
-      R = 19, 
-      seed = 26082025L
-    )
-  ); cwb_test_mental
-
-plan(sequential)
-toc()
+#tic()
+#plan(multisession, workers = parallel::detectCores()-1)
+#
+#cwb_test_mental <- 
+#  try(
+#    Wald_test_cwb(
+#      full_model = outcome_obj_mental,
+#      constraints = constrain_equal(1:4),
+#      R = 19, 
+#      seed = 26082025L
+#    )
+#  ); cwb_test_mental
+#
+#plan(sequential)
+#toc()
 
 # Continuous model
 

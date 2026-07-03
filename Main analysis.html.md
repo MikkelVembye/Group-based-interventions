@@ -2,7 +2,7 @@
 title: "Appendix C - Main analyses"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-05-11"
+date: "2026-07-03"
 format:
   html: 
     keep-md: true
@@ -186,7 +186,7 @@ reint_ma_dat <-
     duration_c = duration_in_weeks - 12,
     fu_time_c = time_after_end_intervention_weeks - 1,
     
-    country = case_match(
+    country = recode_values(
       cnt, 
       c(
         "Turkey", "Norway", "Spain", "Netherlands", 
@@ -222,7 +222,14 @@ reint_ma_dat <-
   ) |> 
   mutate(
     across(where(is.double), as.double),
-    across(where(is.integer), as.integer)
+    across(where(is.integer), as.integer),
+    alcohol_c = alcohol - mean(alcohol),
+    hope_c = hope - mean(hope),
+    lonely_c = lonely - mean(lonely),
+    self_est_c = self_est - mean(self_est),
+    social_fun_c = social_fun - mean(social_fun),
+    wellbeing_c = wellbeing - mean(wellbeing),
+    other_c = other - mean(other)
   )
 
 #reint_ma_dat <- 
@@ -235,7 +242,7 @@ reint_ma_dat <-
 
 attr(reint_ma_dat , "data_name") <- "reint_ma_dat"
 
-saveRDS(reint_ma_dat, "reint_ma_dat.rds")
+#saveRDS(reint_ma_dat, "reint_ma_dat.rds")
 ```
 ````
 :::
@@ -334,6 +341,9 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```{{r}}
 main_res_reint <- .PECHE_RVE(data = reint_ma_dat, pred_int = 67)
 main_res_reint
+
+main_res_reint_95PI <- .PECHE_RVE(data = reint_ma_dat, pred_int = 95)
+c(`95% PI lower (reint)` = main_res_reint_95PI$pi_lb_95, `95% PI upper (reint)` = main_res_reint_95PI$pi_ub_95)
 
 main_res_reint$avg_effect
 c(main_res_reint$LL, main_res_reint$UL)
@@ -457,6 +467,8 @@ pi_plot_reint +  labs(caption = paste0(round(prop_above0, 2) * 100, "% effects a
   <dbl>   <int>   <int>      <dbl>  <dbl> <dbl> <dbl>    <dbl>    <dbl> <dbl>   <dbl>   <dbl>  <dbl>
 1   0.8      46     205      0.195 0.0353 0.122 0.268  -0.0118    0.401  5.51 1.02e-5    24.9 0.0674
 # ℹ 6 more variables: omega <dbl>, sd_total <dbl>, QE <dbl>, I2 <dbl>, tau2 <dbl>, omega2 <dbl>
+95% PI lower (reint) 95% PI upper (reint) 
+          -0.2333695            0.6227890 
 [1] 0.1947098
 [1] 0.1219130 0.2675066
 [1] "t(24.9) = 5.51, p < .001"
@@ -703,9 +715,9 @@ V_mat <-
 
 
 # Checking correct v_mat
-blsplit(V_mat, reint_ma_dat$study) |> 
-  lapply(cov2cor) |> 
-  map(~ round(.x, 2))
+#blsplit(V_mat, reint_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 outcome_obj <- 
   metafor::rma.mv(
@@ -788,397 +800,6 @@ prereg_obj
 ::: {.cell-output .cell-output-stdout}
 
 ```
-$`Acarturk et al. 2022`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Baekkelund et al. 2022`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Barbic et al. 2009`
-     [,1] [,2] [,3]
-[1,]  1.0    0  0.8
-[2,]  0.0    1  0.0
-[3,]  0.8    0  1.0
-
-$`Bond et al. 2015`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Cano-Vindel et al. 2021`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14] [,15] [,16] [,17]
- [1,]  1.0  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
- [2,]  0.8  1.0  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
- [3,]  0.8  0.8  1.0  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
- [4,]  0.0  0.0  0.0  1.0  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
- [5,]  0.0  0.0  0.0  0.8  1.0  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
- [6,]  0.0  0.0  0.0  0.8  0.8  1.0  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
- [7,]  0.0  0.0  0.0  0.8  0.8  0.8  1.0  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
- [8,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  1.0  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
- [9,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  1.0   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
-[10,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   1.0   0.0   0.0   0.0   0.0   0.8   0.8   0.8
-[11,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   1.0   0.8   0.8   0.8   0.0   0.0   0.0
-[12,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   1.0   0.8   0.8   0.0   0.0   0.0
-[13,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   1.0   0.8   0.0   0.0   0.0
-[14,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   1.0   0.0   0.0   0.0
-[15,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   1.0   0.8   0.8
-[16,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   1.0   0.8
-[17,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   1.0
-[18,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[19,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[20,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[21,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[22,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
-[23,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
-[24,]  0.8  0.8  0.8  0.0  0.0  0.0  0.0  0.8  0.8   0.8   0.0   0.0   0.0   0.0   0.8   0.8   0.8
-[25,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[26,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[27,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-[28,]  0.0  0.0  0.0  0.8  0.8  0.8  0.8  0.0  0.0   0.0   0.8   0.8   0.8   0.8   0.0   0.0   0.0
-      [,18] [,19] [,20] [,21] [,22] [,23] [,24] [,25] [,26] [,27] [,28]
- [1,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
- [2,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
- [3,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
- [4,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
- [5,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
- [6,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
- [7,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
- [8,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
- [9,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
-[10,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
-[11,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[12,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[13,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[14,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[15,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
-[16,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
-[17,]   0.0   0.0   0.0   0.0   0.8   0.8   0.8   0.0   0.0   0.0   0.0
-[18,]   1.0   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[19,]   0.8   1.0   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[20,]   0.8   0.8   1.0   0.8   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[21,]   0.8   0.8   0.8   1.0   0.0   0.0   0.0   0.8   0.8   0.8   0.8
-[22,]   0.0   0.0   0.0   0.0   1.0   0.8   0.8   0.0   0.0   0.0   0.0
-[23,]   0.0   0.0   0.0   0.0   0.8   1.0   0.8   0.0   0.0   0.0   0.0
-[24,]   0.0   0.0   0.0   0.0   0.8   0.8   1.0   0.0   0.0   0.0   0.0
-[25,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   1.0   0.8   0.8   0.8
-[26,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   1.0   0.8   0.8
-[27,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   1.0   0.8
-[28,]   0.8   0.8   0.8   0.8   0.0   0.0   0.0   0.8   0.8   0.8   1.0
-
-$`Craigie & Nathan 2009`
-     [,1]
-[1,]    1
-
-$`Crawford et al. 2012`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
- [1,]  1.0  0.5  0.8  0.4  0.8  0.4  0.8  0.4  0.0   0.0   0.0   0.0
- [2,]  0.5  1.0  0.4  0.8  0.4  0.8  0.4  0.8  0.0   0.0   0.0   0.0
- [3,]  0.8  0.4  1.0  0.5  0.8  0.4  0.8  0.4  0.0   0.0   0.0   0.0
- [4,]  0.4  0.8  0.5  1.0  0.4  0.8  0.4  0.8  0.0   0.0   0.0   0.0
- [5,]  0.8  0.4  0.8  0.4  1.0  0.5  0.8  0.4  0.0   0.0   0.0   0.0
- [6,]  0.4  0.8  0.4  0.8  0.5  1.0  0.4  0.8  0.0   0.0   0.0   0.0
- [7,]  0.8  0.4  0.8  0.4  0.8  0.4  1.0  0.5  0.0   0.0   0.0   0.0
- [8,]  0.4  0.8  0.4  0.8  0.4  0.8  0.5  1.0  0.0   0.0   0.0   0.0
- [9,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0   0.5   0.8   0.4
-[10,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.5   1.0   0.4   0.8
-[11,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.8   0.4   1.0   0.5
-[12,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.4   0.8   0.5   1.0
-
-$`Druss et al. 2010`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Druss et al. 2018`
-     [,1] [,2] [,3] [,4] [,5] [,6]
-[1,]  1.0  0.0  0.0  0.8  0.0  0.0
-[2,]  0.0  1.0  0.8  0.0  0.8  0.8
-[3,]  0.0  0.8  1.0  0.0  0.8  0.8
-[4,]  0.8  0.0  0.0  1.0  0.0  0.0
-[5,]  0.0  0.8  0.8  0.0  1.0  0.8
-[6,]  0.0  0.8  0.8  0.0  0.8  1.0
-
-$`Gatz et al. 2007`
-     [,1] [,2] [,3]
-[1,]  1.0  0.8    0
-[2,]  0.8  1.0    0
-[3,]  0.0  0.0    1
-
-$`Gestel-Timmermans et al. 2012`
-     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-[1,]  1.0  0.8  0.8  0.8  0.0  0.0  0.0  0.0
-[2,]  0.8  1.0  0.8  0.8  0.0  0.0  0.0  0.0
-[3,]  0.8  0.8  1.0  0.8  0.0  0.0  0.0  0.0
-[4,]  0.8  0.8  0.8  1.0  0.0  0.0  0.0  0.0
-[5,]  0.0  0.0  0.0  0.0  1.0  0.8  0.0  0.0
-[6,]  0.0  0.0  0.0  0.0  0.8  1.0  0.0  0.0
-[7,]  0.0  0.0  0.0  0.0  0.0  0.0  1.0  0.8
-[8,]  0.0  0.0  0.0  0.0  0.0  0.0  0.8  1.0
-
-$`Gonzalez & Prihoda 2007`
-     [,1]
-[1,]    1
-
-$`Gordon et al. 2018`
-     [,1] [,2] [,3]
-[1,]    1  0.0  0.0
-[2,]    0  1.0  0.8
-[3,]    0  0.8  1.0
-
-$`Gutman et al. 2019`
-     [,1]
-[1,]    1
-
-$`Hagen et al. 2005`
-     [,1]
-[1,]    1
-
-$`Halperin et al. 2000`
-     [,1] [,2] [,3]
-[1,]    1    0    0
-[2,]    0    1    0
-[3,]    0    0    1
-
-$`Haslam et al. 2019`
-     [,1]
-[1,]    1
-
-$`Hilden et al. 2021`
-     [,1] [,2] [,3] [,4] [,5]
-[1,]    1    0  0.0  0.0  0.0
-[2,]    0    1  0.0  0.0  0.0
-[3,]    0    0  1.0  0.8  0.8
-[4,]    0    0  0.8  1.0  0.8
-[5,]    0    0  0.8  0.8  1.0
-
-$`Himle et al. 2014`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.0  0.8  0.0
-[2,]  0.0  1.0  0.0  0.8
-[3,]  0.8  0.0  1.0  0.0
-[4,]  0.0  0.8  0.0  1.0
-
-$`Jacob et al. 2010`
-     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-[1,]  1.0  0.8  0.8  0.8  0.8  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8  0.8  0.8  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8  0.8  0.8  0.8  0.8
-[4,]  0.8  0.8  0.8  1.0  0.8  0.8  0.8  0.8
-[5,]  0.8  0.8  0.8  0.8  1.0  0.8  0.8  0.8
-[6,]  0.8  0.8  0.8  0.8  0.8  1.0  0.8  0.8
-[7,]  0.8  0.8  0.8  0.8  0.8  0.8  1.0  0.8
-[8,]  0.8  0.8  0.8  0.8  0.8  0.8  0.8  1.0
-
-$`James et al. 2004`
-     [,1] [,2] [,3]
-[1,]  1.0  0.8  0.8
-[2,]  0.8  1.0  0.8
-[3,]  0.8  0.8  1.0
-
-$`Kanie et al. 2019`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Lim et al. 2020`
-     [,1]
-[1,]    1
-
-$`Lloyd-Evans et al. 2020`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Madigan et al. 2013`
-     [,1] [,2] [,3] [,4] [,5] [,6]
-[1,]  1.0  0.0  0.0  0.8  0.0  0.0
-[2,]  0.0  1.0  0.0  0.0  0.8  0.0
-[3,]  0.0  0.0  1.0  0.0  0.0  0.8
-[4,]  0.8  0.0  0.0  1.0  0.0  0.0
-[5,]  0.0  0.8  0.0  0.0  1.0  0.0
-[6,]  0.0  0.0  0.8  0.0  0.0  1.0
-
-$`McCay et al. 2006`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`McCay et al. 2007`
-     [,1] [,2] [,3]
-[1,]    1    0    0
-[2,]    0    1    0
-[3,]    0    0    1
-
-$`Michalak et al. 2015`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
- [1,]  1.0  0.5  0.8  0.4  0.8  0.4  0.8  0.4  0.0   0.0
- [2,]  0.5  1.0  0.4  0.8  0.4  0.8  0.4  0.8  0.0   0.0
- [3,]  0.8  0.4  1.0  0.5  0.8  0.4  0.8  0.4  0.0   0.0
- [4,]  0.4  0.8  0.5  1.0  0.4  0.8  0.4  0.8  0.0   0.0
- [5,]  0.8  0.4  0.8  0.4  1.0  0.5  0.8  0.4  0.0   0.0
- [6,]  0.4  0.8  0.4  0.8  0.5  1.0  0.4  0.8  0.0   0.0
- [7,]  0.8  0.4  0.8  0.4  0.8  0.4  1.0  0.5  0.0   0.0
- [8,]  0.4  0.8  0.4  0.8  0.4  0.8  0.5  1.0  0.0   0.0
- [9,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  1.0   0.5
-[10,]  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.0  0.5   1.0
-
-$`Morley et al. 2014`
-     [,1]
-[1,]    1
-
-$`Morton et al. 2012`
-     [,1]
-[1,]    1
-
-$`Patterson et al. 2003`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Rabenstein et al. 2016`
-     [,1]
-[1,]    1
-
-$`Rosenblum et al. 2014`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8
-[4,]  0.8  0.8  0.8  1.0
-
-$`Rusch et al. 2019`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
- [1,]  1.0  0.8  0.8  0.0  0.8  0.8  0.8  0.8  0.0   0.8
- [2,]  0.8  1.0  0.8  0.0  0.8  0.8  0.8  0.8  0.0   0.8
- [3,]  0.8  0.8  1.0  0.0  0.8  0.8  0.8  0.8  0.0   0.8
- [4,]  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.8   0.0
- [5,]  0.8  0.8  0.8  0.0  1.0  0.8  0.8  0.8  0.0   0.8
- [6,]  0.8  0.8  0.8  0.0  0.8  1.0  0.8  0.8  0.0   0.8
- [7,]  0.8  0.8  0.8  0.0  0.8  0.8  1.0  0.8  0.0   0.8
- [8,]  0.8  0.8  0.8  0.0  0.8  0.8  0.8  1.0  0.0   0.8
- [9,]  0.0  0.0  0.0  0.8  0.0  0.0  0.0  0.0  1.0   0.0
-[10,]  0.8  0.8  0.8  0.0  0.8  0.8  0.8  0.8  0.0   1.0
-
-$`Russinova et al. 2018`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
- [1,]  1.0  0.0  0.8  0.0  0.8  0.8  0.0  0.8  0.0   0.8
- [2,]  0.0  1.0  0.0  0.0  0.0  0.0  0.8  0.0  0.0   0.0
- [3,]  0.8  0.0  1.0  0.0  0.8  0.8  0.0  0.8  0.0   0.8
- [4,]  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.0  0.8   0.0
- [5,]  0.8  0.0  0.8  0.0  1.0  0.8  0.0  0.8  0.0   0.8
- [6,]  0.8  0.0  0.8  0.0  0.8  1.0  0.0  0.8  0.0   0.8
- [7,]  0.0  0.8  0.0  0.0  0.0  0.0  1.0  0.0  0.0   0.0
- [8,]  0.8  0.0  0.8  0.0  0.8  0.8  0.0  1.0  0.0   0.8
- [9,]  0.0  0.0  0.0  0.8  0.0  0.0  0.0  0.0  1.0   0.0
-[10,]  0.8  0.0  0.8  0.0  0.8  0.8  0.0  0.8  0.0   1.0
-
-$`Sacks et al. 2011`
-     [,1] [,2] [,3]
-[1,]  1.0  0.8  0.8
-[2,]  0.8  1.0  0.8
-[3,]  0.8  0.8  1.0
-
-$`Sajatovic et al. 2009`
-     [,1] [,2] [,3]
-[1,]  1.0  0.8  0.8
-[2,]  0.8  1.0  0.8
-[3,]  0.8  0.8  1.0
-
-$`Schafer et al. 2019`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14] [,15] [,16] [,17]
- [1,] 1.00 0.49 0.80 0.39 0.80 0.39 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80
- [2,] 0.49 1.00 0.39 0.80 0.39 0.80 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39
- [3,] 0.80 0.39 1.00 0.49 0.80 0.39 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80
- [4,] 0.39 0.80 0.49 1.00 0.39 0.80 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39
- [5,] 0.80 0.39 0.80 0.39 1.00 0.49 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80
- [6,] 0.39 0.80 0.39 0.80 0.49 1.00 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39
- [7,] 0.80 0.39 0.80 0.39 0.80 0.39 1.00 0.49 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80
- [8,] 0.39 0.80 0.39 0.80 0.39 0.80 0.49 1.00 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39
- [9,] 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39 1.00  0.49  0.80  0.39  0.80  0.39  0.80  0.39  0.80
-[10,] 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.49  1.00  0.39  0.80  0.39  0.80  0.39  0.80  0.39
-[11,] 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80  0.39  1.00  0.49  0.80  0.39  0.80  0.39  0.80
-[12,] 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39  0.80  0.49  1.00  0.39  0.80  0.39  0.80  0.39
-[13,] 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80  0.39  0.80  0.39  1.00  0.49  0.80  0.39  0.80
-[14,] 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39  0.80  0.39  0.80  0.49  1.00  0.39  0.80  0.39
-[15,] 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  1.00  0.49  0.80
-[16,] 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.49  1.00  0.39
-[17,] 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  1.00
-[18,] 0.39 0.80 0.39 0.80 0.39 0.80 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.49
-      [,18]
- [1,]  0.39
- [2,]  0.80
- [3,]  0.39
- [4,]  0.80
- [5,]  0.39
- [6,]  0.80
- [7,]  0.39
- [8,]  0.80
- [9,]  0.39
-[10,]  0.80
-[11,]  0.39
-[12,]  0.80
-[13,]  0.39
-[14,]  0.80
-[15,]  0.39
-[16,]  0.80
-[17,]  0.49
-[18,]  1.00
-
-$`Schrank et al. 2016`
-     [,1] [,2] [,3] [,4] [,5]
-[1,]  1.0  0.8  0.0  0.0  0.0
-[2,]  0.8  1.0  0.0  0.0  0.0
-[3,]  0.0  0.0  1.0  0.8  0.8
-[4,]  0.0  0.0  0.8  1.0  0.8
-[5,]  0.0  0.0  0.8  0.8  1.0
-
-$`Smith et al. 2021`
-     [,1]
-[1,]    1
-
-$`Somers et al. 2017`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.8    0    0
-[2,]  0.8  1.0    0    0
-[3,]  0.0  0.0    1    0
-[4,]  0.0  0.0    0    1
-
-$`Tjaden et al. 2021`
-     [,1] [,2] [,3] [,4] [,5] [,6]
-[1,]  1.0  0.0  0.0  0.8  0.0  0.0
-[2,]  0.0  1.0  0.0  0.0  0.8  0.0
-[3,]  0.0  0.0  1.0  0.0  0.0  0.8
-[4,]  0.8  0.0  0.0  1.0  0.0  0.0
-[5,]  0.0  0.8  0.0  0.0  1.0  0.0
-[6,]  0.0  0.0  0.8  0.0  0.0  1.0
-
-$`Valiente et al. 2022`
-     [,1] [,2] [,3] [,4] [,5] [,6] [,7]
-[1,]  1.0  0.8  0.8  0.8  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8  0.8  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8  0.8  0.8  0.8
-[4,]  0.8  0.8  0.8  1.0  0.8  0.8  0.8
-[5,]  0.8  0.8  0.8  0.8  1.0  0.8  0.8
-[6,]  0.8  0.8  0.8  0.8  0.8  1.0  0.8
-[7,]  0.8  0.8  0.8  0.8  0.8  0.8  1.0
-
-$`Volpe et al. 2015`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Wojtalik et al. 2022`
-     [,1]
-[1,]    1
-
-$`Wuthrich & Rapee 2013`
-     [,1]
-[1,]    1
-
 
 Multivariate Meta-Analysis Model (k = 205; method: REML)
 
@@ -1324,6 +945,7 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 :::
 :::
 
+
 ### Theory and methods tables
 
 ::: {.cell}
@@ -1345,56 +967,56 @@ arg_tbl <-
         
         "schizophrenia_in_sample",
         paste0(
-          "schizophrenia_in_sample;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "schizophrenia_in_sample;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "CBT_intervention",
         paste0(
-          "CBT_intervention;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "CBT_intervention;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "prereg_chr", 
         paste0(
-          "prereg_chr;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "prereg_chr;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;clinical_c;tot_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "test_type",
-        paste0(
-          "test_type;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+      paste0(
+          "test_type;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;tot_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "analysis_strategy",
         paste0(
-          "analysis_strategy;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "analysis_strategy;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "QES_design",
         paste0(
-          "QES_design;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "QES_design;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;crt_grp_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "control_modified",
         paste0(
-          "control_modified;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "control_modified;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;rob_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "risk_of_bias", 
         paste0(
-          "risk_of_bias;alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "risk_of_bias;alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         )
@@ -1432,13 +1054,14 @@ arg_list_tbl <-
   pmap(.l = arg_tbl_all, .f = .rma_arg_tbl, data = reint_ma_dat) |> 
   list_rbind() |> 
   mutate(
-    R = 10,
+    R = 1999L,
     seed = 26082025L
   )
 
 
 arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 
+# MAIN RESULTS ARE MADE HERE - remove # to run
 #tic()
 #plan(multisession)
 #reint_cwb_res <- 
@@ -1446,135 +1069,29 @@ arg_list_tbl_rho08 <- arg_list_tbl |> filter(rho == 0.8 & var == "vgt_pop")
 #    .l = arg_list_tbl_rho08, 
 #    .f = .PESCE_RVE, 
 #    return_rma_obj = FALSE,
-#    CWB = TRUE,
-#  ); reint_cwb_res
+#    CWB = TRUE
+#  )
 #plan(sequential)
 #toc()
-#
+
+#reint_cwb_res
+##
 #saveRDS(reint_cwb_res, file = "Bootstrap results/reint_cwb_res.rds")
 
 reint_cwb_res <- readRDS("Bootstrap results/reint_cwb_res.rds")
 
 # Obtaining HTZ value for CBT intervention res
-pmap(
-    .l = arg_list_tbl_rho08[6,], 
+non_converged_wildmeta <- 
+  pmap(
+    .l = arg_list_tbl_rho08[c(12, 14),], 
     .f = .PESCE_RVE, 
     return_rma_obj = FALSE,
     CWB = FALSE
   )
 
-# Working around convergence issue with CBT_intervention with controls
+reint_cwb_res[[12]] <- non_converged_wildmeta[[1]]
+reint_cwb_res[[14]] <- non_converged_wildmeta[[2]]
 
-#rho <- 0.8
-#V_mat_cbt <- 
-#  metafor::vcalc(
-#    data = reint_ma_dat,
-#    vi = vgt_pop, 
-#    cluster = study,
-#    subgroup = CBT_intervention,
-#    type = outcome_time,
-#    grp1 = trt_name,
-#    w1 = N_t,
-#    grp2 = control,
-#    w2 = N_c, 
-#    rho = rho
-#  )
-#
-# Strategy for overcoming non-convergence 
-#optimizers <- c("nlminb","nloptr","Rvmmin","BFGS")
-#raw_res <- "Non-converged"
-#i <- 1L
-#
-## Fitting the main model
-#while (!inherits(raw_res, "rma.mv") & i <= 4L) {
-#  
-#  raw_res <- tryCatch(
-#    suppressWarnings(
-#      metafor::rma.mv(
-#        gt_pop ~ CBT_intervention + alcohol + hope + lonely + self_est + 
-#          social_fun + wellbeing + other + schizo_c + prereg_c + clinical_c + 
-#          tot_c + qes_c + crt_grp_c + rob_c + age_c + sessions_c + 
-#          duration_c + fu_time_c - 1,
-#        V = V_mat_cbt,
-#        random = list(~CBT_intervention | study, ~CBT_intervention | esid), 
-#        struct = c("DIAG", "DIAG"),
-#        data = reint_ma_dat,
-#        sparse = TRUE,
-#        control = list(optimizer= optimizers[i])
-#      )
-#    ),
-#    error = function(e) "Non-converged"
-#  )
-#  i <- i + 1L
-#  
-#}
-
-#noncon_res <- .Wald_test_cwb_fun(
-#  rma_fun_obj = raw_res,
-#  seq_c = 1:2, 
-#  reps = 12,
-#  seed_num = 10112025
-#)
-#
-#wildmeta::Wald_test_cwb(
-#  full_model = raw_res,
-#  constraints = wildmeta::constrain_equal(1:2),
-#  R = 10,
-#  auxiliary_dist = "Rademacher",
-#  seed = 10112025,
-#  future_args = list(future.stdout = FALSE, future.conditions = character(0L))
-#)
-
-#opts <- furrr::furrr_options(
-#  stdout = FALSE,        # don't forward cat/print output
-#  conditions = NULL,      # don't forward messages/warnings
-#  seed = TRUE
-#)
-#
-#n_workers <- max(1L, future::availableCores() - 1L)
-#
-#
-#future::plan(future::multisession, workers = n_workers)
-#tic()
-#main_res <- 
-#  future_pmap(
-#    .l = arg_list_tbl_rho08[1:2,], 
-#    .f = .PESCE_RVE, 
-#    return_rma_obj = FALSE,
-#    CWB = FALSE,
-#    .options = opts,
-#    .progress = TRUE
-#  ); main_res
-#toc()
-#
-#future::plan(future::sequential)
-#future::plan()
-
-
-#rho <- 0.8
-#
-#V_mat <- 
-#  metafor::vcalc(
-#    data = reint_ma_dat,
-#    vi = vgt_pop, 
-#    cluster = study,
-#    type = outcome_time, 
-#    grp1 = trt_name,
-#    w1 = N_t, 
-#    grp2 = control,
-#    w2 = N_c, 
-#    rho = rho
-#  )
-#
-#future::plan(future::multisession, workers = n_workers)
-#wildmeta::Wald_test_cwb(
-#  full_model = outcome_obj,
-#  constraints = wildmeta::constrain_equal(1:7),
-#  R = 10,
-#  seed = 26082025L
-#)
-#future::plan(future::sequential)
-#future::plan()
 
 ## Country effects
 
@@ -1610,17 +1127,6 @@ cnt_res_reint[[1]]
 ::: {.cell-output .cell-output-stdout}
 
 ```
-[[1]]
-# A tibble: 4 × 21
-  Characteric    Moderator studies effects avg_effect_ci   pval df_satt SD_total   rho wald_compared
-  <chr>          <chr>       <dbl>   <dbl> <chr>          <dbl>   <dbl>    <dbl> <dbl> <chr>        
-1 CBT_intervent… Cbt inte…      46     205 <NA>          NA        NA      NA      0.8 <NA>         
-2 CBT_intervent… CBT            12      55 0.36 [0.15, …  0.009     3.8     0.15   0.8 <NA>         
-3 CBT_intervent… Other          35     150 0.25 [0, 0.5]  0.048     3.4     0.2    0.8 <NA>         
-4 CBT_intervent… Wald tes…      NA      NA F(1, 13.1) =…  0.162    NA      NA      0.8 1,2          
-# ℹ 11 more variables: controls <chr>, control_vars <chr>, optimizer <chr>, avg_effect <dbl>,
-#   LL <dbl>, UL <dbl>, tau2 <dbl>, omega2 <dbl>, t_val <dbl>, table <chr>, effect_size <chr>
-
 # A tibble: 6 × 21
   Characteric Moderator    studies effects avg_effect_ci   pval df_satt SD_total   rho wald_compared
   <chr>       <chr>          <dbl>   <dbl> <chr>          <dbl>   <dbl>    <dbl> <dbl> <chr>        
@@ -1715,7 +1221,7 @@ methods_res_table <-
     missing_text = ""         
   ); methods_res_table
 
-methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
+#methods_res_table |> gtsave("Tables/methods_res_table_reint.docx")
 ```
 ````
 :::
@@ -1748,7 +1254,7 @@ arg_tbl_contin <-
         
         paste0(
           "age_c;male_c;sessions_c;duration_c;fu_time_c;",
-          "alcohol;hope;lonely;self_est;social_fun;wellbeing;other;",
+          "alcohol_c;hope_c;lonely_c;self_est_c;social_fun_c;wellbeing_c;other_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;crt_grp_c"
         )
       ),
@@ -1873,7 +1379,7 @@ continuous_res_reint
  4 Duration          <NA>             <NA>             <NA>            -0.003 (… <NA>      0 (0.002)
  5 Follow-up timing  <NA>             <NA>             <NA>            <NA>      0 (0.001… 0 (0.001…
  6 <NA>              <NA>             <NA>             <NA>            <NA>      <NA>      <NA>     
- 7 Intercept         0.191 (0.038)*** 0.204 (0.037)*** 0.19 (0.037)*** 0.213 (0… 0.197 (0… 0.293 (0…
+ 7 Intercept         0.191 (0.038)*** 0.204 (0.037)*** 0.19 (0.037)*** 0.213 (0… 0.197 (0… 0.204 (0…
  8 Study-level SD    0.072            0.079            0.074           0.056     0.067     0        
  9 Effect-level SD   0.193            0.193            0.193           0.194     0.194     0.182    
 10 Total SD          0.206            0.208            0.207           0.202     0.205     0.182    
@@ -2430,7 +1936,7 @@ reint_contin_res_table
 <td headers="Model 3" class="gt_row gt_left">0.19 (0.037)***</td>
 <td headers="Model 4" class="gt_row gt_left">0.213 (0.039)***</td>
 <td headers="Model 5" class="gt_row gt_left">0.197 (0.033)***</td>
-<td headers="Model 6" class="gt_row gt_left">0.293 (0.064)*L</td></tr>
+<td headers="Model 6" class="gt_row gt_left">0.204 (0.035)***</td></tr>
     <tr><td headers="Moderators" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">Study-level SD</td>
 <td headers="Model 1" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">0.072</td>
 <td headers="Model 2" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">0.079</td>
@@ -2609,13 +2115,19 @@ mental_ma_dat <-
   ) |> 
   mutate(
     across(where(is.double), as.double),
-    across(where(is.integer), as.integer)
+    across(where(is.integer), as.integer),
+
+    # Centering
+    anxiety_c = anxiety - mean(anxiety),
+    depression_c = depression - mean(depression),
+    gen_mental_c = gen_mental - mean(gen_mental),
+    symptoms_c = symptoms - mean(symptoms)
   )
 
 
 attr(mental_ma_dat, "data_name") <- "mental_ma_dat"
 
-saveRDS(mental_ma_dat, "mental_ma_dat.rds")
+#saveRDS(mental_ma_dat, "mental_ma_dat.rds")
 ```
 ````
 :::
@@ -2711,6 +2223,9 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```{{r}}
 main_res_mental <- .PECHE_RVE(data = mental_ma_dat, pred_int = 67)
 main_res_mental
+
+main_res_mental_95PI <- .PECHE_RVE(data = mental_ma_dat, pred_int = 95)
+c(`95% PI lower (mental)` = main_res_mental_95PI$pi_lb_95, `95% PI upper (mental)` = main_res_mental_95PI$pi_ub_95)
 
 main_res_mental$avg_effect
 c(main_res_mental$LL, main_res_mental$UL)
@@ -2836,6 +2351,8 @@ pi_plot_mental + labs(caption = paste0(round(prop_above0, 2) * 100, "% effects a
   <dbl>   <int>   <int>      <dbl>  <dbl>  <dbl> <dbl>    <dbl>    <dbl> <dbl>   <dbl>   <dbl> <dbl>
 1   0.8      42     144      0.215 0.0617 0.0897 0.340   -0.120    0.549  3.48 0.00129    37.5 0.298
 # ℹ 6 more variables: omega <dbl>, sd_total <dbl>, QE <dbl>, I2 <dbl>, tau2 <dbl>, omega2 <dbl>
+95% PI lower (mental) 95% PI upper (mental) 
+           -0.4723936             0.9015769 
 [1] 0.2145916
 [1] 0.08965937 0.33952387
 [1] "t(37.5) = 3.48, p = .001"
@@ -3016,7 +2533,7 @@ plot_mental <-
   facet_grid(~analysis_plan) +
   geom_text(data = kj_label_mental, aes(x = max_ciu_mental + 0.6, label = label), size=3.3, color = "black") +
   geom_vline(data = mean_label_dat_mental, aes(xintercept = mean_es), color = "black", linetype = 4) +
-  geom_blank(aes(max_ciu + 0.6 + 0.4)) +
+  geom_blank(aes(max_ciu_mental + 0.6 + 0.4)) +
   geom_polygon(aes(x=sum.x_mental, y=sum.y_mental), color = "black", alpha = 1) +
   theme_light() + 
   theme(
@@ -3073,9 +2590,9 @@ V_mat_mental <-
 
 
 # Checking correct v_mat
-blsplit(V_mat_mental, mental_ma_dat$study) |> 
-  lapply(cov2cor) |> 
-  map(~ round(.x, 2))
+#blsplit(V_mat_mental, mental_ma_dat$study) |> 
+#  lapply(cov2cor) |> 
+#  map(~ round(.x, 2))
 
 outcome_obj_mental <- 
   metafor::rma.mv(
@@ -3099,21 +2616,21 @@ club_wald_test <- Wald_test(outcome_obj_mental, constraints = constrain_equal(1:
 club_wald_test
 
 
-tic()
-plan(multisession, workers = parallel::detectCores()-1)
-
-cwb_test_mental <- 
-  try(
-    Wald_test_cwb(
-      full_model = outcome_obj_mental,
-      constraints = constrain_equal(1:4),
-      R = 19, 
-      seed = 26082025L
-    )
-  ); cwb_test_mental
-
-plan(sequential)
-toc()
+#tic()
+#plan(multisession, workers = parallel::detectCores()-1)
+#
+#cwb_test_mental <- 
+#  try(
+#    Wald_test_cwb(
+#      full_model = outcome_obj_mental,
+#      constraints = constrain_equal(1:4),
+#      R = 19, 
+#      seed = 26082025L
+#    )
+#  ); cwb_test_mental
+#
+#plan(sequential)
+#toc()
 
 # Continuous model
 
@@ -3158,295 +2675,6 @@ prereg_obj_mental
 ::: {.cell-output .cell-output-stdout}
 
 ```
-$`Acarturk et al. 2022`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8
-[4,]  0.8  0.8  0.8  1.0
-
-$`Baekkelund et al. 2022`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Cano-Vindel et al. 2021`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12]
- [1,]  1.0  0.0  0.0  0.8  0.0  0.0  0.8  0.0  0.0   0.8   0.0   0.0
- [2,]  0.0  1.0  0.0  0.0  0.8  0.0  0.0  0.8  0.0   0.0   0.8   0.0
- [3,]  0.0  0.0  1.0  0.0  0.0  0.8  0.0  0.0  0.8   0.0   0.0   0.8
- [4,]  0.8  0.0  0.0  1.0  0.0  0.0  0.8  0.0  0.0   0.8   0.0   0.0
- [5,]  0.0  0.8  0.0  0.0  1.0  0.0  0.0  0.8  0.0   0.0   0.8   0.0
- [6,]  0.0  0.0  0.8  0.0  0.0  1.0  0.0  0.0  0.8   0.0   0.0   0.8
- [7,]  0.8  0.0  0.0  0.8  0.0  0.0  1.0  0.0  0.0   0.8   0.0   0.0
- [8,]  0.0  0.8  0.0  0.0  0.8  0.0  0.0  1.0  0.0   0.0   0.8   0.0
- [9,]  0.0  0.0  0.8  0.0  0.0  0.8  0.0  0.0  1.0   0.0   0.0   0.8
-[10,]  0.8  0.0  0.0  0.8  0.0  0.0  0.8  0.0  0.0   1.0   0.0   0.0
-[11,]  0.0  0.8  0.0  0.0  0.8  0.0  0.0  0.8  0.0   0.0   1.0   0.0
-[12,]  0.0  0.0  0.8  0.0  0.0  0.8  0.0  0.0  0.8   0.0   0.0   1.0
-
-$`Craigie & Nathan 2009`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Crawford et al. 2012`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.5  0.8  0.4
-[2,]  0.5  1.0  0.4  0.8
-[3,]  0.8  0.4  1.0  0.5
-[4,]  0.4  0.8  0.5  1.0
-
-$`Dyck et al. 2000`
-     [,1]
-[1,]    1
-
-$`Gatz et al. 2007`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Gestel-Timmermans et al. 2012`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Gonzalez & Prihoda 2007`
-     [,1]
-[1,]    1
-
-$`Gordon et al. 2018`
-     [,1]
-[1,]    1
-
-$`Gutman et al. 2019`
-     [,1]
-[1,]    1
-
-$`Hagen et al. 2005`
-     [,1] [,2] [,3]
-[1,]    1    0    0
-[2,]    0    1    0
-[3,]    0    0    1
-
-$`Halperin et al. 2000`
-     [,1] [,2] [,3]
-[1,]  1.0    0  0.8
-[2,]  0.0    1  0.0
-[3,]  0.8    0  1.0
-
-$`Haslam et al. 2019`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Hilden et al. 2021`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Himle et al. 2014`
-     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-[1,]  1.0  0.8  0.8  0.0  0.8  0.8  0.8  0.0
-[2,]  0.8  1.0  0.8  0.0  0.8  0.8  0.8  0.0
-[3,]  0.8  0.8  1.0  0.0  0.8  0.8  0.8  0.0
-[4,]  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.8
-[5,]  0.8  0.8  0.8  0.0  1.0  0.8  0.8  0.0
-[6,]  0.8  0.8  0.8  0.0  0.8  1.0  0.8  0.0
-[7,]  0.8  0.8  0.8  0.0  0.8  0.8  1.0  0.0
-[8,]  0.0  0.0  0.0  0.8  0.0  0.0  0.0  1.0
-
-$`Jacob et al. 2010`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`James et al. 2004`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Kanie et al. 2019`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Lim et al. 2020`
-     [,1] [,2] [,3] [,4] [,5]
-[1,]  1.0  0.8  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8  0.8
-[4,]  0.8  0.8  0.8  1.0  0.8
-[5,]  0.8  0.8  0.8  0.8  1.0
-
-$`Lloyd-Evans et al. 2020`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Madigan et al. 2013`
-     [,1] [,2] [,3] [,4] [,5] [,6]
-[1,]  1.0  0.0  0.0  0.8  0.0  0.0
-[2,]  0.0  1.0  0.0  0.0  0.8  0.0
-[3,]  0.0  0.0  1.0  0.0  0.0  0.8
-[4,]  0.8  0.0  0.0  1.0  0.0  0.0
-[5,]  0.0  0.8  0.0  0.0  1.0  0.0
-[6,]  0.0  0.0  0.8  0.0  0.0  1.0
-
-$`McCay et al. 2006`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Michalak et al. 2015`
-     [,1] [,2] [,3] [,4]
-[1,] 1.00 0.41  1.0  0.4
-[2,] 0.41 1.00  0.4  1.0
-[3,] 1.00 0.40  1.0  0.4
-[4,] 0.40 1.00  0.4  1.0
-
-$`Morley et al. 2014`
-     [,1] [,2] [,3]
-[1,]    1    0    0
-[2,]    0    1    0
-[3,]    0    0    1
-
-$`Morton et al. 2012`
-     [,1] [,2] [,3] [,4]
-[1,]  1.0  0.8  0.8  0.8
-[2,]  0.8  1.0  0.8  0.8
-[3,]  0.8  0.8  1.0  0.8
-[4,]  0.8  0.8  0.8  1.0
-
-$`Patterson et al. 2003`
-     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8]
-[1,]  1.0  0.8  0.8  0.0  0.8  0.8  0.8  0.0
-[2,]  0.8  1.0  0.8  0.0  0.8  0.8  0.8  0.0
-[3,]  0.8  0.8  1.0  0.0  0.8  0.8  0.8  0.0
-[4,]  0.0  0.0  0.0  1.0  0.0  0.0  0.0  0.8
-[5,]  0.8  0.8  0.8  0.0  1.0  0.8  0.8  0.0
-[6,]  0.8  0.8  0.8  0.0  0.8  1.0  0.8  0.0
-[7,]  0.8  0.8  0.8  0.0  0.8  0.8  1.0  0.0
-[8,]  0.0  0.0  0.0  0.8  0.0  0.0  0.0  1.0
-
-$`Popolo et al. 2019`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Rabenstein et al. 2016`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Rusch et al. 2019`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Sacks et al. 2011`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Sajatovic et al. 2009`
-     [,1] [,2] [,3] [,4] [,5] [,6]
-[1,]  1.0  0.0  0.8  0.0  0.8  0.0
-[2,]  0.0  1.0  0.0  0.8  0.0  0.8
-[3,]  0.8  0.0  1.0  0.0  0.8  0.0
-[4,]  0.0  0.8  0.0  1.0  0.0  0.8
-[5,]  0.8  0.0  0.8  0.0  1.0  0.0
-[6,]  0.0  0.8  0.0  0.8  0.0  1.0
-
-$`Saloheimo et al. 2016`
-     [,1]
-[1,]    1
-
-$`Schafer et al. 2019`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14] [,15] [,16] [,17]
- [1,] 1.00 0.49 0.80 0.39 0.80 0.39 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [2,] 0.49 1.00 0.39 0.80 0.39 0.80 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [3,] 0.80 0.39 1.00 0.49 0.80 0.39 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [4,] 0.39 0.80 0.49 1.00 0.39 0.80 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [5,] 0.80 0.39 0.80 0.39 1.00 0.49 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [6,] 0.39 0.80 0.39 0.80 0.49 1.00 0.00 0.00 0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
- [7,] 0.00 0.00 0.00 0.00 0.00 0.00 1.00 0.49 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80
- [8,] 0.00 0.00 0.00 0.00 0.00 0.00 0.49 1.00 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39
- [9,] 0.00 0.00 0.00 0.00 0.00 0.00 0.80 0.39 1.00  0.49  0.80  0.39  0.80  0.39  0.80  0.39  0.80
-[10,] 0.00 0.00 0.00 0.00 0.00 0.00 0.39 0.80 0.49  1.00  0.39  0.80  0.39  0.80  0.39  0.80  0.39
-[11,] 0.00 0.00 0.00 0.00 0.00 0.00 0.80 0.39 0.80  0.39  1.00  0.49  0.80  0.39  0.80  0.39  0.80
-[12,] 0.00 0.00 0.00 0.00 0.00 0.00 0.39 0.80 0.39  0.80  0.49  1.00  0.39  0.80  0.39  0.80  0.39
-[13,] 0.00 0.00 0.00 0.00 0.00 0.00 0.80 0.39 0.80  0.39  0.80  0.39  1.00  0.49  0.80  0.39  0.80
-[14,] 0.00 0.00 0.00 0.00 0.00 0.00 0.39 0.80 0.39  0.80  0.39  0.80  0.49  1.00  0.39  0.80  0.39
-[15,] 0.00 0.00 0.00 0.00 0.00 0.00 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  1.00  0.49  0.80
-[16,] 0.00 0.00 0.00 0.00 0.00 0.00 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.49  1.00  0.39
-[17,] 0.00 0.00 0.00 0.00 0.00 0.00 0.80 0.39 0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.39  1.00
-[18,] 0.00 0.00 0.00 0.00 0.00 0.00 0.39 0.80 0.39  0.80  0.39  0.80  0.39  0.80  0.39  0.80  0.49
-      [,18]
- [1,]  0.00
- [2,]  0.00
- [3,]  0.00
- [4,]  0.00
- [5,]  0.00
- [6,]  0.00
- [7,]  0.39
- [8,]  0.80
- [9,]  0.39
-[10,]  0.80
-[11,]  0.39
-[12,]  0.80
-[13,]  0.39
-[14,]  0.80
-[15,]  0.39
-[16,]  0.80
-[17,]  0.49
-[18,]  1.00
-
-$`Schrank et al. 2016`
-     [,1]
-[1,]    1
-
-$`Smith et al. 2021`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Somers et al. 2017`
-     [,1]
-[1,]    1
-
-$`Tjaden et al. 2021`
-     [,1] [,2]
-[1,]  1.0  0.8
-[2,]  0.8  1.0
-
-$`Valiente et al. 2022`
-      [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9]
- [1,]  1.0  0.8  0.8  0.8  0.8  0.8  0.8  0.8  0.8
- [2,]  0.8  1.0  0.8  0.8  0.8  0.8  0.8  0.8  0.8
- [3,]  0.8  0.8  1.0  0.8  0.8  0.8  0.8  0.8  0.8
- [4,]  0.8  0.8  0.8  1.0  0.8  0.8  0.8  0.8  0.8
- [5,]  0.8  0.8  0.8  0.8  1.0  0.8  0.8  0.8  0.8
- [6,]  0.8  0.8  0.8  0.8  0.8  1.0  0.8  0.8  0.8
- [7,]  0.8  0.8  0.8  0.8  0.8  0.8  1.0  0.8  0.8
- [8,]  0.8  0.8  0.8  0.8  0.8  0.8  0.8  1.0  0.8
- [9,]  0.8  0.8  0.8  0.8  0.8  0.8  0.8  0.8  1.0
-
-$`Volpe et al. 2015`
-     [,1] [,2]
-[1,]    1    0
-[2,]    0    1
-
-$`Wojtalik et al. 2022`
-     [,1]
-[1,]    1
-
-$`Wuthrich & Rapee 2013`
-     [,1] [,2] [,3]
-[1,]  1.0    0  0.8
-[2,]  0.0    1  0.0
-[3,]  0.8    0  1.0
-
 
 Multivariate Meta-Analysis Model (k = 144; method: REML)
 
@@ -3501,9 +2729,6 @@ Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
  test Fstat df_num df_denom p_val sig
   HTZ  1.02      3     14.3 0.411    
-  Test Adjustment CR_type Statistic  R     p_val
-1  CWB        CR0     CR0   Naive-F 19 0.4210526
-35.35 sec elapsed
 
 Multivariate Meta-Analysis Model (k = 144; method: REML)
 
@@ -3604,56 +2829,56 @@ arg_tbl_mental <-
         
         "schizophrenia_in_sample",
         paste0(
-          "schizophrenia_in_sample;anxiety;depression;gen_mental;symptoms;",
+          "schizophrenia_in_sample;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "cbt_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "CBT_intervention",
         paste0(
-          "CBT_intervention;anxiety;depression;gen_mental;symptoms;",
+          "CBT_intervention;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;prereg_c;clinical_c;tot_c;qes_c;",
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "prereg_chr", 
         paste0(
-          "prereg_chr;anxiety;depression;gen_mental;symptoms;",
+          "prereg_chr;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "test_type",
         paste0(
-          "test_type;anxiety;depression;gen_mental;symptoms;",
+          "test_type;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "analysis_strategy",
         paste0(
-          "analysis_strategy;anxiety;depression;gen_mental;symptoms;",
+          "analysis_strategy;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "QES_design",
         paste0(
-          "QES_design;anxiety;depression;gen_mental;symptoms;",
+          "QES_design;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "control_modified",
         paste0(
-          "control_modified;anxiety;depression;gen_mental;symptoms;",
+          "control_modified;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         ),
         
         "risk_of_bias", 
         paste0(
-          "risk_of_bias;anxiety;depression;gen_mental;symptoms;",
+          "risk_of_bias;anxiety_c;depression_c;gen_mental_c;symptoms_c;",
           "schizo_c;cbt_c;prereg_c;clinical_c;tot_c;qes_c;", 
           "age_c;sessions_c;duration_c;fu_time_c"
         )
@@ -3698,7 +2923,7 @@ arg_list_tbl_mental <-
 
 arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "vgt_pop")
 
-# MAIN MODERATOR RESULTS MADE HERE
+# MAIN MODERATOR RESULTS MADE HERE - REMOVE # to run
 #tic()
 #plan(multisession)
 #mental_cwb_res <- 
@@ -3714,14 +2939,6 @@ arg_list_tbl_rho08_mental <- arg_list_tbl_mental |> filter(rho == 0.8 & var == "
 #saveRDS(mental_cwb_res, file = "Bootstrap results/mental_cwb_res.rds")
 
 res_mental <- readRDS("Bootstrap results/mental_cwb_res.rds")
-
-# Obtaining HTZ value for schizophrenia indicator
-pmap(
-    .l = arg_list_tbl_rho08_mental[4,], 
-    .f = .PESCE_RVE, 
-    return_rma_obj = FALSE,
-    CWB = FALSE
-  )
 
 
 #opts <- furrr::furrr_options(
@@ -3799,17 +3016,6 @@ cnt_res_mental[[1]]
 ::: {.cell-output .cell-output-stdout}
 
 ```
-[[1]]
-# A tibble: 4 × 21
-  Characteric    Moderator studies effects avg_effect_ci   pval df_satt SD_total   rho wald_compared
-  <chr>          <chr>       <dbl>   <dbl> <chr>          <dbl>   <dbl>    <dbl> <dbl> <chr>        
-1 schizophrenia… Schizoph…      42     144 <NA>          NA        NA      NA      0.8 <NA>         
-2 schizophrenia… Yes             7      14 0.22 [0, 0.4…  0.047     7.3     0      0.8 <NA>         
-3 schizophrenia… No             35     130 0.19 [0.03, …  0.026     8.2     0.27   0.8 <NA>         
-4 schizophrenia… Wald tes…      NA      NA F(1, 9.15) =…  0.763    NA      NA      0.8 1,2          
-# ℹ 11 more variables: controls <chr>, control_vars <chr>, optimizer <chr>, avg_effect <dbl>,
-#   LL <dbl>, UL <dbl>, tau2 <dbl>, omega2 <dbl>, t_val <dbl>, table <chr>, effect_size <chr>
-
 # A tibble: 6 × 21
   Characteric Moderator    studies effects avg_effect_ci   pval df_satt SD_total   rho wald_compared
   <chr>       <chr>          <dbl>   <dbl> <chr>          <dbl>   <dbl>    <dbl> <dbl> <chr>        
@@ -3869,7 +3075,27 @@ main_res_table_mental <-
     missing_text = ""         
   ); main_res_table_mental
 
-#main_res_table_mental |> gtsave("Tables/main_res_table_mental.docx")
+#out_file_main_mental <- "Tables/main_res_table_mental.docx"
+#dir.create("Tables", showWarnings = FALSE, recursive = TRUE)
+#
+#tryCatch(
+#  {
+#    if (file.exists(out_file_main_mental)) unlink(out_file_main_mental)
+#    main_res_table_mental |> gtsave(out_file_main_mental)
+#  },
+#  error = function(e) {
+#    fallback_file <- file.path(
+#      "Tables",
+#      paste0("main_res_table_mental_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".docx")
+#    )
+#    main_res_table_mental |> gtsave(fallback_file)
+#    warning(paste0(
+#      "Could not overwrite ", out_file_main_mental,
+#      ". Saved table to ", fallback_file,
+#      ". Close the target DOCX file if it is open and rerun to overwrite."
+#    ))
+#  }
+#)
 
 wider_dat_methods_factors_mental <- 
   res_mental |> 
@@ -3937,7 +3163,7 @@ arg_tbl_contin_mental <-
         
         paste0(
           "age_c;male_c;sessions_c;duration_c;fu_time_c;",
-          "anxiety;depression;gen_mental;symptoms;schizo_c;",
+          "anxiety_c;depression_c;gen_mental_c;symptoms_c;schizo_c;",
           "cbt_c;prereg_c;clinical_c;tot_c;qes_c"
         )
       ),
@@ -3966,8 +3192,6 @@ arg_tbl_alt_es_contin_mental <-
 
 arg_tbl_all_contin_mental <- 
   rbind(arg_tbl_contin_mental, arg_tbl_alt_es_contin_mental)
-
-
 
 #Model type to replicate with function
 
@@ -4000,12 +3224,9 @@ male_obj <-
   )
 
 
-
-
 arg_list_tbl_contin_mental <- 
   pmap(.l = arg_tbl_contin_mental, .f = .rma_arg_tbl, data = mental_ma_dat) |> 
   list_rbind() 
-
 
 
 continuous_res_mental <- 
@@ -4065,7 +3286,7 @@ continuous_res_mental
  4 Duration          <NA>             <NA>             <NA>            -0.005 (… <NA>      0 (0.003)
  5 Follow-up timing  <NA>             <NA>             <NA>            <NA>      -0.001 (… -0.001 (…
  6 <NA>              <NA>             <NA>             <NA>            <NA>      <NA>      <NA>     
- 7 Intercept         0.213 (0.054)*** 0.231 (0.063)*** 0.235 (0.062)*… 0.249 (0… 0.22 (0.… 0.22 (0.…
+ 7 Intercept         0.213 (0.054)*** 0.231 (0.063)*** 0.235 (0.062)*… 0.249 (0… 0.22 (0.… 0.257 (0…
  8 Study-level SD    0.231            0.301            0.283           0.295     0.299     0.213    
  9 Effect-level SD   0.151            0.15             0.15            0.15      0.15      0.152    
 10 Total SD          0.275            0.337            0.32            0.331     0.335     0.261    
@@ -4112,23 +3333,23 @@ mental_contin_res_table
 ::: {.cell-output-display}
 
 ```{=html}
-<div id="vnljyljuff" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#vnljyljuff table {
+<div id="sytffvyxck" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#sytffvyxck table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#vnljyljuff thead, #vnljyljuff tbody, #vnljyljuff tfoot, #vnljyljuff tr, #vnljyljuff td, #vnljyljuff th {
+#sytffvyxck thead, #sytffvyxck tbody, #sytffvyxck tfoot, #sytffvyxck tr, #sytffvyxck td, #sytffvyxck th {
   border-style: none;
 }
 
-#vnljyljuff p {
+#sytffvyxck p {
   margin: 0;
   padding: 0;
 }
 
-#vnljyljuff .gt_table {
+#sytffvyxck .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -4154,12 +3375,12 @@ mental_contin_res_table
   border-left-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_caption {
+#sytffvyxck .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#vnljyljuff .gt_title {
+#sytffvyxck .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -4171,7 +3392,7 @@ mental_contin_res_table
   border-bottom-width: 0;
 }
 
-#vnljyljuff .gt_subtitle {
+#sytffvyxck .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -4183,7 +3404,7 @@ mental_contin_res_table
   border-top-width: 0;
 }
 
-#vnljyljuff .gt_heading {
+#sytffvyxck .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -4195,13 +3416,13 @@ mental_contin_res_table
   border-right-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_bottom_border {
+#sytffvyxck .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_col_headings {
+#sytffvyxck .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4216,7 +3437,7 @@ mental_contin_res_table
   border-right-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_col_heading {
+#sytffvyxck .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4236,7 +3457,7 @@ mental_contin_res_table
   overflow-x: hidden;
 }
 
-#vnljyljuff .gt_column_spanner_outer {
+#sytffvyxck .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4248,15 +3469,15 @@ mental_contin_res_table
   padding-right: 4px;
 }
 
-#vnljyljuff .gt_column_spanner_outer:first-child {
+#sytffvyxck .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#vnljyljuff .gt_column_spanner_outer:last-child {
+#sytffvyxck .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#vnljyljuff .gt_column_spanner {
+#sytffvyxck .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -4268,11 +3489,11 @@ mental_contin_res_table
   width: 100%;
 }
 
-#vnljyljuff .gt_spanner_row {
+#sytffvyxck .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#vnljyljuff .gt_group_heading {
+#sytffvyxck .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4298,7 +3519,7 @@ mental_contin_res_table
   text-align: left;
 }
 
-#vnljyljuff .gt_empty_group_heading {
+#sytffvyxck .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -4313,15 +3534,15 @@ mental_contin_res_table
   vertical-align: middle;
 }
 
-#vnljyljuff .gt_from_md > :first-child {
+#sytffvyxck .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#vnljyljuff .gt_from_md > :last-child {
+#sytffvyxck .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#vnljyljuff .gt_row {
+#sytffvyxck .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4340,7 +3561,7 @@ mental_contin_res_table
   overflow-x: hidden;
 }
 
-#vnljyljuff .gt_stub {
+#sytffvyxck .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4353,7 +3574,7 @@ mental_contin_res_table
   padding-right: 5px;
 }
 
-#vnljyljuff .gt_stub_row_group {
+#sytffvyxck .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -4367,15 +3588,15 @@ mental_contin_res_table
   vertical-align: top;
 }
 
-#vnljyljuff .gt_row_group_first td {
+#sytffvyxck .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#vnljyljuff .gt_row_group_first th {
+#sytffvyxck .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#vnljyljuff .gt_summary_row {
+#sytffvyxck .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4385,16 +3606,16 @@ mental_contin_res_table
   padding-right: 5px;
 }
 
-#vnljyljuff .gt_first_summary_row {
+#sytffvyxck .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_first_summary_row.thick {
+#sytffvyxck .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#vnljyljuff .gt_last_summary_row {
+#sytffvyxck .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4404,7 +3625,7 @@ mental_contin_res_table
   border-bottom-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_grand_summary_row {
+#sytffvyxck .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -4414,7 +3635,7 @@ mental_contin_res_table
   padding-right: 5px;
 }
 
-#vnljyljuff .gt_first_grand_summary_row {
+#sytffvyxck .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4424,7 +3645,7 @@ mental_contin_res_table
   border-top-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_last_grand_summary_row_top {
+#sytffvyxck .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -4434,11 +3655,11 @@ mental_contin_res_table
   border-bottom-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_striped {
+#sytffvyxck .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#vnljyljuff .gt_table_body {
+#sytffvyxck .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -4447,7 +3668,7 @@ mental_contin_res_table
   border-bottom-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_footnotes {
+#sytffvyxck .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4461,7 +3682,7 @@ mental_contin_res_table
   border-right-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_footnote {
+#sytffvyxck .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -4470,7 +3691,7 @@ mental_contin_res_table
   padding-right: 5px;
 }
 
-#vnljyljuff .gt_sourcenotes {
+#sytffvyxck .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -4484,7 +3705,7 @@ mental_contin_res_table
   border-right-color: #D3D3D3;
 }
 
-#vnljyljuff .gt_sourcenote {
+#sytffvyxck .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -4492,72 +3713,72 @@ mental_contin_res_table
   padding-right: 5px;
 }
 
-#vnljyljuff .gt_left {
+#sytffvyxck .gt_left {
   text-align: left;
 }
 
-#vnljyljuff .gt_center {
+#sytffvyxck .gt_center {
   text-align: center;
 }
 
-#vnljyljuff .gt_right {
+#sytffvyxck .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#vnljyljuff .gt_font_normal {
+#sytffvyxck .gt_font_normal {
   font-weight: normal;
 }
 
-#vnljyljuff .gt_font_bold {
+#sytffvyxck .gt_font_bold {
   font-weight: bold;
 }
 
-#vnljyljuff .gt_font_italic {
+#sytffvyxck .gt_font_italic {
   font-style: italic;
 }
 
-#vnljyljuff .gt_super {
+#sytffvyxck .gt_super {
   font-size: 65%;
 }
 
-#vnljyljuff .gt_footnote_marks {
+#sytffvyxck .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#vnljyljuff .gt_asterisk {
+#sytffvyxck .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#vnljyljuff .gt_indent_1 {
+#sytffvyxck .gt_indent_1 {
   text-indent: 5px;
 }
 
-#vnljyljuff .gt_indent_2 {
+#sytffvyxck .gt_indent_2 {
   text-indent: 10px;
 }
 
-#vnljyljuff .gt_indent_3 {
+#sytffvyxck .gt_indent_3 {
   text-indent: 15px;
 }
 
-#vnljyljuff .gt_indent_4 {
+#sytffvyxck .gt_indent_4 {
   text-indent: 20px;
 }
 
-#vnljyljuff .gt_indent_5 {
+#sytffvyxck .gt_indent_5 {
   text-indent: 25px;
 }
 
-#vnljyljuff .katex-display {
+#sytffvyxck .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#vnljyljuff div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#sytffvyxck div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -4622,7 +3843,7 @@ mental_contin_res_table
 <td headers="Model 3" class="gt_row gt_left">0.235 (0.062)***</td>
 <td headers="Model 4" class="gt_row gt_left">0.249 (0.073)**</td>
 <td headers="Model 5" class="gt_row gt_left">0.22 (0.064)**</td>
-<td headers="Model 6" class="gt_row gt_left">0.22 (0.072)*</td></tr>
+<td headers="Model 6" class="gt_row gt_left">0.257 (0.078)**</td></tr>
     <tr><td headers="Moderators" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">Study-level SD</td>
 <td headers="Model 1" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">0.231</td>
 <td headers="Model 2" class="gt_row gt_left" style="border-top-width: 1px; border-top-style: solid; border-top-color: black;">0.301</td>
@@ -4774,7 +3995,7 @@ Test for Residual Heterogeneity:
 QE(df = 347) = 175293.0167, p-val < .0001
 
 Test of Moderators (coefficients 1:2):
-QM(df = 2) = 30.7369, p-val < .0001
+QM(df = 2) = 30.7370, p-val < .0001
 
 Model Results:
 
@@ -4786,8 +4007,8 @@ outcome_constructReintegrational outcome    0.1962  0.0375  5.2336  <.0001  0.12
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
                         Mental health outcome Reintegrational outcome
-Mental health outcome              0.08991512              0.03543059
-Reintegrational outcome            0.03543059              0.01396124
+Mental health outcome              0.08991508              0.03543050
+Reintegrational outcome            0.03543050              0.01396118
 ```
 
 
@@ -4867,6 +4088,9 @@ map2(
 [1] TRUE
 
 [[17]]
+[1] TRUE
+
+[[18]]
 [1] TRUE
 ```
 
