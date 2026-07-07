@@ -1,5 +1,5 @@
 ---
-title: "Appendix D: Sensitivity analyses for Group-Based Review"
+title: "Appendix D: Sensitivity analysis code"
 author: "Mikkel H. Vembye"
 subtitle: ""
 date: "`r Sys.Date()`"
@@ -34,7 +34,7 @@ citation-location: margin
 bibliography: bibliography.bib  
 ---
 
-[@Dalgaard2025]
+[@Dalgaard2026]
 
 ```{r}
 library(metafor)
@@ -228,7 +228,7 @@ l1out_facet_plot <-
   facet_grid(~facet_label, scale = "free") + 
   theme_light() +
   theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Reason for inclusion", color = "") 
+  labs(x = "Estimate", y = "Exlcuded study", color = "") 
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 l1out_facet_plot 
@@ -356,7 +356,7 @@ ess_facet_plot <-
   facet_grid(~facet_label, scale = "free") + 
   theme_light() +
   theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Reason for inclusion", color = "") 
+  labs(x = "Estimate", y = "Sample size", color = "") 
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 ess_facet_plot 
@@ -1019,7 +1019,7 @@ l1out_facet_plot_mental <-
   facet_grid(~facet_label, scale = "free") + 
   theme_light() +
   theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Reason for inclusion", color = "") 
+  labs(x = "Estimate", y = "Excluded study", color = "") 
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 l1out_facet_plot_mental
@@ -1147,7 +1147,7 @@ ess_facet_plot_mental <-
   facet_grid(~facet_label, scale = "free") + 
   theme_light() +
   theme(legend.position = "none", strip.text = element_text(color = "black")) + 
-  labs(x = "Estimate", y = "Reason for inclusion", color = "") 
+  labs(x = "Estimate", y = "Sample size", color = "") 
   
 #png(filename = "Figures/Sensitivity analysis/ess_facet_plot.png", height = 8, width = 10, res = 600, units = "in")
 ess_facet_plot_mental

@@ -1,8 +1,8 @@
 ---
-title: "Appendix C - Main analyses"
+title: "Appendix C: Main results code"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-07-03"
+date: "2026-07-07"
 format:
   html: 
     keep-md: true
@@ -34,6 +34,8 @@ bibliography: bibliography.bib
 editor_options: 
   chunk_output_type: console
 ---
+
+This is document contains the main analysis code for Dalgaard et al. [-@Dalgaard2026].
 
 ## Loading R packages and data
 

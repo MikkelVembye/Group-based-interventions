@@ -1,6 +1,5 @@
 ---
-title: "Appendix A - Effect size calculation for 'Group-based community interventions to support
-  the social reintegration of marginalised adults with mental illness'"
+title: "Appendix A: Effect size calculation"
 date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
 output: 
   html_document:
@@ -40,7 +39,7 @@ This document contains effect size calculation for the Campbell systematic revie
 
 ```{r}
 # To retrieved the function used to cluster bias correct effect sizes
-#devtools::install_github("MikkelVembye/VIVECampbell")
+#remotes::install_github("MikkelVembye/VIVECampbell")
 
 library(tidyverse)
 #library(dplyr)

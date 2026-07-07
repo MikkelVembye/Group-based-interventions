@@ -1,14 +1,21 @@
 ---
-title: "Publication bias testing in Dalgaard et al. (2026)"
-date: "Last updated `r format(Sys.time(), '%Y.%m.%d')`"
+title: "Appendix E: Publication bias code"
+author: "Mikkel H. Vembye"
+subtitle: ""
+date: "`r Sys.Date()`"
 format:
-  html:
+  html: 
+    keep-md: true
+    self-contained: true
+    grid: 
+      margin-width: 350px
     code-fold: true
-    code-tools: true
     code-summary: "Show the code"
     toc: true
+    toc-location: left
+pdf-engine: pdflatex
 execute: 
-  echo: fenced
+  echo: true
   warning: false
   message: false
 knitr:
@@ -21,11 +28,13 @@ knitr:
       width: 100
       knitr.kable.NA: "-"
       dplyr.summarise.inform: FALSE
-      scipen: 10
-      pillar.sigfig: 4 
-editor_options: 
-  chunk_output_type: console
+      pillar.print_max: 50
+reference-location: margin
+citation-location: margin
+bibliography: bibliography.bib  
 ---
+
+This document contains the publication bias analyses and codes for Dalgaard et al. [-@Dalgaard2026].
 
 # Used package
 
@@ -59,7 +68,7 @@ source("pub-bias-test-helpers.R")
 ```
 
 # **Reintegration**
-
+[label](https://www.pnascentral.org/cgi-bin/main.plex?form_type%3Dcontinue_halted_submission%26j_id%3D1%26ms_id%3D719859%26ms_rev_no%3D0%26ms_id_key%3Dftd4bBU3zVOeDlsXu15u4QTw)
 ## Data
 ```{r load-data}
 #| code-fold: false

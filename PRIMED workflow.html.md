@@ -1,8 +1,8 @@
 ---
-title: "Appendix B - PRIMED workflow for Group-Based Review"
+title: "Appendix B: Data manipulation, RoB visualization, and PRIMED workflow"
 author: "Mikkel H. Vembye"
 subtitle: ""
-date: "2026-06-22"
+date: "2026-07-07"
 format:
   html: 
     keep-md: true
@@ -38,7 +38,7 @@ bibliography: bibliography.bib
 
 # Introduction 
 
-This document contains the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in Dalgaard et al. [-@Dalgaard2025]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
+This document contains data manipulation, risk of bias visualizations and the preliminary data analysis for the meta-analyses with dependent effects (PRIMED) in Dalgaard et al. [-@Dalgaard2026]. As we conduct separate analyses for reintegration (primary analysis) and mental health (secondary analysis) outcomes, we have divided the tabulation and visualization according to the two types of effect size estimates. In most cases, the main presentation of reintegration outcome data appears in the center column of the document, while the presentation of the mental health outcome data is shown in the right column. Where larger tables or visualizations are required, we have used tabsets to distinguish between reintegration and mental health analyses. To view the mental health presentation, select the 'Mental health' tab. In a few instances, reintegration and mental health outcomes are tabulated and visualized together to provide an overall view of the relationships between these two types of estimates. All packages that we have used to create this document, can be found in the next section. 
 
 
 ## R packages
@@ -96,6 +96,7 @@ group_based_dat <- readRDS("Group-based interventions data.RDS") |>
  filter(!str_detect(analysis_plan, "Unused"))
 ```
 :::
+
 
 ## Main variable manipulation
 Unfold the below code, to find the primary data manipulation for the overall data, including both all reintegrational as well as mental health outcomes. 
@@ -18424,7 +18425,7 @@ ggplot(scatter_dat) +
  collate  Danish_Denmark.utf8
  ctype    Danish_Denmark.utf8
  tz       Europe/Copenhagen
- date     2026-06-22
+ date     2026-07-07
  pandoc   3.8.3 @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\resources\\app\\quarto\\bin\\tools/ (via rmarkdown)
  quarto   NA @ c:\\Users\\B199526\\AppData\\Local\\Programs\\Positron\\RESOUR~1\\app\\quarto\\bin\\quarto.exe
 
@@ -18489,7 +18490,7 @@ ggplot(scatter_dat) +
  repr           1.1.7      2024-03-22 [1] CRAN (R 4.6.0)
  rlang        * 1.2.0      2026-04-06 [1] CRAN (R 4.6.0)
  rmarkdown      2.31       2026-03-26 [1] CRAN (R 4.6.0)
- rstudioapi     0.18.0     2026-01-16 [1] CRAN (R 4.6.0)
+ rstudioapi     0.19.0     2026-06-11 [1] CRAN (R 4.6.1)
  S7             0.2.2      2026-04-22 [1] CRAN (R 4.6.0)
  sandwich       3.1-1      2024-09-15 [1] CRAN (R 4.6.0)
  scales         1.4.0      2025-04-24 [1] CRAN (R 4.6.0)
@@ -18511,10 +18512,10 @@ ggplot(scatter_dat) +
  utf8           1.2.6      2025-06-08 [1] CRAN (R 4.6.0)
  vctrs          0.7.3      2026-04-11 [1] CRAN (R 4.6.0)
  viridisLite    0.4.3      2026-02-04 [1] CRAN (R 4.6.0)
- withr          3.0.2      2024-10-28 [1] CRAN (R 4.6.0)
+ withr          3.0.3      2026-06-19 [1] CRAN (R 4.6.1)
  writexl      * 1.5.4      2025-04-15 [1] CRAN (R 4.6.0)
- xfun           0.57       2026-03-20 [1] CRAN (R 4.6.0)
- xml2           1.5.2      2026-01-17 [1] CRAN (R 4.6.0)
+ xfun           0.59       2026-06-19 [1] CRAN (R 4.6.1)
+ xml2           1.6.0      2026-06-22 [1] CRAN (R 4.6.1)
  xtable         1.8-8      2026-02-22 [1] CRAN (R 4.6.0)
  yaml           2.3.12     2025-12-10 [1] CRAN (R 4.6.0)
  zoo            1.8-15     2025-12-15 [1] CRAN (R 4.6.0)
