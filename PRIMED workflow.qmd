@@ -7859,55 +7859,55 @@ reframed_dat <-
 
 
 study_ref_map <- c(
-  "Acarturk et al. 2022" = "Acarturk et al.46",
-  "Barbic et al. 2009" = "Barbic et al.47",
-  "Bond et al. 2015" = "Bond et al.83",
-  "Baekkelund et al. 2022" = "Bækkelund et al.75",
-  "Cano-Vindel et al. 2021" = "Cano-Vindel et al.35",
-  "Craigie & Nathan 2009" = "Craigie & Nathan36",
-  "Crawford et al. 2012" = "Crawford et al.63",
-  "Druss et al. 2010" = "Druss et al.55",
-  "Druss et al. 2018" = "Druss et al.56",
-  "Dyck et al. 2000" = "Dyck et al.57",
-  "Gestel-Timmermans et al. 2012" = "van Gestel-Timmermans et al.78",
-  "Gatz et al. 2007" = "Gatz et al.90",
-  "Gonzalez & Prihoda 2007" = "Gonzalez & Prihoda49",
-  "Gordon et al. 2018" = "Gordon et al.64",
-  "Gutman et al. 2019" = "Gutman et al.50",
-  "Hagen et al. 2005" = "Hagen et al.37",
-  "Halperin et al. 2000" = "Halperin et al.38",
-  "Haslam et al. 2019" = "Haslam et al.51",
-  "Hilden et al. 2021" = "Hilden et al.65",
-  "Himle et al. 2014" = "Himle et al.39",
-  "Jacob et al. 2010" = "Jacob et al.72",
-  "James et al. 2004" = "James et al.86",
-  "Kanie et al. 2019" = "Kanie et al.66",
-  "Lim et al. 2020" = "Lim et al.67",
-  "Lloyd-Evans et al. 2020" = "Lloyd-Evans et al.91",
-  "Madigan et al. 2013" = "Madigan et al.40",
-  "McCay et al. 2006" = "McCay et al.58",
-  "McCay et al. 2007" = "McCay et al.59",
-  "Michalak et al. 2015" = "Michalak et al.41",
-  "Morley et al. 2014" = "Morley et al.80",
-  "Morton et al. 2012" = "Morton et al.77",
-  "Patterson et al. 2003" = "Patterson et al.73",
-  "Popolo et al. 2019" = "Popolo et al.53",
-  "Rabenstein et al. 2016" = "Rabenstein et al.42",
-  "Rosenblum et al. 2014" = "Rosenblum et al.81",
-  "Russinova et al. 2018" = "Russinova et al.85",
-  "Rusch et al. 2019" = "Rüsch et al.60",
-  "Sacks et al. 2011" = "Sacks et al.89",
-  "Sajatovic et al. 2009" = "Sajatovic et al.61",
-  "Saloheimo et al. 2016" = "Saloheimo et al.62",
-  "Schrank et al. 2016" = "Schrank et al.93",
-  "Schafer et al. 2019" = "Schäfer et al.87",
-  "Somers et al. 2017" = "Somers et al.88",
-  "Tjaden et al. 2021" = "Tjaden et al.92",
-  "Valiente et al. 2022" = "Valiente et al.94",
-  "Volpe et al. 2015" = "Volpe et al.95",
-  "Wojtalik et al. 2022" = "Wojtalik et al.68",
-  "Wuthrich & Rapee 2013" = "Wuthrich & Rapee44",
-  "Smith et al. 2021" = "Smith et al.43"
+  "Acarturk et al. 2022" = "Acarturk et al.87",
+  "Barbic et al. 2009" = "Barbic et al.88",
+  "Bond et al. 2015" = "Bond et al.44",
+  "Baekkelund et al. 2022" = "Bækkelund et al.116",
+  "Cano-Vindel et al. 2021" = "Cano-Vindel et al.76",
+  "Craigie & Nathan 2009" = "Craigie & Nathan77",
+  "Crawford et al. 2012" = "Crawford et al.104",
+  "Druss et al. 2010" = "Druss et al.96",
+  "Druss et al. 2018" = "Druss et al.97",
+  "Dyck et al. 2000" = "Dyck et al.98",
+  "Gestel-Timmermans et al. 2012" = "van Gestel-Timmermans et al.119",
+  "Gatz et al. 2007" = "Gatz et al.130",
+  "Gonzalez & Prihoda 2007" = "Gonzalez & Prihoda90",
+  "Gordon et al. 2018" = "Gordon et al.105",
+  "Gutman et al. 2019" = "Gutman et al.91",
+  "Hagen et al. 2005" = "Hagen et al.78",
+  "Halperin et al. 2000" = "Halperin et al.79",
+  "Haslam et al. 2019" = "Haslam et al.92",
+  "Hilden et al. 2021" = "Hilden et al.106",
+  "Himle et al. 2014" = "Himle et al.80",
+  "Jacob et al. 2010" = "Jacob et al.113",
+  "James et al. 2004" = "James et al.126",
+  "Kanie et al. 2019" = "Kanie et al.107",
+  "Lim et al. 2020" = "Lim et al.108",
+  "Lloyd-Evans et al. 2020" = "Lloyd-Evans et al.131",
+  "Madigan et al. 2013" = "Madigan et al.81",
+  "McCay et al. 2006" = "McCay et al.99",
+  "McCay et al. 2007" = "McCay et al.100",
+  "Michalak et al. 2015" = "Michalak et al.82",
+  "Morley et al. 2014" = "Morley et al.121",
+  "Morton et al. 2012" = "Morton et al.118",
+  "Patterson et al. 2003" = "Patterson et al.114",
+  "Popolo et al. 2019" = "Popolo et al.94",
+  "Rabenstein et al. 2016" = "Rabenstein et al.83",
+  "Rosenblum et al. 2014" = "Rosenblum et al.122",
+  "Russinova et al. 2018" = "Russinova et al.125",
+  "Rusch et al. 2019" = "Rüsch et al.101",
+  "Sacks et al. 2011" = "Sacks et al.129",
+  "Sajatovic et al. 2009" = "Sajatovic et al.102",
+  "Saloheimo et al. 2016" = "Saloheimo et al.103",
+  "Schrank et al. 2016" = "Schrank et al.133",
+  "Schafer et al. 2019" = "Schäfer et al.127",
+  "Somers et al. 2017" = "Somers et al.128",
+  "Tjaden et al. 2021" = "Tjaden et al.132",
+  "Valiente et al. 2022" = "Valiente et al.134",
+  "Volpe et al. 2015" = "Volpe et al.135",
+  "Wojtalik et al. 2022" = "Wojtalik et al.109",
+  "Wuthrich & Rapee 2013" = "Wuthrich & Rapee85",
+  "Smith et al. 2021" = "Smith et al.84"
 )
 
 forest_dat <-
@@ -7930,7 +7930,7 @@ forest_dat <-
   )
 
 
-total_forest_nhb <- 
+total_forest_gen_psy <- 
   forest_dat |>
   mutate(
     outcome_construct = case_when(
@@ -7969,8 +7969,8 @@ total_forest_nhb <-
   geom_vline(xintercept = 0, linetype = "dashed", color = "black", alpha = 0.5) 
 
 
-png(filename = "Figures/forest plot nhb.png", height = 11, width = 10, res = 600, units = "in")
-total_forest_nhb
+png(filename = "Figures/forest_gen_psy.png", height = 11, width = 10, res = 600, units = "in")
+total_forest_gen_psy
 dev.off()
 
 ##
